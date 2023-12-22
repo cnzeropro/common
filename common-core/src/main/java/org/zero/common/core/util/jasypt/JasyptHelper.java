@@ -1,0 +1,64 @@
+package org.zero.common.core.util.jasypt;
+
+import lombok.RequiredArgsConstructor;
+import org.jasypt.encryption.StringEncryptor;
+import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
+import org.jasypt.encryption.pbe.config.PBEConfig;
+import org.jasypt.encryption.pbe.config.SimpleStringPBEConfig;
+
+/**
+ * @author Zero (cnzeropro@qq.com)
+ * @date 2021/10/3 21:41
+ */
+@RequiredArgsConstructor(staticName = "build")
+public class JasyptHelper {
+    public static final String DEFAULT_ALGORITHM = "PBEWITHHMACSHA512ANDAES_256";
+    private final StringEncryptor encryptor;
+
+    public static JasyptHelper build(PBEConfig config) {
+        PooledPBEStringEncryptor pbeStringEncryptor = new PooledPBEStringEncryptor();
+        pbeStringEncryptor.setConfig(config);
+        return build(pbeStringEncryptor);
+    }
+
+    public static JasyptHelper build(String password) {
+        return build(password, DEFAULT_ALGORITHM);
+    }
+
+    public static JasyptHelper build(String password, String algorithm) {
+        SimpleStringPBEConfig config = customConfiguration(password, algorithm);
+        return build(config);
+    }
+
+    /**
+     * 加密
+     */
+    public String encrypt(String src) {
+        return encryptor.encrypt(src);
+    }
+
+    /**
+     * 解密
+     */
+    public String decrypt(String src) {
+        return encryptor.decrypt(src);
+    }
+
+    private static SimpleStringPBEConfig customConfiguration(String password, String algorithm) {
+        SimpleStringPBEConfig config = new SimpleStringPBEConfig();
+        config.setPassword(password);
+        // 加密算法建议：
+        // PBEWithMD5AndDES 2.x
+        // PBEWITHHMACSHA512ANDAES_256 3.x
+        config.setAlgorithm(algorithm);
+        config.setKeyObtentionIterations(1000);
+        config.setPoolSize(10);
+        config.setProviderName("SunJCE");
+        config.setSaltGeneratorClassName("org.jasypt.salt.RandomSaltGenerator");
+        // org.jasypt.salt.NoOpIVGenerator 2.x
+        // org.jasypt.iv.RandomIvGenerator 3.x
+        config.setIvGeneratorClassName("org.jasypt.iv.RandomIvGenerator");
+        config.setStringOutputType("base64");
+        return config;
+    }
+}

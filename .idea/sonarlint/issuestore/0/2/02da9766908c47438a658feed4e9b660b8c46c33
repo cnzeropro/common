@@ -1,0 +1,11 @@
+
+c
+java:S1192Û"LDefine a constant instead of duplicating this literal "requestBody" 4 times.(ñ…¸¦
+W	java:S125"<This block of commented-out lines of code should be removed.(šÛÀíûÿÿÿÿ
+I
+java:S1135€"2Complete the task associated to this TODO comment.(˜Ø†±
+i
+java:S3776Ÿ"RRefactor this method to reduce its Cognitive Complexity from 19 to the 15 allowed.(Ü™µ‡
+R	java:S125¶"<This block of commented-out lines of code should be removed.(§ÎĞ¸
+R	java:S125¾"<This block of commented-out lines of code should be removed.(‰İïï
+D	java:S108£")Either remove or fill this block of code.(Æ¸Û‚øÿÿÿÿ

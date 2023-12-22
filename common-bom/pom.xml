@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.zero</groupId>
+    <artifactId>common-bom</artifactId>
+    <version>1.0.0</version>
+
+    <packaging>pom</packaging>
+
+    <name>common-bom</name>
+    <description>common-bom</description>
+
+    <properties>
+        <common-data.version>${project.version}</common-data.version>
+        <common-core.version>${project.version}</common-core.version>
+        <common-log.version>${project.version}</common-log.version>
+        <common-api.version>${project.version}</common-api.version>
+        <common-swagger.version>${project.version}</common-swagger.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.zero</groupId>
+                <artifactId>common-data</artifactId>
+                <version>${common-data.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.zero</groupId>
+                <artifactId>common-core</artifactId>
+                <version>${common-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.zero</groupId>
+                <artifactId>common-log</artifactId>
+                <version>${common-log.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.zero</groupId>
+                <artifactId>common-api</artifactId>
+                <version>${common-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.zero</groupId>
+                <artifactId>common-swagger</artifactId>
+                <version>${common-swagger.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

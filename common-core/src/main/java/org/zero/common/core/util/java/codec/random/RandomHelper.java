@@ -1,0 +1,214 @@
+package org.zero.common.core.util.java.codec.random;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.SneakyThrows;
+
+import java.security.SecureRandom;
+import java.util.Objects;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
+
+/**
+ * @author Zero (cnzeropro@qq.com)
+ * @since 2022/6/20
+ */
+public class RandomHelper {
+    /* ********************************************************** 静态字段 ********************************************************** */
+
+    /**
+     * 用于随机选的数字
+     */
+    public static final String BASE_NUMBER = "0123456789";
+    /**
+     * 用于随机选的字母
+     */
+    public static final String BASE_LETTER = "abcdefghijklmnopqrstuvwxyz";
+
+    /**
+     * 用于随机选的字符
+     */
+    public static final String BASE_CHAR = "~!@#$%^&*_-+=";
+
+    /**
+     * 用于随机选的字母和数字，默认只有字母小写
+     */
+    public static final String BASE_LETTER_NUMBER = BASE_LETTER + BASE_NUMBER;
+
+    /**
+     * 用于随机选的字母和数字，包含字母大写
+     */
+    public static final String BASE_LETTER_NUMBER_WITH_UPPER = BASE_LETTER.toUpperCase() + BASE_LETTER_NUMBER;
+
+    /**
+     * 用于随机选的字符、字母和数字，默认只有字母小写
+     */
+    public static final String BASE_CHAR_LETTER_NUMBER = BASE_LETTER_NUMBER + BASE_CHAR;
+
+    /**
+     * 用于随机选的字符、字母和数字，包含字母大写
+     */
+    public static final String BASE_CHAR_LETTER_NUMBER_WITH_UPPER = BASE_LETTER_NUMBER_WITH_UPPER + BASE_CHAR;
+
+    /* ********************************************************** 静态方法 ********************************************************** */
+
+    /**
+     * 根据RandomType获取Random实例
+     */
+    public static Random obtainRandom(RandomType randomType) {
+        switch (randomType) {
+            case RANDOM:
+                return obtainRandom();
+            case THREAD_LOCAL_RANDOM:
+                return obtainThreadLocalRandom();
+            case SECURE_RANDOM:
+                return obtainSecureRandom();
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * 获取Random实例
+     */
+    public static Random obtainRandom() {
+        return new Random();
+    }
+
+    /**
+     * 获取ThreadLocalRandom实例
+     */
+    public static ThreadLocalRandom obtainThreadLocalRandom() {
+        return ThreadLocalRandom.current();
+    }
+
+    /**
+     * 获取SecureRandom实例
+     */
+    public static SecureRandom obtainSecureRandom() {
+        return new SecureRandom();
+    }
+
+    /**
+     * 获取强SecureRandom实例
+     */
+    @SneakyThrows
+    public static SecureRandom obtainStrongRandom() {
+        return SecureRandom.getInstanceStrong();
+    }
+
+    /**
+     * 根据随机算法获取SecureRandom实例
+     */
+    @SneakyThrows
+    public static SecureRandom obtainSecureRandom(RandomAlgorithm algorithm) {
+        return SecureRandom.getInstance(algorithm.getAlgorithm());
+    }
+
+    /* ********************************************************** 静态构造方法 ********************************************************** */
+
+    public static RandomHelper create() {
+        return create(obtainRandom());
+    }
+
+    public static RandomHelper create(Random random) {
+        return new RandomHelper(Objects.isNull(random) ? obtainRandom() : random);
+    }
+
+    public static RandomHelper create(RandomType randomType) {
+        return create(obtainRandom(randomType));
+    }
+
+    public static RandomHelper createWithThreadLocalRandom() {
+        return create(obtainThreadLocalRandom());
+    }
+
+    public static RandomHelper createWithSecureRandom() {
+        return create(obtainSecureRandom());
+    }
+
+    public static RandomHelper createWithStrongRandom() {
+        return create(obtainStrongRandom());
+    }
+
+    public static RandomHelper createWithSecureRandom(RandomAlgorithm algorithm) {
+        return create(obtainSecureRandom(algorithm));
+    }
+
+    /* ********************************************************** 实例 ********************************************************** */
+
+    /**
+     * 持有的Random实例
+     */
+    @Getter
+    @Setter
+    private Random random;
+
+    /**
+     * 私有化构造器
+     */
+    private RandomHelper(Random random) {
+        this.random = random;
+    }
+
+    /**
+     * 获取随机字符
+     */
+    public char randomChar() {
+        return randomChar(BASE_CHAR_LETTER_NUMBER_WITH_UPPER);
+    }
+
+    /**
+     * 从指定字符串获取随机字符
+     */
+    public char randomChar(String baseStr) {
+        return baseStr.charAt(randomInt(baseStr.length()));
+    }
+
+    /**
+     * 获取随机字符串
+     */
+    public String randomString(int size) {
+        return randomString(size, BASE_LETTER_NUMBER_WITH_UPPER);
+    }
+
+    /**
+     * 从指定字符串获取指定长度的随机字符串
+     */
+    public String randomString(int size, String baseStr) {
+        return random.ints(size, 0, baseStr.length())
+                .mapToObj(i -> String.valueOf(baseStr.charAt(i)))
+                .collect(Collectors.joining());
+    }
+
+    /**
+     * 获取随机中文字符
+     */
+    public char randomChinese() {
+        return (char) randomInt('\u4E00', '\u9FFF');
+    }
+
+    /**
+     * 获取指定长度的随机中文字符串
+     */
+    public String randomChineseString(int size) {
+        return random.ints(size, '\u4E00', '\u9FFF')
+                .mapToObj(i -> String.valueOf((char) i))
+                .collect(Collectors.joining());
+    }
+
+    /**
+     * 获取0到指定范围的随机整数（包含0不包含bound）
+     */
+    public int randomInt(int bound) {
+        return random.nextInt(bound);
+    }
+
+    /**
+     * 获取指定范围的随机整数（包含下界不包含上界）
+     */
+    public int randomInt(int min, int max) {
+        return randomInt(max - min) + min;
+    }
+}
