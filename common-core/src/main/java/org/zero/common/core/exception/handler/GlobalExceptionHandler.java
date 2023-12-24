@@ -5,6 +5,7 @@ import feign.Request;
 import feign.RequestTemplate;
 import feign.Target;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.ObjectError;
@@ -26,7 +27,8 @@ import java.util.stream.Collectors;
  * @since 2020/03/21
  */
 @Slf4j
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "**.controller.**")
+@ConditionalOnWebApplication
 public class GlobalExceptionHandler {
     /* *************************************************** 系统自定义异常 *************************************************** */
     @ExceptionHandler(org.zero.common.data.exception.UtilException.class)
