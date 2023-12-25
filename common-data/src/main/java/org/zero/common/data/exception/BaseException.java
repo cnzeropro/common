@@ -1,8 +1,8 @@
 package org.zero.common.data.exception;
 
 import lombok.Getter;
-import org.zero.common.data.constant.BaseSysError;
-import org.zero.common.data.constant.SysError;
+import org.zero.common.data.enumeration.BaseSysError;
+import org.zero.common.data.enumeration.SysError;
 
 /**
  * @author Zero (cnzeropro@qq.com)

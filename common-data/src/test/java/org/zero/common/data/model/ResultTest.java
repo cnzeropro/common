@@ -2,7 +2,7 @@ package org.zero.common.data.model;
 
 import org.junit.jupiter.api.Test;
 import org.zero.common.data.constant.GenderEnum;
-import org.zero.common.data.constant.SysError;
+import org.zero.common.data.enumeration.SysError;
 
 import java.util.Arrays;
 import java.util.Date;

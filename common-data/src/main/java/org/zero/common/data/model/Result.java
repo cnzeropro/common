@@ -7,8 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.springframework.http.HttpStatus;
-import org.zero.common.data.constant.BaseSysError;
-import org.zero.common.data.constant.SysError;
+import org.zero.common.data.enumeration.BaseSysError;
+import org.zero.common.data.enumeration.SysError;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
