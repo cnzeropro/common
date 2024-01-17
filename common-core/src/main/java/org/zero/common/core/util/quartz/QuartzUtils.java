@@ -2,12 +2,12 @@ package org.zero.common.core.util.quartz;
 
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.CronScheduleBuilder;
-import org.quartz.CronTrigger;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
+import org.quartz.ScheduleBuilder;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
@@ -33,18 +33,18 @@ public class QuartzUtils {
     protected static final String TRIGGER_GROUP_SUFFIX = TRIGGER_SUFFIX + GROUP_SUFFIX;
 
     public static boolean scheduleJob(String key, Class<? extends Job> clazz, String cron) {
-        return scheduleJob(key, clazz, createCronTrigger(key, cron));
+        return scheduleJob(key, clazz, cron, new JobDataMap());
     }
 
-    public static boolean scheduleJob(String key, Class<? extends Job> clazz, JobDataMap jobDataMap, String cron) {
-        return scheduleJob(key, clazz, jobDataMap, createCronTrigger(key, cron));
+    public static boolean scheduleJob(String key, Class<? extends Job> clazz, String cron, JobDataMap jobDataMap) {
+        return scheduleJob(key, clazz, createTrigger(key, cron), jobDataMap);
     }
 
     public static boolean scheduleJob(String key, Class<? extends Job> clazz, Trigger trigger) {
-        return scheduleJob(createJobDetail(key, clazz), trigger);
+        return scheduleJob(key, clazz, trigger, new JobDataMap());
     }
 
-    public static boolean scheduleJob(String key, Class<? extends Job> clazz, JobDataMap jobDataMap, Trigger trigger) {
+    public static boolean scheduleJob(String key, Class<? extends Job> clazz, Trigger trigger, JobDataMap jobDataMap) {
         return scheduleJob(createJobDetail(key, clazz, jobDataMap), trigger);
     }
 
@@ -69,7 +69,7 @@ public class QuartzUtils {
     }
 
     public static boolean rescheduleJob(String key, String cron) {
-        return rescheduleJob(createTriggerKey(key), createCronTrigger(key, cron));
+        return rescheduleJob(createTriggerKey(key), createTrigger(key, cron));
     }
 
     public static boolean rescheduleJob(TriggerKey triggerKey, Trigger trigger) {
@@ -87,9 +87,12 @@ public class QuartzUtils {
     }
 
     public static boolean addJob(String key, Class<? extends Job> clazz, JobDataMap jobDataMap) {
-        JobDetail jobDetail = createJobDetail(key, clazz, jobDataMap);
+        return addJob(createJobDetail(key, clazz, jobDataMap), true);
+    }
+
+    public static boolean addJob(JobDetail jobDetail, boolean replace) {
         try {
-            getScheduler().addJob(jobDetail, true);
+            getScheduler().addJob(jobDetail, replace);
             return true;
         } catch (SchedulerException e) {
             log.warn(String.format("add job error: %s", jobDetail.getKey()), e);
@@ -102,7 +105,10 @@ public class QuartzUtils {
     }
 
     public static boolean triggerJob(String key, JobDataMap jobDataMap) {
-        JobKey jobKey = createJobKey(key);
+        return triggerJob(createJobKey(key), jobDataMap);
+    }
+
+    public static boolean triggerJob(JobKey jobKey, JobDataMap jobDataMap) {
         try {
             getScheduler().triggerJob(jobKey, jobDataMap);
             return true;
@@ -113,7 +119,10 @@ public class QuartzUtils {
     }
 
     public static boolean checkExists(String key) {
-        JobKey jobKey = createJobKey(key);
+        return checkExists(createJobKey(key));
+    }
+
+    public static boolean checkExists(JobKey jobKey) {
         try {
             return getScheduler().checkExists(jobKey);
         } catch (SchedulerException e) {
@@ -123,7 +132,10 @@ public class QuartzUtils {
     }
 
     public static boolean deleteJob(String key) {
-        JobKey jobKey = createJobKey(key);
+        return deleteJob(createJobKey(key));
+    }
+
+    public static boolean deleteJob(JobKey jobKey) {
         try {
             return getScheduler().deleteJob(jobKey);
         } catch (SchedulerException e) {
@@ -133,7 +145,10 @@ public class QuartzUtils {
     }
 
     public static boolean pauseJob(String key) {
-        JobKey jobKey = createJobKey(key);
+        return pauseJob(createJobKey(key));
+    }
+
+    public static boolean pauseJob(JobKey jobKey) {
         try {
             getScheduler().pauseJob(jobKey);
             return true;
@@ -144,7 +159,10 @@ public class QuartzUtils {
     }
 
     public static boolean resumeJob(String key) {
-        JobKey jobKey = createJobKey(key);
+        return resumeJob(createJobKey(key));
+    }
+
+    public static boolean resumeJob(JobKey jobKey) {
         try {
             getScheduler().resumeJob(jobKey);
             return true;
@@ -161,31 +179,48 @@ public class QuartzUtils {
     }
 
     public static JobDetail createJobDetail(String key, Class<? extends Job> clazz, JobDataMap jobDataMap) {
+        return createJobDetail(createJobKey(key), clazz, jobDataMap);
+    }
+
+    public static JobDetail createJobDetail(JobKey jobKey, Class<? extends Job> clazz, JobDataMap jobDataMap) {
         return JobBuilder.newJob()
                 .ofType(clazz)
-                .withIdentity(createJobKey(key))
+                .withIdentity(jobKey)
+                // 使用给定描述
+                // .withDescription("")
                 .usingJobData(jobDataMap)
-                // 调度器执行任务时，遇到'recovery'或者'fail-over'重新执行
+                // 调度器执行任务时，遇到'recovery'（恢复）或者'fail-over'（故障转移）重新执行
                 .requestRecovery()
-                // 没有触发器也不删除该任务
+                // 持久化：没有触发器也不删除该任务
                 .storeDurably()
                 .build();
     }
 
-    public static CronTrigger createCronTrigger(String key, String cron) {
-        return createCronTrigger(key, cron, new JobDataMap());
+    public static Trigger createTrigger(String key, String cron) {
+        return createTrigger(key, cron, new JobDataMap());
     }
 
-    public static CronTrigger createCronTrigger(String key, String cron, JobDataMap jobDataMap) {
+    public static Trigger createTrigger(String key, String cron, JobDataMap jobDataMap) {
+        return createTrigger(createTriggerKey(key), CronScheduleBuilder.cronSchedule(cron), jobDataMap, null);
+    }
+
+    public static Trigger createTrigger(TriggerKey triggerKey, ScheduleBuilder<? extends Trigger> scheduleBuilder, JobDataMap jobDataMap,
+                                        JobKey jobKey) {
         return TriggerBuilder.newTrigger()
-                .withIdentity(createTriggerKey(key))
-                .withSchedule(CronScheduleBuilder.cronSchedule(cron))
-                .usingJobData(jobDataMap)
+                .withIdentity(triggerKey)
+                .withSchedule(scheduleBuilder)
+                // 使用给定描述
+                // .withDescription("")
+                .withPriority(Trigger.DEFAULT_PRIORITY)
                 // 从现在开始执行
                 .startNow()
-                // .startAt()
-                // .endAt()
-                .withPriority(Trigger.DEFAULT_PRIORITY)
+                // 在指定时间开始执行
+                // .startAt(date)
+                // 在指定时间结束执行
+                // .endAt(date)
+                .usingJobData(jobDataMap)
+                // 关联到指定 job
+                .forJob(jobKey)
                 .build();
     }
 
