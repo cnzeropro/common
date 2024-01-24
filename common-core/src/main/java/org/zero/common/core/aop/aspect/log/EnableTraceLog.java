@@ -14,5 +14,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Import(TraceLogAspect.class)
-public @interface EnableMethodTraceLog {
+public @interface EnableTraceLog {
 }

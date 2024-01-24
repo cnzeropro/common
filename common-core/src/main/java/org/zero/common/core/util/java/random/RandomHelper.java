@@ -1,8 +1,9 @@
-package org.zero.common.core.util.java.codec.random;
+package org.zero.common.core.util.java.random;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import org.zero.common.data.exception.UtilException;
 
 import java.security.SecureRandom;
 import java.util.Objects;
@@ -65,7 +66,7 @@ public class RandomHelper {
             case SECURE_RANDOM:
                 return obtainSecureRandom();
             default:
-                return null;
+                throw new UtilException("Unknown random type");
         }
     }
 

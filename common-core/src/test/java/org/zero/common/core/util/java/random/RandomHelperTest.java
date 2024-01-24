@@ -1,4 +1,4 @@
-package org.zero.common.core.util.java.codec.random;
+package org.zero.common.core.util.java.random;
 
 import org.junit.jupiter.api.Test;
 

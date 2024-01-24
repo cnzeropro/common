@@ -1,4 +1,4 @@
-package org.zero.common.data.constant;
+package org.zero.common.data.enumeration;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

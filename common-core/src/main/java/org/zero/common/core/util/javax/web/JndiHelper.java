@@ -22,7 +22,6 @@ public class JndiHelper {
 
     public JndiHelper(String name) {
         this.name = name;
-        createDataSource();
     }
 
     @SneakyThrows
@@ -31,8 +30,6 @@ public class JndiHelper {
         try {
             context = new InitialContext();
             dataSource = (DataSource) context.lookup(name);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
         } finally {
             if (Objects.nonNull(context)) {
                 context.close();
@@ -40,9 +37,12 @@ public class JndiHelper {
         }
     }
 
-    public DataSource getDataSource() {
+    public synchronized DataSource getDataSource() {
         if (Objects.isNull(dataSource)) {
-            throw new UtilException("DataSource is null");
+            createDataSource();
+            if (Objects.isNull(dataSource)) {
+                throw new UtilException("DataSource is null");
+            }
         }
 
         return dataSource;

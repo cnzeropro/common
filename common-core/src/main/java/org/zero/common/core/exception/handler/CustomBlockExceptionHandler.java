@@ -9,8 +9,8 @@ import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowException;
 import com.alibaba.csp.sentinel.slots.system.SystemBlockException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.zero.common.core.util.jackson.JacksonUtils;
 import org.zero.common.core.util.javax.web.ResponseUtil;
-import org.zero.common.core.util.spring.JacksonUtils;
 import org.zero.common.data.model.Result;
 
 import javax.servlet.http.HttpServletRequest;

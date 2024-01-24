@@ -27,8 +27,8 @@ public enum LogType {
     DEPOSITORY,
 
     /**
-     * 默认
+     * 未知
      */
-    OTHER,
+    UNKNOWN,
     ;
 }

@@ -1,5 +1,6 @@
 package org.zero.common.log.annotation;
 
+import org.zero.common.log.constant.LogMessageEngine;
 import org.zero.common.log.constant.LogType;
 import org.zero.common.log.constant.OperateType;
 
@@ -20,42 +21,32 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AutoLog {
     /**
-     * 日志描述（支持SpEL）
+     * 日志引擎
      */
-    String value() default "";
+    LogMessageEngine engine() default LogMessageEngine.DEFAULT;
 
     /**
-     * 日志所属项目，默认当前项目名
+     * 是否在切入方法前执行
+     */
+    boolean before() default false;
+
+    /**
+     * 所属项目，为空时默认取当前项目名
      */
     String app() default "";
 
     /**
-     * 日志所属模块
+     * 所属模块
      */
     String module() default "";
 
     /**
      * 日志类型
      */
-    LogType type() default LogType.OTHER;
+    LogType type() default LogType.UNKNOWN;
 
     /**
-     * 日志操作类型
+     * 操作类型
      */
-    OperateType operateType() default OperateType.OTHER;
-
-    /**
-     * 是否保存请求的参数
-     */
-    boolean withParam() default true;
-
-    /**
-     * 是否保存响应的参数
-     */
-    boolean withReturnData() default true;
-
-    /**
-     * 排除指定的请求参数
-     */
-    String[] excludedParamNames() default {};
+    OperateType operateType() default OperateType.UNKNOWN;
 }

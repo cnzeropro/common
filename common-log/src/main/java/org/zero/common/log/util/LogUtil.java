@@ -1,15 +1,14 @@
 package org.zero.common.log.util;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.map.MapUtil;
-import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.ArrayUtil;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import cn.hutool.core.util.StrUtil;
 import lombok.experimental.UtilityClass;
-import org.springframework.util.ObjectUtils;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author zero
@@ -17,52 +16,26 @@ import java.util.Objects;
  */
 @UtilityClass
 public class LogUtil {
-    public void excludeInJson(JsonNode jsonNode, String[] excludedKeys) {
-        if (Objects.isNull(jsonNode) || ObjectUtils.isEmpty(excludedKeys)) {
-            return;
-        }
+    private final Pattern pattern = Pattern.compile("(?<!\\\\)\\{([^{}]+)(?<!\\\\)}");
 
-        if (jsonNode.isObject()) {
-            ObjectNode objectNode = (ObjectNode) jsonNode;
-            for (String excludeKey : excludedKeys) {
-                objectNode.remove(excludeKey);
-            }
-            objectNode.fields().forEachRemaining(entry -> excludeInJson(entry.getValue(), excludedKeys));
-        } else if (jsonNode.isArray()) {
-            for (JsonNode node : jsonNode) {
-                excludeInJson(node, excludedKeys);
-            }
+    public String getMessage(String messageTemplate, Object... beans) {
+        Map<String, Object> map = MapUtil.newHashMap();
+        for (Object bean : beans) {
+            BeanUtil.beanToMap(bean, map, false, true);
         }
+        return getMessage(messageTemplate, map);
     }
 
-    public Map<String, String[]> excludeInParamMap(Map<String, String[]> paramMap, String[] excludedKeys) {
-        if (Objects.isNull(paramMap)) {
-            return MapUtil.empty();
+    public String getMessage(String messageTemplate, Object bean) {
+        String message = messageTemplate;
+        Matcher matcher = pattern.matcher(messageTemplate);
+        while (matcher.find()) {
+            String key = matcher.group(1);
+            Object value = BeanUtil.getProperty(bean, key);
+            if (Objects.nonNull(value)) {
+                message = message.replace("{" + key + "}", StrUtil.utf8Str(value));
+            }
         }
-
-        if (ObjectUtils.isEmpty(excludedKeys)) {
-            return paramMap;
-        }
-
-        return MapUtil.filter(paramMap, entry -> !ArrayUtil.contains(excludedKeys, entry.getKey()));
-    }
-
-    public String excludeInQueryStr(String queryStr, String[] excludedKeys) {
-        if (CharSequenceUtil.isBlank(queryStr)) {
-            return null;
-        }
-
-        if (ObjectUtils.isEmpty(excludedKeys)) {
-            return queryStr;
-        }
-
-        String result = queryStr;
-        for (String excludeKey : excludedKeys) {
-            String regex = excludeKey + "=[^&]*&?";
-            result = result.replaceAll(regex, "");
-        }
-        // 去除最后一个可能的"&"
-        result = result.replaceAll("&$", "");
-        return result;
+        return message;
     }
 }

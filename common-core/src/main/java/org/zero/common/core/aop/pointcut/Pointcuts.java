@@ -11,6 +11,18 @@ public class Pointcuts {
     public void allMethod() {
     }
 
+    @Pointcut("execution(public * *(..))")
+    public void allPublicMethod() {
+    }
+
+    @Pointcut("execution(* set*(..))")
+    public void allSetMethod() {
+    }
+
+    @Pointcut("execution(* get*(..))")
+    public void allGetMethod() {
+    }
+
     @Pointcut("execution(* org.zero..*.controller..*.*(..))")
     public void controllerMethod() {
     }

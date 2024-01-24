@@ -76,8 +76,7 @@ public class SslUtil {
     }
 
     /**
-     * 获取 KeyStore。
-     * KeyStore：用于管理密钥和证书的存储库，可以用来存储密钥对、证书链、信任根证书等
+     * 使用默认类型获取 KeyStore
      */
     public KeyStore createKeyStore(String filepath, char[] password) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
         return createKeyStore(KeyStore.getDefaultType(), filepath, password);
@@ -85,7 +84,7 @@ public class SslUtil {
 
     /**
      * 获取 KeyStore。
-     * KeyStore：用于管理密钥和证书的存储库，可以用来存储密钥对、证书链、信任根证书等
+     * KeyStore：用于管理密钥和证书的存储库，可以用来存储密钥对、证书链、信任根证书等。
      */
     public KeyStore createKeyStore(String type, String filepath, char[] password) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
         KeyStore keyStore = KeyStore.getInstance(type);
@@ -94,8 +93,7 @@ public class SslUtil {
     }
 
     /**
-     * 使用默认算法获取 KeyManagers。
-     * KeyManager：用于HTTPS双向认证时，客户端向服务端发送的认证信息（证书），与不同的服务端交互时，客户端可能用不同的身份（证书）
+     * 使用默认算法获取 KeyManagers
      */
     public KeyManager[] createKeyManager(KeyStore keyStore, char[] password) throws NoSuchAlgorithmException, UnrecoverableKeyException, KeyStoreException {
         return createKeyManager(KeyManagerFactory.getDefaultAlgorithm(), keyStore, password);
@@ -103,7 +101,7 @@ public class SslUtil {
 
     /**
      * 获取 KeyManagers。
-     * KeyManager：用于HTTPS双向认证时，客户端向服务端发送的认证信息（证书），与不同的服务端交互时，客户端可能用不同的身份（证书）
+     * KeyManager：用于 HTTPS 双向认证时，客户端向服务端发送的认证信息（证书），与不同的服务端交互时，客户端可能用不同的身份（证书）。
      */
     public KeyManager[] createKeyManager(String algorithm, KeyStore keyStore, char[] password) throws NoSuchAlgorithmException, UnrecoverableKeyException, KeyStoreException {
         KeyManagerFactory factory = KeyManagerFactory.getInstance(algorithm);
@@ -112,8 +110,7 @@ public class SslUtil {
     }
 
     /**
-     * 使用默认算法获取 TrustManagers。
-     * TrustManager：用于客户端检测服务端发送过来的证书
+     * 使用默认算法获取 TrustManagers
      */
     public TrustManager[] createTrustManager(KeyStore keyStore) throws NoSuchAlgorithmException, KeyStoreException {
         return createTrustManager(TrustManagerFactory.getDefaultAlgorithm(), keyStore);
@@ -121,7 +118,7 @@ public class SslUtil {
 
     /**
      * 获取 TrustManagers。
-     * TrustManager：用于客户端检测服务端发送过来的证书
+     * TrustManager：用于客户端检测服务端发送过来的证书。
      */
     public TrustManager[] createTrustManager(String algorithm, KeyStore keyStore) throws NoSuchAlgorithmException, KeyStoreException {
         TrustManagerFactory factory = TrustManagerFactory.getInstance(algorithm);

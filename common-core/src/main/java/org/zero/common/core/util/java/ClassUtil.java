@@ -39,8 +39,8 @@ public class ClassUtil {
         classNames.forEach(className -> {
             try {
                 classes.add(Class.forName(className));
-            } catch (Exception t) {
-                log.warn(String.format("Get class[%s] exception under package[%s], skipped", packageName, className), t);
+            } catch (Exception e) {
+                log.warn(String.format("Get class[%s] exception under package[%s], skipped", packageName, className), e);
             }
         });
 

@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-import org.zero.common.data.constant.GenderEnum;
+import org.zero.common.data.enumeration.GenderEnum;
 
 @Data
 @SuperBuilder(toBuilder = true)

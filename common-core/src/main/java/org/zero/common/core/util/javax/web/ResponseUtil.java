@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
  */
 @UtilityClass
 public class ResponseUtil {
+    /* *********************************************** HttpServletResponse *********************************************** */
 
     public static void writeErrorJson(HttpServletResponse response, String jsonStr) {
         writeJson(response, jsonStr, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -29,10 +30,6 @@ public class ResponseUtil {
         write(response, jsonStr, httpStatus, MediaType.APPLICATION_JSON);
     }
 
-    public static void writeJson(ServletResponse response, String jsonStr) {
-        write(response, jsonStr, MediaType.APPLICATION_JSON);
-    }
-
     @SneakyThrows
     public static void write(HttpServletResponse response, Object obj, HttpStatus httpStatus, MediaType mediaType) {
         response.setStatus(httpStatus.value());
@@ -42,6 +39,12 @@ public class ResponseUtil {
         writer.print(obj);
         writer.flush();
         writer.close();
+    }
+
+    /* *********************************************** ServletResponse *********************************************** */
+
+    public static void writeJson(ServletResponse response, String jsonStr) {
+        write(response, jsonStr, MediaType.APPLICATION_JSON);
     }
 
     @SneakyThrows

@@ -56,56 +56,16 @@ public class SysLogPO extends BasePO {
     private String module;
 
     /**
-     * 服务ID
-     */
-    private String serviceId;
-
-    /**
-     * 请求源地址
-     */
-    private String remoteAddr;
-
-    /**
-     * 用户浏览器
-     */
-    private String userAgent;
-
-    /**
-     * 请求URI
-     */
-    private String requestUri;
-
-    /**
-     * 请求方式
-     */
-    private String requestMethod;
-
-    /**
-     * 参数（包括方法参数，URL参数，请求体）
-     */
-    private String param;
-
-    /**
-     * 返回数据
-     */
-    private String returnData;
-
-    /**
      * 是否是正常日志
      */
     @Getter(AccessLevel.NONE)
     private Boolean success;
 
     /**
-     * 异常信息
-     */
-    private String exception;
-
-    /**
      * 执行时间
      */
     @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @JsonFormat(locale = "zh_CN", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime executionTime;
 

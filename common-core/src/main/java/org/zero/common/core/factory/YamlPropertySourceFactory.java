@@ -24,8 +24,8 @@ public class YamlPropertySourceFactory implements PropertySourceFactory {
         Resource r = resource.getResource();
         String sourceName = Objects.nonNull(name) ? name : r.getFilename();
         Properties properties = loadYamlToProperties(r);
-        Assert.notNull(sourceName, "Source Name is null");
-        Assert.notNull(properties, "source Properties is null");
+        Assert.notNull(sourceName, "Source name is null");
+        Assert.notNull(properties, "source properties is null");
         return new PropertiesPropertySource(sourceName, properties);
     }
 

@@ -1,4 +1,4 @@
-package org.zero.common.core.util.spring;
+package org.zero.common.core.util.jackson;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;

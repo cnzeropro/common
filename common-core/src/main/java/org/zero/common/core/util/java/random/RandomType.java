@@ -1,4 +1,4 @@
-package org.zero.common.core.util.java.codec.random;
+package org.zero.common.core.util.java.random;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,16 +15,14 @@ public enum RandomType {
     /**
      * java.util.Random
      */
-    RANDOM("Random"),
+    RANDOM,
     /**
      * java.util.concurrent.ThreadLocalRandom
      */
-    THREAD_LOCAL_RANDOM("ThreadLocalRandom"),
+    THREAD_LOCAL_RANDOM,
     /**
      * java.security.SecureRandom
      */
-    SECURE_RANDOM("SecureRandom"),
+    SECURE_RANDOM,
     ;
-
-    private final String type;
 }

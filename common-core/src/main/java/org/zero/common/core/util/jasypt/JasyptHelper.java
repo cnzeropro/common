@@ -55,6 +55,7 @@ public class JasyptHelper {
         config.setPoolSize(10);
         config.setProviderName("SunJCE");
         config.setSaltGeneratorClassName("org.jasypt.salt.RandomSaltGenerator");
+        // 随机偏移量生成器建议：
         // org.jasypt.salt.NoOpIVGenerator 2.x
         // org.jasypt.iv.RandomIvGenerator 3.x
         config.setIvGeneratorClassName("org.jasypt.iv.RandomIvGenerator");

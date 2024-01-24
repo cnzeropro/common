@@ -5,12 +5,14 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.TemporalAccessorUtil;
 import cn.hutool.core.lang.Opt;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ReflectUtil;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.NumberFormat;
 import org.zero.common.core.util.java.ClassUtil;
@@ -26,7 +28,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -69,7 +70,7 @@ public class BeanMapUtil {
     }
 
     public Map<String, Object> encode(String prefix, String regex, Object... objs) {
-        Map<String, Object> result = new LinkedHashMap<>();
+        Map<String, Object> result = MapUtil.newHashMap(true);
         if (ArrayUtil.isAllNull(objs)) {
             return result;
         }
@@ -109,7 +110,7 @@ public class BeanMapUtil {
     }
 
     public Map<String, Object> encode(String prefix, String regex, Object obj) {
-        Map<String, Object> result = new LinkedHashMap<>();
+        Map<String, Object> result = MapUtil.newHashMap(true);
 
         // 如果为空
         if (Objects.isNull(obj)) {
@@ -139,12 +140,6 @@ public class BeanMapUtil {
                 result.putAll(map);
             });
             return result;
-        }
-
-        // 如果是首次进入该方法，则不应该出现下面的类型，所以抛出异常
-        if (CharSequenceUtil.isBlank(prefix)) {
-            log.warn("encode object fail: {}", obj);
-            throw new UtilException("对象编码异常，不支持此类型：" + clazz);
         }
 
         // 如果是可迭代的，如List
@@ -197,7 +192,7 @@ public class BeanMapUtil {
     }
 
     private Map<String, Object> encodeArray(String prefix, String regex, Object arrayObj) {
-        Map<String, Object> result = new LinkedHashMap<>();
+        Map<String, Object> result = MapUtil.newHashMap(true);
         Class<?> componentType = ArrayUtil.getComponentType(arrayObj);
         Object[] objects = ArrayUtil.cast(componentType, arrayObj);
 
@@ -207,21 +202,18 @@ public class BeanMapUtil {
             result.put(prefix, joined);
             return result;
         }
-
         // 日期时间类型
         if (Date.class.isAssignableFrom(componentType) || Calendar.class.isAssignableFrom(componentType) || TemporalAccessor.class.isAssignableFrom(componentType)) {
             String joined = ArrayUtil.join(objects, ",", obj -> formatDataTime(null, obj));
             result.put(prefix, joined);
             return result;
         }
-
         // 简单值类型
         if (cn.hutool.core.util.ClassUtil.isSimpleValueType(componentType)) {
             String joined = ArrayUtil.join(objects, ",");
             result.put(prefix, joined);
             return result;
         }
-
         // 其他类型，比如bean、map等等
         for (int i = 0; i < objects.length; i++) {
             String key = CharSequenceUtil.format("{}[{}]", prefix, i);
@@ -235,30 +227,27 @@ public class BeanMapUtil {
         String key = CharSequenceUtil.isBlank(prefix) ? field.getName() : CharSequenceUtil.format("{}.{}", prefix, field.getName());
         Object fieldValue = ReflectUtil.getFieldValue(object, field);
 
-        Map<String, Object> result = new LinkedHashMap<>();
-
+        Map<String, Object> result = MapUtil.newHashMap(true);
         // 空值
         if (Objects.isNull(fieldValue)) {
             // 不添加空值
             // result.put(key, null);
             return result;
         }
-
         // 数字类型
         if (ClassUtil.isNumClass(fieldValue.getClass())) {
             String str = formatNum(field, fieldValue);
             result.put(prefix, str);
             return result;
         }
-
         // 日期时间类型
         if (fieldValue instanceof Date ||
                 fieldValue instanceof Calendar ||
                 fieldValue instanceof TemporalAccessor) {
-            result.put(key, formatDataTime(field, fieldValue));
+            String str = formatDataTime(field, fieldValue);
+            result.put(key, str);
             return result;
         }
-
         // 其他类型
         Map<String, Object> map = encode(key, regex, fieldValue);
         result.putAll(map);
@@ -271,9 +260,10 @@ public class BeanMapUtil {
         }
 
         String pattern = Opt.ofNullable(field)
-                .map(f -> f.getAnnotation(NumberFormat.class))
+                .map(f -> AnnotationUtils.findAnnotation(f, NumberFormat.class))
                 .map(NumberFormat::pattern)
                 .orElse(null);
+
         String numStr = numObj.toString();
         if (CharSequenceUtil.isBlank(pattern)) {
             return numStr;
@@ -289,35 +279,35 @@ public class BeanMapUtil {
         }
 
         String pattern = Opt.ofNullable(field)
-                .map(f -> f.getAnnotation(DateTimeFormat.class))
+                .map(f -> AnnotationUtils.findAnnotation(f, DateTimeFormat.class))
                 .map(DateTimeFormat::pattern)
                 .or(() -> Opt.ofNullable(SpringContextUtils.getProperty("spring.mvc.format.date-time")))
-                .orElse(DatePattern.NORM_DATETIME_PATTERN);
+                .orElse(null);
 
         if (dataTimeObj instanceof Date) {
+            if (CharSequenceUtil.isBlank(pattern)) {
+                pattern = DatePattern.NORM_DATETIME_PATTERN;
+            }
             return DateUtil.format((Date) dataTimeObj, pattern);
         }
-
         if (dataTimeObj instanceof Calendar) {
+            if (CharSequenceUtil.isBlank(pattern)) {
+                pattern = DatePattern.NORM_DATETIME_PATTERN;
+            }
             return DateUtil.format(((Calendar) dataTimeObj).getTime(), pattern);
         }
-
         if (dataTimeObj instanceof TemporalAccessor) {
-            if (dataTimeObj instanceof LocalDate) {
-                if (CharSequenceUtil.containsAny(pattern, "HH", "mm", "ss")) {
+            if (CharSequenceUtil.isBlank(pattern)) {
+                pattern = DatePattern.NORM_DATETIME_PATTERN;
+                if (dataTimeObj instanceof LocalDate) {
                     pattern = DatePattern.NORM_DATE_PATTERN;
                 }
-            }
-
-            if (dataTimeObj instanceof LocalTime) {
-                if (CharSequenceUtil.containsAny(pattern, "yyyy", "MM", "dd")) {
+                if (dataTimeObj instanceof LocalTime) {
                     pattern = DatePattern.NORM_TIME_PATTERN;
                 }
             }
-
             return TemporalAccessorUtil.format((TemporalAccessor) dataTimeObj, pattern);
         }
-
         throw new UtilException(String.format("[%s]非日期时间类型，无法格式化", dataTimeObj.getClass()));
     }
 }

@@ -1,5 +1,7 @@
 package org.zero.common.core.aop.aspect.log;
 
+import cn.hutool.core.lang.Opt;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.StrFormatter;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
@@ -14,10 +16,9 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -34,37 +35,44 @@ import java.util.Objects;
 public class TraceLogAspect implements InitializingBean {
     private ObjectMapper objectMapper;
 
-    @Around("org.zero.common.core.aop.pointcut.Pointcuts.allMethod()")
+    // @Around("org.zero.common.core.aop.pointcut.Pointcuts.allMethod()")
+    @Around("@within(org.zero.common.core.aop.aspect.log.TraceLog) || " +
+            "@annotation(org.zero.common.core.aop.aspect.log.TraceLog)")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
+        // 因为切点表达式匹配的签名是方法，使用可以直接进行强制转换
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        Method method = signature.getMethod();
+        String signatureName = signature.getName();
+        LogLevel logLevel = Opt.ofNullable(AnnotationUtils.findAnnotation(signature.getMethod(), TraceLog.class))
+                .or(() -> Opt.ofNullable(AnnotationUtils.findAnnotation(signature.getDeclaringType(), TraceLog.class)))
+                .map(TraceLog::value)
+                .orElse(LogLevel.TRACE);
 
         long endTime = 0L;
         Object result;
-        outputLog("Method[{}] starts executing, args: {}", null, method, toExpectedStr(toMap(method.getParameters(), args)));
+        outputLog(logLevel, "Method[{}] starts executing, args: {}", null, signatureName, toExpectedStr(toMap(signature.getParameterNames(), args)));
         long startTime = System.nanoTime();
         try {
             result = joinPoint.proceed();
             endTime = System.nanoTime();
-            outputLog("Method[{}] execution succeeded, result: {}", null, method, toExpectedStr(result));
+            outputLog(logLevel, "Method[{}] execution succeeded, result: {}", null, signatureName, toExpectedStr(result));
         } catch (Throwable e) {
             endTime = System.nanoTime();
-            outputLog("Method[{}] execution exception", e, method);
+            outputLog(logLevel, "Method[{}] execution exception", e, signatureName);
             throw e;
         } finally {
-            outputLog("Method[{}] execution completes, time-consuming: {}", null, method, Duration.ofNanos(endTime - startTime));
+            outputLog(logLevel, "Method[{}] execution completes, time-consuming: {}", null, signatureName, Duration.ofNanos(endTime - startTime));
         }
 
         return result;
     }
 
-    private Map<String, Object> toMap(Parameter[] parameters, Object[] args) {
-        int length = parameters.length;
-        Map<String, Object> map = new LinkedHashMap<>(length);
+    private Map<String, Object> toMap(String[] parameterNames, Object[] args) {
+        int length = parameterNames.length;
+        Map<String, Object> map = new LinkedHashMap<>((int) (length / MapUtil.DEFAULT_LOAD_FACTOR));
         for (int i = 0; i < length; i++) {
-            Parameter parameter = parameters[i];
-            map.put(parameter.getName(), args[i]);
+            String parameterName = parameterNames[i];
+            map.put(parameterName, args[i]);
         }
         return map;
     }
@@ -83,13 +91,56 @@ public class TraceLogAspect implements InitializingBean {
         return StrUtil.utf8Str(obj);
     }
 
-    private void outputLog(String msg, Throwable throwable, Object... args) {
-        if (log.isTraceEnabled()) {
-            if (Objects.isNull(throwable)) {
-                log.trace(StrFormatter.format(msg, args));
-            } else {
-                log.trace(StrFormatter.format(msg, args), throwable);
-            }
+    private void outputLog(LogLevel logLevel, String msg, Throwable throwable, Object... args) {
+        switch (logLevel) {
+            case NONE:
+                break;
+            case TRACE:
+                if (log.isTraceEnabled()) {
+                    if (Objects.isNull(throwable)) {
+                        log.trace(StrFormatter.format(msg, args));
+                    } else {
+                        log.trace(StrFormatter.format(msg, args), throwable);
+                    }
+                }
+                break;
+            case DEBUG:
+                if (log.isDebugEnabled()) {
+                    if (Objects.isNull(throwable)) {
+                        log.debug(StrFormatter.format(msg, args));
+                    } else {
+                        log.debug(StrFormatter.format(msg, args), throwable);
+                    }
+                }
+                break;
+            case INFO:
+                if (log.isInfoEnabled()) {
+                    if (Objects.isNull(throwable)) {
+                        log.info(StrFormatter.format(msg, args));
+                    } else {
+                        log.info(StrFormatter.format(msg, args), throwable);
+                    }
+                }
+                break;
+            case WARN:
+                if (log.isWarnEnabled()) {
+                    if (Objects.isNull(throwable)) {
+                        log.warn(StrFormatter.format(msg, args));
+                    } else {
+                        log.warn(StrFormatter.format(msg, args), throwable);
+                    }
+                }
+                break;
+            case ERROR:
+                if (log.isErrorEnabled()) {
+                    if (Objects.isNull(throwable)) {
+                        log.error(StrFormatter.format(msg, args));
+                    } else {
+                        log.error(StrFormatter.format(msg, args), throwable);
+                    }
+                }
+                break;
+            default:
         }
     }
 

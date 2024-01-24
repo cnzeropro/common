@@ -33,6 +33,7 @@ public class RequestUtil {
 
     /**
      * protocol :// hostname[:port] / path / [:parameters][?query]#fragment
+     * <p>
      * 如：http://127.0.0.1:8080/demo/test?a=bbb，
      * 取：http://127.0.0.1:8080/
      */
@@ -44,6 +45,7 @@ public class RequestUtil {
 
     /**
      * protocol :// hostname[:port] / path / [:parameters][?query]#fragment
+     * <p>
      * 如：http://127.0.0.1:8080/demo/test?a=bbb
      * 取：http://127.0.0.1:8080/
      */

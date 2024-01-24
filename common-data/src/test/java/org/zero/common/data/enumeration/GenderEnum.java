@@ -1,4 +1,4 @@
-package org.zero.common.data.constant;
+package org.zero.common.data.enumeration;
 
 import com.baomidou.mybatisplus.annotation.IEnum;
 import com.fasterxml.jackson.annotation.JsonCreator;
