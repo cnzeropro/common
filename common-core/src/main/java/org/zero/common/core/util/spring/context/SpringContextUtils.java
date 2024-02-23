@@ -2,6 +2,7 @@ package org.zero.common.core.util.spring.context;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultSingletonBeanRegistry;
@@ -104,6 +105,20 @@ public class SpringContextUtils implements BeanFactoryPostProcessor, Application
      */
     public static <T> Map<String, T> getBeansOfType(Class<T> type) {
         return getBeanFactory().getBeansOfType(type);
+    }
+
+    /**
+     * 获取指定Bean的Provider
+     */
+    public static <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType, boolean allowEagerInit) {
+        return getBeanFactory().getBeanProvider(requiredType, allowEagerInit);
+    }
+
+    /**
+     * 获取指定Bean的Provider
+     */
+    public static <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType) {
+        return getBeanFactory().getBeanProvider(requiredType);
     }
 
     /**
