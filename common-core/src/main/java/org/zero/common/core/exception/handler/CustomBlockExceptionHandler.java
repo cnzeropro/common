@@ -8,7 +8,6 @@ import com.alibaba.csp.sentinel.slots.block.flow.FlowException;
 import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowException;
 import com.alibaba.csp.sentinel.slots.system.SystemBlockException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import org.zero.common.core.util.jackson.JacksonUtils;
 import org.zero.common.core.util.javax.web.ResponseUtil;
 import org.zero.common.data.model.Result;
@@ -23,11 +22,10 @@ import javax.servlet.http.HttpServletResponse;
  * @since 2022/7/16
  */
 @Slf4j
-@Component
 public class CustomBlockExceptionHandler implements BlockExceptionHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, BlockException e) {
-        log.warn("BlockException", e);
+        log.warn("Sentinel block exception", e);
         Result<String> result = Result.error("未知异常", e.getMessage());
         if (e instanceof FlowException) {
             result = Result.error("接口已被限流", e.getMessage());
