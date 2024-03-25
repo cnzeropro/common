@@ -237,7 +237,7 @@ public class BeanMapUtil {
         // 数字类型
         if (ClassUtil.isNumClass(fieldValue.getClass())) {
             String str = formatNum(field, fieldValue);
-            result.put(prefix, str);
+            result.put(key, str);
             return result;
         }
         // 日期时间类型
