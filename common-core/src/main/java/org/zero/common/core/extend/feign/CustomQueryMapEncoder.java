@@ -1,8 +1,8 @@
 package org.zero.common.core.extend.feign;
 
 import feign.QueryMapEncoder;
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.zero.common.core.util.java.bean.BeanMapUtil;
 
@@ -19,7 +19,7 @@ import java.util.Map;
  */
 @Slf4j
 @NoArgsConstructor
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class CustomQueryMapEncoder implements QueryMapEncoder {
     protected String beanBasePackage = "org.zero.common.data.model";
 
