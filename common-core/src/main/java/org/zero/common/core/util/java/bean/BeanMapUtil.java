@@ -10,6 +10,7 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ReflectUtil;
+import feign.Param;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -224,7 +225,14 @@ public class BeanMapUtil {
     }
 
     private Map<String, Object> encodeField(String prefix, String regex, Object object, Field field) {
-        String key = CharSequenceUtil.isBlank(prefix) ? field.getName() : CharSequenceUtil.format("{}.{}", prefix, field.getName());
+        // 支持 feign Param 注解
+        String name = Opt.ofNullable(field)
+                .map(f -> AnnotationUtils.findAnnotation(f, Param.class))
+                .map(Param::value)
+                .or(() -> Opt.ofNullable(field).map(Field::getName))
+                .orElse(null);
+
+        String key = CharSequenceUtil.isBlank(prefix) ? name : CharSequenceUtil.format("{}.{}", prefix, name);
         Object fieldValue = ReflectUtil.getFieldValue(object, field);
 
         Map<String, Object> result = MapUtil.newHashMap(true);
