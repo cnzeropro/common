@@ -3,7 +3,6 @@ package org.zero.common.core.extend.feign;
 import feign.QueryMapEncoder;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.zero.common.core.util.java.bean.BeanMapUtil;
 
 import java.util.Map;
@@ -17,14 +16,13 @@ import java.util.Map;
  * @author zero
  * @since 2021/2/14
  */
-@Slf4j
 @NoArgsConstructor
 @AllArgsConstructor
 public class CustomQueryMapEncoder implements QueryMapEncoder {
-    protected String beanBasePackage = "org.zero.common.data.model";
+    protected String[] beanBasePackages = BeanMapUtil.DEFAULT_PACKAGE_NAMES;
 
     @Override
     public Map<String, Object> encode(Object object) {
-        return BeanMapUtil.encodeIn(beanBasePackage, object);
+        return BeanMapUtil.encodeIn(beanBasePackages, object);
     }
 }

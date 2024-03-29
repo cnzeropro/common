@@ -39,9 +39,10 @@ import java.util.Objects;
 @Slf4j
 @UtilityClass
 public class BeanMapUtil {
-    private static final String DEFAULT_PREFIX = "";
-    private static final String DEFAULT_REGEX_TEMPLATE = "^(\\w+\\.)*(%s)(\\.\\w+)*$";
-    private static final String DEFAULT_REGEX = String.format(DEFAULT_REGEX_TEMPLATE, "model|entity|domain|pojo");
+    public static final String DEFAULT_PREFIX = "";
+    public static final String[] DEFAULT_PACKAGE_NAMES = {"model", "entity", "domain", "pojo"};
+    public static final String DEFAULT_REGEX_TEMPLATE = "^(\\w+\\.)*(%s)(\\.\\w+)*$";
+    public static final String DEFAULT_REGEX = String.format(DEFAULT_REGEX_TEMPLATE, ArrayUtil.join(DEFAULT_PACKAGE_NAMES, "|"));
 
     public Map<String, Object> encode(Object... objs) {
         return encode(DEFAULT_PREFIX, objs);
@@ -71,8 +72,8 @@ public class BeanMapUtil {
     }
 
     public Map<String, Object> encode(String prefix, String regex, Object... objs) {
-        Map<String, Object> result = MapUtil.newHashMap(true);
-        if (ArrayUtil.isAllNull(objs)) {
+        Map<String, Object> result = MapUtil.newHashMap(false);
+        if (ArrayUtil.isEmpty(objs)) {
             return result;
         }
 
@@ -111,7 +112,7 @@ public class BeanMapUtil {
     }
 
     public Map<String, Object> encode(String prefix, String regex, Object obj) {
-        Map<String, Object> result = MapUtil.newHashMap(true);
+        Map<String, Object> result = MapUtil.newHashMap(false);
 
         // 如果为空
         if (Objects.isNull(obj)) {
@@ -120,7 +121,7 @@ public class BeanMapUtil {
 
         Class<?> clazz = obj.getClass();
 
-        // 如果是指定bean
+        // 指定bean
         if (ClassUtil.isSpecifiedClass(clazz, regex)) {
             Field[] fields = ReflectUtil.getFields(clazz);
             for (Field field : fields) {
@@ -130,7 +131,7 @@ public class BeanMapUtil {
             return result;
         }
 
-        // 如果是map
+        // map
         // 此处为什么没有直接返回objMap？是因为考虑到map的value可能是其他类型，比如Bean，List，Map等等
         if (obj instanceof Map) {
             @SuppressWarnings("unchecked")
@@ -143,35 +144,35 @@ public class BeanMapUtil {
             return result;
         }
 
-        // 如果是可迭代的，如List
+        // 可迭代的，如List
         if (obj instanceof Iterable || obj instanceof Iterator || obj instanceof Enumeration) {
             Map<String, Object> map = encodeIter(prefix, regex, obj);
             result.putAll(map);
             return result;
         }
 
-        // 如果是数组
+        // 数组
         if (ArrayUtil.isArray(obj)) {
             Map<String, Object> map = encodeArray(prefix, regex, obj);
             result.putAll(map);
             return map;
         }
 
-        // 数字类型
+        // 数字
         if (ClassUtil.isNumClass(clazz)) {
             String str = formatNum(null, obj);
             result.put(prefix, str);
             return result;
         }
 
-        // 日期时间类型
+        // 日期时间
         if (obj instanceof Date || obj instanceof Calendar || obj instanceof TemporalAccessor) {
             String str = formatDataTime(null, obj);
             result.put(prefix, str);
             return result;
         }
 
-        // 其他类型
+        // 其他
         result.put(prefix, String.valueOf(obj));
         return result;
     }
@@ -179,11 +180,10 @@ public class BeanMapUtil {
     @SuppressWarnings("unchecked")
     private Map<String, Object> encodeIter(String prefix, String regex, Object iterObj) {
         Iterator<Object> iterator;
-        if (iterObj instanceof Iterable) {
-            Iterable<Object> iterable = (Iterable<Object>) iterObj;
-            iterator = iterable.iterator();
-        } else if (iterObj instanceof Iterator) {
+        if (iterObj instanceof Iterator) {
             iterator = (Iterator<Object>) iterObj;
+        } else if (iterObj instanceof Iterable) {
+            iterator = ((Iterable<Object>) iterObj).iterator();
         } else {
             iterator = IterUtil.asIterator((Enumeration<Object>) iterObj);
         }
@@ -193,7 +193,7 @@ public class BeanMapUtil {
     }
 
     private Map<String, Object> encodeArray(String prefix, String regex, Object arrayObj) {
-        Map<String, Object> result = MapUtil.newHashMap(true);
+        Map<String, Object> result = MapUtil.newHashMap(false);
         Class<?> componentType = ArrayUtil.getComponentType(arrayObj);
         Object[] objects = ArrayUtil.cast(componentType, arrayObj);
 
@@ -204,7 +204,9 @@ public class BeanMapUtil {
             return result;
         }
         // 日期时间类型
-        if (Date.class.isAssignableFrom(componentType) || Calendar.class.isAssignableFrom(componentType) || TemporalAccessor.class.isAssignableFrom(componentType)) {
+        if (Date.class.isAssignableFrom(componentType) ||
+                Calendar.class.isAssignableFrom(componentType) ||
+                TemporalAccessor.class.isAssignableFrom(componentType)) {
             String joined = ArrayUtil.join(objects, ",", obj -> formatDataTime(null, obj));
             result.put(prefix, joined);
             return result;
@@ -235,7 +237,7 @@ public class BeanMapUtil {
         String key = CharSequenceUtil.isBlank(prefix) ? name : CharSequenceUtil.format("{}.{}", prefix, name);
         Object fieldValue = ReflectUtil.getFieldValue(object, field);
 
-        Map<String, Object> result = MapUtil.newHashMap(true);
+        Map<String, Object> result = MapUtil.newHashMap(false);
         // 空值
         if (Objects.isNull(fieldValue)) {
             // 不添加空值
