@@ -1,9 +1,14 @@
 package org.zero.common.data.model;
 
+import cn.hutool.core.collection.CollUtil;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  * 前端列表查询对象，两种使用方式：
@@ -13,112 +18,117 @@ import java.io.Serializable;
  * @author Zero (cnzeropro@qq.com)
  * @since 2021/1/5
  */
-@Data
+@Setter
+@Getter
+@ToString
 public class BaseQO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
      * 需求字段（select x）
      */
-    private String[] columns = {"*"};
+    private Collection<String> columns = CollUtil.newHashSet("*");
 
     /**
      * 排序规则（order by x）
      */
-    private Collation[] collations = {new Collation("createTime", false)};
+    private Collection<Collation> collations = CollUtil.newHashSet(Collation.create("createTime", false));
 
     /**
      * 等值查询（where x=?）
      */
-    private String[] eqs = {};
+    private Collection<QueryCondition<Object>> eqs = CollUtil.newHashSet();
 
     /**
      * 非等值查询（where x!=?、x<>?）
      */
-    private String[] nes = {};
+    private Collection<QueryCondition<Object>> nes = CollUtil.newHashSet();
 
     /**
      * 查询（where x>?）
      */
-    private String[] gts = {};
+    private Collection<QueryCondition<Object>> gts = CollUtil.newHashSet();
 
     /**
      * 查询（where x>=?）
      */
-    private String[] ges = {};
+    private Collection<QueryCondition<Object>> ges = CollUtil.newHashSet();
 
     /**
      * 查询（where x<?）
      */
-    private String[] lts = {};
+    private Collection<QueryCondition<Object>> lts = CollUtil.newHashSet();
 
     /**
      * 查询（where x<=?）
      */
-    private String[] les = {};
+    private Collection<QueryCondition<Object>> les = CollUtil.newHashSet();
 
     /**
      * 模糊查询（where x like %?%）
      */
-    private String[] likes = {};
+    private Collection<QueryCondition<String>> likes = CollUtil.newHashSet();
 
     /**
      * 模糊查询（where x not like %?%）
      */
-    private String[] notLikes = {};
+    private Collection<QueryCondition<String>> notLikes = CollUtil.newHashSet();
 
     /**
      * 左模糊查询（where x like %?）
      */
-    private String[] leftLikes = {};
+    private Collection<QueryCondition<String>> leftLikes = CollUtil.newHashSet();
 
     /**
      * 左模糊查询（where x not like %?）
      */
-    private String[] notLeftLikes = {};
+    private Collection<QueryCondition<String>> notLeftLikes = CollUtil.newHashSet();
 
     /**
      * 右模糊查询（where x like ?%）（可以利用索引）
      */
-    private String[] rightLikes = {};
+    private Collection<QueryCondition<String>> rightLikes = CollUtil.newHashSet();
 
     /**
      * 右模糊查询（where x not like ?%）（可以利用索引）
      */
-    private String[] notRightLikes = {};
+    private Collection<QueryCondition<String>> notRightLikes = CollUtil.newHashSet();
 
     /**
      * is null查询（where x is null）
      */
-    private String[] nulls = {};
+    private Collection<String> nulls = CollUtil.newHashSet();
 
     /**
      * is not null查询（where x is not null）
      */
-    private String[] notNulls = {};
+    private Collection<String> notNulls = CollUtil.newHashSet();
 
     /**
      * 多值查询（where x in(?,?,...)）
      */
-    private MultiVal[] ins = {};
+    private Collection<QueryCondition<Object[]>> ins = CollUtil.newHashSet();
 
     /**
      * 多值查询（where x not in(?,?,...)）
      */
-    private MultiVal[] notIns = {};
+    private Collection<QueryCondition<Object[]>> notIns = CollUtil.newHashSet();
 
     /**
      * 范围查询（where x between ? and ?）
      */
-    private Range[] betweens = {};
+    private Collection<Range> betweens = CollUtil.newHashSet();
 
     /**
      * 范围查询（where x not between ? and ?）
      */
-    private Range[] notBetweens = {};
+    private Collection<Range> notBetweens = CollUtil.newHashSet();
 
-    @Data
-    @AllArgsConstructor
+    @Setter
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor(staticName = "create")
+    @ToString
     public static class Collation implements Serializable {
         /**
          * 排序字段
@@ -131,34 +141,33 @@ public class BaseQO implements Serializable {
         private boolean asc = true;
     }
 
-    @Data
-    public static class MultiVal implements Serializable {
-        /**
-         * in查询字段
-         */
-        private String column;
-
-        /**
-         * in查询条件
-         */
-        private Object[] values;
-    }
-
-    @Data
-    public static class Range implements Serializable {
+    @Setter
+    @Getter
+    @ToString
+    public static class QueryCondition<T> implements Serializable {
         /**
          * 查询字段
          */
         private String column;
 
         /**
+         * 查询条件
+         */
+        private T value;
+    }
+
+    @Setter
+    @Getter
+    @ToString(callSuper = true)
+    public static class Range extends QueryCondition<Object> {
+        /**
          * 起始的查询条件
          */
-        private Object startValue;
+        private Object start;
 
         /**
          * 结束的查询条件
          */
-        private Object endValue;
+        private Object end;
     }
 }

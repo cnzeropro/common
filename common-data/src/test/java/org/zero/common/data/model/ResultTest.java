@@ -25,13 +25,13 @@ class ResultTest {
                 .setRecordCount(107L)
                 .setRecords(Arrays.asList(StudentDTO.builder()
                                 .id(1L)
-                                .sid("s00001")
+                                .code("s00001")
                                 .name("小明")
                                 .gender(GenderEnum.MALE)
                                 .build(),
                         StudentDTO.builder()
                                 .id(2L)
-                                .sid("s00002")
+                                .code("s00002")
                                 .gender(GenderEnum.FEMALE)
                                 .name("小红")
                                 .build())));

@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
@@ -47,20 +48,7 @@ public class PageDTO<T> implements Serializable {
     /**
      * 数据对象列表
      */
-    private List<T> records = Collections.emptyList();
-
-    private PageDTO() {
-    }
-
-    private PageDTO(long currentPage, long pageSize) {
-        setCurrentPage(currentPage);
-        setPageSize(pageSize);
-    }
-
-    private PageDTO(long currentPage, long pageSize, long recordCount) {
-        this(currentPage, pageSize);
-        setRecordCount(recordCount);
-    }
+    private Collection<T> records = Collections.emptyList();
 
     /**
      * 设置并修正当前页码
@@ -129,5 +117,18 @@ public class PageDTO<T> implements Serializable {
 
     public static <T> PageDTO<T> of(long currentPage, long pageSize, long recordCount) {
         return new PageDTO<>(currentPage, pageSize, recordCount);
+    }
+
+    private PageDTO() {
+    }
+
+    private PageDTO(long currentPage, long pageSize) {
+        setCurrentPage(currentPage);
+        setPageSize(pageSize);
+    }
+
+    private PageDTO(long currentPage, long pageSize, long recordCount) {
+        this(currentPage, pageSize);
+        setRecordCount(recordCount);
     }
 }

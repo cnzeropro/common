@@ -12,10 +12,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.AccessLevel;
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -28,11 +28,10 @@ import java.time.LocalDateTime;
  * @author Zero (cnzeropro@qq.com)
  * @since 2019/1/5
  */
-@Setter
-@Getter
+@Data
 @SuperBuilder(toBuilder = true)
 @NoArgsConstructor
-@ToString
+@AllArgsConstructor
 public abstract class BasePO implements Serializable {
     private static final long serialVersionUID = 1L;
 
