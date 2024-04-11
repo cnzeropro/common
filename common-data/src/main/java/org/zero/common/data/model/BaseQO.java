@@ -1,134 +1,126 @@
 package org.zero.common.data.model;
 
-import cn.hutool.core.collection.CollUtil;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 import java.io.Serializable;
-import java.util.Collection;
 
 /**
  * 前端列表查询对象，两种使用方式：
- * 1、直接使用：直接用于承接前端传入参数
- * 2、继承使用：查询实体继承其并扩展字段
+ * 1、直接使用：直接用于承接前端传入参数（请求体 JSON 参数）
+ * 2、继承使用：查询实体继承其并进行扩展（URL 参数）
  *
  * @author Zero (cnzeropro@qq.com)
  * @since 2021/1/5
  */
-@Setter
-@Getter
-@ToString
-public class BaseQO implements Serializable {
+@Data
+public class BaseQO<T, MV, R> implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
      * 需求字段（select x）
      */
-    private Collection<String> columns = CollUtil.newHashSet("*");
+    private String[] columns = new String[]{"*"};
 
     /**
      * 排序规则（order by x）
      */
-    private Collection<Collation> collations = CollUtil.newHashSet(Collation.create("createTime", false));
+    private Collation[] collations = {};
 
     /**
      * 等值查询（where x=?）
      */
-    private Collection<QueryCondition<Object>> eqs = CollUtil.newHashSet();
+    private T eq;
 
     /**
      * 非等值查询（where x!=?、x<>?）
      */
-    private Collection<QueryCondition<Object>> nes = CollUtil.newHashSet();
+    private T ne;
 
     /**
      * 查询（where x>?）
      */
-    private Collection<QueryCondition<Object>> gts = CollUtil.newHashSet();
+    private T gt;
 
     /**
      * 查询（where x>=?）
      */
-    private Collection<QueryCondition<Object>> ges = CollUtil.newHashSet();
+    private T ge;
 
     /**
      * 查询（where x<?）
      */
-    private Collection<QueryCondition<Object>> lts = CollUtil.newHashSet();
+    private T lt;
 
     /**
      * 查询（where x<=?）
      */
-    private Collection<QueryCondition<Object>> les = CollUtil.newHashSet();
+    private T le;
 
     /**
      * 模糊查询（where x like %?%）
      */
-    private Collection<QueryCondition<String>> likes = CollUtil.newHashSet();
+    private T like;
 
     /**
      * 模糊查询（where x not like %?%）
      */
-    private Collection<QueryCondition<String>> notLikes = CollUtil.newHashSet();
+    private T notLike;
 
     /**
      * 左模糊查询（where x like %?）
      */
-    private Collection<QueryCondition<String>> leftLikes = CollUtil.newHashSet();
+    private T leftLike;
 
     /**
      * 左模糊查询（where x not like %?）
      */
-    private Collection<QueryCondition<String>> notLeftLikes = CollUtil.newHashSet();
+    private T notLeftLike;
 
     /**
      * 右模糊查询（where x like ?%）（可以利用索引）
      */
-    private Collection<QueryCondition<String>> rightLikes = CollUtil.newHashSet();
+    private T rightLike;
 
     /**
      * 右模糊查询（where x not like ?%）（可以利用索引）
      */
-    private Collection<QueryCondition<String>> notRightLikes = CollUtil.newHashSet();
+    private T notRightLike;
 
     /**
      * is null查询（where x is null）
      */
-    private Collection<String> nulls = CollUtil.newHashSet();
+    private String[] nulls = {};
 
     /**
      * is not null查询（where x is not null）
      */
-    private Collection<String> notNulls = CollUtil.newHashSet();
+    private String[] notNulls = {};
 
     /**
      * 多值查询（where x in(?,?,...)）
      */
-    private Collection<QueryCondition<Object[]>> ins = CollUtil.newHashSet();
+    private MV in;
 
     /**
      * 多值查询（where x not in(?,?,...)）
      */
-    private Collection<QueryCondition<Object[]>> notIns = CollUtil.newHashSet();
+    private MV notIn;
 
     /**
      * 范围查询（where x between ? and ?）
      */
-    private Collection<Range> betweens = CollUtil.newHashSet();
+    private R between;
 
     /**
      * 范围查询（where x not between ? and ?）
      */
-    private Collection<Range> notBetweens = CollUtil.newHashSet();
+    private R notBetween;
 
-    @Setter
-    @Getter
+    @Data
     @NoArgsConstructor
     @AllArgsConstructor(staticName = "create")
-    @ToString
     public static class Collation implements Serializable {
         /**
          * 排序字段
@@ -139,35 +131,5 @@ public class BaseQO implements Serializable {
          * 排序方式，是否升序，默认true
          */
         private boolean asc = true;
-    }
-
-    @Setter
-    @Getter
-    @ToString
-    public static class QueryCondition<T> implements Serializable {
-        /**
-         * 查询字段
-         */
-        private String column;
-
-        /**
-         * 查询条件
-         */
-        private T value;
-    }
-
-    @Setter
-    @Getter
-    @ToString(callSuper = true)
-    public static class Range extends QueryCondition<Object> {
-        /**
-         * 起始的查询条件
-         */
-        private Object start;
-
-        /**
-         * 结束的查询条件
-         */
-        private Object end;
     }
 }

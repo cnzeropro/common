@@ -2,6 +2,10 @@ package org.zero.common.data.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * @author Zero (cnzeropro@qq.com)
@@ -9,6 +13,21 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class StudentQO extends PageQO {
-    private StudentPO student;
+public class StudentQO extends PageQO<StudentPO, StudentQO.StudentMultiValueQO, StudentQO.StudentRangeQO> {
+    @Data
+    public static class StudentMultiValueQO implements Serializable {
+        private Long[] ids = new Long[0];
+        private String[] names = new String[0];
+    }
+
+    @Data
+    public static class StudentRangeQO implements Serializable {
+        private Long startId;
+        private Long endId;
+
+        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        private LocalDateTime startCreateTime;
+        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        private LocalDateTime endCreateTime;
+    }
 }

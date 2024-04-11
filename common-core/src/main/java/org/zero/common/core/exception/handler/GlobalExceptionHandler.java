@@ -7,6 +7,7 @@ import feign.Target;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -16,11 +17,15 @@ import org.zero.common.data.model.Result;
 
 import javax.validation.ConstraintViolation;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 异常处理器
+ * <p>
  * 异常建议从小到大（便于代码阅读和后期维护）
  *
  * @author Zero
@@ -33,13 +38,13 @@ public class GlobalExceptionHandler {
     /* *************************************************** 系统自定义异常 *************************************************** */
     @ExceptionHandler(org.zero.common.data.exception.UtilException.class)
     public Result<Void> utilException(org.zero.common.data.exception.UtilException e) {
-        log.error("Util class method call exception", e);
-        return Result.fail("系统错误，请联系管理员");
+        log.error("Util class method call error", e);
+        return Result.fail("系统内部错误，请联系管理员");
     }
 
     @ExceptionHandler(org.zero.common.data.exception.BaseException.class)
     public Result<Void> baseException(org.zero.common.data.exception.BaseException e) {
-        log.error("System macro exception", e);
+        log.error("System base exception", e);
         return Result.fail(e.getPromptMessage(), e.getSysError());
     }
 
@@ -48,7 +53,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Result<Void>> handleException(org.springframework.web.client.HttpStatusCodeException e) {
         log.error("Http exception", e);
         HttpStatus httpStatus = e.getStatusCode();
-        return ResponseEntity.status(httpStatus).body(Result.fail(httpStatus, e.getStatusText()));
+        return ResponseEntity.status(httpStatus)
+                .body(Result.fail(httpStatus.value(), e.getStatusText()));
     }
 
     @ExceptionHandler(org.springframework.web.servlet.ModelAndViewDefiningException.class)
@@ -59,38 +65,44 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(org.springframework.web.servlet.NoHandlerFoundException.class)
     public Result<Void> noHandlerFoundException(org.springframework.web.servlet.NoHandlerFoundException e) {
-        log.error(String.format("The request did not find the resource: %s", e.getRequestURL()), e);
-        return Result.fail(HttpStatus.NOT_FOUND, String.format("请求资源未找到，请检查URL：%s", e.getRequestURL()));
+        String requestURL = e.getRequestURL();
+        log.error(String.format("The request did not find the resource: %s", requestURL), e);
+        return Result.fail(HttpStatus.NOT_FOUND.value(), String.format("请求资源未找到，请检查URL：%s", requestURL));
     }
 
     @ExceptionHandler(org.springframework.web.bind.MissingRequestHeaderException.class)
     public Result<Void> missingRequestHeaderException(org.springframework.web.bind.MissingRequestHeaderException e) {
-        log.error(String.format("Missing request header: %s", e.getHeaderName()), e);
-        return Result.fail(HttpStatus.EXPECTATION_FAILED, String.format("请求头缺失：%s", e.getHeaderName()));
+        String headerName = e.getHeaderName();
+        log.error(String.format("Missing request header: %s", headerName), e);
+        return Result.fail(HttpStatus.EXPECTATION_FAILED.value(), String.format("请求头缺失：%s", headerName));
     }
 
     @ExceptionHandler(org.springframework.web.bind.MissingRequestCookieException.class)
     public Result<Void> missingRequestCookieException(org.springframework.web.bind.MissingRequestCookieException e) {
-        log.error(String.format("Missing cookie: %s", e.getCookieName()), e);
-        return Result.fail(String.format("Cookie缺失：%s", e.getCookieName()));
+        String cookieName = e.getCookieName();
+        log.error(String.format("Missing cookie: %s", cookieName), e);
+        return Result.fail(String.format("Cookie缺失：%s", cookieName));
     }
 
     @ExceptionHandler(org.springframework.web.bind.MissingServletRequestParameterException.class)
     public Result<Void> missingServletRequestParameterException(org.springframework.web.bind.MissingServletRequestParameterException e) {
-        log.error(String.format("Missing request parameter: %s (%s)", e.getParameterName(), e.getParameterType()), e);
-        return Result.fail(String.format("请求参数缺失：%s", e.getParameterName()));
+        String parameterName = e.getParameterName();
+        log.error(String.format("Missing request parameter: %s (%s)", parameterName, e.getParameterType()), e);
+        return Result.fail(String.format("请求参数缺失：%s", parameterName));
     }
 
     @ExceptionHandler(org.springframework.web.bind.MissingPathVariableException.class)
     public Result<Void> missingPathVariableException(org.springframework.web.bind.MissingPathVariableException e) {
-        log.error(String.format("Missing path variable: %s", e.getVariableName()), e);
-        return Result.fail(String.format("路径参数缺失：%s", e.getVariableName()));
+        String variableName = e.getVariableName();
+        log.error(String.format("Missing path variable: %s", variableName), e);
+        return Result.fail(String.format("路径参数缺失：%s", variableName));
     }
 
     @ExceptionHandler(org.springframework.web.bind.MissingMatrixVariableException.class)
     public Result<Void> missingMatrixVariableException(org.springframework.web.bind.MissingMatrixVariableException e) {
-        log.error(String.format("Missing matrix variable: %s", e.getVariableName()), e);
-        return Result.fail(String.format("矩阵参数缺失：%s", e.getVariableName()));
+        String variableName = e.getVariableName();
+        log.error(String.format("Missing matrix variable: %s", variableName), e);
+        return Result.fail(String.format("矩阵参数缺失：%s", variableName));
     }
 
     @ExceptionHandler(org.springframework.web.bind.MissingRequestValueException.class)
@@ -101,72 +113,77 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(org.springframework.web.multipart.support.MissingServletRequestPartException.class)
     public Result<Void> missingServletRequestPartException(org.springframework.web.multipart.support.MissingServletRequestPartException e) {
-        log.error(String.format("Missing request part: %s", e.getRequestPartName()), e);
-        return Result.fail(String.format("[multipart/form-data]类型参数缺失：%s", e.getRequestPartName()));
+        String requestPartName = e.getRequestPartName();
+        log.error(String.format("Missing request part: %s", requestPartName), e);
+        return Result.fail(String.format("文件类型参数缺失：%s", requestPartName));
     }
 
     @ExceptionHandler(org.springframework.web.HttpSessionRequiredException.class)
     public Result<Void> httpSessionRequiredException(org.springframework.web.HttpSessionRequiredException e) {
-        log.error(String.format("Http session expected: %s", e.getExpectedAttribute()), e);
-        return Result.fail(HttpStatus.EXPECTATION_FAILED, String.format("Session不存在：%s", e.getExpectedAttribute()));
+        String expectedAttribute = e.getExpectedAttribute();
+        log.error(String.format("Http session expected: %s", expectedAttribute), e);
+        return Result.fail(HttpStatus.EXPECTATION_FAILED.value(), String.format("Session不存在：%s", expectedAttribute));
     }
 
     @ExceptionHandler(org.springframework.web.HttpMediaTypeNotSupportedException.class)
     public Result<Void> httpMediaTypeNotSupportedException(org.springframework.web.HttpMediaTypeNotSupportedException e) {
-        log.error(String.format("The media type[%s] is not supported, only supported: %s", e.getContentType(), e.getSupportedMediaTypes()), e);
-        return Result.fail(HttpStatus.UNSUPPORTED_MEDIA_TYPE, String.format("媒体类型（MediaType）不支持：%s", e.getContentType()));
+        MediaType contentType = e.getContentType();
+        log.error(String.format("The media type[%s] is not supported, only supported: %s", contentType, e.getSupportedMediaTypes()), e);
+        return Result.fail(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value(), String.format("媒体类型（MediaType）不支持：%s", contentType));
     }
 
     @ExceptionHandler(org.springframework.web.reactive.function.UnsupportedMediaTypeException.class)
     public Result<Void> unsupportedMediaTypeException(org.springframework.web.reactive.function.UnsupportedMediaTypeException e) {
-        log.error(String.format("The media type[%s] is not supported, only supported: %s", e.getContentType(), e.getSupportedMediaTypes()), e);
-        return Result.fail(HttpStatus.UNSUPPORTED_MEDIA_TYPE, String.format("媒体类型（MediaType）不支持：%s", e.getContentType()));
+        MediaType contentType = e.getContentType();
+        log.error(String.format("The media type[%s] is not supported, only supported: %s", contentType, e.getSupportedMediaTypes()), e);
+        return Result.fail(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value(), String.format("媒体类型（MediaType）不支持：%s", contentType));
     }
 
     @ExceptionHandler(org.springframework.web.HttpRequestMethodNotSupportedException.class)
     public Result<Void> httpRequestMethodNotSupportedException(org.springframework.web.HttpRequestMethodNotSupportedException e) {
-        log.error(String.format("The request method[%s] is not supported, only supported: %s", e.getMethod(), Arrays.toString(e.getSupportedMethods())), e);
-        return Result.fail(HttpStatus.METHOD_NOT_ALLOWED, String.format("请求方法不支持：%s", e.getMethod()));
+        String method = e.getMethod();
+        log.error(String.format("The request method[%s] is not supported, only supported: %s", method, Arrays.toString(e.getSupportedMethods())), e);
+        return Result.fail(HttpStatus.METHOD_NOT_ALLOWED.value(), String.format("请求方法不支持：%s", method));
     }
 
     @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
     public Result<Void> maxUploadSizeExceededException(org.springframework.web.multipart.MaxUploadSizeExceededException e) {
         String size = DataSizeUtil.format(e.getMaxUploadSize());
         log.error(String.format("The uploaded file exceeds the specified size: %s", size), e);
-        return Result.fail(HttpStatus.PAYLOAD_TOO_LARGE, String.format("上传文件超出指定大小[%s]，请压缩或降低文件质量", size));
+        return Result.fail(HttpStatus.PAYLOAD_TOO_LARGE.value(), String.format("上传文件超出指定大小[%s]，请压缩或降低文件质量", size));
     }
 
     @ExceptionHandler(javax.validation.ConstraintViolationException.class)
     public Result<Void> constraintViolationException(javax.validation.ConstraintViolationException e) {
         String errorMsg = Optional.ofNullable(e.getConstraintViolations())
-                .map(constraintViolations -> constraintViolations.stream()
-                        .map(ConstraintViolation::getMessage)
-                        .collect(Collectors.joining(",")))
-                .orElse("[]");
+                .map(Set::stream)
+                .orElseGet(Stream::empty)
+                .map(ConstraintViolation::getMessage)
+                .collect(Collectors.joining(" | ", "[", "]"));
         log.error(String.format("Parameter validation failed: %s", errorMsg), e);
-        return Result.fail(HttpStatus.BAD_REQUEST, String.format("参数效验失败：%s", errorMsg.replace(",", "；")));
+        return Result.fail(HttpStatus.BAD_REQUEST.value(), String.format("参数效验失败：%s", errorMsg));
     }
 
     @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
     public Result<Void> methodArgumentNotValidException(org.springframework.web.bind.MethodArgumentNotValidException e) {
         String errorMsg = Optional.of(e.getAllErrors())
-                .map(errors -> errors.stream()
-                        .map(ObjectError::getDefaultMessage)
-                        .collect(Collectors.joining(",", "[", "]")))
-                .orElse("[]");
+                .map(List::stream)
+                .orElseGet(Stream::empty)
+                .map(ObjectError::getDefaultMessage)
+                .collect(Collectors.joining(" | ", "[", "]"));
         log.error(String.format("The request parameter validation is abnormal: %s", errorMsg), e);
-        return Result.fail(HttpStatus.BAD_REQUEST, String.format("参数无效：%s", errorMsg.replace(",", "；")));
+        return Result.fail(HttpStatus.BAD_REQUEST.value(), String.format("参数无效：%s", errorMsg));
     }
 
     @ExceptionHandler(org.springframework.validation.BindException.class)
     public Result<Void> bindException(org.springframework.validation.BindException e) {
         String errorMsg = Optional.of(e.getAllErrors())
-                .map(errors -> errors.stream()
-                        .map(ObjectError::getDefaultMessage)
-                        .collect(Collectors.joining(",", "[", "]")))
-                .orElse("[]");
+                .map(List::stream)
+                .orElseGet(Stream::empty)
+                .map(ObjectError::getDefaultMessage)
+                .collect(Collectors.joining(" | ", "[", "]"));
         log.error(String.format("Data binding exception: %s", errorMsg), e);
-        return Result.fail(HttpStatus.BAD_REQUEST, String.format("数据绑定异常：%s", errorMsg.replace(",", "；")));
+        return Result.fail(HttpStatus.BAD_REQUEST.value(), String.format("数据绑定异常：%s", errorMsg));
     }
 
     /**
@@ -174,14 +191,14 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
     public Result<Void> httpMessageNotReadableException(org.springframework.http.converter.HttpMessageNotReadableException e) {
-        log.error("Unknown parameter", e);
-        return Result.fail(HttpStatus.BAD_REQUEST, "参数不合法：存在多余参数");
+        log.error("Error parameter", e);
+        return Result.fail(HttpStatus.BAD_REQUEST.value(), "参数不合法");
     }
 
     @ExceptionHandler(org.springframework.web.server.NotAcceptableStatusException.class)
     public Result<Void> notAcceptableStatusException(org.springframework.web.server.NotAcceptableStatusException e) {
         log.error("not acceptable status exception(406)", e);
-        return Result.fail(HttpStatus.NOT_ACCEPTABLE, "406 - Not Acceptable");
+        return Result.fail(HttpStatus.NOT_ACCEPTABLE.value(), "406 - Not Acceptable");
     }
 
     /* *************************************************** Feign异常 *************************************************** */
@@ -288,19 +305,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(org.springframework.data.redis.connection.PoolException.class)
     public Result<Void> poolException(org.springframework.data.redis.connection.PoolException e) {
-        log.error("Redis connection pool exception.", e);
+        log.error("Redis connection pool exception", e);
         return Result.fail("Redis连接池错误");
     }
 
     @ExceptionHandler(org.springframework.data.redis.RedisSystemException.class)
     public Result<Void> redisSystemException(org.springframework.data.redis.RedisSystemException e) {
-        log.error("Redis system exception.", e);
+        log.error("Redis system exception", e);
         return Result.fail("Redis系统错误");
     }
 
     @ExceptionHandler(org.springframework.data.redis.RedisConnectionFailureException.class)
     public Result<Void> redisConnectionFailureException(org.springframework.data.redis.RedisConnectionFailureException e) {
-        log.error("Redis connection failed.", e);
+        log.error("Redis connection failed", e);
         return Result.fail("Redis连接失败");
     }
 
@@ -319,7 +336,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(java.util.concurrent.RejectedExecutionException.class)
     public Result<Void> rejectedExecutionException(java.util.concurrent.RejectedExecutionException e) {
-        log.error("Thread pool is full.", e);
+        log.error("Thread pool is full", e);
         return Result.fail("线程池已满");
     }
 
@@ -328,7 +345,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public Result<Void> exception(Exception e) {
-        log.error("System unknown exception.", e);
+        log.error("System unknown exception", e);
         return Result.fail("系统未知错误，请联系管理员");
     }
 }

@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import javax.annotation.Nullable;
+import javax.validation.constraints.Null;
 import java.lang.reflect.Method;
 
 /**
@@ -49,11 +49,11 @@ public class LogContext {
     /**
      * 方法返回结果
      */
-    @Nullable
+    @Null
     private Object result;
     /**
      * 抛出的异常
      */
-    @Nullable
+    @Null
     private Throwable throwable;
 }

@@ -26,12 +26,16 @@ import java.util.Objects;
 public final class Result<T> implements Serializable {
     private static final long serialVersionUID = 7893804841950761019L;
 
+    public static final int OK_CODE = HttpStatus.OK.value();
+    public static final int ERROR_CODE = OK_CODE;
+    public static final int FAIL_CODE = HttpStatus.INTERNAL_SERVER_ERROR.value();
+
     public static final String OK_MSG = "操作成功";
     public static final String ERROR_MSG = "操作失败";
     public static final String FAIL_MSG = "请求错误";
 
     /**
-     * HTTP 状态码
+     * 状态码
      */
     private int code;
     /**
@@ -39,7 +43,7 @@ public final class Result<T> implements Serializable {
      */
     private String message;
     /**
-     * 错误码
+     * 错误信息
      */
     private BaseSysError error;
 
@@ -73,7 +77,7 @@ public final class Result<T> implements Serializable {
     }
 
     public static <T> Result<T> ok(String message, T data) {
-        return of(HttpStatus.OK, message, SysError.OK, data);
+        return of(OK_CODE, message, SysError.OK, data);
     }
 
     /* ******************************************************** 请求成功但没有达到预期响应 ******************************************************** */
@@ -98,7 +102,7 @@ public final class Result<T> implements Serializable {
     }
 
     public static <T> Result<T> error(String message, BaseSysError error, T data) {
-        return of(HttpStatus.OK, message, error, data);
+        return of(ERROR_CODE, message, error, data);
     }
 
     /* ******************************************************** 请求失败 ******************************************************** */
@@ -111,19 +115,11 @@ public final class Result<T> implements Serializable {
     }
 
     public static <T> Result<T> fail(String message, BaseSysError error) {
-        return fail(HttpStatus.INTERNAL_SERVER_ERROR, message, error);
+        return fail(FAIL_CODE, message, error);
     }
 
     public static <T> Result<T> fail(int code, String message) {
         return fail(code, message, SysError.ERROR);
-    }
-
-    public static <T> Result<T> fail(HttpStatus code, String message) {
-        return fail(code, message, SysError.ERROR);
-    }
-
-    public static <T> Result<T> fail(HttpStatus httpStatus, String message, BaseSysError error) {
-        return of(httpStatus, message, error, null);
     }
 
     public static <T> Result<T> fail(int code, String message, BaseSysError error) {
@@ -132,20 +128,16 @@ public final class Result<T> implements Serializable {
 
     /* ******************************************************** 通用构造 ******************************************************** */
 
-    public static <T> Result<T> of(HttpStatus httpStatus, String message, BaseSysError error, T data) {
-        return of(httpStatus.value(), message, error, LocalDateTime.now(), data);
-    }
-
     public static <T> Result<T> of(int code, String message, BaseSysError error, T data) {
         return of(code, message, error, LocalDateTime.now(), data);
     }
 
     public static <T> Result<T> of(int code, String message, BaseSysError error, LocalDateTime time, T data) {
-        if (Objects.isNull(error)) {
-            return of(code, message, null, HttpStatus.OK.value() == code, time, data);
+        boolean success = OK_CODE == code;
+        if (Objects.nonNull(error)) {
+            success = success && SysError.OK.getCode().equals(error.getCode());
         }
-
-        return of(code, message, error, HttpStatus.OK.value() == code && SysError.OK.getCode().equals(error.getCode()), time, data);
+        return of(code, message, error, success, time, data);
     }
 
     public static <T> Result<T> of(int code, String message, BaseSysError error, boolean success, LocalDateTime time, T data) {
