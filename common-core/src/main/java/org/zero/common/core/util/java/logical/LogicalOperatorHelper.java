@@ -24,9 +24,10 @@ public class LogicalOperatorHelper {
     }
 
     /**
-     * 和
+     * 且
      */
-    public <T> LogicalOperatorHelper and(Predicate<T> predicate, T... objs) {
+    @SafeVarargs
+    public final <T> LogicalOperatorHelper and(Predicate<T> predicate, T... objs) {
         for (T obj : objs) {
             result = result && predicate.test(obj);
         }
@@ -34,9 +35,10 @@ public class LogicalOperatorHelper {
     }
 
     /**
-     * 和
+     * 且
      */
-    public <T> LogicalOperatorHelper and(T obj, Predicate<T>... predicates) {
+    @SafeVarargs
+    public final <T> LogicalOperatorHelper and(T obj, Predicate<T>... predicates) {
         for (Predicate<T> predicate : predicates) {
             result = result && predicate.test(obj);
         }
@@ -44,41 +46,42 @@ public class LogicalOperatorHelper {
     }
 
     /**
-     * 非、和
+     * 非、且
      */
-    public <T> LogicalOperatorHelper negateAnd(Predicate<T> predicate, T... objs) {
-        negate();
-        return and(predicate, objs);
+    @SafeVarargs
+    public final <T> LogicalOperatorHelper negateAnd(Predicate<T> predicate, T... objs) {
+        return negate().and(predicate, objs);
     }
 
     /**
-     * 非、和
+     * 非、且
      */
-    public <T> LogicalOperatorHelper negateAnd(T obj, Predicate<T>... predicates) {
-        negate();
-        return and(obj, predicates);
+    @SafeVarargs
+    public final <T> LogicalOperatorHelper negateAnd(T obj, Predicate<T>... predicates) {
+        return negate().and(obj, predicates);
     }
 
     /**
-     * 和、非
+     * 且、非
      */
-    public <T> LogicalOperatorHelper andNegate(Predicate<T> predicate, T... objs) {
-        and(predicate, objs);
-        return negate();
+    @SafeVarargs
+    public final <T> LogicalOperatorHelper andNegate(Predicate<T> predicate, T... objs) {
+        return and(predicate, objs).negate();
     }
 
     /**
-     * 和、非
+     * 且、非
      */
-    public <T> LogicalOperatorHelper andNegate(T obj, Predicate<T>... predicates) {
-        and(obj, predicates);
-        return negate();
+    @SafeVarargs
+    public final <T> LogicalOperatorHelper andNegate(T obj, Predicate<T>... predicates) {
+        return and(obj, predicates).negate();
     }
 
     /**
      * 或
      */
-    public <T> LogicalOperatorHelper or(T obj, Predicate<T>... predicates) {
+    @SafeVarargs
+    public final <T> LogicalOperatorHelper or(T obj, Predicate<T>... predicates) {
         for (Predicate<T> predicate : predicates) {
             result = result || predicate.test(obj);
         }
@@ -88,7 +91,8 @@ public class LogicalOperatorHelper {
     /**
      * 或
      */
-    public <T> LogicalOperatorHelper or(Predicate<T> predicate, T... objs) {
+    @SafeVarargs
+    public final <T> LogicalOperatorHelper or(Predicate<T> predicate, T... objs) {
         for (T obj : objs) {
             result = result || predicate.test(obj);
         }
@@ -98,33 +102,33 @@ public class LogicalOperatorHelper {
     /**
      * 非、或
      */
-    public <T> LogicalOperatorHelper negateOr(Predicate<T> predicate, T... objs) {
-        negate();
-        return or(predicate, objs);
+    @SafeVarargs
+    public final <T> LogicalOperatorHelper negateOr(Predicate<T> predicate, T... objs) {
+        return negate().or(predicate, objs);
     }
 
     /**
      * 非、或
      */
-    public <T> LogicalOperatorHelper negateOr(T obj, Predicate<T>... predicates) {
-        negate();
-        return or(obj, predicates);
+    @SafeVarargs
+    public final <T> LogicalOperatorHelper negateOr(T obj, Predicate<T>... predicates) {
+        return  negate().or(obj, predicates);
     }
 
     /**
      * 或、非
      */
-    public <T> LogicalOperatorHelper orNegate(Predicate<T> predicate, T... objs) {
-        or(predicate, objs);
-        return negate();
+    @SafeVarargs
+    public final <T> LogicalOperatorHelper orNegate(Predicate<T> predicate, T... objs) {
+        return or(predicate, objs).negate();
     }
 
     /**
      * 或、非
      */
-    public <T> LogicalOperatorHelper orNegate(T obj, Predicate<T>... predicates) {
-        or(obj, predicates);
-        return negate();
+    @SafeVarargs
+    public final <T> LogicalOperatorHelper orNegate(T obj, Predicate<T>... predicates) {
+        return or(obj, predicates).negate();
     }
 
     /**

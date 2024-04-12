@@ -9,8 +9,9 @@ import org.junit.jupiter.api.Test;
 class AssembleUtilTest {
     @Test
     void test() {
-        String source = "veU-**&-78i-fcw-y?s-aa-n9hw-bb-l8n-o09-#Qm-^7m-t4g-E$5rf-[H,po)-2n4q7-2qD6v-ii9";
-        String[] assemble = AssembleUtil.getAssemble(source, "-", 6);
+        String source = "1-3-6";
+        // String source = "veU-**&-78i-fcw-y?s-aa-n9hw-bb-l8n-o09-#Qm-^7m-t4g-E$5rf-[H,po)-2n4q7-2qD6v-ii9";
+        String[] assemble = AssembleUtil.getAssemble(source, "-", 3);
         int size = assemble.length;
         int num = size / 1000;
         for (int i = 0; i < size; i++) {

@@ -58,10 +58,10 @@ public class AssembleUtil {
         Set<String> set = new TreeSet<>();
         String[] olds = start.split(SEPARATOR);
         if (olds.length == len) {
-            set.add(start.replace(SEPARATOR, "").trim());
+            set.add(start.replace(SEPARATOR, ""));
         } else {
             for (String value : sourceArray) {
-                if (!Arrays.asList(olds).contains(value)) {
+                if (Arrays.binarySearch(olds, value) < 0) {
                     set.addAll(doSet(start + SEPARATOR + value, sourceArray, len));
                 }
             }

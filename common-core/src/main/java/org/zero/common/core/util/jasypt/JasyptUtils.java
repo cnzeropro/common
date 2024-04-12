@@ -13,7 +13,6 @@ import java.util.Objects;
 @UtilityClass
 public class JasyptUtils {
     /* **************************************************** Public **************************************************** */
-
     /**
      * 加密
      */

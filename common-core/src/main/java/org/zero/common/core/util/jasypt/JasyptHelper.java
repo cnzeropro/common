@@ -12,7 +12,7 @@ import org.jasypt.encryption.pbe.config.SimpleStringPBEConfig;
  */
 @RequiredArgsConstructor(staticName = "build")
 public class JasyptHelper {
-    public static final String DEFAULT_ALGORITHM = "PBEWITHHMACSHA512ANDAES_256";
+    public static final String DEFAULT_ALGORITHM = "PBEWithHMACSHA512AndAES_256";
     private final StringEncryptor encryptor;
 
     public static JasyptHelper build(PBEConfig config) {
@@ -49,7 +49,7 @@ public class JasyptHelper {
         config.setPassword(password);
         // 加密算法建议：
         // PBEWithMD5AndDES 2.x
-        // PBEWITHHMACSHA512ANDAES_256 3.x
+        // PBEWithHMACSHA512AndAES_256 3.x
         config.setAlgorithm(algorithm);
         config.setKeyObtentionIterations(1000);
         config.setPoolSize(10);

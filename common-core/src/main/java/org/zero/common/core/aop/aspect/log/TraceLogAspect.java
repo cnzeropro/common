@@ -4,7 +4,6 @@ import cn.hutool.core.lang.Opt;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.StrFormatter;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -18,6 +17,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
+import org.zero.common.core.util.spring.context.SpringContextUtils;
 
 import java.time.Duration;
 import java.util.LinkedHashMap;
@@ -147,7 +147,7 @@ public class TraceLogAspect implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         // 从容器中的对象copy而来，因为要进行配置调整，避免影响到全局
-        objectMapper = SpringUtil.getBean(ObjectMapper.class).copy();
+        objectMapper = SpringContextUtils.getBean(ObjectMapper.class).copy();
         // 序列化对象的所有属性，包括为Null的属性
         objectMapper.setSerializationInclusion(JsonInclude.Include.ALWAYS);
         // 关闭 序列化时间日期为时间戳

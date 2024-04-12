@@ -86,28 +86,30 @@ public class CsvUtil {
      */
     public List<Map<String, Object>> readAll(String filePath, String delimiter, Charset charset) {
         String[] headers = readHeader(filePath);
-        try (Stream<String> stream = getStream(filePath, charset)) {
-            List<String> dataList = stream.skip(1L).collect(Collectors.toList());
-            return merge(headers, dataList, delimiter);
-        }
+        List<String> dataList = getStream(filePath, charset)
+                .skip(1L)
+                .collect(Collectors.toList());
+        return merge(headers, dataList, delimiter);
     }
 
     /**
      * 分页读
      */
-    public List<Map<String, Object>> page(String filePath, int pageNum, int pageSize) {
+    public List<Map<String, Object>> page(String filePath, long pageNum, long pageSize) {
         return page(filePath, pageNum, pageSize, DEFAULT_DELIMITER, DEFAULT_CHARSET);
     }
 
     /**
      * 分页读
      */
-    public List<Map<String, Object>> page(String filePath, int pageNum, int pageSize, String delimiter, Charset charset) {
+    public List<Map<String, Object>> page(String filePath, long pageNum, long pageSize, String delimiter, Charset charset) {
         String[] headers = readHeader(filePath);
-        try (Stream<String> stream = getStream(filePath, charset)) {
-            List<String> dataList = stream.skip((long) pageNum * pageSize + 1L).limit(pageSize).collect(Collectors.toList());
-            return merge(headers, dataList, delimiter);
-        }
+        List<String> dataList = getStream(filePath, charset)
+                .skip((pageNum - 1L) * pageSize + 1L)
+                .limit(pageSize)
+                .collect(Collectors.toList());
+        return merge(headers, dataList, delimiter);
+
     }
 
     /**
@@ -121,9 +123,7 @@ public class CsvUtil {
      * 统计csv文件总行数
      */
     public long count(String filePath, Charset charset) {
-        try (Stream<String> stream = getStream(filePath, charset)) {
-            return stream.count();
-        }
+        return getStream(filePath, charset).count();
     }
 
     /**
@@ -137,40 +137,37 @@ public class CsvUtil {
      * 读取指定行号的数据
      */
     public List<String> readRow(String filePath, int rowNum, String delimiter, Charset charset) {
-        try (Stream<String> stream = getStream(filePath, charset)) {
-            Optional<String> firstOpt = stream.skip(rowNum - 1L).findFirst();
-            if (!firstOpt.isPresent()) {
-                return ListUtil.empty();
-            }
+        Optional<String> firstOpt = getStream(filePath, charset)
+                .skip(rowNum)
+                .findFirst();
+        if (firstOpt.isPresent()) {
             return CharSequenceUtil.split(firstOpt.get(), delimiter);
         }
+        return ListUtil.empty();
     }
 
     /**
      * 读取指定列号的数据
      */
-    public List<String> readCol(String filePath, int colNum, boolean withHeader) {
-        return readCol(filePath, colNum, withHeader, DEFAULT_DELIMITER, DEFAULT_CHARSET);
+    public List<String> readCol(String filePath, int colNum) {
+        return readCol(filePath, colNum, DEFAULT_DELIMITER, DEFAULT_CHARSET);
     }
 
     /**
      * 读取指定列号的数据
      */
-    public List<String> readCol(String filePath, int colNum, boolean withHeader, String delimiter, Charset charset) {
-        try (Stream<String> stream = getStream(filePath, charset)) {
-            Stream<String> tempStream = stream;
-            if (!withHeader) {
-                tempStream = stream.skip(1L);
-            }
-            return tempStream.map(s -> {
-                String[] data = CharSequenceUtil.splitToArray(s, delimiter);
-                try {
-                    return data[colNum];
-                } catch (Exception e) {
-                    throw new UtilException(String.format("Out of bounds, data len: %d, query col: %d", data.length, colNum));
-                }
-            }).collect(Collectors.toList());
-        }
+    public List<String> readCol(String filePath, int colNum, String delimiter, Charset charset) {
+        return getStream(filePath, charset)
+                .skip(1L)
+                .map(s -> {
+                    String[] data = CharSequenceUtil.splitToArray(s, delimiter);
+                    try {
+                        return data[colNum];
+                    } catch (Exception e) {
+                        throw new UtilException(String.format("Out of bounds, data len: %d, query col: %d", data.length, colNum));
+                    }
+                })
+                .collect(Collectors.toList());
     }
 
     /**
@@ -185,29 +182,40 @@ public class CsvUtil {
      */
     public List<String> readCol(String filePath, String colName, String delimiter, Charset charset) {
         String[] headers = readHeader(filePath);
-        try (Stream<String> stream = getStream(filePath, charset)) {
-            return stream.skip(1L).map(s -> {
-                String[] data = CharSequenceUtil.splitToArray(s, delimiter);
-                Map<String, Object> dataMap = merge(headers, data);
-                return StrUtil.utf8Str(dataMap.get(colName));
-            }).collect(Collectors.toList());
-        }
+        return getStream(filePath, charset)
+                .skip(1L)
+                .map(s -> {
+                    String[] data = CharSequenceUtil.splitToArray(s, delimiter);
+                    Map<String, Object> dataMap = merge(headers, data);
+                    return StrUtil.utf8Str(dataMap.get(colName));
+                })
+                .collect(Collectors.toList());
     }
 
+    /**
+     * 读取表头
+     */
     public String[] readHeader(String filePath) {
-        return readHeader(filePath, DEFAULT_DELIMITER, DEFAULT_CHARSET);
+        return readHeader(filePath, DEFAULT_DELIMITER);
     }
 
+    /**
+     * 读取表头
+     */
+    public String[] readHeader(String filePath, String delimiter) {
+        return readHeader(filePath, delimiter, DEFAULT_CHARSET);
+    }
+
+    /**
+     * 读取表头
+     */
     public String[] readHeader(String filePath, String delimiter, Charset charset) {
-        String[] headers = {};
-        try (Stream<String> stream = getStream(filePath, charset)) {
-            Optional<String> firstOpt = stream.findFirst();
-            if (!firstOpt.isPresent()) {
-                return headers;
-            }
-            headers = CharSequenceUtil.splitToArray(firstOpt.get(), delimiter);
+        Optional<String> firstOpt = getStream(filePath, charset)
+                .findFirst();
+        if (firstOpt.isPresent()) {
+            return CharSequenceUtil.splitToArray(firstOpt.get(), delimiter);
         }
-        return headers;
+        return new String[0];
     }
 
     /**
@@ -222,19 +230,19 @@ public class CsvUtil {
      */
     public List<Map<String, Object>> filter(String filePath, Predicate<? super Map<String, Object>> predicate, String delimiter, Charset charset) {
         String[] header = readHeader(filePath);
-        try (Stream<String> stream = getStream(filePath, charset)) {
-            return stream.map(s -> merge(header, s, delimiter)).filter(predicate).collect(Collectors.toList());
-        }
+        return getStream(filePath, charset)
+                .skip(1L)
+                .map(s -> merge(header, s, delimiter))
+                .filter(predicate)
+                .collect(Collectors.toList());
     }
 
     /* *********************************************************************** 其他 *********************************************************************** */
 
     public List<Map<String, Object>> merge(String[] headers, List<String> dataList, String delimiter) {
-        List<Map<String, Object>> result = ListUtil.list(true);
-        for (String data : dataList) {
-            result.add(merge(headers, data, delimiter));
-        }
-        return result;
+        return dataList.stream()
+                .map(data -> merge(headers, data, delimiter))
+                .collect(Collectors.toList());
     }
 
     public Map<String, Object> merge(String[] headers, String dataStr, String delimiter) {
@@ -243,14 +251,11 @@ public class CsvUtil {
     }
 
     public Map<String, Object> merge(String[] headers, String[] data) {
-        Map<String, Object> map = MapUtil.newHashMap(16, true);
+        Map<String, Object> map = MapUtil.newHashMap(true);
         for (int i = 0; i < headers.length || i < data.length; i++) {
             try {
                 map.put(headers[i], data[i]);
             } catch (Exception e) {
-                log.warn("csv data is misaligned");
-                log.info("len: {}, headers: {}", headers.length, headers);
-                log.info("len: {}, data: {}", data.length, data);
                 throw new UtilException(String.format("Csv data is misaligned, header len: %d, data len: %d", headers.length, data.length));
             }
         }
