@@ -20,7 +20,7 @@ import java.util.Optional;
  * @since 2020/03/21
  */
 @Slf4j
-@RestControllerAdvice(basePackages = "**.controller.**")
+@RestControllerAdvice
 @ConditionalOnWebApplication
 public class FeignExceptionHandler {
     /* *************************************************** Feign异常 *************************************************** */

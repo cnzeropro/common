@@ -16,7 +16,7 @@ import org.zero.common.data.model.Result;
  * @since 2020/03/21
  */
 @Slf4j
-@RestControllerAdvice(basePackages = "**.controller.**")
+@RestControllerAdvice
 @ConditionalOnWebApplication
 public class SpringWebMvcExceptionHandler {
     /* *************************************************** Web MVC 异常 *************************************************** */

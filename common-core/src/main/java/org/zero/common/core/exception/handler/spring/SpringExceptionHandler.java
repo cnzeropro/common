@@ -22,7 +22,7 @@ import java.util.stream.Stream;
  * @since 2020/03/21
  */
 @Slf4j
-@RestControllerAdvice(basePackages = "**.controller.**")
+@RestControllerAdvice
 @ConditionalOnWebApplication
 public class SpringExceptionHandler {
     /* *************************************************** Spring 异常 *************************************************** */
