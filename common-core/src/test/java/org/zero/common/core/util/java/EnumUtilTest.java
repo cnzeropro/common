@@ -1,7 +1,7 @@
 package org.zero.common.core.util.java;
 
 import org.junit.jupiter.api.Test;
-import org.zero.common.data.constant.StatusEnum;
+import org.zero.common.data.enumeration.Status;
 
 /**
  * @author Zero (cnzeropro@qq.com)
@@ -11,33 +11,33 @@ class EnumUtilTest {
 
     @Test
     void getEnumByName() {
-        StatusEnum statusEnum = EnumUtil.getEnumByName(StatusEnum.class, "lost");
-        System.out.println(statusEnum);
+        Status status = EnumUtil.getEnumByName(Status.class, "lost");
+        System.out.println(status);
     }
 
     @Test
     void getEnum() {
-        StatusEnum statusEnum = EnumUtil.getEnum(StatusEnum.class, 1);
-//        StatusEnum statusEnum = EnumUtil.getEnum(StatusEnum.class, "冻结");
-        System.out.println(statusEnum);
+        Status status = EnumUtil.getEnum(Status.class, 1);
+//        Status status = EnumUtil.getEnum(Status.class, "冻结");
+        System.out.println(status);
     }
 
     @Test
-    void getKey() {
-        String key = EnumUtil.getVal(StatusEnum.DELETED, String.class);
+    void getVal() {
+        String key = EnumUtil.getVal(Status.DELETED, String.class);
         System.out.println(key);
 
-        Object statusId = EnumUtil.getVal(StatusEnum.LOST, "statusId");
-        System.out.println(statusId);
+        Object type = EnumUtil.getVal(Status.LOST, "type");
+        System.out.println(type);
 
-        String genderName = EnumUtil.getVal(StatusEnum.LOCKED, "statusName", String.class);
-        System.out.println(genderName);
+        String name = EnumUtil.getVal(Status.LOCKED, "name", String.class);
+        System.out.println(name);
     }
 
     @Test
-    void getOtherKey() {
-        // Object statusName = EnumUtil.getOtherKey(StatusEnum.class, 1, "statusName");
-        String statusName = EnumUtil.getOtherVal(StatusEnum.class, 4, "statusName", String.class);
-        System.out.println(statusName);
+    void getOtherVal() {
+        // Object name = EnumUtil.getOtherKey(Status.class, 4, "name");
+        String name = EnumUtil.getOtherVal(Status.class, 4, "name", String.class);
+        System.out.println(name);
     }
 }

@@ -14,27 +14,30 @@ import lombok.Getter;
 @AllArgsConstructor
 // 当成pojo序列化成json
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-public enum GenderEnum implements IEnum<Integer> {
+public enum Gender implements IEnum<Integer> {
     MALE(1, "男"),
     FEMALE(2, "女"),
     ;
 
-    private final Integer code;
+    private final Integer type;
     private final String name;
 
+    /**
+     * MP 反序列化使用
+     */
     @Override
     public Integer getValue() {
-        return code;
+        return type;
     }
 
     /**
      * jackson反序列化使用
      */
     @JsonCreator
-    public static GenderEnum of(Integer code) {
-        for (GenderEnum e : values()) {
-            if (e.getValue().equals(code)) {
-                return e;
+    public static Gender of(Integer type) {
+        for (Gender gender : values()) {
+            if (gender.type.equals(type)) {
+                return gender;
             }
         }
         return null;

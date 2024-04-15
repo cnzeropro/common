@@ -1,8 +1,8 @@
 package org.zero.common.core.util.java;
 
+import cn.hutool.core.util.ReflectUtil;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
-import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -30,16 +30,15 @@ public class EnumUtil {
     /**
      * 获取含有指定属性值的枚举对象，默认只取第一个
      */
-    @SneakyThrows
     public <E extends Enum<E>> E getEnum(Class<E> enumType, Object val) {
         Field[] fields = enumType.getDeclaredFields();
         for (E enumObj : enumType.getEnumConstants()) {
             for (Field field : fields) {
-                // Sonar 扫描修复，我其实并不想调用三方类库方法（无法之举）
+                // Sonar 扫描修复，我其实并不想调用三方类库方法（无奈之举）
                 // field.setAccessible(true);
-                ReflectionUtils.makeAccessible(field);
-                Object obj = field.get(enumObj);
-                if (equalsFieldVal(obj, val)) {
+                // Object fieldValue = field.get(enumObj);
+                Object fieldValue = ReflectUtil.getFieldValue(enumObj, field);
+                if (equalsFieldVal(fieldValue, val)) {
                     return enumObj;
                 }
             }
@@ -55,9 +54,7 @@ public class EnumUtil {
         Field[] fields = enumObj.getDeclaringClass().getDeclaredFields();
         for (Field field : fields) {
             if (field.getName().equalsIgnoreCase(valName)) {
-                // field.setAccessible(true);
-                ReflectionUtils.makeAccessible(field);
-                return field.get(enumObj);
+                return ReflectUtil.getFieldValue(enumObj, field);
             }
         }
         return null;
@@ -71,9 +68,8 @@ public class EnumUtil {
         Field[] fields = enumObj.getDeclaringClass().getDeclaredFields();
         for (Field field : fields) {
             if (Objects.equals(field.getType(), valType)) {
-                // field.setAccessible(true);
-                ReflectionUtils.makeAccessible(field);
-                return valType.cast(field.get(enumObj));
+                Object fieldValue = ReflectUtil.getFieldValue(enumObj, field);
+                return valType.cast(fieldValue);
             }
         }
         return null;
@@ -87,9 +83,8 @@ public class EnumUtil {
         Field[] fields = enumObj.getDeclaringClass().getDeclaredFields();
         for (Field field : fields) {
             if (field.getName().equalsIgnoreCase(valName)) {
-                // field.setAccessible(true);
-                ReflectionUtils.makeAccessible(field);
-                return valType.cast(field.get(enumObj));
+                Object fieldValue = ReflectUtil.getFieldValue(enumObj, field);
+                return valType.cast(fieldValue);
             }
         }
         return null;
@@ -112,19 +107,23 @@ public class EnumUtil {
     /**
      * Sonar 认知复杂性过高 修复
      */
-    private boolean equalsFieldVal(Object obj, Object val) {
-        if (Objects.isNull(obj) || Objects.isNull(val)) {
+    private boolean equalsFieldVal(Object fieldVal, Object val) {
+        if (fieldVal == val) {
+            return true;
+        }
+
+        if (Objects.isNull(fieldVal) || Objects.isNull(val)) {
             return false;
         }
 
         // 数字类型比较
-        if (ClassUtil.isNumClass(obj.getClass()) && ClassUtil.isNumClass(val.getClass())) {
-            BigDecimal numObj = new BigDecimal(String.valueOf(obj));
+        if (ClassUtil.isNumClass(fieldVal.getClass()) && ClassUtil.isNumClass(val.getClass())) {
+            BigDecimal numObj = new BigDecimal(String.valueOf(fieldVal));
             BigDecimal numVal = new BigDecimal(String.valueOf(val));
             // numObj.equals(numVal);
             return numObj.compareTo(numVal) == 0;
         } else {
-            return Objects.equals(val, obj);
+            return Objects.equals(val, fieldVal);
         }
     }
 }

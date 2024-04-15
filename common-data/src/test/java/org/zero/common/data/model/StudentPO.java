@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.With;
 import lombok.experimental.SuperBuilder;
-import org.zero.common.data.enumeration.GenderEnum;
-import org.zero.common.data.enumeration.StatusEnum;
+import org.zero.common.data.enumeration.Gender;
+import org.zero.common.data.enumeration.Status;
 
 @Data
 @SuperBuilder(toBuilder = true)
@@ -23,6 +23,6 @@ import org.zero.common.data.enumeration.StatusEnum;
 public class StudentPO extends BasePO {
     private String code;
     private String name;
-    private GenderEnum gender;
-    private StatusEnum status;
+    private Gender gender;
+    private Status status;
 }

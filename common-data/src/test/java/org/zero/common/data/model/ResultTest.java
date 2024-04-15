@@ -1,11 +1,11 @@
 package org.zero.common.data.model;
 
 import org.junit.jupiter.api.Test;
-import org.zero.common.data.enumeration.GenderEnum;
+import org.zero.common.data.enumeration.Gender;
+import org.zero.common.data.enumeration.Status;
 import org.zero.common.data.enumeration.SysError;
 
 import java.util.Arrays;
-import java.util.Date;
 
 /**
  * @author Zero (cnzeropro@qq.com)
@@ -27,13 +27,15 @@ class ResultTest {
                                 .id(1L)
                                 .code("s00001")
                                 .name("小明")
-                                .gender(GenderEnum.MALE)
+                                .gender(Gender.MALE)
+                                .status(Status.FREEZING)
                                 .build(),
                         StudentDTO.builder()
                                 .id(2L)
                                 .code("s00002")
-                                .gender(GenderEnum.FEMALE)
                                 .name("小红")
+                                .gender(Gender.FEMALE)
+                                .status(Status.NORMAL)
                                 .build())));
         System.out.println(okPageStudent);
     }
@@ -50,13 +52,7 @@ class ResultTest {
         System.out.println(failVoid);
         Result<Double> failDouble = Result.fail("fail");
         System.out.println(failDouble);
-        Result<Date> failDate = Result.fail("fail");
-        System.out.println(failDate);
-    }
-
-    @Test
-    void of() {
-        Result<Void> of = Result.fail(404, "资源未找到", SysError.ERROR);
-        System.out.println(of);
+        Result<Void> fail404 = Result.fail(404, "资源未找到", SysError.ERROR);
+        System.out.println(fail404);
     }
 }

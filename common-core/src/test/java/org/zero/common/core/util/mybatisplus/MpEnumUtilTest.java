@@ -1,7 +1,7 @@
 package org.zero.common.core.util.mybatisplus;
 
 import org.junit.jupiter.api.Test;
-import org.zero.common.data.constant.StatusEnum;
+import org.zero.common.data.enumeration.Gender;
 
 import java.lang.reflect.Method;
 
@@ -12,7 +12,7 @@ import java.lang.reflect.Method;
 class MpEnumUtilTest {
     @Test
     void test() {
-        Method method = MpEnumUtil.getMethod(StatusEnum.class);
+        Method method = MpEnumUtil.getMethod(Gender.class);
         System.out.println(method);
     }
 }

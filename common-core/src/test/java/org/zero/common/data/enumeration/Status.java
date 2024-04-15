@@ -1,4 +1,4 @@
-package org.zero.common.data.constant;
+package org.zero.common.data.enumeration;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,13 +9,13 @@ import lombok.Getter;
  */
 @Getter
 @AllArgsConstructor
-public enum StatusEnum {
+public enum Status {
     NORMAL(1, "正常"),
     LOCKED(2, "锁定"),
     FREEZING(3, "冻结"),
     LOST(4, "挂失"),
     DELETED(5, "销户");
 
-    private final Integer statusCode;
-    private final String statusName;
+    private final Integer type;
+    private final String name;
 }
