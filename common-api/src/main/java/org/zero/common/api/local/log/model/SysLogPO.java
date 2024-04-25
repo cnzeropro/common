@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.zero.common.data.model.BasePO;
+import org.zero.common.data.model.po.mp.BasePO;
 
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;

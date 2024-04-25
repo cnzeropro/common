@@ -1,4 +1,4 @@
-package org.zero.common.data.model;
+package org.zero.common.data.model.qo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

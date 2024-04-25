@@ -1,4 +1,4 @@
-package org.zero.common.data.model;
+package org.zero.common.data.model.dto;
 
 import lombok.Data;
 import lombok.experimental.Accessors;

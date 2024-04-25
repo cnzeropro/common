@@ -10,7 +10,7 @@ import com.alibaba.csp.sentinel.slots.system.SystemBlockException;
 import lombok.extern.slf4j.Slf4j;
 import org.zero.common.core.util.jackson.JacksonUtils;
 import org.zero.common.core.util.javax.web.ResponseUtil;
-import org.zero.common.data.model.Result;
+import org.zero.common.data.model.vo.Result;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

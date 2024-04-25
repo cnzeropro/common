@@ -4,7 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.zero.common.data.enumeration.Gender;
 import org.zero.common.data.enumeration.Status;
 import org.zero.common.data.enumeration.SysError;
+import org.zero.common.data.model.dto.PageDTO;
+import org.zero.common.data.model.vo.Result;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 
 /**
@@ -29,6 +32,8 @@ class ResultTest {
                                 .name("小明")
                                 .gender(Gender.MALE)
                                 .status(Status.FREEZING)
+                                .createTime(LocalDateTime.now())
+                                .updateBy("admin")
                                 .build(),
                         StudentDTO.builder()
                                 .id(2L)
@@ -36,6 +41,8 @@ class ResultTest {
                                 .name("小红")
                                 .gender(Gender.FEMALE)
                                 .status(Status.NORMAL)
+                                .createTime(LocalDateTime.now())
+                                .updateBy("admin")
                                 .build())));
         System.out.println(okPageStudent);
     }

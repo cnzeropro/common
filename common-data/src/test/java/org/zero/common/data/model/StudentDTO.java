@@ -16,5 +16,4 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = false)
 @JsonIgnoreProperties({"createBy", "updateBy"})
 public class StudentDTO extends StudentPO {
-
 }

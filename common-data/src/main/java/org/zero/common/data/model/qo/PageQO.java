@@ -1,7 +1,8 @@
-package org.zero.common.data.model;
+package org.zero.common.data.model.qo;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.zero.common.data.model.dto.PageDTO;
 
 import javax.validation.constraints.Positive;
 

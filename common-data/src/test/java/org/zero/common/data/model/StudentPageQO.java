@@ -2,6 +2,7 @@ package org.zero.common.data.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.zero.common.data.model.qo.PageQO;
 
 /**
  * @author Zero (cnzeropro@qq.com)

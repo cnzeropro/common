@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.openfeign.FallbackFactory;
 import org.springframework.stereotype.Component;
 import org.zero.common.api.local.log.model.SysLogPO;
-import org.zero.common.data.model.Result;
+import org.zero.common.data.model.vo.Result;
 
 /**
  * @author zero

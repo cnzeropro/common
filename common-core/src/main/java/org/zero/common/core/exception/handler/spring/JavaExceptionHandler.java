@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.zero.common.data.model.Result;
+import org.zero.common.data.model.vo.Result;
 
 /**
  * 异常处理器
@@ -20,14 +20,6 @@ import org.zero.common.data.model.Result;
 @RestControllerAdvice
 @ConditionalOnWebApplication
 public class JavaExceptionHandler {
-    /* *************************************************** 总异常 *************************************************** */
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler(Exception.class)
-    public Result<Void> exception(Exception e) {
-        log.error("System unknown exception", e);
-        return Result.fail("系统未知错误，请联系管理员");
-    }
-
     /* *************************************************** SQL异常 *************************************************** */
 
     @ExceptionHandler(java.sql.SQLIntegrityConstraintViolationException.class)
@@ -78,5 +70,27 @@ public class JavaExceptionHandler {
     public Result<Void> rejectedExecutionException(java.util.concurrent.RejectedExecutionException e) {
         log.error("Thread pool is full", e);
         return Result.fail("线程池已满");
+    }
+
+    /* *************************************************** 总异常 *************************************************** */
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(Exception.class)
+    public Result<Void> exception(Exception e) {
+        log.error("System unknown exception", e);
+        return Result.fail("系统未知异常，请联系管理员");
+    }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(Error.class)
+    public Result<Void> error(Error t) {
+        log.error("System critical error", t);
+        return Result.fail("系统严重错误，请联系管理员");
+    }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(Throwable.class)
+    public Result<Void> throwable(Throwable t) {
+        log.error("System fatal mistake", t);
+        return Result.fail("系统严重错误，建议联系管理员并尝试重启");
     }
 }

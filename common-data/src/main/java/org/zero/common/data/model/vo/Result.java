@@ -1,6 +1,8 @@
-package org.zero.common.data.model;
+package org.zero.common.data.model.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -55,6 +57,7 @@ public final class Result<T> implements Serializable {
      * 时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     @Builder.Default
     private LocalDateTime time = LocalDateTime.now();
 
