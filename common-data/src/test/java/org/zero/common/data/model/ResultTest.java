@@ -31,7 +31,7 @@ class ResultTest {
                                 .code("s00001")
                                 .name("小明")
                                 .gender(Gender.MALE)
-                                .status(Status.FREEZING)
+                                .status(Status.FREEZE)
                                 .createTime(LocalDateTime.now())
                                 .updateBy("admin")
                                 .build(),

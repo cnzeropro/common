@@ -12,9 +12,8 @@ import lombok.Getter;
 public enum Status {
     NORMAL(1, "正常"),
     LOCKED(2, "锁定"),
-    FREEZING(3, "冻结"),
-    LOST(4, "挂失"),
-    DELETED(5, "销户");
+    FREEZE(3, "冻结"),
+    ;
 
     private final Integer type;
     private final String name;

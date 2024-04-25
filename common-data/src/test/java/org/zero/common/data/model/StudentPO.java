@@ -1,6 +1,7 @@
 package org.zero.common.data.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
 import lombok.experimental.SuperBuilder;
+import lombok.experimental.WithBy;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.zero.common.data.enumeration.Gender;
 import org.zero.common.data.enumeration.Status;
@@ -20,7 +22,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @SuperBuilder(toBuilder = true)
 @With
-// @WithBy
+@WithBy
+// fluent = true 可能会导致 jackson 等 json 工具序列化时出现错误结果（与具体版本有关）
+// @Accessors(fluent = true, chain = true)
 public class StudentPO implements Serializable {
     private Long id;
     private String code;
@@ -37,4 +41,6 @@ public class StudentPO implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
+    @JsonIgnore
+    private Boolean deleted;
 }

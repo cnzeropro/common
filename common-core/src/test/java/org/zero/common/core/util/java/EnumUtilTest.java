@@ -11,7 +11,7 @@ class EnumUtilTest {
 
     @Test
     void getEnumByName() {
-        Status status = EnumUtil.getEnumByName(Status.class, "lost");
+        Status status = EnumUtil.getEnumByName(Status.class, "freeze");
         System.out.println(status);
     }
 
@@ -24,10 +24,10 @@ class EnumUtilTest {
 
     @Test
     void getVal() {
-        String key = EnumUtil.getVal(Status.DELETED, String.class);
+        String key = EnumUtil.getVal(Status.NORMAL, String.class);
         System.out.println(key);
 
-        Object type = EnumUtil.getVal(Status.LOST, "type");
+        Object type = EnumUtil.getVal(Status.NORMAL, "type");
         System.out.println(type);
 
         String name = EnumUtil.getVal(Status.LOCKED, "name", String.class);
@@ -36,8 +36,8 @@ class EnumUtilTest {
 
     @Test
     void getOtherVal() {
-        // Object name = EnumUtil.getOtherKey(Status.class, 4, "name");
-        String name = EnumUtil.getOtherVal(Status.class, 4, "name", String.class);
+        // Object name = EnumUtil.getOtherKey(Status.class, 3, "name");
+        String name = EnumUtil.getOtherVal(Status.class, 3, "name", String.class);
         System.out.println(name);
     }
 }

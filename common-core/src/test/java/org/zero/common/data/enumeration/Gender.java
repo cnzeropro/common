@@ -33,7 +33,7 @@ public enum Gender implements IEnum<Integer> {
     /**
      * jackson反序列化使用
      */
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static Gender of(Integer type) {
         for (Gender gender : values()) {
             if (gender.type.equals(type)) {
