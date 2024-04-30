@@ -14,7 +14,6 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.Map;
 
@@ -23,44 +22,47 @@ import java.util.Map;
  * @since 2022/2/23
  */
 public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
-    public XssHttpServletRequestWrapper(HttpServletRequest request) {
+    protected final Mode mode;
+
+    public XssHttpServletRequestWrapper(HttpServletRequest request, Mode mode) {
         super(request);
+        this.mode = mode;
     }
 
     @Override
     public String getRequestURI() {
         String requestURI = super.getRequestURI();
-        return this.escape(requestURI);
+        return this.mode.apply(requestURI);
     }
 
     @Override
     public StringBuffer getRequestURL() {
         StringBuffer requestURL = super.getRequestURL();
-        return new StringBuffer(this.escape(requestURL.toString()));
+        return new StringBuffer(this.mode.apply(requestURL.toString()));
     }
 
     @Override
     public String getHeader(String name) {
         String header = super.getHeader(name);
-        return this.escape(header);
+        return this.mode.apply(header);
     }
 
     @Override
     public Enumeration<String> getHeaders(String name) {
         Enumeration<String> headers = super.getHeaders(name);
-        return new IteratorEnumeration<>(IterUtil.trans(IterUtil.asIterator(headers), this::escape));
+        return new IteratorEnumeration<>(IterUtil.trans(IterUtil.asIterator(headers), this.mode::apply));
     }
 
     @Override
     public String getParameter(String name) {
         String parameter = super.getParameter(name);
-        return this.escape(parameter);
+        return this.mode.apply(parameter);
     }
 
     @Override
     public String[] getParameterValues(String name) {
         String[] parameterValues = super.getParameterValues(name);
-        return ArrayUtil.map(parameterValues, String.class, this::escape);
+        return ArrayUtil.map(parameterValues, String.class, this.mode::apply);
     }
 
     @Override
@@ -74,12 +76,12 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
             @Override
             public String[] getValue() {
-                return ArrayUtil.map(e.getValue(), String.class, XssHttpServletRequestWrapper.this::escape);
+                return ArrayUtil.map(e.getValue(), String.class, XssHttpServletRequestWrapper.this.mode::apply);
             }
 
             @Override
             public String[] setValue(String[] value) {
-                throw new UnsupportedOperationException("Unsupported [setValue] method");
+                throw new UnsupportedOperationException();
             }
         });
     }
@@ -90,7 +92,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     @Override
     public String getQueryString() {
         String queryString = super.getQueryString();
-        return this.escape(queryString);
+        return this.mode.apply(queryString);
     }
 
     /**
@@ -98,13 +100,14 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
      */
     @Override
     public ServletInputStream getInputStream() throws IOException {
+        String characterEncoding = super.getCharacterEncoding();
         ServletInputStream inputStream = super.getInputStream();
-        String escaped = this.escape(IoUtil.read(inputStream, StandardCharsets.UTF_8));
-        final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(escaped.getBytes(StandardCharsets.UTF_8));
+        String escaped = this.mode.apply(IoUtil.read(inputStream, characterEncoding));
+        final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(escaped.getBytes(characterEncoding));
         return new ServletInputStream() {
             @Override
             public boolean isFinished() {
-                return true;
+                return false;
             }
 
             @Override
@@ -114,6 +117,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
             @Override
             public void setReadListener(ReadListener listener) {
+                throw new UnsupportedOperationException();
             }
 
             @Override
@@ -132,30 +136,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     public BufferedReader getReader() throws IOException {
         BufferedReader reader = super.getReader();
         String input = IoUtil.read(reader);
-        String escaped = this.escape(input);
+        String escaped = this.mode.apply(input);
         return new BufferedReader(new StringReader(escaped));
-    }
-
-    /**
-     * xss 字符检查
-     *
-     * @return true：存在 xss 字符，反之则返
-     */
-    private boolean check(String input) {
-        return false;
-    }
-
-    /**
-     * xss 字符转义
-     */
-    private String escape(String input) {
-        return org.apache.commons.text.StringEscapeUtils.escapeHtml4(input);
-    }
-
-    /**
-     * xss 字符过滤
-     */
-    private String filter(String input) {
-        return cn.hutool.http.HtmlUtil.filter(input);
     }
 }

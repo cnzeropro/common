@@ -1,10 +1,9 @@
-package org.zero.common.core.util.spring.i18n;
+package org.zero.common.core.util.spring.context;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.util.StringUtils;
-import org.zero.common.core.util.spring.context.SpringContextUtils;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -18,7 +17,7 @@ import java.util.Objects;
  * @since 2021/2/20
  */
 @Slf4j
-public class I18nUtils {
+public class MessageSourceUtils {
     private static String message(String code, Object... args) {
         Locale locale = LocaleContextHolder.getLocale();
         return message(code, locale, args);
@@ -37,7 +36,7 @@ public class I18nUtils {
 
     private static MessageSource getMessageSource() {
         if (Objects.isNull(messageSource)) {
-            synchronized (I18nUtils.class) {
+            synchronized (MessageSourceUtils.class) {
                 if (Objects.isNull(messageSource)) {
                     messageSource = SpringContextUtils.getBean(MessageSource.class);
                 }

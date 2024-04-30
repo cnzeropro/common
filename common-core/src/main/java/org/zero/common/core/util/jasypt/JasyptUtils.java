@@ -28,7 +28,7 @@ public class JasyptUtils {
     }
 
     /* **************************************************** Private **************************************************** */
-    private StringEncryptor encryptor;
+    private volatile StringEncryptor encryptor;
 
     private StringEncryptor getEncryptor() {
         if (Objects.isNull(encryptor)) {

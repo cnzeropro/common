@@ -7,7 +7,6 @@ import lombok.experimental.Accessors;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-
 @Setter
 @Getter
 @Accessors(chain = true)

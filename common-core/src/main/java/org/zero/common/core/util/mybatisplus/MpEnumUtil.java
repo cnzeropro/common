@@ -5,13 +5,11 @@ import com.baomidou.mybatisplus.annotation.IEnum;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.zero.common.core.util.java.reflect.ReflectUtil;
 import org.zero.common.data.exception.UtilException;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -25,49 +23,28 @@ public class MpEnumUtil {
     /**
      * 方法缓存
      */
-    private static final ConcurrentMap<Class<? extends Enum<?>>, Method> METHOD_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Class<? extends Enum<?>>, Method> METHOD_CACHE = new ConcurrentHashMap<>();
 
-    @SneakyThrows
+    @SneakyThrows(Exception.class)
     public static Object invoke(Enum<?> enumObj) {
-        Method method = MpEnumUtil.getMethod(enumObj.getDeclaringClass());
+        Method method = getMethod(enumObj.getDeclaringClass());
         return method.invoke(enumObj);
     }
 
-    public static Method getMethod(Class<? extends Enum<?>> enumType) {
-        return METHOD_MAP.computeIfAbsent(enumType, k -> {
+    public static <T> T invoke(Enum<?> enumObj, Class<T> clazz) {
+        Object value = invoke(enumObj);
+        return clazz.cast(value);
+    }
+
+    public static Method getMethod(Class<? extends Enum<?>> enumClass) {
+        return METHOD_CACHE.computeIfAbsent(enumClass, clazz -> {
             // 此处可使用自定义父类和注解，但因为Mp已经提供，所以无需重复造轮子
-            if (IEnum.class.isAssignableFrom(k)) {
-                return getMethodWithName(k, "getValue");
+            if (IEnum.class.isAssignableFrom(clazz)) {
+                return ReflectUtil.getMethodByName(clazz, "getValue");
             } else {
-                Field field = getAnnotatedFieldOpt(k, EnumValue.class).orElseThrow(() -> new UtilException(String.format("Class[%s] fields could not find @EnumValue", k.getName())));
-                return getMethodWithField(k, field);
+                Field field = ReflectUtil.getAnnotatedFieldOpt(clazz, EnumValue.class).orElseThrow(() -> new UtilException(String.format("No field with @EnumValue annotation found in class[%s]", clazz.getName())));
+                return ReflectUtil.getMethodByField(clazz, field);
             }
         });
-    }
-
-    public static Optional<Field> getAnnotatedFieldOpt(Class<? extends Enum<?>> targetClass, Class<? extends Annotation> annotationClass) {
-        return targetClass.isEnum() ? Arrays.stream(targetClass.getDeclaredFields()).filter(field -> field.isAnnotationPresent(annotationClass)).findFirst() : Optional.empty();
-    }
-
-    private static Method getMethodWithField(Class<?> clazz, Field field) {
-        String fieldName = field.getName();
-        String methodName = getMethodName(fieldName);
-        return getMethodWithName(clazz, methodName);
-    }
-
-    private static Method getMethodWithName(Class<?> clazz, String methodName) {
-        try {
-            return clazz.getMethod(methodName);
-        } catch (NoSuchMethodException e) {
-            throw new UtilException(String.format("Class[%s] could not find %s()", clazz.getName(), methodName), e);
-        }
-    }
-
-    private static String getMethodName(String name) {
-        char firstChar = name.charAt(0);
-        if (Character.isLowerCase(firstChar)) {
-            return "get" + Character.toUpperCase(firstChar) + name.substring(1);
-        }
-        return "get" + name;
     }
 }

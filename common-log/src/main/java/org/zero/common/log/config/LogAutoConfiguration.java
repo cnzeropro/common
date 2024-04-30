@@ -2,9 +2,9 @@ package org.zero.common.log.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.zero.common.api.local.log.RemoteLogService;
 import org.zero.common.log.aspect.AutoLogAspect;
 import org.zero.common.log.event.SysLogListener;
+import org.zero.common.log.feign.RemoteLogService;
 
 /**
  * 日志自动装配

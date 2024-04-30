@@ -1,5 +1,6 @@
 package org.zero.common.core.util.spring.context;
 
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
@@ -13,9 +14,9 @@ public class SpringContextUtilsRegistrar implements ImportBeanDefinitionRegistra
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
         String name = SpringContextUtils.class.getName();
-        if (!registry.containsBeanDefinition(name)) {
-            BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(SpringContextUtils.class);
-            registry.registerBeanDefinition(name, builder.getBeanDefinition());
+        if (!registry.isBeanNameInUse(name)) {
+            AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder.rootBeanDefinition(SpringContextUtils.class).getBeanDefinition();
+            registry.registerBeanDefinition(name, beanDefinition);
         }
     }
 }

@@ -2,6 +2,7 @@ package org.zero.common.log.constant;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.zero.common.log.supplier.DefaultLogSupplier;
 import org.zero.common.log.supplier.LogContext;
 import org.zero.common.log.supplier.LogSupplier;
@@ -47,4 +48,10 @@ public enum LogMessageEngine {
      * 日志供给者（产生日志信息）
      */
     private final LogSupplier supplier;
+
+    public LogContext getContext() {
+        LogContext logContext = new LogContext();
+        BeanUtils.copyProperties(context, logContext);
+        return logContext;
+    }
 }

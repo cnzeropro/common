@@ -2,8 +2,8 @@ package org.zero.common.log.supplier;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import javax.validation.constraints.Null;
@@ -13,11 +13,11 @@ import java.lang.reflect.Method;
  * @author zero
  * @date 2022/1/3
  */
+@Data
 @Builder(toBuilder = true)
 @Accessors(chain = true)
+@NoArgsConstructor
 @AllArgsConstructor
-@Setter
-@Getter
 public class LogContext {
     /**
      * 排除的参数
@@ -31,13 +31,13 @@ public class LogContext {
     private String messageTemplate = "";
 
     /**
-     * 目标对象
-     */
-    private Object target;
-    /**
      * 目标对象的AOP代理对象
      */
     private Object proxy;
+    /**
+     * 目标对象
+     */
+    private Object target;
     /**
      * 目标对象方法
      */

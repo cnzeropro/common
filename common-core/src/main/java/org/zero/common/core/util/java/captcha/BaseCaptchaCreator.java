@@ -1,5 +1,6 @@
 package org.zero.common.core.util.java.captcha;
 
+import lombok.Cleanup;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -18,7 +19,7 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * @author yufa.wang (yufa.wang@ronganchina.com)
+ * @author zero
  * @since 2023/12/19
  */
 @Slf4j
@@ -102,13 +103,12 @@ public abstract class BaseCaptchaCreator<T extends BaseCaptchaCreator<T>> {
         return this.createBase64(type);
     }
 
-    @SneakyThrows
+    @SneakyThrows(Exception.class)
     @SuppressWarnings("unchecked")
     public T createBase64(String imgType) {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        @Cleanup ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         this.out(imgType, outputStream);
         byte[] byteArray = outputStream.toByteArray();
-        outputStream.close();
         String base64Content = base64Encoder.encodeToString(byteArray);
         String base64Prefix = String.format(BASE64_PREFIX, imgType.toLowerCase());
         this.imgBase64 = base64Prefix + base64Content;
@@ -123,7 +123,7 @@ public abstract class BaseCaptchaCreator<T extends BaseCaptchaCreator<T>> {
         this.out(imageType.name(), outputStream);
     }
 
-    @SneakyThrows
+    @SneakyThrows(Exception.class)
     public void out(String imageType, OutputStream outputStream) {
         ImageIO.write(bufferedImage, imageType, outputStream);
     }

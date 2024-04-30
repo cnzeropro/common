@@ -6,13 +6,13 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.util.StringUtils;
-import org.zero.common.api.local.log.model.SysLogPO;
 import org.zero.common.core.util.spring.context.SpringContextUtils;
 import org.zero.common.log.annotation.AutoLog;
 import org.zero.common.log.constant.LogMessageEngine;
 import org.zero.common.log.constant.LogType;
 import org.zero.common.log.constant.OperateType;
 import org.zero.common.log.event.SysLogEvent;
+import org.zero.common.log.model.SysLog;
 import org.zero.common.log.supplier.LogContext;
 import org.zero.common.log.supplier.LogSupplier;
 
@@ -34,7 +34,6 @@ public class AutoLogAspect {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
 
-        boolean before = autoLog.before();
         String app = autoLog.app();
         if (!StringUtils.hasText(app)) {
             app = SpringContextUtils.getAppName();
@@ -50,15 +49,16 @@ public class AutoLogAspect {
                 .setMethod(method)
                 .setParams(args);
 
-        SysLogPO sysLog = SysLogPO.builder()
+        SysLog sysLog = SysLog.builder()
                 .app(app)
                 .module(module)
-                .type(logType.name())
-                .operateType(operateType.name())
+                .type(logType)
+                .operateType(operateType)
                 .build();
 
+        boolean before = autoLog.before();
         if (before) {
-            setMessage(sysLog, supplier, context);
+            this.setMessage(sysLog, supplier, context);
         }
 
         long endTime = 0L;
@@ -78,12 +78,11 @@ public class AutoLogAspect {
         } finally {
             context.setResult(result);
             if (!before) {
-                setMessage(sysLog, supplier, context);
+                this.setMessage(sysLog, supplier, context);
             }
             sysLog.setExecutionTime(startDateTime);
             sysLog.setCostTime(endTime - startTime);
-            // todo: 调用iam服务api查询用户信息
-            // String username = SpringSecurityUtil.getUsername();
+            // todo: 调用 iam 服务 api 查询当前用户信息
             String username = "";
             sysLog.setOperator(username);
             // 发布事件
@@ -93,7 +92,7 @@ public class AutoLogAspect {
         return result;
     }
 
-    private void setMessage(SysLogPO sysLog, LogSupplier supplier, LogContext context) {
+    private void setMessage(SysLog sysLog, LogSupplier supplier, LogContext context) {
         String message = null;
         try {
             message = supplier.getMessage(context);

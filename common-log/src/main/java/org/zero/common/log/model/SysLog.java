@@ -1,18 +1,17 @@
-package org.zero.common.api.local.log.model;
+package org.zero.common.log.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
-import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.zero.common.data.model.po.mp.BasePO;
+import org.zero.common.log.constant.LogType;
+import org.zero.common.log.constant.OperateType;
 
 import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -21,8 +20,9 @@ import java.time.LocalDateTime;
  */
 @Data
 @SuperBuilder(toBuilder = true)
-@EqualsAndHashCode(callSuper = true)
-public class SysLogPO extends BasePO {
+@NoArgsConstructor
+@AllArgsConstructor
+public class SysLog implements Serializable {
     /**
      * 日志内容
      */
@@ -33,12 +33,12 @@ public class SysLogPO extends BasePO {
      * 日志类型
      */
     @NotBlank(message = "日志类型不能为空")
-    private String type;
+    private LogType type;
 
     /**
      * 操作类型
      */
-    private String operateType;
+    private OperateType operateType;
 
     /**
      * 操作者
@@ -58,7 +58,6 @@ public class SysLogPO extends BasePO {
     /**
      * 是否是正常日志
      */
-    @Getter(AccessLevel.NONE)
     private Boolean success;
 
     /**
@@ -66,16 +65,10 @@ public class SysLogPO extends BasePO {
      */
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime executionTime;
 
     /**
      * 持续时间（纳秒）
      */
-    @JsonSerialize(using = ToStringSerializer.class)
     private Long costTime;
-
-    public Boolean isSuccess() {
-        return success;
-    }
 }

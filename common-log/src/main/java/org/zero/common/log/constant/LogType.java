@@ -4,7 +4,7 @@ package org.zero.common.log.constant;
  * @author zero
  * @since 2020/1/23
  */
-public enum LogType {
+public enum LogType implements ILogType {
     /**
      * 登录日志
      */

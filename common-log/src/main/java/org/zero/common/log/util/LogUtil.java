@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
  */
 @UtilityClass
 public class LogUtil {
-    private final Pattern pattern = Pattern.compile("(?<!\\\\)\\{([^{}]+)(?<!\\\\)}");
+    private final Pattern PATTERN = Pattern.compile("(?<!\\\\)\\{([^{}]+)(?<!\\\\)}");
 
     public String getMessage(String messageTemplate, Object... beans) {
         Map<String, Object> map = MapUtil.newHashMap();
@@ -28,7 +28,7 @@ public class LogUtil {
 
     public String getMessage(String messageTemplate, Object bean) {
         String message = messageTemplate;
-        Matcher matcher = pattern.matcher(messageTemplate);
+        Matcher matcher = PATTERN.matcher(messageTemplate);
         while (matcher.find()) {
             String key = matcher.group(1);
             Object value = BeanUtil.getProperty(bean, key);

@@ -2,7 +2,7 @@ package org.zero.common.log.supplier;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.expression.EvaluationContext;
-import org.zero.common.core.util.spring.SpELUtil;
+import org.zero.common.core.util.spring.expression.SpELUtil;
 
 /**
  * @author zero
