@@ -14,11 +14,11 @@ public class LokiPushDTO {
 
     @Data
     public static class Stream {
-        private StreamIn stream;
+        private Stream0 stream;
         private List<List<String>> values;
 
         @Data
-        public static class StreamIn {
+        public static class Stream0 {
             private String label;
         }
     }

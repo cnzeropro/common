@@ -15,9 +15,7 @@
     <properties>
         <common-data.version>${project.version}</common-data.version>
         <common-core.version>${project.version}</common-core.version>
-        <common-log.version>${project.version}</common-log.version>
         <common-api.version>${project.version}</common-api.version>
-        <common-swagger.version>${project.version}</common-swagger.version>
     </properties>
 
     <dependencyManagement>
@@ -34,18 +32,8 @@
             </dependency>
             <dependency>
                 <groupId>org.zero</groupId>
-                <artifactId>common-log</artifactId>
-                <version>${common-log.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.zero</groupId>
                 <artifactId>common-api</artifactId>
                 <version>${common-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.zero</groupId>
-                <artifactId>common-swagger</artifactId>
-                <version>${common-swagger.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
