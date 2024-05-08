@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
 
     <name>common-core</name>
-    <description>Demo project for Common Core</description>
+    <description>Common Core</description>
 
     <dependencies>
         <dependency>

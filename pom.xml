@@ -13,6 +13,7 @@
         <module>common-data</module>
         <module>common-core</module>
         <module>common-api</module>
+        <module>common-job</module>
     </modules>
 
     <name>common</name>

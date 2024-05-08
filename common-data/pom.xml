@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
 
     <name>common-data</name>
-    <description>Demo project for Common Data</description>
+    <description>Common Data</description>
 
     <dependencies>
         <dependency>

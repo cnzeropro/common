@@ -13,7 +13,7 @@
     <version>1.0.0</version>
 
     <name>common-api</name>
-    <description>common-api</description>
+    <description>Common Api</description>
 
     <dependencies>
         <dependency>
