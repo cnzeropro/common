@@ -15,6 +15,7 @@ import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
 import org.zero.common.core.util.spring.context.SpringContextUtils;
 
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -58,6 +59,9 @@ public class QuartzUtils {
         }
     }
 
+    /**
+     * 自动执行 job
+     */
     public static boolean scheduleJob(JobDetail jobDetail, Trigger trigger) {
         try {
             getScheduler().scheduleJob(jobDetail, trigger);
@@ -72,30 +76,15 @@ public class QuartzUtils {
         return rescheduleJob(createTriggerKey(key), createTrigger(key, cron));
     }
 
+    /**
+     * 重新调度 job
+     */
     public static boolean rescheduleJob(TriggerKey triggerKey, Trigger trigger) {
         try {
             getScheduler().rescheduleJob(triggerKey, trigger);
             return true;
         } catch (SchedulerException e) {
             log.warn(String.format("reschedule job error: %s", trigger.getJobKey()), e);
-            return false;
-        }
-    }
-
-    public static boolean addJob(String key, Class<? extends Job> clazz) {
-        return addJob(key, clazz, new JobDataMap());
-    }
-
-    public static boolean addJob(String key, Class<? extends Job> clazz, JobDataMap jobDataMap) {
-        return addJob(createJobDetail(key, clazz, jobDataMap), true);
-    }
-
-    public static boolean addJob(JobDetail jobDetail, boolean replace) {
-        try {
-            getScheduler().addJob(jobDetail, replace);
-            return true;
-        } catch (SchedulerException e) {
-            log.warn(String.format("add job error: %s", jobDetail.getKey()), e);
             return false;
         }
     }
@@ -108,6 +97,9 @@ public class QuartzUtils {
         return triggerJob(createJobKey(key), jobDataMap);
     }
 
+    /**
+     * 触发执行 job
+     */
     public static boolean triggerJob(JobKey jobKey, JobDataMap jobDataMap) {
         try {
             getScheduler().triggerJob(jobKey, jobDataMap);
@@ -118,10 +110,34 @@ public class QuartzUtils {
         }
     }
 
+    public static boolean addJob(String key, Class<? extends Job> clazz) {
+        return addJob(key, clazz, new JobDataMap());
+    }
+
+    public static boolean addJob(String key, Class<? extends Job> clazz, JobDataMap jobDataMap) {
+        return addJob(createJobDetail(key, clazz, jobDataMap), true);
+    }
+
+    /**
+     * 添加 job
+     */
+    public static boolean addJob(JobDetail jobDetail, boolean replace) {
+        try {
+            getScheduler().addJob(jobDetail, replace);
+            return true;
+        } catch (SchedulerException e) {
+            log.warn(String.format("add job error: %s", jobDetail.getKey()), e);
+            return false;
+        }
+    }
+
     public static boolean checkExists(String key) {
         return checkExists(createJobKey(key));
     }
 
+    /**
+     * 检查 job 是否存在
+     */
     public static boolean checkExists(JobKey jobKey) {
         try {
             return getScheduler().checkExists(jobKey);
@@ -135,6 +151,9 @@ public class QuartzUtils {
         return deleteJob(createJobKey(key));
     }
 
+    /**
+     * 删除 job
+     */
     public static boolean deleteJob(JobKey jobKey) {
         try {
             return getScheduler().deleteJob(jobKey);
@@ -148,6 +167,11 @@ public class QuartzUtils {
         return pauseJob(createJobKey(key));
     }
 
+    /**
+     * 暂停 job
+     *
+     * @see QuartzUtils#resumeJob(JobKey)
+     */
     public static boolean pauseJob(JobKey jobKey) {
         try {
             getScheduler().pauseJob(jobKey);
@@ -162,12 +186,34 @@ public class QuartzUtils {
         return resumeJob(createJobKey(key));
     }
 
+    /**
+     * 恢复 job
+     *
+     * @see QuartzUtils#pauseJob(JobKey)
+     */
     public static boolean resumeJob(JobKey jobKey) {
         try {
             getScheduler().resumeJob(jobKey);
             return true;
         } catch (SchedulerException e) {
             log.warn(String.format("resume job error: %s", jobKey), e);
+            return false;
+        }
+    }
+
+    public static boolean interruptJob(String key) {
+        return interruptJob(createJobKey(key));
+    }
+
+    /**
+     * 中断 job
+     */
+    public static boolean interruptJob(JobKey jobKey) {
+        try {
+            getScheduler().standby();
+            return getScheduler().interrupt(jobKey);
+        } catch (SchedulerException e) {
+            log.warn(String.format("interrupt job error: %s", jobKey), e);
             return false;
         }
     }
@@ -204,20 +250,29 @@ public class QuartzUtils {
         return createTrigger(createTriggerKey(key), CronScheduleBuilder.cronSchedule(cron), jobDataMap, null);
     }
 
-    public static Trigger createTrigger(TriggerKey triggerKey, ScheduleBuilder<? extends Trigger> scheduleBuilder, JobDataMap jobDataMap,
+    public static Trigger createTrigger(TriggerKey triggerKey,
+                                        ScheduleBuilder<? extends Trigger> scheduleBuilder,
+                                        JobDataMap jobDataMap,
+                                        JobKey jobKey) {
+        return createTrigger(triggerKey, scheduleBuilder, jobDataMap, new Date(), null, jobKey);
+    }
+
+    public static Trigger createTrigger(TriggerKey triggerKey,
+                                        ScheduleBuilder<? extends Trigger> scheduleBuilder,
+                                        JobDataMap jobDataMap,
+                                        Date startDate, Date endDate,
                                         JobKey jobKey) {
         return TriggerBuilder.newTrigger()
                 .withIdentity(triggerKey)
                 .withSchedule(scheduleBuilder)
                 // 使用给定描述
                 // .withDescription("")
+                // 线程优先级
                 .withPriority(Trigger.DEFAULT_PRIORITY)
-                // 从现在开始执行
-                .startNow()
                 // 在指定时间开始执行
-                // .startAt(date)
+                .startAt(startDate)
                 // 在指定时间结束执行
-                // .endAt(date)
+                .endAt(endDate)
                 .usingJobData(jobDataMap)
                 // 关联到指定 job
                 .forJob(jobKey)
