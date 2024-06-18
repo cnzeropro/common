@@ -14,7 +14,12 @@ import java.time.LocalDateTime;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class StudentQO extends BaseQO<StudentPO, StudentQO.StudentMultiValueQO, StudentQO.StudentRangeQO> {
+public class StudentQO extends BaseQO {
+    private StudentPO eq;
+    private StudentPO like;
+    private StudentMultiValueQO in;
+    private StudentRangeQO between;
+
     @Data
     public static class StudentMultiValueQO implements Serializable {
         private Long[] ids = new Long[0];

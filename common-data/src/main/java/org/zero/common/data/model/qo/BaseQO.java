@@ -5,20 +5,27 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 
 /**
- * 前端列表查询对象，两种使用方式：
- * 1、直接使用：直接用于承接前端传入参数（请求体 JSON 参数）
- * 2、继承使用：查询实体继承其并进行扩展（URL 参数）
+ * 前端列表查询对象
+ * <p>
+ * 两种使用方式：
+ * 1、直接使用：直接用于承接前端传入参数（不建议）
+ * 2、继承使用：查询实体继承其并进行扩展
+ * <p>
+ * 警告：因数据库字段由前端传入，所以请注意 SQL 注入检查
+ * <p>
+ * 常见有两种方式：
+ * 1、把前端传入的字段与具体的数据实体（PO、DO 或者 Entity）字段做比较
+ * 2、SQL 注入关键词过滤，如：delete，insert，set 等等，可以自己实现也可以使用一些开源工具类
  *
  * @author Zero (cnzeropro@qq.com)
  * @since 2021/1/5
  */
 @Data
-public class BaseQO<T, MV, R> implements Serializable {
+public class BaseQO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -33,112 +40,6 @@ public class BaseQO<T, MV, R> implements Serializable {
     @Valid
     private Collation[] collations = {};
 
-    /**
-     * 等值查询（where x=?）
-     */
-    @Valid
-    private T eq;
-
-    /**
-     * 非等值查询（where x!=?、x<>?）
-     */
-    @Valid
-    private T ne;
-
-    /**
-     * 查询（where x>?）
-     */
-    @Valid
-    private T gt;
-
-    /**
-     * 查询（where x>=?）
-     */
-    @Valid
-    private T ge;
-
-    /**
-     * 查询（where x<?）
-     */
-    @Valid
-    private T lt;
-
-    /**
-     * 查询（where x<=?）
-     */
-    @Valid
-    private T le;
-
-    /**
-     * 模糊查询（where x like %?%）
-     */
-    @Valid
-    private T like;
-
-    /**
-     * 模糊查询（where x not like %?%）
-     */
-    @Valid
-    private T notLike;
-
-    /**
-     * 左模糊查询（where x like %?）
-     */
-    @Valid
-    private T leftLike;
-
-    /**
-     * 左模糊查询（where x not like %?）
-     */
-    @Valid
-    private T notLeftLike;
-
-    /**
-     * 右模糊查询（where x like ?%）（可以利用索引）
-     */
-    @Valid
-    private T rightLike;
-
-    /**
-     * 右模糊查询（where x not like ?%）（可以利用索引）
-     */
-    @Valid
-    private T notRightLike;
-
-    /**
-     * is null查询（where x is null）
-     */
-    private String[] nulls = {};
-
-    /**
-     * is not null查询（where x is not null）
-     */
-    private String[] notNulls = {};
-
-    /**
-     * 多值查询（where x in(?,?,...)）
-     */
-    @Valid
-    private MV in;
-
-    /**
-     * 多值查询（where x not in(?,?,...)）
-     */
-    @Valid
-    private MV notIn;
-
-    /**
-     * 范围查询（where x between ? and ?）
-     */
-    @Valid
-    private R between;
-
-    /**
-     * 范围查询（where x not between ? and ?）
-     */
-    @Valid
-    private R notBetween;
-
     @Data
     @NoArgsConstructor
     @AllArgsConstructor(staticName = "create")
@@ -146,11 +47,10 @@ public class BaseQO<T, MV, R> implements Serializable {
         /**
          * 排序字段
          */
-        @NotBlank
         private String column;
 
         /**
-         * 排序方式，是否升序，默认true
+         * 排序方式：是否升序。默认：true（升序）
          */
         private boolean asc = true;
     }

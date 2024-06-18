@@ -16,7 +16,7 @@ import javax.validation.constraints.Positive;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class PageQO<T, MV, R> extends BaseQO<T, MV, R> {
+public class PageQO extends BaseQO {
     /**
      * 页码
      */

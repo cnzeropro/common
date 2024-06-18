@@ -10,5 +10,5 @@ import org.zero.common.data.model.qo.PageQO;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class StudentPageQO extends PageQO<StudentPO, StudentQO.StudentMultiValueQO, StudentQO.StudentRangeQO> {
+public class StudentPageQO extends PageQO {
 }
