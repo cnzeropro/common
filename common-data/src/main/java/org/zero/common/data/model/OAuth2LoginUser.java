@@ -1,6 +1,8 @@
 package org.zero.common.data.model;
 
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,9 +17,11 @@ import java.util.Map;
  * @since 2021/8/25
  */
 @Setter
+@Getter
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class OAuth2LoginUser extends SecurityLoginUser implements OAuth2AuthenticatedPrincipal {
+    @Setter(AccessLevel.NONE)
     private Map<String, Object> attributes = new HashMap<>();
 
     public OAuth2LoginUser(Long userId, String username, String password,

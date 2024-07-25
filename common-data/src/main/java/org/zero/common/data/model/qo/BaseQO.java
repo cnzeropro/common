@@ -5,17 +5,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
- * 前端列表查询对象
+ * 前端列表查询参数对象
  * <p>
  * 两种使用方式：
- * 1、直接使用：直接用于承接前端传入参数（不建议）
+ * 1、直接使用：直接用于承接前端传入参数（不建议，导致接收参数实体增多）
  * 2、继承使用：查询实体继承其并进行扩展
  * <p>
- * 警告：因数据库字段由前端传入，所以请注意 SQL 注入检查
+ * <b>警告：因数据库字段由前端传入，所以请注意 SQL 注入检查</b>
  * <p>
  * 常见有两种方式：
  * 1、把前端传入的字段与具体的数据实体（PO、DO 或者 Entity）字段做比较
@@ -29,16 +29,54 @@ public class BaseQO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 需求字段（select x）
+     * 普通字段（SELECT x）
      */
-    @NotEmpty
+    @NotNull
     private String[] columns = new String[]{"*"};
+    /**
+     * 别名字段（SELECT x AS y）
+     */
+    @NotNull
+    private Alias[] aliases = {};
 
     /**
-     * 排序规则（order by x）
+     * 分组字段（GROUP BY x）
+     */
+    @NotNull
+    private String[] groupings = {};
+
+    /**
+     * 过滤分组（HAVING x）
+     */
+    @Valid
+    private Condition[] havings = {};
+
+    /**
+     * 排序规则（ORDER BY x）
      */
     @Valid
     private Collation[] collations = {};
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor(staticName = "create")
+    public static class Alias implements Serializable {
+        public static final String AS_TEMPLATE = "%s AS %s";
+
+        /**
+         * 字段
+         */
+        private String column;
+
+        /**
+         * 别名
+         */
+        private String alias;
+
+        public String getAliasColumn() {
+            return String.format(AS_TEMPLATE, column, alias);
+        }
+    }
 
     @Data
     @NoArgsConstructor
@@ -50,8 +88,21 @@ public class BaseQO implements Serializable {
         private String column;
 
         /**
-         * 排序方式：是否升序。默认：true（升序）
+         * 排序方式。默认：ASC（升序）
          */
-        private boolean asc = true;
+        private Order order = Order.ASC;
+
+        public boolean isAsc() {
+            return order == Order.ASC;
+        }
+
+        public String getOrderColumn() {
+            return String.format("%s %s", column, order.name());
+        }
+
+        public enum Order {
+            ASC, DESC,
+            ;
+        }
     }
 }
