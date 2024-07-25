@@ -28,11 +28,13 @@ import java.io.Serializable;
 public class BaseQO implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    public static final String ALL_COLUMN_FLAG = "*";
+
     /**
      * 普通字段（SELECT x）
      */
     @NotNull
-    private String[] columns = new String[]{"*"};
+    private String[] columns = new String[]{ALL_COLUMN_FLAG};
     /**
      * 别名字段（SELECT x AS y）
      */
