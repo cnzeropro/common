@@ -1,5 +1,6 @@
 package org.zero.common.data.enumeration;
 
+import com.baomidou.mybatisplus.annotation.EnumValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -15,6 +16,7 @@ public enum Status {
     FREEZE(3, "冻结"),
     ;
 
+    @EnumValue
     private final Integer type;
     private final String name;
 }

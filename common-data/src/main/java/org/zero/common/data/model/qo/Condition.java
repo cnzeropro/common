@@ -6,14 +6,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+import java.util.regex.Pattern;
 
 /**
  * @author zero
@@ -35,7 +36,7 @@ public class Condition implements Serializable {
     /**
      * 条件值
      */
-    private Object value;
+    private String value;
 
     @Getter
     @RequiredArgsConstructor
@@ -72,40 +73,35 @@ public class Condition implements Serializable {
         /**
          * 字符串模糊匹配：x LIKE ?
          */
-        LIKE("%s LIKE ?", o -> String.format("%%%s%%", o)),
+        LIKE("%s LIKE ?", (Function<String, Object>) o -> String.format("%%%s%%", o)),
         /**
          * 字符串模糊不匹配：x NOT LIKE ?
          */
-        NOT_LIKE("%s NOT LIKE ?", o -> String.format("%%%s%%", o)),
+        NOT_LIKE("%s NOT LIKE ?", (Function<String, Object>) o -> String.format("%%%s%%", o)),
         /**
          * 字符串左模糊匹配：x LIKE ?
          */
-        LEFT_LIKE("%s LIKE ?", o -> String.format("%%%s", o)),
+        LEFT_LIKE("%s LIKE ?", (Function<String, Object>) o -> String.format("%%%s", o)),
         /**
          * 字符串左模糊不匹配：x NOT LIKE ?
          */
-        NOT_LEFT_LIKE("%s NOT LIKE ?", o -> String.format("%%%s", o)),
+        NOT_LEFT_LIKE("%s NOT LIKE ?", (Function<String, Object>) o -> String.format("%%%s", o)),
         /**
          * 字符串右模糊匹配：x LIKE ?
          */
-        RIGHT_LIKE("%s LIKE ?", o -> String.format("%s%%", o)),
+        RIGHT_LIKE("%s LIKE ?", (Function<String, Object>) o -> String.format("%s%%", o)),
         /**
          * 字符串右模糊不匹配：x NOT LIKE ?
          */
-        NOT_RIGHT_LIKE("%s NOT LIKE ?", o -> String.format("%s%%", o)),
+        NOT_RIGHT_LIKE("%s NOT LIKE ?", (Function<String, Object>) o -> String.format("%s%%", o)),
         /**
          * 集合匹配：x IN (?,?,...)
          */
-        IN("%s IN %s", (Function<Object, Object>) o -> {
+        IN("%s IN %s", (UnaryOperator<String>) o -> {
             StringJoiner stringJoiner = new StringJoiner(",", "(", ")");
-            if (ObjectUtils.isArray(o)) {
-                Object[] array = (Object[]) o;
-                for (Object ignored : array) {
-                    stringJoiner.add("?");
-                }
-            } else if (o instanceof Collection) {
-                Collection<?> collection = (Collection<?>) o;
-                for (Object ignored : collection) {
+            if (Objects.nonNull(o)) {
+                String[] strings = StringUtils.commaDelimitedListToStringArray(o);
+                for (String ignored : strings) {
                     stringJoiner.add("?");
                 }
             }
@@ -114,16 +110,11 @@ public class Condition implements Serializable {
         /**
          * 集合不匹配：x NOT IN (?,?,...)
          */
-        NOT_IN("%s NOT IN %s", (Function<Object, Object>) o -> {
+        NOT_IN("%s NOT IN %s", (UnaryOperator<String>) o -> {
             StringJoiner stringJoiner = new StringJoiner(",", "(", ")");
-            if (ObjectUtils.isArray(o)) {
-                Object[] array = (Object[]) o;
-                for (Object ignored : array) {
-                    stringJoiner.add("?");
-                }
-            } else if (o instanceof Collection) {
-                Collection<?> collection = (Collection<?>) o;
-                for (Object ignored : collection) {
+            if (Objects.nonNull(o)) {
+                String[] strings = StringUtils.commaDelimitedListToStringArray(o);
+                for (String ignored : strings) {
                     stringJoiner.add("?");
                 }
             }
@@ -164,37 +155,81 @@ public class Condition implements Serializable {
         ;
 
         private final String expression;
-        private Function<Object, Object> sqlMapper;
-        private UnaryOperator<Object> paramMapper;
+        private UnaryOperator<String> sqlMapper;
+        private Function<String, Object> paramMapper;
 
-        public String getPrecompiledSql(String column) {
-            return String.format(expression, column);
-        }
-
-        public String getPrecompiledSql(String column, Object value) {
-            Object[] args = new Object[]{column};
-            if (Objects.nonNull(sqlMapper)) {
-                Object applied = sqlMapper.apply(value);
-                args = ObjectUtils.addObjectToArray(args, applied);
-            }
-            return String.format(expression, args);
-        }
-
-        public Object getFormattedParam(Object value) {
-            if (Objects.isNull(paramMapper)) {
-                return null;
-            }
-            return paramMapper.apply(value);
-        }
-
-        Operator(String expression, Function<Object, Object> sqlMapper) {
+        Operator(String expression, UnaryOperator<String> sqlMapper) {
             this.expression = expression;
             this.sqlMapper = sqlMapper;
         }
 
-        Operator(String expression, UnaryOperator<Object> paramMapper) {
+        Operator(String expression, Function<String, Object> paramMapper) {
             this.expression = expression;
             this.paramMapper = paramMapper;
         }
+    }
+
+    static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\?");
+
+    /**
+     * 获取 SQL 片段，如：name LIKE '%a%'
+     */
+    public String getSql() {
+        String precompiledSql = getPrecompiledSql();
+        Object formattedParam = getFormattedParam();
+        String formattedParamStr;
+        if (Objects.isNull(formattedParam)) {
+            formattedParamStr = "";
+        } else {
+            formattedParamStr = formattedParam.toString();
+        }
+        // 占位符数量大于1，则需要将参数值按逗号分隔，并且将占位符设置为参数值
+        int count = StringUtils.countOccurrencesOf(precompiledSql, "?");
+        if (count > 1) {
+            String sql = precompiledSql;
+            String[] params = StringUtils.commaDelimitedListToStringArray(formattedParamStr);
+            for (String param : params) {
+                String paramStr = getParamStr(param);
+                sql = PLACEHOLDER_PATTERN.matcher(sql).replaceFirst(paramStr);
+            }
+            return sql;
+        }
+        String paramStr = getParamStr(formattedParamStr);
+        return precompiledSql.replace("?", paramStr);
+    }
+
+    static final Pattern NOT_NEED_QUOTE_PATTERN = Pattern.compile("^(true|false|\\d+(\\.\\d+)?)$", Pattern.CASE_INSENSITIVE);
+
+    private String getParamStr(String param) {
+        if (NOT_NEED_QUOTE_PATTERN.matcher(param).find()) {
+            return param;
+        } else {
+            return String.format("'%s'", param);
+        }
+    }
+
+    /**
+     * 获取可以预编译的 SQL 片段，如：name LIKE ?
+     */
+    public String getPrecompiledSql() {
+        String expression = operator.getExpression();
+        UnaryOperator<String> sqlMapper = operator.getSqlMapper();
+        Object[] args = new Object[]{column};
+        if (Objects.nonNull(value) && Objects.nonNull(sqlMapper)) {
+            Object applied = sqlMapper.apply(value);
+            args = ObjectUtils.addObjectToArray(args, applied);
+        }
+        return String.format(expression, args);
+    }
+
+    /**
+     * 获取处理的 SQL 参数，如：%a%
+     */
+    public Object getFormattedParam() {
+        Function<String, Object> paramMapper = operator.getParamMapper();
+        if (Objects.isNull(value) || Objects.isNull(paramMapper)) {
+            return value;
+        }
+        return paramMapper.apply(value);
     }
 }

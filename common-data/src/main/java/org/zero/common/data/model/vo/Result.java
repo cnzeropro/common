@@ -21,7 +21,7 @@ import java.util.Objects;
  * @date 2018/11/29
  */
 @Data
-@Builder
+@Builder(toBuilder = true)
 @Accessors(chain = true)
 @NoArgsConstructor
 @AllArgsConstructor

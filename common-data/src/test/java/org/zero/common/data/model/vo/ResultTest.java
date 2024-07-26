@@ -1,11 +1,11 @@
-package org.zero.common.data.model;
+package org.zero.common.data.model.vo;
 
 import org.junit.jupiter.api.Test;
 import org.zero.common.data.enumeration.Gender;
 import org.zero.common.data.enumeration.Status;
 import org.zero.common.data.enumeration.SysError;
+import org.zero.common.data.model.StudentDTO;
 import org.zero.common.data.model.dto.PageDTO;
-import org.zero.common.data.model.vo.Result;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;

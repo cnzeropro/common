@@ -31,7 +31,7 @@ public enum Gender implements IEnum<Integer> {
     }
 
     /**
-     * jackson反序列化使用
+     * jackson 反序列化使用
      */
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static Gender of(Integer type) {

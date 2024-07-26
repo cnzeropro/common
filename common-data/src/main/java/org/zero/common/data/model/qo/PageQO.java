@@ -2,6 +2,7 @@ package org.zero.common.data.model.qo;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.zero.common.data.model.dto.PageDTO;
 
 import javax.validation.constraints.Positive;
@@ -15,6 +16,7 @@ import javax.validation.constraints.Positive;
  * @since 2021/1/5
  */
 @Data
+@ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class PageQO extends BaseQO {
     /**
