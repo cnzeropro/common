@@ -22,12 +22,12 @@ public class PageQO extends BaseQO {
     /**
      * 页码
      */
-    @Positive(message = "当前页码不能小于或等于0")
+    @Positive
     private long pageNum = 1L;
 
     /**
      * 每页显示数
      */
-    @Positive(message = "每页数目不能小于或等于0")
+    @Positive
     private long pageSize = PageDTO.DEFAULT_PAGE_SIZE;
 }

@@ -3,10 +3,13 @@ package org.zero.common.data.model.qo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.With;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * 前端列表查询参数对象
@@ -28,17 +31,11 @@ import java.io.Serializable;
 public class BaseQO implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    public static final String ALL_COLUMN_FLAG = "*";
-
     /**
-     * 普通字段（SELECT x）
+     * 需求字段（SELECT x[ AS y]）
      */
-    @NotNull
-    private String[] columns = new String[]{ALL_COLUMN_FLAG};
-    /**
-     * 别名字段（SELECT x AS y）
-     */
-    @NotNull
+    @Valid
+    @NotEmpty
     private Alias[] aliases = {};
 
     /**
@@ -60,6 +57,7 @@ public class BaseQO implements Serializable {
     private Collation[] collations = {};
 
     @Data
+    @With
     @NoArgsConstructor
     @AllArgsConstructor(staticName = "create")
     public static class Alias implements Serializable {
@@ -68,7 +66,8 @@ public class BaseQO implements Serializable {
         /**
          * 字段
          */
-        private String column;
+        @NotEmpty
+        private String field;
 
         /**
          * 别名
@@ -76,18 +75,20 @@ public class BaseQO implements Serializable {
         private String alias;
 
         public String getAliasColumn() {
-            return String.format(AS_TEMPLATE, column, alias);
+            return Objects.isNull(alias) ? field : String.format(AS_TEMPLATE, field, alias);
         }
     }
 
     @Data
+    @With
     @NoArgsConstructor
     @AllArgsConstructor(staticName = "create")
     public static class Collation implements Serializable {
         /**
          * 排序字段
          */
-        private String column;
+        @NotEmpty
+        private String field;
 
         /**
          * 排序方式。默认：ASC（升序）
@@ -99,7 +100,7 @@ public class BaseQO implements Serializable {
         }
 
         public String getOrderColumn() {
-            return String.format("%s %s", column, order.name());
+            return String.format("%s %s", field, order.name());
         }
 
         public enum Order {

@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.With;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -21,6 +22,7 @@ import java.util.regex.Pattern;
  * @since 2024/6/20
  */
 @Data
+@With
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "create")
 public class Condition implements Serializable {
@@ -28,7 +30,7 @@ public class Condition implements Serializable {
      * 条件字段
      */
     @NotEmpty
-    private String column;
+    private String field;
     /**
      * 操作符
      */
@@ -214,7 +216,7 @@ public class Condition implements Serializable {
     public String getPrecompiledSql() {
         String expression = operator.getExpression();
         UnaryOperator<String> sqlMapper = operator.getSqlMapper();
-        Object[] args = new Object[]{column};
+        Object[] args = new Object[]{field};
         if (Objects.nonNull(value) && Objects.nonNull(sqlMapper)) {
             Object applied = sqlMapper.apply(value);
             args = ObjectUtils.addObjectToArray(args, applied);

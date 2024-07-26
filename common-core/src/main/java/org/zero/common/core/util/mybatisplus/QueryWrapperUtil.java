@@ -6,7 +6,10 @@ import com.baomidou.mybatisplus.core.metadata.TableInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.core.toolkit.sql.SqlInjectionUtils;
+import lombok.Data;
 import org.zero.common.core.util.java.reflect.ReflectUtil;
+import org.zero.common.data.exception.UtilException;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -31,72 +34,61 @@ public class QueryWrapperUtil {
 
     protected static ConcurrentMap<Class<?>, Map<String, Collection<Method>>> METHOD_CACHE = new ConcurrentHashMap<>();
 
-    public static <E> QueryWrapper<E> setSelect(QueryWrapper<E> queryWrapper, String[] columns) {
-        return setSelect(queryWrapper, CollectionUtils.toList(columns));
+    public static <E> QueryWrapper<E> setSelect(QueryWrapper<E> queryWrapper, Class<E> clazz, String[] fields) {
+        return setSelect(queryWrapper, clazz, CollectionUtils.toList(fields));
     }
 
-    public static <E> QueryWrapper<E> setSelect(QueryWrapper<E> queryWrapper, Collection<String> columns) {
-        if (CollectionUtils.isEmpty(columns)) {
-            return queryWrapper;
+    public static <E> QueryWrapper<E> setSelect(QueryWrapper<E> queryWrapper, Class<E> clazz, Collection<String> fields) {
+        if (isSelectAll(fields)) {
+            fields = getColumns(clazz);
         }
-        columns.forEach(column -> queryWrapper.select(StringUtils.isNotBlank(column), column));
+        List<FieldInfo> fieldInfos = getFieldInfos(clazz, fields);
+        fieldInfos.forEach(fieldInfo -> {
+            String column = fieldInfo.getColumn();
+            if (!fieldInfo.isTableColumn()) {
+                checkSqlInjection(column);
+            }
+            queryWrapper.select(StringUtils.isNotBlank(column), column);
+        });
         return queryWrapper;
     }
 
-    public static <E> QueryWrapper<E> setSelect(QueryWrapper<E> queryWrapper, Class<E> clazz, String[] properties) {
-        return setSelect(queryWrapper, clazz, CollectionUtils.toList(properties));
+    public static <E> QueryWrapper<E> setIsNull(QueryWrapper<E> queryWrapper, Class<E> clazz, String[] fields) {
+        return setIsNull(queryWrapper, clazz, CollectionUtils.toList(fields));
     }
 
-    public static <E> QueryWrapper<E> setSelect(QueryWrapper<E> queryWrapper, Class<E> clazz, Collection<String> properties) {
-        List<String> columns;
-        if (isSelectAll(properties)) {
-            columns = getColumns(clazz);
-        } else {
-            columns = toColumns(clazz, properties);
-        }
-        return setSelect(queryWrapper, columns);
-    }
-
-    public static <E> QueryWrapper<E> setIsNull(QueryWrapper<E> queryWrapper, String[] columns) {
-        return setIsNull(queryWrapper, CollectionUtils.toList(columns));
-    }
-
-    public static <E> QueryWrapper<E> setIsNull(QueryWrapper<E> queryWrapper, Collection<String> columns) {
-        if (CollectionUtils.isEmpty(columns)) {
+    public static <E> QueryWrapper<E> setIsNull(QueryWrapper<E> queryWrapper, Class<E> clazz, Collection<String> fields) {
+        if (CollectionUtils.isEmpty(fields)) {
             return queryWrapper;
         }
-        columns.forEach(column -> queryWrapper.isNull(StringUtils.isNotBlank(column), column));
+        List<FieldInfo> fieldInfos = getFieldInfos(clazz, fields);
+        fieldInfos.forEach(fieldInfo -> {
+            String column = fieldInfo.getColumn();
+            if (!fieldInfo.isTableColumn()) {
+                checkSqlInjection(column);
+            }
+            queryWrapper.isNull(StringUtils.isNotBlank(column), column);
+        });
         return queryWrapper;
     }
 
-    public static <E> QueryWrapper<E> setIsNull(QueryWrapper<E> queryWrapper, Class<E> clazz, String[] properties) {
-        return setIsNull(queryWrapper, clazz, CollectionUtils.toList(properties));
+    public static <E> QueryWrapper<E> setIsNotNull(QueryWrapper<E> queryWrapper, Class<E> clazz, String[] fields) {
+        return setIsNotNull(queryWrapper, clazz, CollectionUtils.toList(fields));
     }
 
-    public static <E> QueryWrapper<E> setIsNull(QueryWrapper<E> queryWrapper, Class<E> clazz, Collection<String> properties) {
-        List<String> columns = toColumns(clazz, properties);
-        return setIsNull(queryWrapper, columns);
-    }
-
-    public static <E> QueryWrapper<E> setIsNotNull(QueryWrapper<E> queryWrapper, String[] columns) {
-        return setIsNotNull(queryWrapper, CollectionUtils.toList(columns));
-    }
-
-    public static <E> QueryWrapper<E> setIsNotNull(QueryWrapper<E> queryWrapper, Collection<String> columns) {
-        if (CollectionUtils.isEmpty(columns)) {
+    public static <E> QueryWrapper<E> setIsNotNull(QueryWrapper<E> queryWrapper, Class<E> clazz, Collection<String> fields) {
+        if (CollectionUtils.isEmpty(fields)) {
             return queryWrapper;
         }
-        columns.forEach(column -> queryWrapper.isNotNull(StringUtils.isNotBlank(column), column));
+        List<FieldInfo> fieldInfos = getFieldInfos(clazz, fields);
+        fieldInfos.forEach(fieldInfo -> {
+            String column = fieldInfo.getColumn();
+            if (!fieldInfo.isTableColumn()) {
+                checkSqlInjection(column);
+            }
+            queryWrapper.isNotNull(StringUtils.isNotBlank(column), column);
+        });
         return queryWrapper;
-    }
-
-    public static <E> QueryWrapper<E> setIsNotNull(QueryWrapper<E> queryWrapper, Class<E> clazz, String[] properties) {
-        return setIsNotNull(queryWrapper, clazz, CollectionUtils.toList(properties));
-    }
-
-    public static <E> QueryWrapper<E> setIsNotNull(QueryWrapper<E> queryWrapper, Class<E> clazz, Collection<String> properties) {
-        List<String> columns = toColumns(clazz, properties);
-        return setIsNotNull(queryWrapper, columns);
     }
 
     public static <E> QueryWrapper<E> setEq(QueryWrapper<E> queryWrapper, E entity) {
@@ -243,25 +235,31 @@ public class QueryWrapperUtil {
         return queryWrapper;
     }
 
-    public static <T> QueryWrapper<T> setGroupBy(QueryWrapper<T> queryWrapper, String[] columns) {
-        return setGroupBy(queryWrapper, CollectionUtils.toList(columns));
+    public static <T> QueryWrapper<T> setGroupBy(QueryWrapper<T> queryWrapper, Class<T> clazz, String[] fields) {
+        return setGroupBy(queryWrapper, clazz, CollectionUtils.toList(fields));
     }
 
-    public static <T> QueryWrapper<T> setGroupBy(QueryWrapper<T> queryWrapper, Collection<String> columns) {
-        if (CollectionUtils.isEmpty(columns)) {
+    public static <T> QueryWrapper<T> setGroupBy(QueryWrapper<T> queryWrapper, Class<T> clazz, Collection<String> fields) {
+        if (CollectionUtils.isEmpty(fields)) {
             return queryWrapper;
         }
-        columns.forEach(column -> queryWrapper.groupBy(StringUtils.isNotBlank(column), column));
+        List<FieldInfo> fieldInfos = getFieldInfos(clazz, fields);
+        fieldInfos.forEach(fieldInfo -> {
+            String column = fieldInfo.getColumn();
+            if (!fieldInfo.isTableColumn()) {
+                checkSqlInjection(column);
+            }
+            queryWrapper.groupBy(StringUtils.isNotBlank(column), column);
+        });
         return queryWrapper;
     }
 
-    public static <T> QueryWrapper<T> setGroupBy(QueryWrapper<T> queryWrapper, Class<T> clazz, String[] properties) {
-        return setGroupBy(queryWrapper, clazz, CollectionUtils.toList(properties));
-    }
-
-    public static <T> QueryWrapper<T> setGroupBy(QueryWrapper<T> queryWrapper, Class<T> clazz, Collection<String> properties) {
-        List<String> columns = toColumns(clazz, properties);
-        return setGroupBy(queryWrapper, columns);
+    protected static void checkSqlInjection(String str) {
+        if (StringUtils.isNotBlank(str)) {
+            if (SqlInjectionUtils.check(str)) {
+                throw new UtilException(String.format("There is a risk of SQL injection, please check: %s", str));
+            }
+        }
     }
 
     /**
@@ -276,7 +274,7 @@ public class QueryWrapperUtil {
      */
     protected static boolean isSelectAll(final Collection<String> strings) {
         if (CollectionUtils.isEmpty(strings)) {
-            return false;
+            return true;
         }
         return strings.stream().anyMatch(QueryWrapperUtil::isSelectAll);
     }
@@ -319,11 +317,13 @@ public class QueryWrapperUtil {
      * 属性名（实体）转化为字段名（数据库）
      */
     protected static Optional<String> toColumnOpt(final Class<?> clazz, final String property) {
-        return getTableFieldInfos(clazz).stream()
-                // 保证实体存在该属性（有效避免 SQL 注入）
-                .filter(tableFieldInfo -> Objects.equals(property, tableFieldInfo.getProperty()))
-                .map(TableFieldInfo::getColumn)
-                .findFirst();
+        List<TableFieldInfo> tableFieldInfos = getTableFieldInfos(clazz);
+        for (TableFieldInfo tableFieldInfo : tableFieldInfos) {
+            if (Objects.equals(property, tableFieldInfo.getProperty())) {
+                return Optional.ofNullable(tableFieldInfo.getColumn());
+            }
+        }
+        return Optional.ofNullable(property);
     }
 
     /**
@@ -337,11 +337,51 @@ public class QueryWrapperUtil {
      * 属性名（实体）转化为字段名（数据库）
      */
     protected static List<String> toColumns(final Class<?> clazz, final Collection<String> properties) {
-        return getTableFieldInfos(clazz).stream()
-                // 保证实体存在该属性（有效避免 SQL 注入）
-                .filter(tableFieldInfo -> properties.contains(tableFieldInfo.getProperty()))
-                .map(TableFieldInfo::getColumn)
-                .collect(Collectors.toList());
+        List<String> columns = new ArrayList<>(properties.size());
+        List<TableFieldInfo> tableFieldInfos = getTableFieldInfos(clazz);
+        for (String property : properties) {
+            boolean isFound = false;
+            for (TableFieldInfo tableFieldInfo : tableFieldInfos) {
+                if (Objects.equals(property, tableFieldInfo.getProperty())) {
+                    isFound = true;
+                    columns.add(tableFieldInfo.getColumn());
+                }
+            }
+            if (!isFound) {
+                columns.add(property);
+            }
+        }
+        return columns;
+    }
+
+    protected static List<FieldInfo> getFieldInfos(final Class<?> clazz, final Collection<String> fields) {
+        List<FieldInfo> fieldInfos = new ArrayList<>(fields.size());
+        List<TableFieldInfo> tableFieldInfos = getTableFieldInfos(clazz);
+        for (String field : fields) {
+            FieldInfo fieldInfo = new FieldInfo(field);
+            for (TableFieldInfo tableFieldInfo : tableFieldInfos) {
+                if (Objects.equals(field, tableFieldInfo.getProperty())) {
+                    fieldInfo.setColumn(tableFieldInfo.getColumn());
+                }
+            }
+            fieldInfos.add(fieldInfo);
+        }
+        return fieldInfos;
+    }
+
+    @Data
+    protected static class FieldInfo {
+        private String property;
+        private String column;
+
+        public FieldInfo(String field) {
+            this.property = field;
+            this.column = field;
+        }
+
+        public boolean isTableColumn() {
+            return !Objects.equals(property, column);
+        }
     }
 
     /**
@@ -388,7 +428,7 @@ public class QueryWrapperUtil {
         }
         Class<?> entityClass = entity.getClass();
         Map<String, Collection<Method>> methodMap = METHOD_CACHE.computeIfAbsent(entityClass,
-                c -> ReflectUtil.getFilteredPublicMethods(c, method -> ReflectUtil.isGetter(method, true))
+                c -> ReflectUtil.getFilteredPublicMethods(c, method -> ReflectUtil.isGetter(method, false))
                         .stream()
                         .collect(Collectors.groupingBy(ReflectUtil::getFieldNameFromGetterMethod,
                                 ConcurrentHashMap::new,
@@ -412,13 +452,7 @@ public class QueryWrapperUtil {
                                 .filter(CollectionUtils::isNotEmpty)
                                 .map(Collection::stream)
                                 .orElseGet(Stream::empty)
-                                .map(method -> {
-                                    try {
-                                        return method.invoke(entity);
-                                    } catch (Exception ignored) {
-                                        return null;
-                                    }
-                                })
+                                .map(method -> ReflectUtil.invoke(method, entity).orElse(null))
                                 .collect(Collectors.toList()),
                         (oldVal, newVal) -> newVal,
                         HashMap::new));
