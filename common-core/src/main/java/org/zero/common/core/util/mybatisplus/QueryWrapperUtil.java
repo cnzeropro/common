@@ -40,17 +40,20 @@ public class QueryWrapperUtil {
     }
 
     public static <E> QueryWrapper<E> setSelect(QueryWrapper<E> queryWrapper, Class<E> clazz, Collection<String> fields) {
+        List<String> columns;
         if (isSelectAll(fields)) {
-            fields = getColumns(clazz);
+            columns = getColumns(clazz);
+        } else {
+            columns = getFieldInfos(clazz, fields).stream()
+                    .peek(fieldInfo -> {
+                        if (!fieldInfo.isTableColumn()) {
+                            checkSqlInjection(fieldInfo.getColumn());
+                        }
+                    })
+                    .map(FieldInfo::getColumn)
+                    .collect(Collectors.toList());
         }
-        List<FieldInfo> fieldInfos = getFieldInfos(clazz, fields);
-        fieldInfos.forEach(fieldInfo -> {
-            String column = fieldInfo.getColumn();
-            if (!fieldInfo.isTableColumn()) {
-                checkSqlInjection(column);
-            }
-            queryWrapper.select(StringUtils.isNotBlank(column), column);
-        });
+        queryWrapper.select(CollectionUtils.isNotEmpty(columns), columns);
         return queryWrapper;
     }
 
