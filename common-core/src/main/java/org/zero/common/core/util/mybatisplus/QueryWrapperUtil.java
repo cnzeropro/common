@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -435,7 +436,11 @@ public class QueryWrapperUtil {
                                 Collectors.toCollection(ArrayList::new))));
         Map<String, Object> fieldValueMap = new HashMap<>();
         getFieldValuesMap(clazz, entity, methodMap).forEach((k, v) -> {
-            Object value = v.stream().findFirst().orElse(null);
+            Object value = null;
+            Iterator<Object> iterator = v.iterator();
+            if (iterator.hasNext()) {
+                value = iterator.next();
+            }
             fieldValueMap.put(k, value);
         });
         return fieldValueMap;
