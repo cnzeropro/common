@@ -216,10 +216,11 @@ public class ClassUtil {
      * 是否是数字类型
      */
     public static boolean isNumClass(Class<?> clazz) {
-        return Number.class.isAssignableFrom(clazz) ||
-                (clazz.isPrimitive() &&
-                        (clazz == int.class || clazz == long.class ||
-                                clazz == short.class || clazz == byte.class ||
-                                clazz == float.class || clazz == double.class));
+        return Objects.nonNull(clazz) &&
+                (Number.class.isAssignableFrom(clazz) ||
+                        (clazz.isPrimitive() &&
+                                (clazz == int.class || clazz == long.class ||
+                                        clazz == short.class || clazz == byte.class ||
+                                        clazz == float.class || clazz == double.class)));
     }
 }

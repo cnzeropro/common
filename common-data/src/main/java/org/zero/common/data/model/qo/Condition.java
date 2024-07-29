@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.function.Function;
@@ -38,7 +39,7 @@ public class Condition implements Serializable {
     /**
      * 条件值
      */
-    private String value;
+    private Object value;
 
     @Getter
     @RequiredArgsConstructor
@@ -75,50 +76,70 @@ public class Condition implements Serializable {
         /**
          * 字符串模糊匹配：x LIKE ?
          */
-        LIKE("%s LIKE ?", (Function<String, Object>) o -> String.format("%%%s%%", o)),
+        LIKE("%s LIKE ?", (UnaryOperator<Object>) o -> String.format("%%%s%%", o)),
         /**
          * 字符串模糊不匹配：x NOT LIKE ?
          */
-        NOT_LIKE("%s NOT LIKE ?", (Function<String, Object>) o -> String.format("%%%s%%", o)),
+        NOT_LIKE("%s NOT LIKE ?", (UnaryOperator<Object>) o -> String.format("%%%s%%", o)),
         /**
          * 字符串左模糊匹配：x LIKE ?
          */
-        LEFT_LIKE("%s LIKE ?", (Function<String, Object>) o -> String.format("%%%s", o)),
+        LEFT_LIKE("%s LIKE ?", (UnaryOperator<Object>) o -> String.format("%%%s", o)),
         /**
          * 字符串左模糊不匹配：x NOT LIKE ?
          */
-        NOT_LEFT_LIKE("%s NOT LIKE ?", (Function<String, Object>) o -> String.format("%%%s", o)),
+        NOT_LEFT_LIKE("%s NOT LIKE ?", (UnaryOperator<Object>) o -> String.format("%%%s", o)),
         /**
          * 字符串右模糊匹配：x LIKE ?
          */
-        RIGHT_LIKE("%s LIKE ?", (Function<String, Object>) o -> String.format("%s%%", o)),
+        RIGHT_LIKE("%s LIKE ?", (UnaryOperator<Object>) o -> String.format("%s%%", o)),
         /**
          * 字符串右模糊不匹配：x NOT LIKE ?
          */
-        NOT_RIGHT_LIKE("%s NOT LIKE ?", (Function<String, Object>) o -> String.format("%s%%", o)),
+        NOT_RIGHT_LIKE("%s NOT LIKE ?", (UnaryOperator<Object>) o -> String.format("%s%%", o)),
         /**
          * 集合匹配：x IN (?,?,...)
          */
-        IN("%s IN %s", (UnaryOperator<String>) o -> {
-            StringJoiner stringJoiner = new StringJoiner(",", "(", ")");
-            if (Objects.nonNull(o)) {
-                String[] strings = StringUtils.commaDelimitedListToStringArray(o);
-                for (String ignored : strings) {
-                    stringJoiner.add("?");
+        IN("%s IN %s", (Function<Object, String>) o -> {
+            Object[] objects = {o};
+            if (ObjectUtils.isArray(o)) {
+                objects = (Object[]) o;
+            } else if (o instanceof Collection) {
+                Collection<?> collection = (Collection<?>) o;
+                objects = collection.toArray();
+            } else if (o instanceof String) {
+                String str = (String) o;
+                if (str.contains(",")) {
+                    objects = StringUtils.delimitedListToStringArray(str, ",");
                 }
+            }
+
+            StringJoiner stringJoiner = new StringJoiner(",", "(", ")");
+            for (Object ignored : objects) {
+                stringJoiner.add("?");
             }
             return stringJoiner.toString();
         }),
         /**
          * 集合不匹配：x NOT IN (?,?,...)
          */
-        NOT_IN("%s NOT IN %s", (UnaryOperator<String>) o -> {
-            StringJoiner stringJoiner = new StringJoiner(",", "(", ")");
-            if (Objects.nonNull(o)) {
-                String[] strings = StringUtils.commaDelimitedListToStringArray(o);
-                for (String ignored : strings) {
-                    stringJoiner.add("?");
+        NOT_IN("%s NOT IN %s", (Function<Object, String>) o -> {
+            Object[] objects = {o};
+            if (ObjectUtils.isArray(o)) {
+                objects = (Object[]) o;
+            } else if (o instanceof Collection) {
+                Collection<?> collection = (Collection<?>) o;
+                objects = collection.toArray();
+            } else if (o instanceof String) {
+                String str = (String) o;
+                if (str.contains(",")) {
+                    objects = StringUtils.delimitedListToStringArray(str, ",");
                 }
+            }
+
+            StringJoiner stringJoiner = new StringJoiner(",", "(", ")");
+            for (Object ignored : objects) {
+                stringJoiner.add("?");
             }
             return stringJoiner.toString();
         }),
@@ -157,15 +178,15 @@ public class Condition implements Serializable {
         ;
 
         private final String expression;
-        private UnaryOperator<String> sqlMapper;
-        private Function<String, Object> paramMapper;
+        private Function<Object, String> sqlMapper;
+        private UnaryOperator<Object> paramMapper;
 
-        Operator(String expression, UnaryOperator<String> sqlMapper) {
+        Operator(String expression, Function<Object, String> sqlMapper) {
             this.expression = expression;
             this.sqlMapper = sqlMapper;
         }
 
-        Operator(String expression, Function<String, Object> paramMapper) {
+        Operator(String expression, UnaryOperator<Object> paramMapper) {
             this.expression = expression;
             this.paramMapper = paramMapper;
         }
@@ -179,35 +200,63 @@ public class Condition implements Serializable {
     public String getSql() {
         String precompiledSql = getPrecompiledSql();
         Object formattedParam = getFormattedParam();
-        String formattedParamStr;
-        if (Objects.isNull(formattedParam)) {
-            formattedParamStr = "";
-        } else {
-            formattedParamStr = formattedParam.toString();
+
+        if (!precompiledSql.contains("?")) {
+            return precompiledSql;
         }
-        // 占位符数量大于1，则需要将参数值按逗号分隔，并且将占位符设置为参数值
-        int count = StringUtils.countOccurrencesOf(precompiledSql, "?");
-        if (count > 1) {
-            String sql = precompiledSql;
-            String[] params = StringUtils.commaDelimitedListToStringArray(formattedParamStr);
-            for (String param : params) {
-                String paramStr = getParamStr(param);
-                sql = PLACEHOLDER_PATTERN.matcher(sql).replaceFirst(paramStr);
+
+        Object[] params = {formattedParam};
+        if (formattedParam instanceof String) {
+            String str = (String) formattedParam;
+            if (str.contains(",")) {
+                params = StringUtils.delimitedListToStringArray(str, ",");
             }
-            return sql;
+        } else if (ObjectUtils.isArray(formattedParam)) {
+            params = (Object[]) formattedParam;
+        } else if (formattedParam instanceof Collection) {
+            Collection<?> collection = (Collection<?>) formattedParam;
+            params = collection.toArray();
         }
-        String paramStr = getParamStr(formattedParamStr);
-        return precompiledSql.replace("?", paramStr);
+
+        String sql = precompiledSql;
+        for (Object param : params) {
+            String paramStr = getParamStr(param);
+            sql = PLACEHOLDER_PATTERN.matcher(sql)
+                    .replaceFirst(paramStr);
+        }
+        return sql;
     }
 
     static final Pattern NOT_NEED_QUOTE_PATTERN = Pattern.compile("^(true|false|\\d+(\\.\\d+)?)$", Pattern.CASE_INSENSITIVE);
 
-    private String getParamStr(String param) {
-        if (NOT_NEED_QUOTE_PATTERN.matcher(param).find()) {
-            return param;
-        } else {
-            return String.format("'%s'", param);
+    private String getParamStr(Object param) {
+        if (Objects.isNull(param)) {
+            return "null";
         }
+
+        Class<?> clazz = param.getClass();
+        if (isNumClass(clazz)) {
+            return param.toString();
+        } else {
+            String str = param.toString();
+            if (NOT_NEED_QUOTE_PATTERN.matcher(str).find()) {
+                return str;
+            } else {
+                return String.format("'%s'", param);
+            }
+        }
+    }
+
+    /**
+     * 是否是数字类型
+     */
+    static boolean isNumClass(Class<?> clazz) {
+        return Objects.nonNull(clazz) &&
+                (Number.class.isAssignableFrom(clazz) ||
+                        (clazz.isPrimitive() &&
+                                (clazz == int.class || clazz == long.class ||
+                                        clazz == short.class || clazz == byte.class ||
+                                        clazz == float.class || clazz == double.class)));
     }
 
     /**
@@ -215,7 +264,7 @@ public class Condition implements Serializable {
      */
     public String getPrecompiledSql() {
         String expression = operator.getExpression();
-        UnaryOperator<String> sqlMapper = operator.getSqlMapper();
+        Function<Object, String> sqlMapper = operator.getSqlMapper();
         Object[] args = new Object[]{field};
         if (Objects.nonNull(value) && Objects.nonNull(sqlMapper)) {
             Object applied = sqlMapper.apply(value);
@@ -228,7 +277,7 @@ public class Condition implements Serializable {
      * 获取处理的 SQL 参数，如：%a%
      */
     public Object getFormattedParam() {
-        Function<String, Object> paramMapper = operator.getParamMapper();
+        UnaryOperator<Object> paramMapper = operator.getParamMapper();
         if (Objects.isNull(value) || Objects.isNull(paramMapper)) {
             return value;
         }

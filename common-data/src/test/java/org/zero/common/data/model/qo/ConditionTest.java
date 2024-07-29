@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
  * @since 2024/7/26
  */
 class ConditionTest {
-    Condition condition = Condition.create("name", Condition.Operator.IN, " , \t\n   ,\n,            ");
+    Condition condition = Condition.create("name", Condition.Operator.IN, "1,2");
 
     @Test
     void getSql() {
