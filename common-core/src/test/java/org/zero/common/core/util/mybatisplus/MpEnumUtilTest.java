@@ -1,5 +1,6 @@
 package org.zero.common.core.util.mybatisplus;
 
+import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
 import org.junit.jupiter.api.Test;
 import org.zero.common.data.enumeration.Gender;
 import org.zero.common.data.enumeration.Status;
@@ -12,7 +13,9 @@ import java.lang.reflect.Method;
  */
 class MpEnumUtilTest {
     @Test
-    void test() {
+    void test() throws InstantiationException, IllegalAccessException {
+        TableFieldInfo key = TableFieldInfo.class.newInstance();
+
         Method method = MpEnumUtil.getMethod(Gender.class);
         System.out.println(method);
 

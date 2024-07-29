@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.sql.SqlInjectionUtils;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.zero.common.core.util.java.reflect.ReflectUtil;
 import org.zero.common.data.exception.UtilException;
@@ -321,8 +322,8 @@ public class QueryWrapperUtil {
      * 属性名（实体）转化为字段名（数据库）
      */
     protected static Optional<String> toColumnOpt(final Class<?> clazz, final String property) {
-        List<TableFieldInfo> tableFieldInfos = getTableFieldInfos(clazz);
-        for (TableFieldInfo tableFieldInfo : tableFieldInfos) {
+        List<FieldInfo> tableFieldInfos = getTableFieldInfos(clazz);
+        for (FieldInfo tableFieldInfo : tableFieldInfos) {
             if (Objects.equals(property, tableFieldInfo.getProperty())) {
                 return Optional.ofNullable(tableFieldInfo.getColumn());
             }
@@ -342,10 +343,10 @@ public class QueryWrapperUtil {
      */
     protected static List<String> toColumns(final Class<?> clazz, final Collection<String> properties) {
         List<String> columns = new ArrayList<>(properties.size());
-        List<TableFieldInfo> tableFieldInfos = getTableFieldInfos(clazz);
+        List<FieldInfo> tableFieldInfos = getTableFieldInfos(clazz);
         for (String property : properties) {
             boolean isFound = false;
-            for (TableFieldInfo tableFieldInfo : tableFieldInfos) {
+            for (FieldInfo tableFieldInfo : tableFieldInfos) {
                 if (Objects.equals(property, tableFieldInfo.getProperty())) {
                     isFound = true;
                     columns.add(tableFieldInfo.getColumn());
@@ -360,10 +361,10 @@ public class QueryWrapperUtil {
 
     protected static List<FieldInfo> getFieldInfos(final Class<?> clazz, final Collection<String> fields) {
         List<FieldInfo> fieldInfos = new ArrayList<>(fields.size());
-        List<TableFieldInfo> tableFieldInfos = getTableFieldInfos(clazz);
+        List<FieldInfo> tableFieldInfos = getTableFieldInfos(clazz);
         for (String field : fields) {
             FieldInfo fieldInfo = new FieldInfo(field);
-            for (TableFieldInfo tableFieldInfo : tableFieldInfos) {
+            for (FieldInfo tableFieldInfo : tableFieldInfos) {
                 if (Objects.equals(field, tableFieldInfo.getProperty())) {
                     fieldInfo.setColumn(tableFieldInfo.getColumn());
                 }
@@ -374,6 +375,7 @@ public class QueryWrapperUtil {
     }
 
     @Data
+    @AllArgsConstructor
     protected static class FieldInfo {
         private String property;
         private String column;
@@ -390,11 +392,21 @@ public class QueryWrapperUtil {
 
     /**
      * 获取 MP 缓存的所有表字段信息
+     * <p>
+     * 没有直接使用 {@link TableFieldInfo} 实体，原因在于 {@link com.baomidou.mybatisplus.core.metadata.TableInfo#getFieldList()} 返回不包含主键信息
      */
-    protected static List<TableFieldInfo> getTableFieldInfos(final Class<?> clazz) {
-        return Optional.ofNullable(TableInfoHelper.getTableInfo(clazz))
-                .map(TableInfo::getFieldList)
-                .orElseGet(ArrayList::new);
+    protected static List<FieldInfo> getTableFieldInfos(final Class<?> clazz) {
+        List<FieldInfo> fieldInfos = new ArrayList<>();
+        TableInfo tableInfo = TableInfoHelper.getTableInfo(clazz);
+        tableInfo.getFieldList()
+                .stream()
+                .map(tableFieldInfo -> new FieldInfo(tableFieldInfo.getProperty(), tableFieldInfo.getColumn()))
+                .forEach(fieldInfos::add);
+        // 塞入主键
+        String keyColumn = tableInfo.getKeyColumn();
+        String keyProperty = tableInfo.getKeyProperty();
+        fieldInfos.add(new FieldInfo(keyProperty, keyColumn));
+        return fieldInfos;
     }
 
     /**
@@ -402,7 +414,7 @@ public class QueryWrapperUtil {
      */
     protected static List<String> getColumns(final Class<?> clazz) {
         return getTableFieldInfos(clazz).stream()
-                .map(TableFieldInfo::getColumn)
+                .map(FieldInfo::getColumn)
                 .collect(Collectors.toList());
     }
 
@@ -454,7 +466,7 @@ public class QueryWrapperUtil {
      */
     protected static Map<String, Collection<Object>> getFieldValuesMap(final Class<?> clazz, final Object entity, final Map<String, Collection<Method>> methodMap) {
         return getTableFieldInfos(clazz).stream()
-                .collect(Collectors.toMap(TableFieldInfo::getColumn,
+                .collect(Collectors.toMap(FieldInfo::getColumn,
                         tableFieldInfo -> Optional.ofNullable(tableFieldInfo.getProperty())
                                 .map(methodMap::get)
                                 .filter(CollectionUtils::isNotEmpty)
