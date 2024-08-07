@@ -1,12 +1,18 @@
 package org.zero.common.core.util.java;
 
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.net.JarURLConnection;
 import java.net.URL;
+import java.time.temporal.TemporalAccessor;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -222,5 +228,508 @@ public class ClassUtil {
                                 (clazz == int.class || clazz == long.class ||
                                         clazz == short.class || clazz == byte.class ||
                                         clazz == float.class || clazz == double.class)));
+    }
+
+    /**
+     * 是否是日期时间类型
+     */
+    public static boolean isDateTimeClass(Class<?> clazz) {
+        return Objects.nonNull(clazz) &&
+                (Date.class.isAssignableFrom(clazz) ||
+                        Calendar.class.isAssignableFrom(clazz) ||
+                        TemporalAccessor.class.isAssignableFrom(clazz));
+    }
+
+    /**
+     * 通过类型获取值
+     *
+     * @param type         类型
+     * @param defaultValue 默认值
+     * @return 值
+     */
+    public static Object getValue(Class<?> type, Object defaultValue) {
+        if (Objects.isNull(type)) {
+            return null;
+        }
+
+        // Primitive
+        if (type.isPrimitive()) {
+            return getPrimitiveValue(type, defaultValue);
+        }
+
+        if (Objects.isNull(defaultValue)) {
+            return null;
+        }
+
+        if (Objects.equals(type, defaultValue.getClass())) {
+            return defaultValue;
+        }
+
+        // Primitive Wrapper
+        if (Long.class.isAssignableFrom(type)) {
+            if (defaultValue instanceof Number) {
+                return ((Number) defaultValue).longValue();
+            }
+            try {
+                return Long.valueOf(defaultValue.toString());
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        if (Integer.class.isAssignableFrom(type)) {
+            if (defaultValue instanceof Number) {
+                return ((Number) defaultValue).intValue();
+            }
+            try {
+                return Integer.valueOf(defaultValue.toString());
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        if (Short.class.isAssignableFrom(type)) {
+            if (defaultValue instanceof Number) {
+                return ((Number) defaultValue).shortValue();
+            }
+            try {
+                return Short.valueOf(defaultValue.toString());
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        if (Byte.class.isAssignableFrom(type)) {
+            if (defaultValue instanceof Number) {
+                return ((Number) defaultValue).byteValue();
+            }
+            try {
+                return Byte.valueOf(defaultValue.toString());
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        if (Double.class.isAssignableFrom(type)) {
+            if (defaultValue instanceof Number) {
+                return ((Number) defaultValue).doubleValue();
+            }
+            try {
+                return Double.valueOf(defaultValue.toString());
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        if (Float.class.isAssignableFrom(type)) {
+            if (defaultValue instanceof Number) {
+                return ((Number) defaultValue).floatValue();
+            }
+            try {
+                return Float.valueOf(defaultValue.toString());
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        if (Character.class.isAssignableFrom(type)) {
+            String defaultValueStr = defaultValue.toString();
+            if (!defaultValueStr.isEmpty()) {
+                return defaultValueStr.charAt(0);
+            }
+        }
+        if (Boolean.class.isAssignableFrom(type)) {
+            return Boolean.valueOf(defaultValue.toString());
+        }
+
+        // CharSequence
+        if (CharSequence.class.isAssignableFrom(type)) {
+            if (Objects.equals(CharSequence.class, type)) {
+                if (defaultValue instanceof CharSequence) {
+                    return defaultValue;
+                }
+            }
+            if (String.class.isAssignableFrom(type)) {
+                return defaultValue.toString();
+            }
+        }
+
+        // Big Number
+        if (java.math.BigDecimal.class.isAssignableFrom(type)) {
+            if (Objects.equals(java.math.BigDecimal.class, type)) {
+                if (defaultValue instanceof java.math.BigDecimal) {
+                    return defaultValue;
+                }
+            }
+            try {
+                return new java.math.BigDecimal(defaultValue.toString());
+            } catch (Exception ignored) {
+            }
+        }
+        if (java.math.BigInteger.class.isAssignableFrom(type)) {
+            if (Objects.equals(java.math.BigInteger.class, type)) {
+                if (defaultValue instanceof java.math.BigInteger) {
+                    return defaultValue;
+                }
+            }
+            try {
+                return new java.math.BigInteger(defaultValue.toString());
+            } catch (Exception ignored) {
+            }
+        }
+
+        // Date
+        if (java.util.Date.class.isAssignableFrom(type)) {
+            if (Objects.equals(java.util.Date.class, type)) {
+                if (defaultValue instanceof java.util.Date) {
+                    return defaultValue;
+                }
+                try {
+                    return DateUtil.parse(defaultValue.toString()).toJdkDate();
+                } catch (Exception ignored) {
+                }
+            }
+            if (java.sql.Date.class.isAssignableFrom(type)) {
+                try {
+                    return DateUtil.parse(defaultValue.toString()).toSqlDate();
+                } catch (Exception ignored) {
+                }
+            }
+            if (java.sql.Timestamp.class.isAssignableFrom(type)) {
+                try {
+                    return DateUtil.parse(defaultValue.toString()).toTimestamp();
+                } catch (Exception ignored) {
+                }
+            }
+            if (java.sql.Time.class.isAssignableFrom(type)) {
+                try {
+                    return new java.sql.Time(DateUtil.parse(defaultValue.toString()).getTime());
+                } catch (Exception ignored) {
+                }
+            }
+        }
+
+        // Calendar
+        if (java.util.Calendar.class.isAssignableFrom(type)) {
+            if (Objects.equals(java.util.Calendar.class, type)) {
+                if (defaultValue instanceof java.util.Calendar) {
+                    return defaultValue;
+                }
+            }
+            try {
+                return DateUtil.parse(defaultValue.toString()).toCalendar();
+            } catch (Exception ignored) {
+            }
+        }
+
+        // TemporalAccessor
+        if (java.time.temporal.TemporalAccessor.class.isAssignableFrom(type)) {
+            if (Objects.equals(java.time.temporal.TemporalAccessor.class, type)) {
+                if (defaultValue instanceof java.time.temporal.TemporalAccessor) {
+                    return defaultValue;
+                }
+            }
+            if (java.time.LocalDateTime.class.isAssignableFrom(type)) {
+                try {
+                    return DateUtil.parse(defaultValue.toString()).toLocalDateTime();
+                } catch (Exception ignored) {
+                }
+            }
+            if (java.time.LocalDate.class.isAssignableFrom(type)) {
+                try {
+                    return DateUtil.parse(defaultValue.toString()).toLocalDateTime().toLocalDate();
+                } catch (Exception ignored) {
+                }
+            }
+            if (java.time.LocalTime.class.isAssignableFrom(type)) {
+                try {
+                    return DateUtil.parse(defaultValue.toString()).toLocalDateTime().toLocalTime();
+                } catch (Exception ignored) {
+                }
+            }
+            if (java.time.Instant.class.isAssignableFrom(type)) {
+                try {
+                    return DateUtil.parse(defaultValue.toString()).toInstant();
+                } catch (Exception ignored) {
+                }
+            }
+            if (java.time.ZonedDateTime.class.isAssignableFrom(type)) {
+                try {
+                    DateTime dateTime = DateUtil.parse(defaultValue.toString());
+                    return java.time.ZonedDateTime.ofInstant(dateTime.toInstant(), dateTime.getZoneId());
+                } catch (Exception ignored) {
+                }
+            }
+            if (java.time.OffsetDateTime.class.isAssignableFrom(type)) {
+                try {
+                    DateTime dateTime = DateUtil.parse(defaultValue.toString());
+                    return java.time.OffsetDateTime.ofInstant(dateTime.toInstant(), dateTime.getZoneId());
+                } catch (Exception ignored) {
+                }
+            }
+            if (java.time.OffsetTime.class.isAssignableFrom(type)) {
+                try {
+                    DateTime dateTime = DateUtil.parse(defaultValue.toString());
+                    return java.time.OffsetTime.ofInstant(dateTime.toInstant(), dateTime.getZoneId());
+                } catch (Exception ignored) {
+                }
+            }
+            if (java.time.Year.class.isAssignableFrom(type)) {
+                try {
+                    return java.time.Year.of(DateUtil.parse(defaultValue.toString()).toLocalDateTime().getYear());
+                } catch (Exception ignored) {
+                }
+            }
+            if (java.time.YearMonth.class.isAssignableFrom(type)) {
+                try {
+                    java.time.LocalDateTime dateTime = DateUtil.parse(defaultValue.toString()).toLocalDateTime();
+                    return java.time.YearMonth.of(dateTime.getYear(), dateTime.getMonth());
+                } catch (Exception ignored) {
+                }
+            }
+            if (java.time.MonthDay.class.isAssignableFrom(type)) {
+                try {
+                    java.time.LocalDateTime dateTime = DateUtil.parse(defaultValue.toString()).toLocalDateTime();
+                    return java.time.MonthDay.of(dateTime.getMonth(), dateTime.getDayOfMonth());
+                } catch (Exception ignored) {
+                }
+            }
+        }
+
+        // Enum
+        if (type.isEnum()) {
+            Enum<?>[] enumConstants = (Enum<?>[]) type.getEnumConstants();
+            if (defaultValue instanceof Number) {
+                int i = ((Number) defaultValue).intValue();
+                if (i >= 0 && i < enumConstants.length) {
+                    return enumConstants[i];
+                }
+            }
+            if (defaultValue instanceof CharSequence) {
+                for (Enum<?> enumConstant : enumConstants) {
+                    if (enumConstant.name().equalsIgnoreCase(defaultValue.toString())) {
+                        return enumConstant;
+                    }
+                }
+            }
+        }
+
+        // Array
+        if (type.isArray()) {
+            Class<?> componentType = type.getComponentType();
+            Class<?> defaultValueClass = defaultValue.getClass();
+            if (Objects.equals(componentType, defaultValueClass)) {
+                try {
+                    Object array = Array.newInstance(defaultValueClass, 1);
+                    Array.set(array, 0, defaultValue);
+                    return array;
+                } catch (Exception ignored) {
+                }
+            }
+            try {
+                return Array.newInstance(componentType, 0);
+            } catch (Exception ignored) {
+            }
+        }
+
+        // Collection
+        if (java.util.Collection.class.isAssignableFrom(type)) {
+            if (java.util.List.class.isAssignableFrom(type)) {
+                if (Objects.equals(java.util.List.class, type)) {
+                    if (defaultValue instanceof java.util.List) {
+                        return defaultValue;
+                    }
+                    return new java.util.ArrayList<>();
+                }
+            }
+            if (java.util.Set.class.isAssignableFrom(type)) {
+                if (java.util.SortedSet.class.isAssignableFrom(type)) {
+                    if (java.util.NavigableSet.class.isAssignableFrom(type)) {
+                        if (Objects.equals(java.util.NavigableSet.class, type)) {
+                            if (defaultValue instanceof java.util.NavigableSet) {
+                                return defaultValue;
+                            }
+                            return new java.util.TreeSet<>();
+                        }
+                    }
+                    if (Objects.equals(java.util.SortedSet.class, type)) {
+                        if (defaultValue instanceof java.util.SortedSet) {
+                            return defaultValue;
+                        }
+                        return new java.util.TreeSet<>();
+                    }
+                }
+                if (Objects.equals(java.util.Set.class, type)) {
+                    if (defaultValue instanceof java.util.Set) {
+                        return defaultValue;
+                    }
+                    return new java.util.HashSet<>();
+                }
+            }
+            if (java.util.Queue.class.isAssignableFrom(type)) {
+                if (java.util.Deque.class.isAssignableFrom(type)) {
+                    if (Objects.equals(java.util.Deque.class, type)) {
+                        if (defaultValue instanceof java.util.Deque) {
+                            return defaultValue;
+                        }
+                        return new java.util.ArrayDeque<>();
+                    }
+                }
+                if (Objects.equals(java.util.Queue.class, type)) {
+                    if (defaultValue instanceof java.util.Queue) {
+                        return defaultValue;
+                    }
+                    return new java.util.PriorityQueue<>();
+                }
+            }
+            if (Objects.equals(java.util.Collection.class, type)) {
+                if (defaultValue instanceof java.util.Collection) {
+                    return defaultValue;
+                }
+            }
+            if (!type.isInterface()) {
+                try {
+                    return type.newInstance();
+                } catch (Exception ignored) {
+                }
+            }
+        }
+
+        // Map
+        if (java.util.Map.class.isAssignableFrom(type)) {
+            if (java.util.SortedMap.class.isAssignableFrom(type)) {
+                if (java.util.NavigableMap.class.isAssignableFrom(type)) {
+                    if (Objects.equals(java.util.NavigableMap.class, type)) {
+                        if (defaultValue instanceof java.util.NavigableMap) {
+                            return defaultValue;
+                        }
+                        return new java.util.TreeMap<>();
+                    }
+                }
+                if (Objects.equals(java.util.SortedMap.class, type)) {
+                    if (defaultValue instanceof java.util.SortedMap) {
+                        return defaultValue;
+                    }
+                    return new java.util.TreeMap<>();
+                }
+            }
+            if (Objects.equals(java.util.Map.class, type)) {
+                if (defaultValue instanceof java.util.Map) {
+                    return defaultValue;
+                }
+                return new java.util.HashMap<>();
+            }
+            if (!type.isInterface()) {
+                try {
+                    return type.newInstance();
+                } catch (Exception ignored) {
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public static Object getPrimitiveValue(Class<?> type, Object defaultValue) {
+        if (long.class == type) {
+            if (defaultValue instanceof Long) {
+                return defaultValue;
+            }
+            if (defaultValue instanceof Number) {
+                return ((Number) defaultValue).longValue();
+            }
+            if (Objects.nonNull(defaultValue)) {
+                try {
+                    return Long.parseLong(defaultValue.toString());
+                } catch (NumberFormatException ignored) {
+                }
+            }
+            return 0L;
+        }
+        if (int.class == type) {
+            if (defaultValue instanceof Integer) {
+                return defaultValue;
+            }
+            if (defaultValue instanceof Number) {
+                return ((Number) defaultValue).intValue();
+            }
+            if (Objects.nonNull(defaultValue)) {
+                try {
+                    return Integer.parseInt(defaultValue.toString());
+                } catch (NumberFormatException ignored) {
+                }
+            }
+            return 0;
+        }
+        if (short.class == type) {
+            if (defaultValue instanceof Short) {
+                return defaultValue;
+            }
+            if (defaultValue instanceof Number) {
+                return ((Number) defaultValue).shortValue();
+            }
+            if (Objects.nonNull(defaultValue)) {
+                try {
+                    return Short.parseShort(defaultValue.toString());
+                } catch (NumberFormatException ignored) {
+                }
+            }
+            return (short) 0;
+        }
+        if (byte.class == type) {
+            if (defaultValue instanceof Byte) {
+                return defaultValue;
+            }
+            if (defaultValue instanceof Number) {
+                return ((Number) defaultValue).byteValue();
+            }
+            if (Objects.nonNull(defaultValue)) {
+                try {
+                    return Byte.parseByte(defaultValue.toString());
+                } catch (NumberFormatException ignored) {
+                }
+            }
+            return (byte) 0;
+        }
+        if (double.class == type) {
+            if (defaultValue instanceof Double) {
+                return defaultValue;
+            }
+            if (defaultValue instanceof Number) {
+                return ((Number) defaultValue).doubleValue();
+            }
+            if (Objects.nonNull(defaultValue)) {
+                try {
+                    return Double.parseDouble(defaultValue.toString());
+                } catch (NumberFormatException ignored) {
+                }
+            }
+            return 0.0;
+        }
+        if (float.class == type) {
+            if (defaultValue instanceof Float) {
+                return defaultValue;
+            }
+            if (defaultValue instanceof Number) {
+                return ((Number) defaultValue).floatValue();
+            }
+            if (Objects.nonNull(defaultValue)) {
+                try {
+                    return Float.parseFloat(defaultValue.toString());
+                } catch (NumberFormatException ignored) {
+                }
+            }
+            return 0.0F;
+        }
+        if (char.class == type) {
+            if (defaultValue instanceof Character) {
+                return defaultValue;
+            }
+            if (Objects.nonNull(defaultValue)) {
+                String defaultValueStr = defaultValue.toString();
+                if (!defaultValueStr.isEmpty()) {
+                    return defaultValueStr.charAt(0);
+                }
+            }
+            return '\0';
+        }
+        if (boolean.class == type) {
+            if (defaultValue instanceof Boolean) {
+                return defaultValue;
+            }
+            if (Objects.nonNull(defaultValue)) {
+                return Boolean.parseBoolean(defaultValue.toString());
+            }
+            return false;
+        }
+        return null;
     }
 }
