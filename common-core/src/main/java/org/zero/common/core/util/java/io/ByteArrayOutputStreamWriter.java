@@ -39,7 +39,7 @@ public class ByteArrayOutputStreamWriter extends ByteArrayOutputStream implement
 
     @SneakyThrows
     public void write(char[] chars, int off, int len) {
-        write(StringCoding.encode(charset, chars, off, len));
+        write(new String(chars, off, len).getBytes(charset));
     }
 
     public void write(String str) {
@@ -47,11 +47,12 @@ public class ByteArrayOutputStreamWriter extends ByteArrayOutputStream implement
     }
 
     public void write(String str, int off, int len) {
-        if (Objects.isNull(str)) {
-            str = "null";
-        }
         char[] chars = new char[len];
-        str.getChars(off, (off + len), chars, 0);
+        if (Objects.isNull(str)) {
+            "null".getChars(0, 4, chars, 0);
+        } else {
+            str.getChars(off, (off + len), chars, 0);
+        }
         write(chars);
     }
 
@@ -67,7 +68,7 @@ public class ByteArrayOutputStreamWriter extends ByteArrayOutputStream implement
 
     @Override
     public ByteArrayOutputStreamWriter append(CharSequence csq, int start, int end) {
-        CharSequence cs = (csq == null ? "null" : csq);
+        CharSequence cs = Objects.isNull(csq) ? "null" : csq;
         write(cs.subSequence(start, end).toString());
         return this;
     }
