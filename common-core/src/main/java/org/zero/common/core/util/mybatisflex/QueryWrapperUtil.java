@@ -1,12 +1,10 @@
-package org.zero.common.core.util.mybatisplus;
+package org.zero.common.core.util.mybatisflex;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
-import com.baomidou.mybatisplus.core.metadata.TableInfo;
-import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
-import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import com.baomidou.mybatisplus.core.toolkit.sql.SqlInjectionUtils;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.table.TableInfo;
+import com.mybatisflex.core.table.TableInfoFactory;
+import com.mybatisflex.core.util.CollectionUtil;
+import com.mybatisflex.core.util.StringUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.zero.common.core.util.java.reflect.ReflectUtil;
@@ -24,6 +22,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,34 +35,34 @@ public class QueryWrapperUtil {
 
     protected static ConcurrentMap<Class<?>, Map<String, Collection<Method>>> METHOD_CACHE = new ConcurrentHashMap<>();
 
-    public static <E> QueryWrapper<E> setSelect(QueryWrapper<E> queryWrapper, Class<E> clazz, String[] fields) {
-        return setSelect(queryWrapper, clazz, CollectionUtils.toList(fields));
+    public static <E> QueryWrapper setSelect(QueryWrapper queryWrapper, Class<E> clazz, String[] fields) {
+        return setSelect(queryWrapper, clazz, CollectionUtil.newArrayList(fields));
     }
 
-    public static <E> QueryWrapper<E> setSelect(QueryWrapper<E> queryWrapper, Class<E> clazz, Collection<String> fields) {
+    public static <E> QueryWrapper setSelect(QueryWrapper queryWrapper, Class<E> clazz, Collection<String> fields) {
         List<String> columns;
         if (isSelectAll(fields)) {
             columns = getColumns(clazz);
         } else {
             columns = getFieldInfos(clazz, fields).stream()
-                    .peek(fieldInfo -> {
-                        if (!fieldInfo.isTableColumn()) {
-                            checkSqlInjection(fieldInfo.getColumn());
-                        }
-                    })
-                    .map(FieldInfo::getColumn)
-                    .collect(Collectors.toList());
+                .peek(fieldInfo -> {
+                    if (!fieldInfo.isTableColumn()) {
+                        checkSqlInjection(fieldInfo.getColumn());
+                    }
+                })
+                .map(FieldInfo::getColumn)
+                .collect(Collectors.toList());
         }
-        queryWrapper.select(CollectionUtils.isNotEmpty(columns), columns);
+        queryWrapper.select(columns.toArray(new String[0]));
         return queryWrapper;
     }
 
-    public static <E> QueryWrapper<E> setIsNull(QueryWrapper<E> queryWrapper, Class<E> clazz, String[] fields) {
-        return setIsNull(queryWrapper, clazz, CollectionUtils.toList(fields));
+    public static <E> QueryWrapper setIsNull(QueryWrapper queryWrapper, Class<E> clazz, String[] fields) {
+        return setIsNull(queryWrapper, clazz, CollectionUtil.newArrayList(fields));
     }
 
-    public static <E> QueryWrapper<E> setIsNull(QueryWrapper<E> queryWrapper, Class<E> clazz, Collection<String> fields) {
-        if (CollectionUtils.isEmpty(fields)) {
+    public static <E> QueryWrapper setIsNull(QueryWrapper queryWrapper, Class<E> clazz, Collection<String> fields) {
+        if (CollectionUtil.isEmpty(fields)) {
             return queryWrapper;
         }
         List<FieldInfo> fieldInfos = getFieldInfos(clazz, fields);
@@ -72,17 +71,17 @@ public class QueryWrapperUtil {
             if (!fieldInfo.isTableColumn()) {
                 checkSqlInjection(column);
             }
-            queryWrapper.isNull(StringUtils.isNotBlank(column), column);
+            queryWrapper.isNull(column, StringUtil.isNotBlank(column));
         });
         return queryWrapper;
     }
 
-    public static <E> QueryWrapper<E> setIsNotNull(QueryWrapper<E> queryWrapper, Class<E> clazz, String[] fields) {
-        return setIsNotNull(queryWrapper, clazz, CollectionUtils.toList(fields));
+    public static <E> QueryWrapper setIsNotNull(QueryWrapper queryWrapper, Class<E> clazz, String[] fields) {
+        return setIsNotNull(queryWrapper, clazz, CollectionUtil.newArrayList(fields));
     }
 
-    public static <E> QueryWrapper<E> setIsNotNull(QueryWrapper<E> queryWrapper, Class<E> clazz, Collection<String> fields) {
-        if (CollectionUtils.isEmpty(fields)) {
+    public static <E> QueryWrapper setIsNotNull(QueryWrapper queryWrapper, Class<E> clazz, Collection<String> fields) {
+        if (CollectionUtil.isEmpty(fields)) {
             return queryWrapper;
         }
         List<FieldInfo> fieldInfos = getFieldInfos(clazz, fields);
@@ -91,161 +90,161 @@ public class QueryWrapperUtil {
             if (!fieldInfo.isTableColumn()) {
                 checkSqlInjection(column);
             }
-            queryWrapper.isNotNull(StringUtils.isNotBlank(column), column);
+            queryWrapper.isNotNull(column, StringUtil.isNotBlank(column));
         });
         return queryWrapper;
     }
 
-    public static <E> QueryWrapper<E> setEq(QueryWrapper<E> queryWrapper, E entity) {
+    public static <E> QueryWrapper setEq(QueryWrapper queryWrapper, E entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.eq(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.eq(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <E, T> QueryWrapper<E> setEq(QueryWrapper<E> queryWrapper, Class<E> clazz, T entity) {
+    public static <E, T> QueryWrapper setEq(QueryWrapper queryWrapper, Class<E> clazz, T entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(clazz, entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.eq(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.eq(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <E> QueryWrapper<E> setNe(QueryWrapper<E> queryWrapper, E entity) {
+    public static <E> QueryWrapper setNe(QueryWrapper queryWrapper, E entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.ne(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.ne(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <E, T> QueryWrapper<E> setNe(QueryWrapper<E> queryWrapper, Class<E> clazz, T entity) {
+    public static <E, T> QueryWrapper setNe(QueryWrapper queryWrapper, Class<E> clazz, T entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(clazz, entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.ne(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.ne(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <E> QueryWrapper<E> setGt(QueryWrapper<E> queryWrapper, E entity) {
+    public static <E> QueryWrapper setGt(QueryWrapper queryWrapper, E entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.gt(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.gt(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <E, T> QueryWrapper<E> setGt(QueryWrapper<E> queryWrapper, Class<E> clazz, T entity) {
+    public static <E, T> QueryWrapper setGt(QueryWrapper queryWrapper, Class<E> clazz, T entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(clazz, entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.gt(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.gt(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <E> QueryWrapper<E> setGe(QueryWrapper<E> queryWrapper, E entity) {
+    public static <E> QueryWrapper setGe(QueryWrapper queryWrapper, E entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.ge(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.ge(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <E, T> QueryWrapper<E> setGe(QueryWrapper<E> queryWrapper, Class<E> clazz, T entity) {
+    public static <E, T> QueryWrapper setGe(QueryWrapper queryWrapper, Class<E> clazz, T entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(clazz, entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.ge(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.ge(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <E> QueryWrapper<E> setLt(QueryWrapper<E> queryWrapper, E entity) {
+    public static <E> QueryWrapper setLt(QueryWrapper queryWrapper, E entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.lt(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.lt(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <E, T> QueryWrapper<E> setLt(QueryWrapper<E> queryWrapper, Class<E> clazz, T entity) {
+    public static <E, T> QueryWrapper setLt(QueryWrapper queryWrapper, Class<E> clazz, T entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(clazz, entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.lt(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.lt(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <E> QueryWrapper<E> setLe(QueryWrapper<E> queryWrapper, E entity) {
+    public static <E> QueryWrapper setLe(QueryWrapper queryWrapper, E entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.le(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.le(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <E, T> QueryWrapper<E> setLe(QueryWrapper<E> queryWrapper, Class<E> clazz, T entity) {
+    public static <E, T> QueryWrapper setLe(QueryWrapper queryWrapper, Class<E> clazz, T entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(clazz, entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.le(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.le(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <E> QueryWrapper<E> setLike(QueryWrapper<E> queryWrapper, E entity) {
+    public static <E> QueryWrapper setLike(QueryWrapper queryWrapper, E entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.like(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.like(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <E, T> QueryWrapper<E> setLike(QueryWrapper<E> queryWrapper, Class<E> clazz, T entity) {
+    public static <E, T> QueryWrapper setLike(QueryWrapper queryWrapper, Class<E> clazz, T entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(clazz, entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.like(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.like(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <E> QueryWrapper<E> setNotLike(QueryWrapper<E> queryWrapper, E entity) {
+    public static <E> QueryWrapper setNotLike(QueryWrapper queryWrapper, E entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.notLike(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.notLike(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <E, T> QueryWrapper<E> setNotLike(QueryWrapper<E> queryWrapper, Class<E> clazz, T entity) {
+    public static <E, T> QueryWrapper setNotLike(QueryWrapper queryWrapper, Class<E> clazz, T entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(clazz, entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.notLike(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.notLike(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <E> QueryWrapper<E> setLeftLike(QueryWrapper<E> queryWrapper, E entity) {
+    public static <E> QueryWrapper setLeftLike(QueryWrapper queryWrapper, E entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.likeLeft(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.likeLeft(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <E, T> QueryWrapper<E> setLeftLike(QueryWrapper<E> queryWrapper, Class<E> clazz, T entity) {
+    public static <E, T> QueryWrapper setLeftLike(QueryWrapper queryWrapper, Class<E> clazz, T entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(clazz, entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.likeLeft(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.likeLeft(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <E> QueryWrapper<E> setNotLeftLike(QueryWrapper<E> queryWrapper, E entity) {
+    public static <E> QueryWrapper setNotLeftLike(QueryWrapper queryWrapper, E entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.notLikeLeft(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.notLikeLeft(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <E, T> QueryWrapper<E> setNotLeftLike(QueryWrapper<E> queryWrapper, Class<E> clazz, T entity) {
+    public static <E, T> QueryWrapper setNotLeftLike(QueryWrapper queryWrapper, Class<E> clazz, T entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(clazz, entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.notLikeLeft(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.notLikeLeft(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <E> QueryWrapper<E> setRightLike(QueryWrapper<E> queryWrapper, E entity) {
+    public static <E> QueryWrapper setRightLike(QueryWrapper queryWrapper, E entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.likeRight(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.likeRight(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <E, T> QueryWrapper<E> setRightLike(QueryWrapper<E> queryWrapper, Class<E> clazz, T entity) {
+    public static <E, T> QueryWrapper setRightLike(QueryWrapper queryWrapper, Class<E> clazz, T entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(clazz, entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.likeRight(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.likeRight(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <E> QueryWrapper<E> setNotRightLike(QueryWrapper<E> queryWrapper, E entity) {
+    public static <E> QueryWrapper setNotRightLike(QueryWrapper queryWrapper, E entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.notLikeRight(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.notLikeRight(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <E, T> QueryWrapper<E> setNotRightLike(QueryWrapper<E> queryWrapper, Class<E> clazz, T entity) {
+    public static <E, T> QueryWrapper setNotRightLike(QueryWrapper queryWrapper, Class<E> clazz, T entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(clazz, entity);
-        fieldValueMap.forEach((name, value) -> queryWrapper.notLikeRight(Objects.nonNull(value), name, value));
+        fieldValueMap.forEach((name, value) -> queryWrapper.notLikeRight(name, value, Objects.nonNull(value)));
         return queryWrapper;
     }
 
-    public static <T> QueryWrapper<T> setGroupBy(QueryWrapper<T> queryWrapper, Class<T> clazz, String[] fields) {
-        return setGroupBy(queryWrapper, clazz, CollectionUtils.toList(fields));
+    public static <E> QueryWrapper setGroupBy(QueryWrapper queryWrapper, Class<E> clazz, String[] fields) {
+        return setGroupBy(queryWrapper, clazz, CollectionUtil.newArrayList(fields));
     }
 
-    public static <T> QueryWrapper<T> setGroupBy(QueryWrapper<T> queryWrapper, Class<T> clazz, Collection<String> fields) {
-        if (CollectionUtils.isEmpty(fields)) {
+    public static <E> QueryWrapper setGroupBy(QueryWrapper queryWrapper, Class<E> clazz, Collection<String> fields) {
+        if (CollectionUtil.isEmpty(fields)) {
             return queryWrapper;
         }
         List<FieldInfo> fieldInfos = getFieldInfos(clazz, fields);
@@ -254,17 +253,27 @@ public class QueryWrapperUtil {
             if (!fieldInfo.isTableColumn()) {
                 checkSqlInjection(column);
             }
-            queryWrapper.groupBy(StringUtils.isNotBlank(column), column);
+            queryWrapper.groupBy(column);
         });
         return queryWrapper;
     }
 
     /**
+     * SQL语法检查正则：符合两个关键字（有先后顺序）才算匹配
+     */
+    private static final Pattern SQL_SYNTAX_PATTERN = Pattern.compile("(insert|delete|update|select|create|drop|truncate|grant|alter|deny|revoke|call|execute|exec|declare|show|rename|set)" +
+        "\\s+.*(into|from|set|where|table|database|view|index|on|cursor|procedure|trigger|for|password|union|and|or)|(select\\s*\\*\\s*from\\s+)|(and|or)\\s+.*(like|=|>|<|in|between|is|not|exists)", Pattern.CASE_INSENSITIVE);
+    /**
+     * 使用'、;或注释截断SQL检查正则
+     */
+    private static final Pattern SQL_COMMENT_PATTERN = Pattern.compile("'.*(or|union|--|#|/\\*|;)", Pattern.CASE_INSENSITIVE);
+
+    /**
      * 检查是否存在 SQL 注入风险
      */
     protected static void checkSqlInjection(String str) {
-        if (StringUtils.isNotBlank(str)) {
-            if (SqlInjectionUtils.check(str)) {
+        if (StringUtil.isNotBlank(str)) {
+            if (SQL_COMMENT_PATTERN.matcher(str).find() || SQL_SYNTAX_PATTERN.matcher(str).find()) {
                 throw new UtilException(String.format("There is a risk of SQL injection, please check: %s", str));
             }
         }
@@ -274,14 +283,14 @@ public class QueryWrapperUtil {
      * 判断是否选择了所有字段
      */
     protected static boolean isSelectAll(final String[] strings) {
-        return isSelectAll(CollectionUtils.toList(strings));
+        return isSelectAll(CollectionUtil.newArrayList(strings));
     }
 
     /**
      * 判断是否选择了所有字段
      */
     protected static boolean isSelectAll(final Collection<String> strings) {
-        if (CollectionUtils.isEmpty(strings)) {
+        if (CollectionUtil.isEmpty(strings)) {
             return true;
         }
         return strings.stream().anyMatch(QueryWrapperUtil::isSelectAll);
@@ -300,7 +309,7 @@ public class QueryWrapperUtil {
      * 注意：此方法没有用到 MP 属性名与字段名的关联关系，只是单纯将驼峰命名法转化为蛇形命名法
      */
     protected static String toColumn(final String property) {
-        return StringUtils.camelToUnderline(property);
+        return StringUtil.camelToUnderline(property);
     }
 
     /**
@@ -310,8 +319,8 @@ public class QueryWrapperUtil {
      */
     protected static List<String> toColumns(final Collection<String> properties) {
         return properties.stream()
-                .map(QueryWrapperUtil::toColumn)
-                .collect(Collectors.toList());
+            .map(QueryWrapperUtil::toColumn)
+            .collect(Collectors.toList());
     }
 
     /**
@@ -338,7 +347,7 @@ public class QueryWrapperUtil {
      * 属性名（实体）转化为字段名（数据库）
      */
     protected static List<String> toColumns(final Class<?> clazz, final String[] properties) {
-        return toColumns(clazz, CollectionUtils.toList(properties));
+        return toColumns(clazz, CollectionUtil.newArrayList(properties));
     }
 
     /**
@@ -378,23 +387,21 @@ public class QueryWrapperUtil {
     }
 
     /**
-     * 获取 MP 缓存的所有表字段信息
-     * <p>
-     * 没有直接使用 {@link TableFieldInfo} 实体，
-     * 原因在于 {@link TableInfo#getFieldList()} 返回不包含主键信息
+     * 获取 MF 缓存的所有表字段信息
      */
     protected static List<FieldInfo> getTableFieldInfos(final Class<?> clazz) {
         List<FieldInfo> fieldInfos = new ArrayList<>();
-        TableInfo tableInfo = TableInfoHelper.getTableInfo(clazz);
+        TableInfo tableInfo = TableInfoFactory.ofEntityClass(clazz);
         // 塞入列
-        tableInfo.getFieldList()
-                .stream()
-                .map(tableFieldInfo -> new FieldInfo(tableFieldInfo.getProperty(), tableFieldInfo.getColumn()))
-                .forEach(fieldInfos::add);
-        // 塞入主键（MP 不支持联合主键）
-        String keyColumn = tableInfo.getKeyColumn();
-        String keyProperty = tableInfo.getKeyProperty();
-        fieldInfos.add(new FieldInfo(keyProperty, keyColumn));
+        tableInfo.getColumnInfoList()
+            .stream()
+            .map(columnInfo -> new FieldInfo(columnInfo.getProperty(), columnInfo.getColumn()))
+            .forEach(fieldInfos::add);
+        // 塞入主键
+        tableInfo.getPrimaryKeyList()
+            .stream()
+            .map(idInfo -> new FieldInfo(idInfo.getProperty(), idInfo.getColumn()))
+            .forEach(fieldInfos::add);
         return fieldInfos;
     }
 
@@ -409,6 +416,9 @@ public class QueryWrapperUtil {
             this.column = field;
         }
 
+        /**
+         * 当属性名和字段名不一致时，认为是数据库字段
+         */
         public boolean isTableColumn() {
             return !Objects.equals(property, column);
         }
@@ -419,8 +429,8 @@ public class QueryWrapperUtil {
      */
     protected static List<String> getColumns(final Class<?> clazz) {
         return getTableFieldInfos(clazz).stream()
-                .map(FieldInfo::getColumn)
-                .collect(Collectors.toList());
+            .map(FieldInfo::getColumn)
+            .collect(Collectors.toList());
     }
 
     /**
@@ -449,11 +459,11 @@ public class QueryWrapperUtil {
         }
         Class<?> entityClass = entity.getClass();
         Map<String, Collection<Method>> methodMap = METHOD_CACHE.computeIfAbsent(entityClass,
-                c -> ReflectUtil.getFilteredPublicMethods(c, method -> ReflectUtil.isGetter(method, false))
-                        .stream()
-                        .collect(Collectors.groupingBy(ReflectUtil::getFieldNameFromGetterMethod,
-                                ConcurrentHashMap::new,
-                                Collectors.toCollection(ArrayList::new))));
+            c -> ReflectUtil.getFilteredPublicMethods(c, method -> ReflectUtil.isGetter(method, false))
+                .stream()
+                .collect(Collectors.groupingBy(ReflectUtil::getFieldNameFromGetterMethod,
+                    ConcurrentHashMap::new,
+                    Collectors.toCollection(ArrayList::new))));
         Map<String, Object> fieldValueMap = new HashMap<>();
         getFieldValuesMap(clazz, entity, methodMap).forEach((k, v) -> {
             Object value = null;
@@ -471,16 +481,16 @@ public class QueryWrapperUtil {
      */
     protected static Map<String, Collection<Object>> getFieldValuesMap(final Class<?> clazz, final Object entity, final Map<String, Collection<Method>> methodMap) {
         return getTableFieldInfos(clazz).stream()
-                .collect(Collectors.toMap(FieldInfo::getColumn,
-                        tableFieldInfo -> Optional.ofNullable(tableFieldInfo.getProperty())
-                                .map(methodMap::get)
-                                .filter(CollectionUtils::isNotEmpty)
-                                .map(Collection::stream)
-                                .orElseGet(Stream::empty)
-                                .map(method -> ReflectUtil.invoke(method, entity).orElse(null))
-                                .collect(Collectors.toList()),
-                        (oldVal, newVal) -> newVal,
-                        HashMap::new));
+            .collect(Collectors.toMap(FieldInfo::getColumn,
+                tableFieldInfo -> Optional.ofNullable(tableFieldInfo.getProperty())
+                    .map(methodMap::get)
+                    .filter(CollectionUtil::isNotEmpty)
+                    .map(Collection::stream)
+                    .orElseGet(Stream::empty)
+                    .map(method -> ReflectUtil.invoke(method, entity).orElse(null))
+                    .collect(Collectors.toList()),
+                (oldVal, newVal) -> newVal,
+                HashMap::new));
     }
 
     protected QueryWrapperUtil() throws IllegalAccessException {

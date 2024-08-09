@@ -169,6 +169,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.mybatis-flex</groupId>
+            <artifactId>mybatis-flex-core</artifactId>
+            <version>${mybatis-flex.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>io.minio</groupId>
             <artifactId>minio</artifactId>
             <version>${minio.version}</version>
