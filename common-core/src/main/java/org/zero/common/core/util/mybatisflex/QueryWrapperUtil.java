@@ -45,13 +45,13 @@ public class QueryWrapperUtil {
             columns = getColumns(clazz);
         } else {
             columns = getFieldInfos(clazz, fields).stream()
-                .peek(fieldInfo -> {
-                    if (!fieldInfo.isTableColumn()) {
-                        checkSqlInjection(fieldInfo.getColumn());
-                    }
-                })
-                .map(FieldInfo::getColumn)
-                .collect(Collectors.toList());
+                    .peek(fieldInfo -> {
+                        if (!fieldInfo.isTableColumn()) {
+                            checkSqlInjection(fieldInfo.getColumn());
+                        }
+                    })
+                    .map(FieldInfo::getColumn)
+                    .collect(Collectors.toList());
         }
         queryWrapper.select(columns.toArray(new String[0]));
         return queryWrapper;
@@ -262,7 +262,7 @@ public class QueryWrapperUtil {
      * SQL语法检查正则：符合两个关键字（有先后顺序）才算匹配
      */
     private static final Pattern SQL_SYNTAX_PATTERN = Pattern.compile("(insert|delete|update|select|create|drop|truncate|grant|alter|deny|revoke|call|execute|exec|declare|show|rename|set)" +
-        "\\s+.*(into|from|set|where|table|database|view|index|on|cursor|procedure|trigger|for|password|union|and|or)|(select\\s*\\*\\s*from\\s+)|(and|or)\\s+.*(like|=|>|<|in|between|is|not|exists)", Pattern.CASE_INSENSITIVE);
+            "\\s+.*(into|from|set|where|table|database|view|index|on|cursor|procedure|trigger|for|password|union|and|or)|(select\\s*\\*\\s*from\\s+)|(and|or)\\s+.*(like|=|>|<|in|between|is|not|exists)", Pattern.CASE_INSENSITIVE);
     /**
      * 使用'、;或注释截断SQL检查正则
      */
@@ -319,8 +319,8 @@ public class QueryWrapperUtil {
      */
     protected static List<String> toColumns(final Collection<String> properties) {
         return properties.stream()
-            .map(QueryWrapperUtil::toColumn)
-            .collect(Collectors.toList());
+                .map(QueryWrapperUtil::toColumn)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -394,14 +394,14 @@ public class QueryWrapperUtil {
         TableInfo tableInfo = TableInfoFactory.ofEntityClass(clazz);
         // 塞入列
         tableInfo.getColumnInfoList()
-            .stream()
-            .map(columnInfo -> new FieldInfo(columnInfo.getProperty(), columnInfo.getColumn()))
-            .forEach(fieldInfos::add);
+                .stream()
+                .map(columnInfo -> new FieldInfo(columnInfo.getProperty(), columnInfo.getColumn()))
+                .forEach(fieldInfos::add);
         // 塞入主键
         tableInfo.getPrimaryKeyList()
-            .stream()
-            .map(idInfo -> new FieldInfo(idInfo.getProperty(), idInfo.getColumn()))
-            .forEach(fieldInfos::add);
+                .stream()
+                .map(idInfo -> new FieldInfo(idInfo.getProperty(), idInfo.getColumn()))
+                .forEach(fieldInfos::add);
         return fieldInfos;
     }
 
@@ -429,8 +429,8 @@ public class QueryWrapperUtil {
      */
     protected static List<String> getColumns(final Class<?> clazz) {
         return getTableFieldInfos(clazz).stream()
-            .map(FieldInfo::getColumn)
-            .collect(Collectors.toList());
+                .map(FieldInfo::getColumn)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -459,11 +459,11 @@ public class QueryWrapperUtil {
         }
         Class<?> entityClass = entity.getClass();
         Map<String, Collection<Method>> methodMap = METHOD_CACHE.computeIfAbsent(entityClass,
-            c -> ReflectUtil.getFilteredPublicMethods(c, method -> ReflectUtil.isGetter(method, false))
-                .stream()
-                .collect(Collectors.groupingBy(ReflectUtil::getFieldNameFromGetterMethod,
-                    ConcurrentHashMap::new,
-                    Collectors.toCollection(ArrayList::new))));
+                c -> ReflectUtil.getFilteredPublicMethods(c, method -> ReflectUtil.isGetter(method, false))
+                        .stream()
+                        .collect(Collectors.groupingBy(ReflectUtil::getFieldNameFromGetterMethod,
+                                ConcurrentHashMap::new,
+                                Collectors.toCollection(ArrayList::new))));
         Map<String, Object> fieldValueMap = new HashMap<>();
         getFieldValuesMap(clazz, entity, methodMap).forEach((k, v) -> {
             Object value = null;
@@ -481,16 +481,16 @@ public class QueryWrapperUtil {
      */
     protected static Map<String, Collection<Object>> getFieldValuesMap(final Class<?> clazz, final Object entity, final Map<String, Collection<Method>> methodMap) {
         return getTableFieldInfos(clazz).stream()
-            .collect(Collectors.toMap(FieldInfo::getColumn,
-                tableFieldInfo -> Optional.ofNullable(tableFieldInfo.getProperty())
-                    .map(methodMap::get)
-                    .filter(CollectionUtil::isNotEmpty)
-                    .map(Collection::stream)
-                    .orElseGet(Stream::empty)
-                    .map(method -> ReflectUtil.invoke(method, entity).orElse(null))
-                    .collect(Collectors.toList()),
-                (oldVal, newVal) -> newVal,
-                HashMap::new));
+                .collect(Collectors.toMap(FieldInfo::getColumn,
+                        tableFieldInfo -> Optional.ofNullable(tableFieldInfo.getProperty())
+                                .map(methodMap::get)
+                                .filter(CollectionUtil::isNotEmpty)
+                                .map(Collection::stream)
+                                .orElseGet(Stream::empty)
+                                .map(method -> ReflectUtil.invoke(method, entity))
+                                .collect(Collectors.toList()),
+                        (oldVal, newVal) -> newVal,
+                        HashMap::new));
     }
 
     protected QueryWrapperUtil() throws IllegalAccessException {

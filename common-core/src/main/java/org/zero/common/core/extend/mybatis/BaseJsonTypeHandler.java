@@ -11,7 +11,7 @@ import java.util.Objects;
 
 /**
  * @author Zero (cnzeropro@163.com)
- * @since 2024/8/12
+ * @since 2021/8/12
  */
 public abstract class BaseJsonTypeHandler<T> extends BaseTypeHandler<T> {
     @Override

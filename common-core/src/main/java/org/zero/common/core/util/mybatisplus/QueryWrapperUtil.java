@@ -477,7 +477,7 @@ public class QueryWrapperUtil {
                                 .filter(CollectionUtils::isNotEmpty)
                                 .map(Collection::stream)
                                 .orElseGet(Stream::empty)
-                                .map(method -> ReflectUtil.invoke(method, entity).orElse(null))
+                                .map(method -> ReflectUtil.invoke(method, entity))
                                 .collect(Collectors.toList()),
                         (oldVal, newVal) -> newVal,
                         HashMap::new));

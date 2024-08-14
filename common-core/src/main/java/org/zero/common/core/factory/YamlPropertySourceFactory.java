@@ -14,9 +14,17 @@ import java.util.Properties;
 
 /**
  * 读取自定义 yaml 文件的工厂类
+ * <p>
+ * 使用方式：
+ * <pre>
+ *     {@code
+ *     @org.springframework.context.annotation.PropertySource(value = "classpath:/config/app.yml", factory = YamlPropertySourceFactory.class)
+ *     public class ApplicationConfig {}
+ *     }
+ * </pre>
  *
  * @author zero
- * @date 2022/3/29
+ * @date 2021/2/12
  */
 public class YamlPropertySourceFactory implements PropertySourceFactory {
     @Override
@@ -25,7 +33,7 @@ public class YamlPropertySourceFactory implements PropertySourceFactory {
         String sourceName = Objects.nonNull(name) ? name : r.getFilename();
         Properties properties = loadYamlToProperties(r);
         Assert.notNull(sourceName, "Source name is null");
-        Assert.notNull(properties, "source properties is null");
+        Assert.notNull(properties, "Source properties is null");
         return new PropertiesPropertySource(sourceName, properties);
     }
 

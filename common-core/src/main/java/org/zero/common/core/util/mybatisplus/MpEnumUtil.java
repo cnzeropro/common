@@ -29,8 +29,7 @@ public class MpEnumUtil {
      */
     public static Object getValue(Enum<?> enumObj) {
         Method method = getMethod(enumObj.getDeclaringClass());
-        return ReflectUtil.invoke(method, enumObj)
-                .orElse(null);
+        return ReflectUtil.invoke(method, enumObj);
     }
 
     /**
@@ -49,7 +48,7 @@ public class MpEnumUtil {
             String className = clazz.getName();
             // 此处可使用自定义父类和注解，但因为Mp已经提供，所以无需重复造轮子
             if (IEnum.class.isAssignableFrom(clazz)) {
-                return ReflectUtil.getMethodOptByName(clazz, "getValue")
+                return ReflectUtil.getMethodOptByNameAndParam(clazz, "getValue")
                         .orElseThrow(() -> new UtilException(String.format("No getValue() method found in class[%s]", className)));
             } else {
                 Field field = ReflectUtil.getAnnotatedFieldOpt(clazz, EnumValue.class)

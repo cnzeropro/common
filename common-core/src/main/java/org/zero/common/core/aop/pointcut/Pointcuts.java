@@ -12,22 +12,26 @@ public class Pointcuts {
     }
 
     @Pointcut("execution(public * *(..))")
-    public void allPublicMethod() {
+    public void publicMethod() {
     }
 
     @Pointcut("execution(* set*(..))")
-    public void allSetMethod() {
+    public void setMethod() {
     }
 
     @Pointcut("execution(* get*(..))")
-    public void allGetMethod() {
+    public void getMethod() {
     }
 
-    @Pointcut("execution(* org.zero..*.controller..*.*(..))")
+    @Pointcut("execution(* *.controller..*.*(..))")
     public void controllerMethod() {
     }
 
-    @Pointcut("execution(* org.zero..*.service..*.*(..))")
+    @Pointcut("execution(* *.service..*.*(..))")
     public void serviceMethod() {
+    }
+
+    @Pointcut("execution(* *.mapper..*.*(..))")
+    public void mapperMethod() {
     }
 }

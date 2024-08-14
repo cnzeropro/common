@@ -1,6 +1,6 @@
 package org.zero.common.core.desensitization;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import lombok.Getter;
 
 import java.util.Objects;
@@ -56,13 +56,13 @@ public enum DesensitizationType {
          * ”区“后面的字符串脱敏
          */
         @Override
-        public String desensitize(String value, int start, int end, String replacement) {
+        public String desensitize(String value, String replacement) {
             if (Objects.isNull(value)) {
                 return null;
             }
             if (value.contains("区")) {
-                start = value.indexOf("区") + 1;
-                end = value.length() - 1;
+                int start = value.indexOf("区") + 1;
+                int end = value.length() - 1;
                 return super.desensitize(value, start, end, replacement);
             }
             return value;
@@ -83,13 +83,13 @@ public enum DesensitizationType {
      */
     EMAIL {
         @Override
-        public String desensitize(String value, int start, int end, String replacement) {
+        public String desensitize(String value, String replacement) {
             if (Objects.isNull(value)) {
                 return null;
             }
             if (value.contains("@")) {
-                start = 1;
-                end = value.indexOf("@") - 1;
+                int start = 1;
+                int end = value.indexOf("@") - 1;
                 return super.desensitize(value, start, end, replacement);
             }
             return value;
@@ -112,7 +112,7 @@ public enum DesensitizationType {
     /**
      * 银行卡号
      * <pre>
-     *     {@code 1234 2222 3333 4444 6789  ->  1234 **** **** **** 6789}
+     *     {@code 1234222233334444678  ->  1234 **** **** **** 678}
      * </pre>
      */
     BANK_CARD {
@@ -125,16 +125,16 @@ public enum DesensitizationType {
             final int endLength = length % 4 == 0 ? 4 : length % 4;
             final int midLength = length - 4 - endLength;
 
-            final StringBuilder buf = new StringBuilder();
-            buf.append(value, 0, 4);
+            final StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(value, 0, 4);
             for (int i = 0; i < midLength; ++i) {
                 if (i % 4 == 0) {
-                    buf.append(' ');
+                    stringBuilder.append(' ');
                 }
-                buf.append(replacement);
+                stringBuilder.append(replacement);
             }
-            buf.append(' ').append(value, length - endLength, length);
-            return buf.toString();
+            stringBuilder.append(' ').append(value, length - endLength, length);
+            return stringBuilder.toString();
         }
     },
     /**
@@ -149,7 +149,8 @@ public enum DesensitizationType {
             if (Objects.isNull(value)) {
                 return null;
             }
-            return String.format("%s.%s.%s.%s", StrUtil.subBefore(value, '.', false),
+            return String.format("%s.%s.%s.%s",
+                    CharSequenceUtil.subBefore(value, '.', false),
                     replacement, replacement, replacement);
         }
     },
@@ -165,7 +166,8 @@ public enum DesensitizationType {
             if (Objects.isNull(value)) {
                 return null;
             }
-            return String.format("%s:%s:%s:%s:%s:%s:%s:%s", StrUtil.subBefore(value, ':', false),
+            return String.format("%s:%s:%s:%s:%s:%s:%s:%s",
+                    CharSequenceUtil.subBefore(value, ':', false),
                     replacement, replacement, replacement, replacement, replacement, replacement, replacement);
         }
     },
@@ -181,7 +183,8 @@ public enum DesensitizationType {
             if (Objects.isNull(value)) {
                 return null;
             }
-            return String.format("%s-%s-%s-%s-%s-%s", StrUtil.subBefore(value, '-', false),
+            return String.format("%s-%s-%s-%s-%s-%s",
+                    CharSequenceUtil.subBefore(value, '-', false),
                     replacement, replacement, replacement, replacement, replacement);
         }
     },
@@ -259,7 +262,7 @@ public enum DesensitizationType {
             return null;
         }
         // 如果外部传入的脱敏填充字符为空，则使用内部配置的脱敏填充字符
-        if (StrUtil.isBlank(replacement)) {
+        if (CharSequenceUtil.isBlank(replacement)) {
             replacement = this.replacement;
         }
         // 如果结束位置小于0，则重新计算结束位置
@@ -270,7 +273,7 @@ public enum DesensitizationType {
         if (start < 0) {
             return value;
         }
-        return StrUtil.replace(value, start, end + 1, replacement);
+        return CharSequenceUtil.replace(value, start, end + 1, replacement);
     }
 
     DesensitizationType() {
