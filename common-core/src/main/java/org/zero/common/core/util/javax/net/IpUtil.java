@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @author yufa.wang (yufa.wang@ronganchina.com)
+ * @author zero
  * @since 2022/6/17
  */
 @UtilityClass

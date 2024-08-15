@@ -5,6 +5,7 @@ import cn.hutool.core.collection.IteratorEnumeration;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.CharsetUtil;
 
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
@@ -14,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.Map;
 
@@ -102,7 +104,8 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     public ServletInputStream getInputStream() throws IOException {
         String characterEncoding = super.getCharacterEncoding();
         ServletInputStream inputStream = super.getInputStream();
-        String escaped = this.mode.apply(IoUtil.read(inputStream, characterEncoding));
+        Charset charset = CharsetUtil.charset(characterEncoding);
+        String escaped = this.mode.apply(IoUtil.read(inputStream, charset));
         final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(escaped.getBytes(characterEncoding));
         return new ServletInputStream() {
             @Override
