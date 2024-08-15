@@ -192,6 +192,7 @@ public abstract class BaseChecker {
         return notNull(val) && between(val.length, min, max);
     }
 
+    @SuppressWarnings("unchecked")
     protected <T> boolean containsAny(T[] val, T... items) {
         return ArrayUtil.containsAny(val, items);
     }
@@ -246,22 +247,27 @@ public abstract class BaseChecker {
         return notNull(val) && size(IterUtil.asIterator(val), min, max);
     }
 
+    @SuppressWarnings("unchecked")
     protected <K, V, T extends Map<K, V>> boolean containsAnyKey(T val, K... keys) {
         return notEmpty(val) && containsAny(val.keySet(), keys);
     }
 
+    @SuppressWarnings("unchecked")
     protected <K, V, T extends Map<K, V>> boolean containsAnyValue(T val, V... values) {
         return notEmpty(val) && containsAny(val.values(), values);
     }
 
+    @SuppressWarnings("unchecked")
     protected <K, V, T extends Map<K, V>> boolean containsAny(T val, Map.Entry<K, V>... entries) {
         return notEmpty(val) && containsAny(val.entrySet(), entries);
     }
 
+    @SuppressWarnings("unchecked")
     protected <K, V, T extends Map<K, V>> boolean containsAny(T val, K[] keys, V[] values) {
         return containsAnyKey(val, keys) && containsAnyValue(val, values);
     }
 
+    @SuppressWarnings("unchecked")
     protected <E, T extends Iterable<E>> boolean containsAny(T val, E... items) {
         if (val instanceof Collection) {
             return CollUtil.containsAny((Collection<?>) val, CollUtil.newHashSet(items));
@@ -269,6 +275,7 @@ public abstract class BaseChecker {
         return containsAny(IterUtil.getIter(val), items);
     }
 
+    @SuppressWarnings("unchecked")
     protected <E, T extends Iterator<E>> boolean containsAny(T val, E... items) {
         if (isNull(val) || isNull(items)) {
             return false;
@@ -286,6 +293,7 @@ public abstract class BaseChecker {
         return isFound;
     }
 
+    @SuppressWarnings("unchecked")
     protected <E, T extends Enumeration<E>> boolean containsAny(T val, E... items) {
         return notNull(val) && containsAny(IterUtil.asIterator(val), items);
     }
