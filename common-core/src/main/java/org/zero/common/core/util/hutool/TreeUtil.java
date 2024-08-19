@@ -11,6 +11,7 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -23,10 +24,10 @@ public class TreeUtil {
 
 
     /**
-     * 获取当前同级节点的最大叶子节点深度
+     * 获取指定同级树节点的最大深度
      *
-     * @param treeList 同级数节点列表
-     * @return 同级节点中的最大叶子节点深度
+     * @param treeList 同级树节点列表
+     * @return 最大深度
      */
     public static <T> long sameLevelMaxDepth(List<Tree<T>> treeList) {
         long max = 0L;
@@ -64,7 +65,7 @@ public class TreeUtil {
      * @param num      当前节点数
      * @return 叶子节点总数
      */
-    public static <T> long leafNodeSum(List<Tree<T>> treeList, long num) {
+    public static <T> long sumLeafNode(List<Tree<T>> treeList, long num) {
         if (CollUtil.isEmpty(treeList)) {
             return num;
         }
@@ -72,7 +73,7 @@ public class TreeUtil {
         for (Tree<T> node : treeList) {
             List<Tree<T>> children = node.getChildren();
             if (CollUtil.isNotEmpty(children)) {
-                num = leafNodeSum(children, num);
+                num = sumLeafNode(children, num);
             } else {
                 num += 1L;
             }
@@ -81,48 +82,80 @@ public class TreeUtil {
         return num;
     }
 
-    public static List<Tree<String>> toTreeList(Collection<String> headers) {
-        List<TreeNode<String>> treeNodes = toTreeNodeList(headers);
+    /**
+     * 将表头列表转换为树状结构
+     *
+     * @param headers   表头列表
+     * @param separator 表头分割符
+     * @return 树状结构
+     */
+    public static List<Tree<String>> toTreeList(Collection<String> headers, String separator) {
+        List<TreeNode<String>> treeNodes = toTreeNodeList(headers, separator);
         return cn.hutool.core.lang.tree.TreeUtil.build(treeNodes, null);
     }
 
-    public static List<Tree<String>> toTreeList(Collection<String> headers, CellStyle cellStyle) {
-        List<TreeNode<String>> treeNodes = toTreeNodeList(headers, cellStyle);
+    /**
+     * 将表头列表转换为树状结构
+     *
+     * @param headers   表头列表
+     * @param separator 表头分割符
+     * @param cellStyle 单元格样式
+     * @return 树状结构
+     */
+    public static List<Tree<String>> toTreeList(Collection<String> headers, String separator, CellStyle cellStyle) {
+        List<TreeNode<String>> treeNodes = toTreeNodeList(headers, separator, cellStyle);
         return cn.hutool.core.lang.tree.TreeUtil.build(treeNodes, null);
     }
 
-    public static List<TreeNode<String>> toTreeNodeList(Collection<String> headers) {
-        return toTreeNodeList(headers, null);
+    /**
+     * 将表头列表转换为树节点列表
+     *
+     * @param headers   表头列表
+     * @param separator 表头分割符
+     * @return 树节点列表
+     */
+    public static List<TreeNode<String>> toTreeNodeList(Collection<String> headers, String separator) {
+        return toTreeNodeList(headers, separator, null);
     }
 
-    public static List<TreeNode<String>> toTreeNodeList(Collection<String> headers, CellStyle cellStyle) {
+    /**
+     * 将表头列表转换为树节点列表
+     *
+     * @param headers   表头列表
+     * @param separator 表头分割符
+     * @param cellStyle 单元格样式
+     * @return 树节点列表
+     */
+    public static List<TreeNode<String>> toTreeNodeList(Collection<String> headers, String separator, CellStyle cellStyle) {
         List<List<String>> headersList = headers.stream()
-                .map(h -> CharSequenceUtil.split(h, "."))
+                .map(h -> CharSequenceUtil.split(h, separator))
                 .collect(Collectors.toList());
-        return IntStream.rangeClosed(1, headersList.stream()
-                        .map(List::size)
-                        .max(Comparator.naturalOrder())
-                        .orElse(1))
+        Integer maxSize = headersList.stream()
+                .map(List::size)
+                .max(Comparator.naturalOrder())
+                .orElse(1);
+        return IntStream.rangeClosed(1, maxSize)
                 .boxed()
                 .flatMap(level -> headersList.stream()
                         .filter(hs -> hs.size() >= level)
                         .map(hs -> {
+                            Map<String, Object> extraMap = MapUtil.<String, Object>builder()
+                                    .put("cellStyle", cellStyle)
+                                    .build();
+
                             String id = hs.stream()
                                     .limit(level)
-                                    .collect(Collectors.joining());
+                                    .collect(Collectors.joining(separator));
                             String parentId = null;
                             if (level > 1) {
                                 parentId = hs.stream()
                                         .limit(level - 1L)
-                                        .collect(Collectors.joining());
+                                        .collect(Collectors.joining(separator));
                             }
                             String name = hs.get(level - 1);
 
-                            TreeNode<String> treeNode = new TreeNode<>(id, parentId, name, Integer.MAX_VALUE);
-                            treeNode.setExtra(MapUtil.<String, Object>builder()
-                                    .put("cellStyle", cellStyle)
-                                    .build());
-                            return treeNode;
+                            return new TreeNode<>(id, parentId, name, null)
+                                    .setExtra(extraMap);
                         })
                         .distinct())
                 .collect(Collectors.toList());

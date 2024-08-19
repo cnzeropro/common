@@ -82,7 +82,7 @@ class ExcelUtilTest {
                 .map(Map::keySet)
                 .orElseThrow(() -> new UtilException("导出数据为空"));
         // 通过表头获取树节点列表
-        List<TreeNode<String>> treeNodes = TreeUtil.toTreeNodeList(keys);
+        List<TreeNode<String>> treeNodes = TreeUtil.toTreeNodeList(keys,".");
         // 调整顺序
         // treeNodes.forEach(treeNode -> {
         //     if (Objects.equals(treeNode.getId(), "c")) {

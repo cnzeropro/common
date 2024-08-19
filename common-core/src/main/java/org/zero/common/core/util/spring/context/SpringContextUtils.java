@@ -40,36 +40,6 @@ public class SpringContextUtils implements BeanFactoryPostProcessor, Application
      */
     private static ApplicationContext applicationContext;
 
-    public static Optional<ApplicationContext> getApplicationContextOpt() {
-        return Optional.ofNullable(applicationContext);
-    }
-
-    /**
-     * 获取 {@link ApplicationContext}
-     */
-    public static ApplicationContext getApplicationContext() {
-        return applicationContext;
-    }
-
-    /**
-     * 获取 {@link ListableBeanFactory}
-     */
-    public static ListableBeanFactory getBeanFactory() {
-        return Objects.isNull(beanFactory) ? applicationContext : beanFactory;
-    }
-
-    /**
-     * 获取 {@link ConfigurableListableBeanFactory}
-     */
-    public static ConfigurableListableBeanFactory getConfigurableBeanFactory() {
-        if (Objects.nonNull(beanFactory)) {
-            return beanFactory;
-        } else if (applicationContext instanceof ConfigurableApplicationContext) {
-            return ((ConfigurableApplicationContext) applicationContext).getBeanFactory();
-        }
-        throw new UtilException("No ConfigurableListableBeanFactory from context");
-    }
-
     public static Object getBean(String name) {
         return getBeanFactory().getBean(name);
     }
@@ -108,6 +78,27 @@ public class SpringContextUtils implements BeanFactoryPostProcessor, Application
     }
 
     /**
+     * 获取指定类型对应的所有Bean，包括子类
+     */
+    public static <T> Map<String, T> getBeansOfType(Class<T> type, boolean includeNonSingletons, boolean allowEagerInit) {
+        return getBeanFactory().getBeansOfType(type, includeNonSingletons, allowEagerInit);
+    }
+
+    /**
+     * 获取指定Bean的Provider
+     */
+    public static <T> ObjectProvider<T> getBeanProvider(Class<T> type, boolean allowEagerInit) {
+        return getBeanFactory().getBeanProvider(type, allowEagerInit);
+    }
+
+    /**
+     * 获取指定Bean的Provider
+     */
+    public static <T> ObjectProvider<T> getBeanProvider(Class<T> type) {
+        return getBeanFactory().getBeanProvider(type);
+    }
+
+    /**
      * 获取指定Bean的Provider
      */
     public static <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType, boolean allowEagerInit) {
@@ -136,20 +127,6 @@ public class SpringContextUtils implements BeanFactoryPostProcessor, Application
     }
 
     /**
-     * 获取应用环境 Opt
-     */
-    public static Optional<Environment> getEnvironmentOpt() {
-        return getApplicationContextOpt().map(ApplicationContext::getEnvironment);
-    }
-
-    /**
-     * 获取应用环境
-     */
-    public static Environment getEnvironment() {
-        return getEnvironmentOpt().orElse(null);
-    }
-
-    /**
      * 获取属性值
      */
     public static String getProperty(String key) {
@@ -160,28 +137,21 @@ public class SpringContextUtils implements BeanFactoryPostProcessor, Application
      * 获取属性值
      */
     public static String getProperty(String key, String defaultValue) {
-        return getEnvironmentOpt().map(env -> env.getProperty(key)).orElse(defaultValue);
+        return getEnvironment().getProperty(key, defaultValue);
     }
 
     /**
      * 获取属性值
      */
     public static <T> T getProperty(String key, Class<T> type) {
-        return getProperty(key, type, null);
+        return getEnvironment().getProperty(key, type);
     }
 
     /**
      * 获取属性值
      */
     public static <T> T getProperty(String key, Class<T> type, T defaultValue) {
-        return getEnvironmentOpt().map(env -> env.getProperty(key, type)).orElse(defaultValue);
-    }
-
-    /**
-     * 解析占位符
-     */
-    public static String resolvePlaceholders(String text) {
-        return getEnvironmentOpt().map(env -> env.resolvePlaceholders(text)).orElse(null);
+        return getEnvironment().getProperty(key, type, defaultValue);
     }
 
     /**
@@ -192,10 +162,17 @@ public class SpringContextUtils implements BeanFactoryPostProcessor, Application
     }
 
     /**
+     * 解析占位符
+     */
+    public static String resolvePlaceholders(String text) {
+        return getEnvironment().resolvePlaceholders(text);
+    }
+
+    /**
      * 获取当前配置环境，无配置返回空数组
      */
     public static String[] getActiveProfiles() {
-        return getEnvironmentOpt().map(Environment::getActiveProfiles).orElse(new String[0]);
+        return getEnvironment().getActiveProfiles();
     }
 
     /**
@@ -210,18 +187,18 @@ public class SpringContextUtils implements BeanFactoryPostProcessor, Application
      * 发布事件
      */
     public static void publishEvent(ApplicationEvent event) {
-        getApplicationContextOpt().ifPresent(applicationContext -> applicationContext.publishEvent(event));
+        getApplicationContext().publishEvent(event);
     }
 
     /**
      * 发布事件
      */
     public static void publishEvent(Object event) {
-        getApplicationContextOpt().ifPresent(applicationContext -> applicationContext.publishEvent(event));
+        getApplicationContext().publishEvent(event);
     }
 
     /**
-     * 动态向Spring注册Bean
+     * 动态向 Spring 注册 Bean
      */
     public static <T> void registerBean(String beanName, T bean) {
         final ConfigurableListableBeanFactory factory = getConfigurableBeanFactory();
@@ -230,7 +207,7 @@ public class SpringContextUtils implements BeanFactoryPostProcessor, Application
     }
 
     /**
-     * 注销Bean
+     * 注销 Bean
      * <p>
      * 注意：请谨慎使用
      */
@@ -244,27 +221,80 @@ public class SpringContextUtils implements BeanFactoryPostProcessor, Application
         }
     }
 
+    /* ******************************************* Context Getter ******************************************* */
+
+    /**
+     * 获取 {@link ApplicationContext}
+     */
+    public static ApplicationContext getApplicationContext() {
+        return getApplicationContextOpt().orElseThrow(() -> new UtilException("ApplicationContext is null"));
+    }
+
+    public static Optional<ApplicationContext> getApplicationContextOpt() {
+        return Optional.ofNullable(applicationContext);
+    }
+
+    /**
+     * 获取 {@link ListableBeanFactory}
+     */
+    public static ListableBeanFactory getBeanFactory() {
+        return getBeanFactoryOpt().orElseThrow(() -> new UtilException("BeanFactory is null"));
+    }
+
+    public static Optional<ListableBeanFactory> getBeanFactoryOpt() {
+        return Objects.nonNull(beanFactory) ? Optional.of(beanFactory) : Optional.ofNullable(applicationContext);
+    }
+
+    /**
+     * 获取 {@link ConfigurableListableBeanFactory}
+     */
+    public static ConfigurableListableBeanFactory getConfigurableBeanFactory() {
+        return getConfigurableBeanFactoryOpt().orElseThrow(() -> new UtilException("No ConfigurableListableBeanFactory from context"));
+    }
+
+    public static Optional<ConfigurableListableBeanFactory> getConfigurableBeanFactoryOpt() {
+        if (Objects.nonNull(beanFactory)) {
+            return Optional.of(beanFactory);
+        } else if (applicationContext instanceof ConfigurableApplicationContext) {
+            return Optional.of(((ConfigurableApplicationContext) applicationContext).getBeanFactory());
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * 获取 {@link Environment}
+     */
+    public static Environment getEnvironment() {
+        return getEnvironmentOpt().orElseThrow(() -> new UtilException("No Environment from context"));
+    }
+
+    public static Optional<Environment> getEnvironmentOpt() {
+        return getApplicationContextOpt().map(ApplicationContext::getEnvironment);
+    }
+
+    /* ******************************************* Context Setter ******************************************* */
+
+    /**
+     * Set {@link ApplicationContext}
+     */
+    public static synchronized void setAppContext(ApplicationContext ac) {
+        applicationContext = ac;
+    }
+
+    /**
+     * Set {@link ConfigurableListableBeanFactory}
+     */
+    public static synchronized void setConfigurableListableBeanFactory(ConfigurableListableBeanFactory bf) {
+        beanFactory = bf;
+    }
+
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        setBf(beanFactory);
+        setConfigurableListableBeanFactory(beanFactory);
     }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        setAc(applicationContext);
-    }
-
-    /**
-     * Sonar 实例方法不应写入“静态”字段 修复
-     */
-    private static void setBf(ConfigurableListableBeanFactory bf) {
-        SpringContextUtils.beanFactory = bf;
-    }
-
-    /**
-     * Sonar 实例方法不应写入“静态”字段 修复
-     */
-    private static void setAc(ApplicationContext ac) {
-        applicationContext = ac;
+        setAppContext(applicationContext);
     }
 }

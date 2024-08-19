@@ -104,7 +104,7 @@ public class ExcelUtil {
 
             // 起始列
             int firstColumn = Math.max(writer.getColumnCount(firstRow), 0);
-            int mergeColumn = Math.max((int) TreeUtil.leafNodeSum(node.getChildren(), 0L), 1);
+            int mergeColumn = Math.max((int) TreeUtil.sumLeafNode(node.getChildren(), 0L), 1);
             // 结束列
             int lastColumn = firstColumn + mergeColumn - 1;
 

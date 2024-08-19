@@ -103,6 +103,26 @@ public class ReflectUtil {
                 .findFirst();
     }
 
+    public static <T> T getFieldValue(Field field, Object obj, Class<T> asType) {
+        return getFieldValueOpt(field, obj, asType).orElse(null);
+    }
+
+    public static <T> Optional<T> getFieldValueOpt(Field field, Object obj, Class<T> asType) {
+        int modifiers = field.getModifiers();
+        if (!Modifier.isPublic(modifiers)) {
+            setAccessible(field);
+        }
+        try {
+            Object got = field.get(obj);
+            T result = asType.cast(got);
+            return Optional.ofNullable(result);
+        } catch (Exception ignored) {
+            return Optional.empty();
+        } finally {
+            field.setAccessible(false);
+        }
+    }
+
     /* ********************************************************* Method ********************************************************* */
     public static final String SETTER_METHOD_PREFIX = "set";
     public static final String GETTER_METHOD_PREFIX = "get";

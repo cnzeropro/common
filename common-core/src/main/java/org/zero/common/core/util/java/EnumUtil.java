@@ -1,8 +1,8 @@
 package org.zero.common.core.util.java;
 
-import cn.hutool.core.util.ReflectUtil;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
+import org.zero.common.core.util.java.reflect.ReflectUtil;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -34,10 +34,7 @@ public class EnumUtil {
         Field[] fields = enumType.getDeclaredFields();
         for (E enumObj : enumType.getEnumConstants()) {
             for (Field field : fields) {
-                // Sonar 扫描修复，我其实并不想调用三方类库方法（无奈之举）
-                // field.setAccessible(true);
-                // Object fieldValue = field.get(enumObj);
-                Object fieldValue = ReflectUtil.getFieldValue(enumObj, field);
+                Object fieldValue = ReflectUtil.getFieldValue(field, enumObj, Object.class);
                 if (equalsFieldVal(fieldValue, val)) {
                     return enumObj;
                 }
@@ -54,7 +51,7 @@ public class EnumUtil {
         Field[] fields = enumObj.getDeclaringClass().getDeclaredFields();
         for (Field field : fields) {
             if (field.getName().equalsIgnoreCase(valName)) {
-                return ReflectUtil.getFieldValue(enumObj, field);
+                return ReflectUtil.getFieldValue(field, enumObj, Object.class);
             }
         }
         return null;
@@ -68,8 +65,7 @@ public class EnumUtil {
         Field[] fields = enumObj.getDeclaringClass().getDeclaredFields();
         for (Field field : fields) {
             if (Objects.equals(field.getType(), valType)) {
-                Object fieldValue = ReflectUtil.getFieldValue(enumObj, field);
-                return valType.cast(fieldValue);
+                return ReflectUtil.getFieldValue(field, enumObj, valType);
             }
         }
         return null;
@@ -83,8 +79,7 @@ public class EnumUtil {
         Field[] fields = enumObj.getDeclaringClass().getDeclaredFields();
         for (Field field : fields) {
             if (field.getName().equalsIgnoreCase(valName)) {
-                Object fieldValue = ReflectUtil.getFieldValue(enumObj, field);
-                return valType.cast(fieldValue);
+                return ReflectUtil.getFieldValue(field, enumObj, valType);
             }
         }
         return null;

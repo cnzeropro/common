@@ -60,7 +60,11 @@ public class JacksonUtils {
         if (Objects.isNull(objectMapper)) {
             synchronized (JacksonUtils.class) {
                 if (Objects.isNull(objectMapper)) {
-                    objectMapper = SpringContextUtils.getBean(ObjectMapper.class);
+                    objectMapper = SpringContextUtils.getBeanProvider(ObjectMapper.class)
+                            .getIfAvailable();
+                }
+                if (Objects.isNull(objectMapper)) {
+                    objectMapper = new ObjectMapper();
                 }
             }
         }

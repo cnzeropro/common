@@ -29,87 +29,90 @@ import java.util.regex.Pattern;
 @Slf4j
 @UtilityClass
 public class ClassUtil {
-    private static final String CLASS_SUFFIX = ".class";
+    private static final String CLASS_FILE_SUFFIX = ".class";
     private static final String CLASS_FILE_PREFIX = File.separator + "classes" + File.separator;
     private static final String CLASS_FILE_SEPARATOR = File.separator;
     private static final String PACKAGE_SEPARATOR = ".";
     private static final String INNER_CLASS_SEPARATOR = "$";
 
     /**
-     * 获取指定包下类对象
+     * 获取指定包下类对象列表
      */
     public static List<Class<?>> getClasses(String packageName) {
         List<Class<?>> classes = new LinkedList<>();
-
         List<String> classNames = getClassNames(packageName);
         classNames.forEach(className -> {
             try {
                 classes.add(Class.forName(className));
             } catch (Exception e) {
-                log.warn(String.format("Get class[%s] exception under package[%s], skipped", packageName, className), e);
+                log.warn(String.format("Get class[%s] exception under package[%s], skipped", className, packageName), e);
             }
         });
-
         return classes;
     }
 
     /**
-     * 获取指定包下类名
+     * 获取指定包下类名列表
      */
     @SneakyThrows
     public static List<String> getClassNames(String packageName) {
         List<String> classNames = new LinkedList<>();
-        String replacedPackageName = packageName.replace(PACKAGE_SEPARATOR, CLASS_FILE_SEPARATOR);
-        Enumeration<URL> urls = Thread.currentThread().getContextClassLoader().getResources(replacedPackageName);
+        String packageFileName = packageName.replace(PACKAGE_SEPARATOR, CLASS_FILE_SEPARATOR);
+        Enumeration<URL> urls = Thread.currentThread()
+                .getContextClassLoader()
+                .getResources(packageFileName);
         while (urls.hasMoreElements()) {
             URL url = urls.nextElement();
             String protocol = url.getProtocol();
             if ("file".equals(protocol)) {
-                String packagePath = url.getPath().replace("%5c", File.separator).replace("%20", " ");
+                String packagePath = url.getPath()
+                        .replace("%5c", CLASS_FILE_SEPARATOR)
+                        .replace("%20", " ");
                 File file = new File(packagePath);
-                classNames.addAll(getClassNameByFile(file, packageName));
+                List<String> classNamesByFile = getClassNamesByFile(file, packageName);
+                classNames.addAll(classNamesByFile);
             } else if ("jar".equals(protocol)) {
-                JarFile jarFile = ((JarURLConnection) url.openConnection()).getJarFile();
+                JarFile jarFile = ((JarURLConnection) url.openConnection())
+                        .getJarFile();
                 if (Objects.nonNull(jarFile)) {
-                    classNames.addAll(getClassNameByJar(jarFile, packageName));
+                    List<String> classNamesByJar = getClassNamesByJar(jarFile, packageName);
+                    classNames.addAll(classNamesByJar);
                 }
             }
         }
-
         return classNames;
     }
 
     /**
-     * 通过class文件获取全限定类名
+     * 在文件中获取指定包名的类名
      */
-    public static List<String> getClassNameByFile(File file, String packageName) {
-        return getClassNameByFile(file, packageName, true, false);
+    public static List<String> getClassNamesByFile(File file, String packageName) {
+        return getClassNamesByFile(file, packageName, true, false);
     }
 
     /**
-     * 通过class文件获取全限定类名
+     * 在文件中获取指定包名的类名
      */
-    public static List<String> getClassNameByFile(File file, String packageName, boolean withChildClass, boolean withInnerClass) {
+    public static List<String> getClassNamesByFile(File file, String packageName, boolean withChildClass, boolean withInnerClass) {
         List<String> classNames = new LinkedList<>();
-
-        // 目录或文件不存在，直接返回空集合
-        if (!file.exists()) {
+        // File 对象为 null 或其不存在
+        if (Objects.isNull(file) || !file.exists()) {
             return classNames;
         }
-
-        // 是否需要包含子包class
-        if (!withChildClass && !file.isFile()) {
+        // File 对象是目录且又不包含子包类
+        if (!withChildClass && file.isDirectory()) {
             return classNames;
         }
-
         if (file.isFile()) {
             String path = file.getPath();
+            // 不包含内部类但存在内部类标识
             if (!withInnerClass && path.contains(INNER_CLASS_SEPARATOR)) {
                 return classNames;
             }
-            // 该文件是否是.class文件，且文件路径是否包含classes目录
-            if (path.endsWith(CLASS_SUFFIX) && path.contains(CLASS_FILE_PREFIX)) {
-                String classFileName = path.substring(path.indexOf(CLASS_FILE_PREFIX) + CLASS_FILE_PREFIX.length()).replace(File.separator, PACKAGE_SEPARATOR);
+            // 存在类文件标识（）
+            if (path.endsWith(CLASS_FILE_SUFFIX) && path.contains(CLASS_FILE_PREFIX)) {
+                String classFileName = path.substring(path.indexOf(CLASS_FILE_PREFIX) + CLASS_FILE_PREFIX.length())
+                        .replace(CLASS_FILE_SEPARATOR, PACKAGE_SEPARATOR);
                 String className = classFileName.substring(0, classFileName.lastIndexOf(PACKAGE_SEPARATOR));
                 if (withChildClass) {
                     if (className.startsWith(packageName)) {
@@ -125,34 +128,34 @@ public class ClassUtil {
             File[] files = file.listFiles();
             if (Objects.nonNull(files)) {
                 for (File f : files) {
-                    classNames.addAll(getClassNameByFile(f, packageName, withChildClass, withInnerClass));
+                    List<String> classNamesByFile = getClassNamesByFile(f, packageName, withChildClass, withInnerClass);
+                    classNames.addAll(classNamesByFile);
                 }
             }
         }
-
         return classNames;
     }
 
     /**
      * 通过JarFile获取其中全限定类名
      */
-    public static List<String> getClassNameByJar(JarFile jarFile, String packageName) {
-        return getClassNameByJar(jarFile, packageName, true, false);
+    public static List<String> getClassNamesByJar(JarFile jarFile, String packageName) {
+        return getClassNamesByJar(jarFile, packageName, true, false);
     }
 
     /**
      * 通过JarFile获取其中全限定类名
      */
-    public static List<String> getClassNameByJar(JarFile jarFile, String packageName, boolean withChildClass, boolean withInnerClass) {
+    public static List<String> getClassNamesByJar(JarFile jarFile, String packageName, boolean withChildClass, boolean withInnerClass) {
         List<String> classNames = new LinkedList<>();
-
         Enumeration<JarEntry> entries = jarFile.entries();
         while (entries.hasMoreElements()) {
             JarEntry jarEntry = entries.nextElement();
             String jarEntryName = jarEntry.getName();
-            // 判断是不是class文件
-            if (jarEntryName.endsWith(CLASS_SUFFIX)) {
-                String replacedJarEntryName = jarEntryName.replace(CLASS_SUFFIX, "").replace(CLASS_FILE_SEPARATOR, PACKAGE_SEPARATOR);
+            // 是 class 文件
+            if (jarEntryName.endsWith(CLASS_FILE_SUFFIX)) {
+                String replacedJarEntryName = jarEntryName.replace(CLASS_FILE_SUFFIX, "")
+                        .replace(CLASS_FILE_SEPARATOR, PACKAGE_SEPARATOR);
                 if (!withInnerClass && replacedJarEntryName.contains(INNER_CLASS_SEPARATOR)) {
                     continue;
                 }
@@ -167,7 +170,6 @@ public class ClassUtil {
                 }
             }
         }
-
         return classNames;
     }
 
