@@ -277,14 +277,14 @@ public class SpringContextUtils implements BeanFactoryPostProcessor, Application
     /**
      * Set {@link ApplicationContext}
      */
-    public static synchronized void setAppContext(ApplicationContext ac) {
+    public static void setAppContext(ApplicationContext ac) {
         applicationContext = ac;
     }
 
     /**
      * Set {@link ConfigurableListableBeanFactory}
      */
-    public static synchronized void setConfigurableListableBeanFactory(ConfigurableListableBeanFactory bf) {
+    public static void setConfigurableListableBeanFactory(ConfigurableListableBeanFactory bf) {
         beanFactory = bf;
     }
 
