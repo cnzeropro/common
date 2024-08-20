@@ -2,6 +2,7 @@ package org.zero.common.core.util.hutool;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.tree.Tree;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import cn.hutool.poi.excel.cell.CellUtil;
 import lombok.experimental.UtilityClass;
@@ -19,6 +20,7 @@ import org.apache.poi.xssf.usermodel.XSSFDrawing;
 import org.apache.poi.xssf.usermodel.XSSFSimpleShape;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Excel 工具类
@@ -98,20 +100,24 @@ public class ExcelUtil {
             int firstRow = writer.getCurrentRow();
             int sameLevelMaxDepth = Math.max((int) TreeUtil.sameLevelMaxDepth(trees), 1);
             int maxDepth = (int) TreeUtil.maxDepth(node);
+            // 合并行
             int mergeRow = sameLevelMaxDepth - maxDepth + 1;
             // 结束行
             int lastRow = firstRow + mergeRow - 1;
 
             // 起始列
             int firstColumn = Math.max(writer.getColumnCount(firstRow), 0);
-            int mergeColumn = Math.max((int) TreeUtil.sumLeafNode(node.getChildren(), 0L), 1);
+            // 合并列
+            long sumLeafNode = TreeUtil.sumLeafNode(node.getChildren(), 0L);
+            int mergeColumn = Math.max((int) sumLeafNode, 1);
             // 结束列
             int lastColumn = firstColumn + mergeColumn - 1;
 
+            // 绘制表头
             if (lastRow > firstRow || lastColumn > firstColumn) {
                 // 单元格样式
                 CellStyle cellStyle = (CellStyle) node.get("cellStyle");
-                if (cellStyle == null) {
+                if (Objects.isNull(cellStyle)) {
                     writer.merge(firstRow, lastRow, firstColumn, lastColumn, node.getName(), true);
                 } else {
                     writer.merge(firstRow, lastRow, firstColumn, lastColumn, node.getName(), cellStyle);
@@ -120,7 +126,7 @@ public class ExcelUtil {
                 writer.writeCellValue(firstColumn, firstRow, node.getName());
                 // 单元格样式
                 CellStyle cellStyle = (CellStyle) node.get("cellStyle");
-                if (cellStyle == null) {
+                if (Objects.isNull(cellStyle)) {
                     writer.setStyle(writer.getHeadCellStyle(), firstColumn, firstRow);
                 } else {
                     writer.setStyle(cellStyle, firstColumn, firstRow);
@@ -154,6 +160,29 @@ public class ExcelUtil {
                                              int dx2, int dy2,
                                              int col1, int row1,
                                              int col2, int row2) {
+        writeCellDiagonalLine(writer, dx1, dy1, dx2, dy2, col1, row1, col2, row2, null);
+    }
+
+    /**
+     * 绘制单元格对角线
+     *
+     * @param writer      Excel 写入器 {@link ExcelWriter}
+     * @param dx1         第一个单元格内的 x 坐标
+     * @param dy1         第一个单元格内的 y 坐标
+     * @param dx2         第二个单元格内的 x 坐标
+     * @param dy2         第二个单元格内的 y 坐标
+     * @param col1        第一个单元格的列（基于 0）
+     * @param row1        第一个单元格的行（基于 0）
+     * @param col2        第二个单元格的列（基于 0）
+     * @param row2        第二个单元格的行（基于 0）
+     * @param cellContent 单元格内容
+     */
+    public static void writeCellDiagonalLine(ExcelWriter writer,
+                                             int dx1, int dy1,
+                                             int dx2, int dy2,
+                                             int col1, int row1,
+                                             int col2, int row2,
+                                             String cellContent) {
         writer.merge(0, row2 - 1, 0, col2 - 1, null, false);
         Sheet sheet = writer.getSheet();
         Drawing<?> drawingPatriarch = sheet.createDrawingPatriarch();
@@ -182,12 +211,14 @@ public class ExcelUtil {
             // 设置边框线宽，单位：Point
             shape.setLineWidth(1);
         } else if (drawingPatriarch instanceof SXSSFDrawing) {
-            log.warn("Not supported this sheet drawing type");
+            log.warn("Not supported this sheet drawing type: {}", drawingPatriarch.getClass());
         } else {
-            log.warn("Unknown sheet drawing type");
+            log.warn("Unknown sheet drawing type: {}", drawingPatriarch.getClass());
         }
 
-        // 对角线单元格内容
-        // writer.writeCellValue(0, 0, "列 行");
+        // 写入对角线单元格内容
+        if (CharSequenceUtil.isNotBlank(cellContent)) {
+            writer.writeCellValue(0, 0, cellContent);
+        }
     }
 }
