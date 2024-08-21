@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 
 /**
  * @author Zero (cnzeropro@qq.com)
- * @date 2022/12/1
+ * @since 2022/12/1
  */
 @AllArgsConstructor
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)

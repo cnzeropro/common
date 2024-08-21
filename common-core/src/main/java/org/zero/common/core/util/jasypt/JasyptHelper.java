@@ -8,7 +8,7 @@ import org.jasypt.encryption.pbe.config.SimpleStringPBEConfig;
 
 /**
  * @author Zero (cnzeropro@qq.com)
- * @date 2021/10/3 21:41
+ * @since 2021/10/3 21:41
  */
 @RequiredArgsConstructor(staticName = "build")
 public class JasyptHelper {

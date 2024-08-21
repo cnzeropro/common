@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 
 /**
  * @author Zero (cnzeropro@qq.com)
- * @date 2022/11/30
+ * @since 2022/11/30
  */
 @UtilityClass
 public class IfUtil {

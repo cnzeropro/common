@@ -6,8 +6,8 @@ import java.io.InputStream;
 import java.net.URL;
 
 /**
- * <Detect encoding .>
- * Copyright (C) <2009>  <Fluck,ACC http://androidos.cc/dev>
+ * &lt;Detect encoding .&gt;
+ * Copyright (C) &lt;2009&gt;  &lt;Fluck,ACC http://androidos.cc/dev&gt;
  * <p>
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

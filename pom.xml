@@ -28,9 +28,10 @@
         <maven.compiler.encoding>${project.encoding}</maven.compiler.encoding>
         <project.build.sourceEncoding>${project.encoding}</project.build.sourceEncoding>
         <project.reporting.outputEncoding>${project.encoding}</project.reporting.outputEncoding>
+        <github.global.server>github</github.global.server>
 
         <common.version>${project.version}</common.version>
-
+        <!-- Spring -->
         <spring-framework.version>5.3.31</spring-framework.version>
         <spring-boot.version>2.7.18</spring-boot.version>
         <spring-amqp.version>2.4.17</spring-amqp.version>
@@ -47,11 +48,14 @@
         <spring-security.version>5.7.11</spring-security.version>
         <spring-session-bom.version>2021.2.3</spring-session-bom.version>
         <spring-ws.version>3.1.7</spring-ws.version>
-
         <spring-cloud.version>2021.0.5</spring-cloud.version>
         <spring-cloud-alibaba.version>2021.0.5.0</spring-cloud-alibaba.version>
         <spring-cloud-huawei.version>1.11.0-2021.0.x</spring-cloud-huawei.version>
-
+        <!-- Apache commons -->
+        <commons-text.version>1.11.0</commons-text.version>
+        <commons-compress.version>1.26.1</commons-compress.version>
+        <commons-poi.version>5.2.5</commons-poi.version>
+        <!-- Other -->
         <arthas.version>3.4.8</arthas.version>
         <druid.version>1.2.16</druid.version>
         <dynamic-datasource.version>4.2.0</dynamic-datasource.version>
@@ -91,10 +95,14 @@
         <mysql.version>8.0.32</mysql.version>
         <grpc.version>1.59.0</grpc.version>
         <protobuf.version>3.24.4</protobuf.version>
-        <commons-text.version>1.11.0</commons-text.version>
-        <commons-compress.version>1.26.1</commons-compress.version>
-        <commons-poi.version>5.2.5</commons-poi.version>
         <xerces.version>2.12.2</xerces.version>
+
+        <!-- Maven Plugins -->
+        <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
+        <maven-javadoc-plugin.version>3.8.0</maven-javadoc-plugin.version>
+        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
+        <site-maven-plugin.version>0.12</site-maven-plugin.version>
     </properties>
 
     <dependencies>
@@ -222,4 +230,103 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <!-- setting.xml 文件中指定用户名和密码
+    <server>
+        <id>github</id>
+        <username>YOUR_USERNAME</username>
+        <password>YOUR_PASSWORD</password>
+    </server>
+    -->
+
+    <distributionManagement>
+        <repository>
+            <id>local-staging-repository</id>
+            <name>Local Staging Repository</name>
+            <url>file://${project.build.directory}/mvn-repo</url>
+        </repository>
+    </distributionManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>${maven-source-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>jar-no-fork</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>${maven-javadoc-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <source>${maven.compiler.source}</source>
+                        <target>${maven.compiler.target}</target>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>${maven-deploy-plugin.version}</version>
+                    <configuration>
+                        <altDeploymentRepository>
+                            local-staging-repository::default::file://${project.build.directory}/mvn-repo
+                        </altDeploymentRepository>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>com.github.github</groupId>
+                    <artifactId>site-maven-plugin</artifactId>
+                    <version>${site-maven-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>site</goal>
+                            </goals>
+                            <phase>deploy</phase>
+                            <configuration>
+                                <!-- Server info (setting.xml -> server) -->
+                                <server>${github.global.server}</server>
+                                <!-- commit message -->
+                                <message>update common jar</message>
+                                <!-- github repo name -->
+                                <repositoryName>repository</repositoryName>
+                                <!-- organization or username  -->
+                                <repositoryOwner>cnzeropro</repositoryOwner>
+                                <!-- Use merge or override the content -->
+                                <merge>true</merge>
+                                <!-- The directory to deploy -->
+                                <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
+                                <!-- The branch to commit -->
+                                <branch>refs/heads/main</branch>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>

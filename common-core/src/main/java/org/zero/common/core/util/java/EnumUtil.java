@@ -10,7 +10,7 @@ import java.util.Objects;
 
 /**
  * @author Zero (cnzeropro@qq.com)
- * @date 2021/9/1 17:02
+ * @since 2021/9/1 17:02
  */
 @UtilityClass
 public class EnumUtil {

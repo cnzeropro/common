@@ -6,7 +6,7 @@ import java.util.Objects;
 
 /**
  * @author Zero (cnzeropro@qq.com)
- * @date 2022/11/29
+ * @since 2022/11/29
  */
 public abstract class TypeReference<T> implements Type {
     /**

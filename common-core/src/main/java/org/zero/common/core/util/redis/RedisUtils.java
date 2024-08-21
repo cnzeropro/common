@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  * redisTemplate封装
  *
  * @author Zero
- * @date 2021/10/20 13:36
+ * @since 2021/10/20 13:36
  */
 @UtilityClass
 public class RedisUtils {
@@ -915,8 +915,8 @@ public class RedisUtils {
     /**
      * 通过索引（index）获取列表中的值
      * <p>
-     * index>=0时：0表头，1第二个元素，依次类推；
-     * index<0时，-1表尾，-2倒数第二个元素，依次类推
+     * index &gt;= 0时：0表头，1第二个元素，依次类推；
+     * index &lt; 0时，-1表尾，-2倒数第二个元素，依次类推
      * <p>
      * lindex
      *
@@ -1096,8 +1096,8 @@ public class RedisUtils {
 
     /**
      * 移除列表元素
-     * count > 0：从表头开始向表尾搜索，移除与VALUE相等的元素，数量为COUNT。
-     * count < 0：从表尾开始向表头搜索，移除与VALUE相等的元素，数量为COUNT的绝对值。
+     * count &gt; 0：从表头开始向表尾搜索，移除与VALUE相等的元素，数量为COUNT。
+     * count &lt; 0：从表尾开始向表头搜索，移除与VALUE相等的元素，数量为COUNT的绝对值。
      * count = 0：移除表中所有与VALUE相等的值。
      * <p>
      * LREM

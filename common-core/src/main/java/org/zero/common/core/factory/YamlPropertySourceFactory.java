@@ -24,7 +24,7 @@ import java.util.Properties;
  * </pre>
  *
  * @author zero
- * @date 2021/2/12
+ * @since 2021/2/12
  */
 public class YamlPropertySourceFactory implements PropertySourceFactory {
     @Override
