@@ -128,20 +128,26 @@
                         </goals>
                         <phase>deploy</phase>
                         <configuration>
-                            <!-- Server info (setting.xml -> server) -->
+                            <!-- 服务器 ID（setting.xml -> server） -->
                             <server>github</server>
-                            <!-- commit message -->
-                            <message>upload common-bom</message>
-                            <!-- github repo name -->
-                            <repositoryName>repository</repositoryName>
-                            <!-- organization or username  -->
-                            <repositoryOwner>cnzeropro</repositoryOwner>
-                            <!-- Use merge or override the content -->
-                            <merge>true</merge>
-                            <!-- The directory to deploy -->
-                            <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
-                            <!-- The branch to commit -->
+                            <!-- 分支 -->
                             <branch>refs/heads/main</branch>
+                            <!-- 提交信息 -->
+                            <message>upload ${project.artifactId}-${project.version}</message>
+                            <!-- 仓库所有者  -->
+                            <repositoryOwner>cnzeropro</repositoryOwner>
+                            <!-- 仓库名称 -->
+                            <repositoryName>repository</repositoryName>
+                            <!-- true：合并；false：覆盖 -->
+                            <merge>true</merge>
+                            <!-- 是否生成 .nojekyll 文件 -->
+                            <noJekyll>true</noJekyll>
+                            <!-- 提交根目录-->
+                            <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
+                            <!-- 要包含的路径和模式 -->
+                            <includes>
+                                <include>**/*</include>
+                            </includes>
                         </configuration>
                     </execution>
                 </executions>
