@@ -116,6 +116,7 @@
                     </altDeploymentRepository>
                 </configuration>
             </plugin>
+            <!-- https://github.com/github/maven-plugins -->
             <plugin>
                 <groupId>com.github.github</groupId>
                 <artifactId>site-maven-plugin</artifactId>
@@ -130,7 +131,7 @@
                             <!-- Server info (setting.xml -> server) -->
                             <server>github</server>
                             <!-- commit message -->
-                            <message>update common jar</message>
+                            <message>upload common-bom</message>
                             <!-- github repo name -->
                             <repositoryName>repository</repositoryName>
                             <!-- organization or username  -->
