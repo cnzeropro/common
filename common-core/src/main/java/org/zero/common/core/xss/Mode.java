@@ -1,8 +1,5 @@
 package org.zero.common.core.xss;
 
-import cn.hutool.http.HtmlUtil;
-import org.apache.commons.text.StringEscapeUtils;
-
 /**
  * @author zero
  * @since 2024/4/30
@@ -14,7 +11,8 @@ public enum Mode {
     CHECK {
         @Override
         public String apply(String value) {
-            throw new UnsupportedOperationException();
+            XssChecker.checkOrElseThrow(value);
+            return value;
         }
     },
     /**
@@ -23,8 +21,8 @@ public enum Mode {
     ESCAPE {
         @Override
         public String apply(String value) {
-            // return EscapeUtil.escapeHtml4(value);
-            return StringEscapeUtils.escapeHtml4(value);
+            // cn.hutool.core.util.EscapeUtil.escapeHtml4(value);
+            return org.apache.commons.text.StringEscapeUtils.escapeHtml4(value);
         }
     },
     /**
@@ -33,7 +31,7 @@ public enum Mode {
     FILTER {
         @Override
         public String apply(String value) {
-            return HtmlUtil.filter(value);
+            return cn.hutool.http.HtmlUtil.filter(value);
         }
     },
     ;
