@@ -1,4 +1,4 @@
-package org.zero.common.core.desensitization.jackson;
+package org.zero.common.core.support.desensitization.jackson;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.BeanProperty;
@@ -8,9 +8,9 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import org.zero.common.core.desensitization.Desensitization;
-import org.zero.common.core.desensitization.DesensitizationProvider;
-import org.zero.common.core.desensitization.DesensitizationType;
+import org.zero.common.core.support.desensitization.Desensitization;
+import org.zero.common.core.support.desensitization.DesensitizationProvider;
+import org.zero.common.core.support.desensitization.DesensitizationType;
 import org.zero.common.core.util.java.reflect.ReflectUtil;
 
 import java.io.IOException;

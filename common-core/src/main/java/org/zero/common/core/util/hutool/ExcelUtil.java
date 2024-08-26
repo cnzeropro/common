@@ -10,7 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
 import org.apache.poi.hssf.usermodel.HSSFPatriarch;
 import org.apache.poi.hssf.usermodel.HSSFSimpleShape;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.ShapeTypes;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -219,6 +221,44 @@ public class ExcelUtil {
         // 写入对角线单元格内容
         if (CharSequenceUtil.isNotBlank(cellContent)) {
             writer.writeCellValue(0, 0, cellContent);
+        }
+    }
+
+    public static final int MIN_COLUMN_WIDTH = 8;
+    public static final int MAX_COLUMN_CHAR = 255;
+    public static final int MAX_COLUMN_PIXEL = 256;
+    public static final int MAX_COLUMN_WIDTH = MAX_COLUMN_CHAR * MAX_COLUMN_PIXEL;
+    public static final int EXTRA_COLUMN_WIDTH = 4;
+
+    /**
+     * 单元格自适应宽度
+     */
+    public static void autoSizeColumnAll(ExcelWriter writer) {
+        int columnCount = writer.getColumnCount();
+        int physicalRowCount = writer.getPhysicalRowCount();
+        int maxWidth = MIN_COLUMN_WIDTH;
+        for (int i = 0; i < columnCount; i++) {
+            for (int j = 0; j < physicalRowCount; j++) {
+                Cell cell = writer.getCell(i, j);
+                if (Objects.nonNull(cell)) {
+                    String stringCellValue = "";
+                    CellType cellType = cell.getCellType();
+                    if (CellType.STRING == cellType) {
+                        stringCellValue = cell.getStringCellValue();
+                    } else if (CellType.NUMERIC == cellType) {
+                        stringCellValue = Double.toString(cell.getNumericCellValue());
+                    } else if (CellType.BOOLEAN == cellType) {
+                        stringCellValue = Boolean.toString(cell.getBooleanCellValue());
+                    } else if (CellType.FORMULA == cellType) {
+                        stringCellValue = cell.getCellFormula();
+                    }
+                    int cellWidth = stringCellValue.getBytes().length * MAX_COLUMN_PIXEL;
+                    maxWidth = Math.max(maxWidth, cellWidth);
+                }
+            }
+            maxWidth += EXTRA_COLUMN_WIDTH;
+            maxWidth = Math.max(maxWidth, MAX_COLUMN_WIDTH);
+            writer.getSheet().setColumnWidth(i, maxWidth);
         }
     }
 }

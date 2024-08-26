@@ -1,4 +1,4 @@
-package org.zero.common.core.xss;
+package org.zero.common.core.support.xss;
 
 import lombok.experimental.StandardException;
 import org.zero.common.data.exception.BaseException;

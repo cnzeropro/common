@@ -1,4 +1,4 @@
-package org.zero.common.core.desensitization;
+package org.zero.common.core.support.desensitization;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import lombok.Getter;

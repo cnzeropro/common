@@ -82,8 +82,8 @@ public class JavaExceptionHandler {
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Error.class)
-    public Result<Void> error(Error t) {
-        log.error("System critical error", t);
+    public Result<Void> error(Error e) {
+        log.error("System critical error", e);
         return Result.fail("系统严重错误，请联系管理员");
     }
 

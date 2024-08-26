@@ -1,8 +1,8 @@
-package org.zero.common.core.desensitization;
+package org.zero.common.core.support.desensitization;
 
 import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.zero.common.core.desensitization.jackson.DesensitizationSerializer;
+import org.zero.common.core.support.desensitization.jackson.DesensitizationSerializer;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

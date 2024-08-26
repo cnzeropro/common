@@ -1,4 +1,4 @@
-package org.zero.common.core.xss;
+package org.zero.common.core.support.xss;
 
 /**
  * @author zero

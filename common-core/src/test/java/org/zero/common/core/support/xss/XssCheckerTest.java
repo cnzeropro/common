@@ -1,10 +1,10 @@
-package org.zero.common.core.xss;
+package org.zero.common.core.support.xss;
 
 import org.junit.jupiter.api.Test;
 
 /**
  * @author Zero (cnzeropro@163.com)
- * @since 2024/8/23
+ * @since 2024/8/26
  */
 class XssCheckerTest {
 
