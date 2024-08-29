@@ -2,11 +2,6 @@ package org.zero.common.core.exception.handler.sentinel;
 
 import com.alibaba.csp.sentinel.adapter.spring.webmvc.callback.BlockExceptionHandler;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
-import com.alibaba.csp.sentinel.slots.block.authority.AuthorityException;
-import com.alibaba.csp.sentinel.slots.block.degrade.DegradeException;
-import com.alibaba.csp.sentinel.slots.block.flow.FlowException;
-import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowException;
-import com.alibaba.csp.sentinel.slots.system.SystemBlockException;
 import lombok.extern.slf4j.Slf4j;
 import org.zero.common.core.util.jackson.JacksonUtils;
 import org.zero.common.core.util.javax.web.ResponseUtil;
@@ -16,6 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
+ * Web MVC 端 Sentinel 统一异常处理
+ * <p>
  * 默认实现：{@link com.alibaba.csp.sentinel.adapter.spring.webmvc.callback.DefaultBlockExceptionHandler}
  *
  * @author Zero
@@ -26,22 +23,7 @@ public class CustomBlockExceptionHandler implements BlockExceptionHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, BlockException e) {
         log.warn("Sentinel block exception", e);
-        Result<String> result = Result.error("未知异常", e.getMessage());
-        if (e instanceof FlowException) {
-            result = Result.error("接口已被限流", e.getMessage());
-        }
-        if (e instanceof DegradeException) {
-            result = Result.error("服务已被降级", e.getMessage());
-        }
-        if (e instanceof ParamFlowException) {
-            result = Result.error("热点参数被限流", e.getMessage());
-        }
-        if (e instanceof SystemBlockException) {
-            result = Result.error("触发系统保护规则", e.getMessage());
-        }
-        if (e instanceof AuthorityException) {
-            result = Result.error("未被授权，请稍后再试", e.getMessage());
-        }
+        Result<Void> result = SentinelExceptionUtil.exception2Result(e);
         String jsonStr = JacksonUtils.toJsonStr(result);
         ResponseUtil.writeErrorJson(response, jsonStr);
     }
