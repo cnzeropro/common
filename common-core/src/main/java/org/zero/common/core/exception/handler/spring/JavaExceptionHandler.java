@@ -72,6 +72,12 @@ public class JavaExceptionHandler {
         return Result.fail("线程池已满");
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public Result<Void> runtimeException(RuntimeException e) {
+        log.error("Runtime exception", e);
+        return Result.fail("运行时异常");
+    }
+
     /* *************************************************** 总异常 *************************************************** */
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
