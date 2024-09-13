@@ -18,6 +18,7 @@ import org.zero.common.data.exception.CommonException;
 import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -102,7 +103,8 @@ public class EasyExcelResponseBodyAdvice extends BaseExcelExportResponseBodyAdvi
         String sheetName = String.format(SHEET_NAME_STYLE, SHEET_NAME_PREFIX, 1);
         List<List<String>> head = this.getHeadList(maps);
         WriteSheet writeSheet = EasyExcel.writerSheet(0, sheetName).head(head).build();
-        excelWriter.write(maps, writeSheet);
+        List<Map<Integer, Object>> data = maps.stream().map(this::convert).collect(Collectors.toList());
+        excelWriter.write(data, writeSheet);
         return outputStream;
     }
 
@@ -129,7 +131,8 @@ public class EasyExcelResponseBodyAdvice extends BaseExcelExportResponseBodyAdvi
             String sheetName = String.format(SHEET_NAME_STYLE, SHEET_NAME_PREFIX, i + 1);
             List<List<String>> head = this.getHeadList(maps);
             WriteSheet writeSheet = EasyExcel.writerSheet(i, sheetName).head(head).build();
-            excelWriter.write(maps, writeSheet);
+            List<Map<Integer, Object>> data = maps.stream().map(this::convert).collect(Collectors.toList());
+            excelWriter.write(data, writeSheet);
             i++;
         }
         return outputStream;
@@ -193,7 +196,8 @@ public class EasyExcelResponseBodyAdvice extends BaseExcelExportResponseBodyAdvi
             String sheetName = Objects.toString(key);
             List<List<String>> head = this.getHeadList(value);
             WriteSheet writeSheet = EasyExcel.writerSheet(i, sheetName).head(head).build();
-            excelWriter.write(value, writeSheet);
+            List<Map<Integer, Object>> data = value.stream().map(this::convert).collect(Collectors.toList());
+            excelWriter.write(data, writeSheet);
             i++;
         }
         return outputStream;
@@ -270,5 +274,14 @@ public class EasyExcelResponseBodyAdvice extends BaseExcelExportResponseBodyAdvi
             excelWriterBuilder.password(password);
         }
         return excelWriterBuilder;
+    }
+
+    private Map<Integer, Object> convert(Map<?, ?> map) {
+        Map<Integer, Object> dataMap = new LinkedHashMap<>(map.size());
+        int i = 0;
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
+            dataMap.put(i++, entry.getValue());
+        }
+        return dataMap;
     }
 }
