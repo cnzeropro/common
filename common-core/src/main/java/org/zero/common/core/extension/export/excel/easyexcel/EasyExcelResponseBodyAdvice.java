@@ -5,6 +5,7 @@ import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.support.ExcelTypeEnum;
 import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.alibaba.excel.write.metadata.WriteSheet;
+import lombok.Cleanup;
 import lombok.NoArgsConstructor;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.StringUtils;
@@ -48,18 +49,19 @@ public class EasyExcelResponseBodyAdvice extends BaseExcelExportResponseBodyAdvi
     @Override
     protected FastByteArrayOutputStream handleCollectionOfEntity(ExcelExport excelExport, Collection<?> collection) {
         FastByteArrayOutputStream outputStream = new FastByteArrayOutputStream();
-        ExcelWriter excelWriter = this.getExcelWriter(outputStream, excelExport);
+        @Cleanup ExcelWriter excelWriter = this.getExcelWriter(outputStream, excelExport);
         String sheetName = String.format(SHEET_NAME_STYLE, SHEET_NAME_PREFIX, 1);
         Class<?> clazz = this.getHeadClass(collection);
         WriteSheet writeSheet = EasyExcel.writerSheet(0, sheetName).head(clazz).build();
         excelWriter.write(collection, writeSheet);
+        excelWriter.close();
         return outputStream;
     }
 
     @Override
     protected FastByteArrayOutputStream handleCollectionOfBase(ExcelExport excelExport, Collection<?> collection) {
         FastByteArrayOutputStream outputStream = new FastByteArrayOutputStream();
-        ExcelWriter excelWriter = this.getExcelWriter(outputStream, excelExport);
+        @Cleanup ExcelWriter excelWriter = this.getExcelWriter(outputStream, excelExport);
         String sheetName = String.format(SHEET_NAME_STYLE, SHEET_NAME_PREFIX, 1);
         WriteSheet writeSheet = EasyExcel.writerSheet(0, sheetName).build();
         // 包装一下，让其写一行，而不是写一列
@@ -71,7 +73,7 @@ public class EasyExcelResponseBodyAdvice extends BaseExcelExportResponseBodyAdvi
     @Override
     protected FastByteArrayOutputStream handleCollectionOfCollectionOfEntity(ExcelExport excelExport, Collection<Collection<?>> collections) {
         FastByteArrayOutputStream outputStream = new FastByteArrayOutputStream();
-        ExcelWriter excelWriter = this.getExcelWriter(outputStream, excelExport);
+        @Cleanup ExcelWriter excelWriter = this.getExcelWriter(outputStream, excelExport);
         int i = 0;
         for (Collection<?> collection : collections) {
             String sheetName = String.format(SHEET_NAME_STYLE, SHEET_NAME_PREFIX, i + 1);
@@ -86,7 +88,7 @@ public class EasyExcelResponseBodyAdvice extends BaseExcelExportResponseBodyAdvi
     @Override
     protected FastByteArrayOutputStream handleCollectionOfCollectionOfBase(ExcelExport excelExport, Collection<Collection<?>> collections) {
         FastByteArrayOutputStream outputStream = new FastByteArrayOutputStream();
-        ExcelWriter excelWriter = this.getExcelWriter(outputStream, excelExport);
+        @Cleanup ExcelWriter excelWriter = this.getExcelWriter(outputStream, excelExport);
         String sheetName = String.format(SHEET_NAME_STYLE, SHEET_NAME_PREFIX, 1);
         WriteSheet writeSheet = EasyExcel.writerSheet(0, sheetName).build();
         excelWriter.write(collections, writeSheet);
@@ -96,7 +98,7 @@ public class EasyExcelResponseBodyAdvice extends BaseExcelExportResponseBodyAdvi
     @Override
     protected FastByteArrayOutputStream handleCollectionOfMap(ExcelExport excelExport, Collection<Map<?, ?>> maps) {
         FastByteArrayOutputStream outputStream = new FastByteArrayOutputStream();
-        ExcelWriter excelWriter = this.getExcelWriter(outputStream, excelExport);
+        @Cleanup ExcelWriter excelWriter = this.getExcelWriter(outputStream, excelExport);
         String sheetName = String.format(SHEET_NAME_STYLE, SHEET_NAME_PREFIX, 1);
         List<List<String>> head = this.getHeadList(maps);
         WriteSheet writeSheet = EasyExcel.writerSheet(0, sheetName).head(head).build();
@@ -107,7 +109,7 @@ public class EasyExcelResponseBodyAdvice extends BaseExcelExportResponseBodyAdvi
     @Override
     protected FastByteArrayOutputStream handleCollectionOfCollectionOfCollection(ExcelExport excelExport, Collection<Collection<Collection<?>>> collectionOfCollections) {
         FastByteArrayOutputStream outputStream = new FastByteArrayOutputStream();
-        ExcelWriter excelWriter = this.getExcelWriter(outputStream, excelExport);
+        @Cleanup ExcelWriter excelWriter = this.getExcelWriter(outputStream, excelExport);
         int i = 0;
         for (Collection<Collection<?>> collections : collectionOfCollections) {
             String sheetName = String.format(SHEET_NAME_STYLE, SHEET_NAME_PREFIX, i + 1);
@@ -121,7 +123,7 @@ public class EasyExcelResponseBodyAdvice extends BaseExcelExportResponseBodyAdvi
     @Override
     protected FastByteArrayOutputStream handleCollectionOfCollectionOfMap(ExcelExport excelExport, Collection<Collection<Map<?, ?>>> collectionOfMaps) {
         FastByteArrayOutputStream outputStream = new FastByteArrayOutputStream();
-        ExcelWriter excelWriter = this.getExcelWriter(outputStream, excelExport);
+        @Cleanup ExcelWriter excelWriter = this.getExcelWriter(outputStream, excelExport);
         int i = 0;
         for (Collection<Map<?, ?>> maps : collectionOfMaps) {
             String sheetName = String.format(SHEET_NAME_STYLE, SHEET_NAME_PREFIX, i + 1);
@@ -136,7 +138,7 @@ public class EasyExcelResponseBodyAdvice extends BaseExcelExportResponseBodyAdvi
     @Override
     protected FastByteArrayOutputStream handleMapOfOther(ExcelExport excelExport, Map<?, ?> map) {
         FastByteArrayOutputStream outputStream = new FastByteArrayOutputStream();
-        ExcelWriter excelWriter = this.getExcelWriter(outputStream, excelExport);
+        @Cleanup ExcelWriter excelWriter = this.getExcelWriter(outputStream, excelExport);
         String sheetName = String.format(SHEET_NAME_STYLE, SHEET_NAME_PREFIX, 1);
         List<List<String>> head = this.getHeadList(map);
         WriteSheet writeSheet = EasyExcel.writerSheet(0, sheetName).head(head).build();
@@ -149,7 +151,7 @@ public class EasyExcelResponseBodyAdvice extends BaseExcelExportResponseBodyAdvi
     @Override
     protected FastByteArrayOutputStream handleMapOfCollectionOfEntity(ExcelExport excelExport, Map<?, Collection<?>> collectionMap) {
         FastByteArrayOutputStream outputStream = new FastByteArrayOutputStream();
-        ExcelWriter excelWriter = this.getExcelWriter(outputStream, excelExport);
+        @Cleanup ExcelWriter excelWriter = this.getExcelWriter(outputStream, excelExport);
         int i = 0;
         for (Map.Entry<?, Collection<?>> entry : collectionMap.entrySet()) {
             Object key = entry.getKey();
@@ -166,7 +168,7 @@ public class EasyExcelResponseBodyAdvice extends BaseExcelExportResponseBodyAdvi
     @Override
     protected FastByteArrayOutputStream handleMapOfCollectionOfBase(ExcelExport excelExport, Map<?, Collection<?>> collectionMap) {
         FastByteArrayOutputStream outputStream = new FastByteArrayOutputStream();
-        ExcelWriter excelWriter = this.getExcelWriter(outputStream, excelExport);
+        @Cleanup ExcelWriter excelWriter = this.getExcelWriter(outputStream, excelExport);
         int i = 0;
         for (Map.Entry<?, Collection<?>> entry : collectionMap.entrySet()) {
             Object key = entry.getKey();
@@ -183,7 +185,7 @@ public class EasyExcelResponseBodyAdvice extends BaseExcelExportResponseBodyAdvi
     @Override
     protected FastByteArrayOutputStream handleMapOfCollectionOfMap(ExcelExport excelExport, Map<?, Collection<Map<?, ?>>> collectionOfMapMap) {
         FastByteArrayOutputStream outputStream = new FastByteArrayOutputStream();
-        ExcelWriter excelWriter = this.getExcelWriter(outputStream, excelExport);
+        @Cleanup ExcelWriter excelWriter = this.getExcelWriter(outputStream, excelExport);
         int i = 0;
         for (Map.Entry<?, Collection<Map<?, ?>>> entry : collectionOfMapMap.entrySet()) {
             Object key = entry.getKey();
