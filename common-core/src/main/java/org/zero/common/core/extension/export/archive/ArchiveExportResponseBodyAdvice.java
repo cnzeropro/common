@@ -243,9 +243,9 @@ public class ArchiveExportResponseBodyAdvice extends BaseExportResponseBodyAdvic
     protected FileExportEntity handleCharSequence(ArchiveExport archiveExport, CharSequence... charSequences) {
         URI[] uris;
         try {
-            uris = mapArray(charSequences, this::getUriFromCharSequence);
+            uris = mapArray(charSequences, this::getUriFromCharSequence, URI.class);
         } catch (Exception ignored) {
-            File[] files = mapArray(charSequences, this::getFileFromCharSequence);
+            File[] files = mapArray(charSequences, this::getFileFromCharSequence, File.class);
             return this.handleFile(archiveExport, files);
         }
         return this.handleUri(archiveExport, uris);
@@ -274,9 +274,9 @@ public class ArchiveExportResponseBodyAdvice extends BaseExportResponseBodyAdvic
     protected FileExportEntity handleUri(ArchiveExport archiveExport, URI... uris) {
         URL[] urls;
         try {
-            urls = mapArray(uris, this::getUrlFromUri);
+            urls = mapArray(uris, this::getUrlFromUri, URL.class);
         } catch (Exception ignored) {
-            File[] files = mapArray(uris, this::getFileFromUri);
+            File[] files = mapArray(uris, this::getFileFromUri, File.class);
             return this.handleFile(archiveExport, files);
         }
         return this.handleUrl(archiveExport, urls);
@@ -304,10 +304,10 @@ public class ArchiveExportResponseBodyAdvice extends BaseExportResponseBodyAdvic
 
     protected FileExportEntity handleUrl(ArchiveExport archiveExport, URL... urls) {
         if (allNonNullMatch(urls, ResourceUtils::isFileURL)) {
-            File[] files = mapArray(urls, this::getFileFromUrl);
+            File[] files = mapArray(urls, this::getFileFromUrl, File.class);
             return this.handleFile(archiveExport, files);
         } else {
-            InputStream[] inputStreams = mapArray(urls, URLUtil::getStream);
+            InputStream[] inputStreams = mapArray(urls, URLUtil::getStream, InputStream.class);
             return this.handleStream(archiveExport, inputStreams);
         }
     }
@@ -323,7 +323,7 @@ public class ArchiveExportResponseBodyAdvice extends BaseExportResponseBodyAdvic
     }
 
     protected FileExportEntity handlePath(ArchiveExport archiveExport, Path... paths) {
-        File[] files = mapArray(paths, Path::toFile);
+        File[] files = mapArray(paths, Path::toFile, File.class);
         return this.handleFile(archiveExport, files);
     }
 
@@ -341,7 +341,7 @@ public class ArchiveExportResponseBodyAdvice extends BaseExportResponseBodyAdvic
     protected FileExportEntity handleResource(ArchiveExport archiveExport, Resource... resources) {
         File[] files;
         try {
-            files = mapArray(resources, this::getFileFromResource);
+            files = mapArray(resources, this::getFileFromResource, File.class);
         } catch (Exception ignored) {
             int i = 0;
             Map<String, InputStream> inputStreamMap = new LinkedHashMap<>();
@@ -395,7 +395,7 @@ public class ArchiveExportResponseBodyAdvice extends BaseExportResponseBodyAdvic
     }
 
     protected FileExportEntity handleReader(ArchiveExport archiveExport, Reader... readers) {
-        InputStream[] inputStreams = mapArray(readers, reader -> this.getInputStreamFromReader(archiveExport, reader));
+        InputStream[] inputStreams = mapArray(readers, reader -> this.getInputStreamFromReader(archiveExport, reader), InputStream.class);
         return this.handleStream(archiveExport, inputStreams);
     }
 
@@ -502,7 +502,7 @@ public class ArchiveExportResponseBodyAdvice extends BaseExportResponseBodyAdvic
     }
 
     @SuppressWarnings("unchecked")
-    protected static <T, R> R[] mapArray(T[] array, Function<T, R> function) {
-        return Arrays.stream(array).map(function).toArray(size -> (R[]) new Object[size]);
+    protected static <T, R> R[] mapArray(T[] array, Function<T, R> function, Class<R> clazz) {
+        return Arrays.stream(array).map(function).toArray(size -> ArrayUtil.newArray(clazz, size));
     }
 }
