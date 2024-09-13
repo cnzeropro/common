@@ -230,22 +230,34 @@ public class ArchiveExportResponseBodyAdvice extends BaseExportResponseBodyAdvic
     }
 
     protected FileExportEntity handleCharSequence(ArchiveExport archiveExport, Map<?, CharSequence> charSequenceMap) {
-        Map<?, URI> uriMap = mapMapValue(charSequenceMap, this::getUriFromCharSequence);
+        Map<?, URI> uriMap;
+        try {
+            uriMap = mapMapValue(charSequenceMap, this::getUriFromCharSequence);
+        } catch (Exception ignored) {
+            Map<?, File> fileMap = mapMapValue(charSequenceMap, this::getFileFromCharSequence);
+            return this.handleFile(archiveExport, fileMap);
+        }
         return this.handleUri(archiveExport, uriMap);
     }
 
     protected FileExportEntity handleCharSequence(ArchiveExport archiveExport, CharSequence... charSequences) {
-        URI[] uris = mapArray(charSequences, this::getUriFromCharSequence);
+        URI[] uris;
+        try {
+            uris = mapArray(charSequences, this::getUriFromCharSequence);
+        } catch (Exception ignored) {
+            File[] files = mapArray(charSequences, this::getFileFromCharSequence);
+            return this.handleFile(archiveExport, files);
+        }
         return this.handleUri(archiveExport, uris);
     }
 
     private URI getUriFromCharSequence(CharSequence charSequence) {
-        String string = charSequence.toString();
-        try {
-            return URI.create(string);
-        } catch (Exception e) {
-            throw new CommonException(String.format("The value is not a valid URI: %s", string), e);
-        }
+        return URI.create(charSequence.toString());
+    }
+
+    @SneakyThrows
+    private File getFileFromCharSequence(CharSequence charSequence) {
+        return ResourceUtils.getFile(charSequence.toString());
     }
 
     protected FileExportEntity handleUri(ArchiveExport archiveExport, Map<?, URI> uriMap) {
@@ -325,7 +337,6 @@ public class ArchiveExportResponseBodyAdvice extends BaseExportResponseBodyAdvic
         }
         return this.handleFile(archiveExport, fileMap);
     }
-
 
     protected FileExportEntity handleResource(ArchiveExport archiveExport, Resource... resources) {
         File[] files;

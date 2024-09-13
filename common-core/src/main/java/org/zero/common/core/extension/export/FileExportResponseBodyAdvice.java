@@ -79,13 +79,14 @@ public class FileExportResponseBodyAdvice extends BaseExportResponseBodyAdvice {
         return this.handleString(fileExport, charSequence.toString());
     }
 
+    @SneakyThrows
     private FileExportEntity handleString(FileExport fileExport, String str) {
         URI uri;
         try {
             uri = URI.create(str);
-        } catch (Exception e) {
-            // 非 URI 字符串无法处理，抛出异常
-            throw new CommonException(String.format("The value is not a valid URI: %s", str), e);
+        } catch (Exception ignored) {
+            File file = ResourceUtils.getFile(str);
+            return this.handleFile(fileExport, file);
         }
         return this.handleUri(fileExport, uri);
     }
