@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.zero.common.core.extension.xss.XssException;
 import org.zero.common.data.model.vo.Result;
 
 /**
@@ -25,8 +26,8 @@ public class BaseExceptionHandler {
         return Result.fail("系统内部错误，请联系管理员");
     }
 
-    @ExceptionHandler(org.zero.common.core.support.xss.XssException.class)
-    public Result<Void> xssException(org.zero.common.core.support.xss.XssException e) {
+    @ExceptionHandler(XssException.class)
+    public Result<Void> xssException(XssException e) {
         log.error("There is a risk of XSS (Cross Site Scripting)", e);
         return Result.fail("文本存在跨站脚本攻击，请检查");
     }

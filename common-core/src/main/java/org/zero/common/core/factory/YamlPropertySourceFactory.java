@@ -13,7 +13,7 @@ import java.util.Objects;
 import java.util.Properties;
 
 /**
- * 读取自定义 yaml 文件的工厂类
+ * 读取 yaml 文件的工厂类
  * <p>
  * 使用方式：
  * <pre>

@@ -16,7 +16,7 @@ import java.net.URL;
  * <p>
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR CommonCellData PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  * <p>
  * EncodingDetect.java<br>
@@ -554,7 +554,7 @@ class BytesEncodingDetect extends Encoding {
         rawtextlen = rawtext.length;
         for (i = 0; i < rawtextlen - 1; i++) {
             if (rawtext[i] == (byte) 0x1B && i + 3 < rawtextlen) { // Escape char ESC
-                if (rawtext[i + 1] == (byte) 0x24 && rawtext[i + 2] == 0x29 && rawtext[i + 3] == (byte) 0x41) { // GB Escape $ ) A
+                if (rawtext[i + 1] == (byte) 0x24 && rawtext[i + 2] == 0x29 && rawtext[i + 3] == (byte) 0x41) { // GB Escape $ ) CommonCellData
                     i += 4;
                     while (rawtext[i] != (byte) 0x1B) {
                         dbchars++;

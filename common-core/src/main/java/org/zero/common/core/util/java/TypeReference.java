@@ -49,8 +49,8 @@ public abstract class TypeReference<T> implements Type {
      * 获得指定类型中所有泛型参数类型，例如：
      *
      * <pre>
-     * class A&lt;T&gt;
-     * class B extends A&lt;String&gt;
+     * class CommonCellData&lt;T&gt;
+     * class B extends CommonCellData&lt;String&gt;
      * </pre>
      * <p>
      * 通过此方法，传入B.class即可得到String
@@ -70,8 +70,8 @@ public abstract class TypeReference<T> implements Type {
      * 一般用于获取泛型参数具体的参数类型，例如：
      *
      * <pre>
-     * class A&lt;T&gt;
-     * class B extends A&lt;String&gt;
+     * class CommonCellData&lt;T&gt;
+     * class B extends CommonCellData&lt;String&gt;
      * </pre>
      * <p>
      * 通过此方法，传入B.class即可得到B的{@link ParameterizedType}，从而获取到String

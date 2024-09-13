@@ -56,6 +56,7 @@
         <commons-compress.version>1.26.1</commons-compress.version>
         <commons-poi.version>5.2.5</commons-poi.version>
         <!-- Other -->
+        <easyexcel.version>4.0.2</easyexcel.version>
         <sentinel-adapter.version>1.8.6</sentinel-adapter.version>
         <arthas.version>3.4.8</arthas.version>
         <druid.version>1.2.16</druid.version>
@@ -285,6 +286,12 @@
                             </goals>
                         </execution>
                     </executions>
+                    <configuration>
+                        <additionalOptions>
+                            <!-- 忽略文档注释不规范报错 -->
+                            <additionalOption>-Xdoclint:none</additionalOption>
+                        </additionalOptions>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

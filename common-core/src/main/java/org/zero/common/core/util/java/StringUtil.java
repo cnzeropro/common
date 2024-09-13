@@ -1,5 +1,8 @@
 package org.zero.common.core.util.java;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -61,6 +64,53 @@ public class StringUtil {
 
     public static String removeSuffixAndFirst2Lower(String str, String suffix) {
         return first2Lower(removeSuffix(str, suffix));
+    }
+
+    public static boolean containsAny(String str, String... testStrs) {
+        return isNotNull(getContainsStr(str, testStrs));
+    }
+
+    public static String getContainsStr(String str, String... testStrs) {
+        if (isEmpty(str) || ArrayUtil.isEmpty(testStrs)) {
+            return null;
+        }
+        for (String checkStr : testStrs) {
+            if (isNotNull(str) && str.contains(checkStr)) {
+                return checkStr;
+            }
+        }
+        return null;
+    }
+
+    public static List<String> split(String str, String delimiter) {
+        if (Objects.isNull(str)) {
+            return Collections.emptyList();
+        }
+        if (Objects.isNull(delimiter)) {
+            return Collections.singletonList(str);
+        }
+
+        List<String> result = new ArrayList<>();
+        if (delimiter.isEmpty()) {
+            for (int i = 0; i < str.length(); i++) {
+                String charStr = str.substring(i, i + 1);
+                result.add(charStr);
+            }
+        } else {
+            int delimiterLength = delimiter.length();
+            int fromIndex = 0;
+            int findIndex;
+            while ((findIndex = str.indexOf(delimiter, fromIndex)) != -1) {
+                String subStr = str.substring(fromIndex, findIndex);
+                result.add(subStr);
+                fromIndex = findIndex + delimiterLength;
+            }
+            if (!str.isEmpty() && fromIndex <= str.length()) {
+                String subStr = str.substring(fromIndex);
+                result.add(subStr);
+            }
+        }
+        return result;
     }
 
     private StringUtil() throws IllegalAccessException {
