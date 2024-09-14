@@ -2,8 +2,8 @@ package org.zero.common.core.exception.handler.spring;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.zero.common.data.model.vo.Result;
 
 /**
@@ -11,7 +11,7 @@ import org.zero.common.data.model.vo.Result;
  * @since 2024/8/30
  */
 @Slf4j
-@RestControllerAdvice
+@ControllerAdvice
 @ConditionalOnWebApplication
 public class SentinelExceptionHandler {
     @ExceptionHandler(com.alibaba.csp.sentinel.slots.block.flow.FlowException.class)

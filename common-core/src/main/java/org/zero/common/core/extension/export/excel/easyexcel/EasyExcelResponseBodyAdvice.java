@@ -9,7 +9,7 @@ import lombok.Cleanup;
 import lombok.NoArgsConstructor;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.zero.common.core.extension.export.excel.BaseExcelExportResponseBodyAdvice;
 import org.zero.common.core.extension.export.excel.ExcelExport;
 import org.zero.common.core.extension.export.excel.ExcelFileType;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  * @since 2024/9/4
  */
 @NoArgsConstructor
-@RestControllerAdvice
+@ControllerAdvice
 public class EasyExcelResponseBodyAdvice extends BaseExcelExportResponseBodyAdvice {
     public EasyExcelResponseBodyAdvice(String... packageNames) {
         super(packageNames);

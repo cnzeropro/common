@@ -3,7 +3,6 @@ package org.zero.common.core.extension.export;
 import cn.hutool.core.io.FileTypeUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.io.file.FileNameUtil;
 import lombok.Cleanup;
 import lombok.SneakyThrows;
 import org.springframework.core.MethodParameter;
@@ -15,7 +14,7 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.zero.common.data.exception.CommonException;
 
 import java.io.File;
@@ -32,7 +31,7 @@ import java.util.Optional;
  * @author Zero (cnzeropro@163.com)
  * @since 2024/9/10
  */
-@RestControllerAdvice
+@ControllerAdvice
 public class FileExportResponseBodyAdvice extends BaseExportResponseBodyAdvice {
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
@@ -80,12 +79,12 @@ public class FileExportResponseBodyAdvice extends BaseExportResponseBodyAdvice {
     }
 
     @SneakyThrows
-    private FileExportEntity handleString(FileExport fileExport, String str) {
+    private FileExportEntity handleString(FileExport fileExport, String string) {
         URI uri;
         try {
-            uri = URI.create(str);
+            uri = URI.create(string);
         } catch (Exception ignored) {
-            File file = ResourceUtils.getFile(str);
+            File file = ResourceUtils.getFile(string);
             return this.handleFile(fileExport, file);
         }
         return this.handleUri(fileExport, uri);
@@ -106,7 +105,7 @@ public class FileExportResponseBodyAdvice extends BaseExportResponseBodyAdvice {
 
     @SneakyThrows
     protected FileExportEntity handleUrl(FileExport fileExport, URL url) {
-        if (ResourceUtils.URL_PROTOCOL_FILE.equalsIgnoreCase(url.getProtocol())) {
+        if (ResourceUtils.isFileURL(url)) {
             File file = ResourceUtils.getFile(url);
             return this.handleFile(fileExport, file);
         }
@@ -130,13 +129,9 @@ public class FileExportResponseBodyAdvice extends BaseExportResponseBodyAdvice {
 
     protected FileExportEntity handleFile(FileExport fileExport, File file) {
         if (file.isFile()) {
-            String extName = FileNameUtil.extName(file);
-            String mimeType = FileUtil.getMimeType(file.getPath());
-            String filename = fileExport.filename();
-            filename = StringUtils.hasText(filename) ? filename : FileUtil.getName(file);
+            String filename = FileUtil.getName(file);
             InputStream inputStream = FileUtil.getInputStream(file);
-            FastByteArrayOutputStream outputStream = this.getOutputStreamFromInputStream(inputStream);
-            return FileExportEntity.of(filename, outputStream, extName, mimeType);
+            this.handleStream(fileExport, filename, inputStream);
         }
         throw new CommonException(String.format("The value is not a support file: %s", file));
     }
@@ -153,7 +148,6 @@ public class FileExportResponseBodyAdvice extends BaseExportResponseBodyAdvice {
 
     private InputStream getInputStreamFromReader(FileExport fileExport, Reader reader) {
         @Cleanup FastByteArrayOutputStream out = new FastByteArrayOutputStream();
-
         // 尝试获取字符集
         Charset charset;
         if (reader instanceof InputStreamReader) {
@@ -166,7 +160,6 @@ public class FileExportResponseBodyAdvice extends BaseExportResponseBodyAdvice {
                 charset = Charset.defaultCharset();
             }
         }
-
         OutputStreamWriter writer = new OutputStreamWriter(out, charset);
         IoUtil.copy(reader, writer);
         IoUtil.close(reader);
@@ -182,16 +175,21 @@ public class FileExportResponseBodyAdvice extends BaseExportResponseBodyAdvice {
         return this.handleStream(fileExport, fileExport.filename(), inputStream);
     }
 
-    private FileExportEntity handleStream(FileExport fileExport, String fileName, InputStream inputStream) {
+    private FileExportEntity handleStream(FileExport fileExport, String suggestedFileName, InputStream inputStream) {
         FastByteArrayOutputStream outputStream = this.getOutputStreamFromInputStream(inputStream);
         String filename = fileExport.filename();
-        if (!StringUtils.hasText(fileName)) {
-            filename = fileName;
+        if (!StringUtils.hasText(filename)) {
+            filename = suggestedFileName;
         }
         // 不能直接使用入参的 InputStream
         String extName = FileTypeUtil.getType(outputStream.getInputStream(), filename);
-        // 以文件后缀名构建文件名，用其获取尝试 contentType
-        String contentType = FileUtil.getMimeType(String.format("%s.%s", "unknown", extName));
+        // 未指定 contentType 时，尝试获取文件类型
+        String contentType = fileExport.contentType();
+        if (!StringUtils.hasText(contentType)) {
+            // 以文件后缀名构建文件名，用其获取尝试 contentType
+            String tempFileName = String.format("%s.%s", "unknown", extName);
+            contentType = FileUtil.getMimeType(tempFileName);
+        }
         // 没有时使用默认值：application/octet-stream
         if (!StringUtils.hasText(contentType)) {
             contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;

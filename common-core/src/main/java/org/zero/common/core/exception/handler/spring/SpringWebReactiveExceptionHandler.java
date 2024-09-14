@@ -4,8 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.zero.common.data.model.vo.Result;
 
 /**
@@ -17,7 +17,7 @@ import org.zero.common.data.model.vo.Result;
  * @since 2020/03/21
  */
 @Slf4j
-@RestControllerAdvice
+@ControllerAdvice
 @ConditionalOnWebApplication
 public class SpringWebReactiveExceptionHandler {
     /* *************************************************** Web MVC 异常 *************************************************** */

@@ -2,8 +2,8 @@ package org.zero.common.core.exception.handler.spring;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.zero.common.core.extension.xss.XssException;
 import org.zero.common.data.model.vo.Result;
 
@@ -16,7 +16,7 @@ import org.zero.common.data.model.vo.Result;
  * @since 2020/03/21
  */
 @Slf4j
-@RestControllerAdvice
+@ControllerAdvice
 @ConditionalOnWebApplication
 public class BaseExceptionHandler {
     /* *************************************************** 系统自定义异常 *************************************************** */

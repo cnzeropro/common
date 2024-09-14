@@ -7,8 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.zero.common.data.model.vo.Result;
 
 import java.util.Arrays;
@@ -26,7 +26,7 @@ import java.util.stream.Stream;
  * @since 2020/03/21
  */
 @Slf4j
-@RestControllerAdvice
+@ControllerAdvice
 @ConditionalOnWebApplication
 public class SpringWebExceptionHandler {
     /* *************************************************** Web 异常 *************************************************** */

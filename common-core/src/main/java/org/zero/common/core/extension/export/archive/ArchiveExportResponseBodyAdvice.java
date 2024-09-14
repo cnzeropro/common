@@ -4,6 +4,7 @@ import cn.hutool.core.collection.IterUtil;
 import cn.hutool.core.compress.Deflate;
 import cn.hutool.core.compress.Gzip;
 import cn.hutool.core.compress.ZipWriter;
+import cn.hutool.core.io.FileTypeUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.stream.CollectorUtil;
@@ -20,12 +21,13 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.zero.common.core.extension.export.BaseExportResponseBodyAdvice;
 import org.zero.common.core.extension.export.FileExportEntity;
 import org.zero.common.data.exception.CommonException;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -49,7 +51,7 @@ import java.util.zip.ZipOutputStream;
  * @author Zero (cnzeropro@163.com)
  * @since 2024/9/11
  */
-@RestControllerAdvice
+@ControllerAdvice
 public class ArchiveExportResponseBodyAdvice extends BaseExportResponseBodyAdvice {
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
@@ -347,10 +349,26 @@ public class ArchiveExportResponseBodyAdvice extends BaseExportResponseBodyAdvic
             Map<String, InputStream> inputStreamMap = new LinkedHashMap<>();
             for (Resource resource : resources) {
                 String filename = resource.getFilename();
+                InputStream inputStream = this.getInputStreamFromResource(resource);
                 if (!StringUtils.hasText(filename)) {
-                    filename = String.format("file_%d", i++);
+                    try {
+                        // 先调用一次，不支持 reset 的流会抛出异常，保证不会走到以下逻辑
+                        inputStream.reset();
+                        // 尝试获取文件类型
+                        String type = FileTypeUtil.getType(inputStream, true);
+                        if (StringUtils.hasText(type)) {
+                            filename = String.format("file_%d.%s", i++, type);
+                        } else {
+                            filename = String.format("file_%d", i++);
+                        }
+                        // 重置
+                        inputStream.reset();
+                    } catch (IOException ignore) {
+                        // InputStream 不支持 reset
+                        filename = String.format("file_%d", i++);
+                    }
                 }
-                inputStreamMap.put(filename, this.getInputStreamFromResource(resource));
+                inputStreamMap.put(filename, inputStream);
             }
             return this.handleStream(archiveExport, inputStreamMap);
         }
@@ -450,7 +468,23 @@ public class ArchiveExportResponseBodyAdvice extends BaseExportResponseBodyAdvic
         int i = 0;
         Map<String, InputStream> inputStreamMap = new LinkedHashMap<>();
         for (InputStream inputStream : inputStreams) {
-            String path = String.format("file_%d", i++);
+            String path;
+            try {
+                // 先调用一次，不支持 reset 的流会抛出异常，保证不会走到以下逻辑
+                inputStream.reset();
+                // 尝试获取文件类型
+                String type = FileTypeUtil.getType(inputStream, true);
+                if (StringUtils.hasText(type)) {
+                    path = String.format("file_%d.%s", i++, type);
+                } else {
+                    path = String.format("file_%d", i++);
+                }
+                // 重置
+                inputStream.reset();
+            } catch (IOException ignore) {
+                // InputStream 不支持 reset
+                path = String.format("file_%d", i++);
+            }
             inputStreamMap.put(path, inputStream);
         }
         return this.handleStream(archiveExport, inputStreamMap);

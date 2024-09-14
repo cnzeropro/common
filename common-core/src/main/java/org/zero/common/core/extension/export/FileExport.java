@@ -22,6 +22,11 @@ public @interface FileExport {
     String filename() default "";
 
     /**
+     * 响应类型。为空时，会尝试获取 contentType，还是没有时，默认：application/octet-stream
+     */
+    String contentType() default "";
+
+    /**
      * 字符集。默认：UTF-8。仅导出字符流 {@link java.io.Reader} 使用
      */
     String charset() default "UTF-8";

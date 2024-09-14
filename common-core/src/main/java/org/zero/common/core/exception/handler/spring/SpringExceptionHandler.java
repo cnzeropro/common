@@ -4,8 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.zero.common.data.model.vo.Result;
 
 import java.util.List;
@@ -22,7 +22,7 @@ import java.util.stream.Stream;
  * @since 2020/03/21
  */
 @Slf4j
-@RestControllerAdvice
+@ControllerAdvice
 @ConditionalOnWebApplication
 public class SpringExceptionHandler {
     /* *************************************************** Spring 异常 *************************************************** */
