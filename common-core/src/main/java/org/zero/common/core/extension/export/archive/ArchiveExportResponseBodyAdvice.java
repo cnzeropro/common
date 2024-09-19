@@ -53,6 +53,9 @@ import java.util.zip.ZipOutputStream;
  */
 @ControllerAdvice
 public class ArchiveExportResponseBodyAdvice extends BaseExportResponseBodyAdvice {
+    private static final String DEFAULT_FILEPATH_TEMPLATE = "file_%d";
+    private static final String DEFAULT_FILENAME_TEMPLATE = DEFAULT_FILEPATH_TEMPLATE + ".%s";
+
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
         return returnType.hasMethodAnnotation(ArchiveExport.class);
@@ -351,22 +354,7 @@ public class ArchiveExportResponseBodyAdvice extends BaseExportResponseBodyAdvic
                 String filename = resource.getFilename();
                 InputStream inputStream = this.getInputStreamFromResource(resource);
                 if (!StringUtils.hasText(filename)) {
-                    try {
-                        // 先调用一次，不支持 reset 的流会抛出异常，保证不会走到以下逻辑
-                        inputStream.reset();
-                        // 尝试获取文件类型
-                        String type = FileTypeUtil.getType(inputStream, true);
-                        if (StringUtils.hasText(type)) {
-                            filename = String.format("file_%d.%s", i++, type);
-                        } else {
-                            filename = String.format("file_%d", i++);
-                        }
-                        // 重置
-                        inputStream.reset();
-                    } catch (IOException ignore) {
-                        // InputStream 不支持 reset
-                        filename = String.format("file_%d", i++);
-                    }
+                    filename = this.getNameByInputStream(inputStream, i++);
                 }
                 inputStreamMap.put(filename, inputStream);
             }
@@ -468,26 +456,31 @@ public class ArchiveExportResponseBodyAdvice extends BaseExportResponseBodyAdvic
         int i = 0;
         Map<String, InputStream> inputStreamMap = new LinkedHashMap<>();
         for (InputStream inputStream : inputStreams) {
-            String path;
-            try {
-                // 先调用一次，不支持 reset 的流会抛出异常，保证不会走到以下逻辑
-                inputStream.reset();
-                // 尝试获取文件类型
-                String type = FileTypeUtil.getType(inputStream, true);
-                if (StringUtils.hasText(type)) {
-                    path = String.format("file_%d.%s", i++, type);
-                } else {
-                    path = String.format("file_%d", i++);
-                }
-                // 重置
-                inputStream.reset();
-            } catch (IOException ignore) {
-                // InputStream 不支持 reset
-                path = String.format("file_%d", i++);
-            }
+            String path = this.getNameByInputStream(inputStream, i++);
             inputStreamMap.put(path, inputStream);
         }
         return this.handleStream(archiveExport, inputStreamMap);
+    }
+
+    private String getNameByInputStream(InputStream inputStream, int index) {
+        String name;
+        try {
+            // 先调用一次，不支持 reset 的流会抛出异常，保证不会走到以下逻辑
+            inputStream.reset();
+            // 尝试获取文件类型
+            String type = FileTypeUtil.getType(inputStream, true);
+            if (StringUtils.hasText(type)) {
+                name = String.format(DEFAULT_FILENAME_TEMPLATE, index, type);
+            } else {
+                name = String.format(DEFAULT_FILEPATH_TEMPLATE, index);
+            }
+            // 重置
+            inputStream.reset();
+        } catch (IOException ignore) {
+            // 不支持 reset 的 InputStream
+            name = String.format(DEFAULT_FILEPATH_TEMPLATE, index);
+        }
+        return name;
     }
 
     private FastByteArrayOutputStream handleStreamByZip(ArchiveExport archiveExport, Map<?, InputStream> inputStreamMap) {
