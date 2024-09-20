@@ -32,6 +32,11 @@ public @interface ExcelExport {
     boolean withHeader() default true;
 
     /**
+     * 是否都在在内存中处理，如果为 true 表示 excel 文件生成都在内存中完成，反之表示使用磁盘进行大文件生成。默认：false。仅 xlsx（Excel07 版本）支持
+     */
+    boolean inMemory() default false;
+
+    /**
      * 密码。不为空时生效。
      */
     String password() default "";

@@ -247,14 +247,6 @@ public class EasyExcelResponseBodyAdvice extends BaseExcelExportResponseBodyAdvi
      * 获取 {@link ExcelWriter}
      */
     private ExcelWriter getExcelWriter(OutputStream outputStream, ExcelExport excelExport) {
-        ExcelWriterBuilder excelWriterBuilder = this.initExcelWriterBuilder(outputStream, excelExport);
-        return excelWriterBuilder.build();
-    }
-
-    /**
-     * 初始化 {@link ExcelWriterBuilder}
-     */
-    private ExcelWriterBuilder initExcelWriterBuilder(OutputStream outputStream, ExcelExport excelExport) {
         ExcelTypeEnum excelTypeEnum;
         ExcelFileType excelFileType = excelExport.fileType();
         if (excelFileType == ExcelFileType.XLSX) {
@@ -267,17 +259,18 @@ public class EasyExcelResponseBodyAdvice extends BaseExcelExportResponseBodyAdvi
         ExcelWriterBuilder excelWriterBuilder = EasyExcel.write(outputStream)
                 .excelType(excelTypeEnum)
                 .needHead(excelExport.withHeader())
+                .inMemory(excelExport.inMemory())
                 .automaticMergeHead(Boolean.TRUE)
                 .autoCloseStream(Boolean.TRUE);
         String password = excelExport.password();
         if (StringUtils.hasText(password)) {
             excelWriterBuilder.password(password);
         }
-        return excelWriterBuilder;
+        return excelWriterBuilder.build();
     }
 
     private Map<Integer, Object> convert(Map<?, ?> map) {
-        Map<Integer, Object> dataMap = new LinkedHashMap<>(map.size());
+        Map<Integer, Object> dataMap = new LinkedHashMap<>(map.size(), 1.0F);
         int i = 0;
         for (Map.Entry<?, ?> entry : map.entrySet()) {
             dataMap.put(i++, entry.getValue());
