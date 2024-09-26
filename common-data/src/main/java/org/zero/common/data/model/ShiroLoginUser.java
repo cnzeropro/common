@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /**
  * @author zero
  * @since 2021/8/22
@@ -17,6 +19,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ShiroLoginUser {
     @JsonSerialize(using = ToStringSerializer.class)
-    private Long id;
+    private Serializable id;
     private String username;
 }

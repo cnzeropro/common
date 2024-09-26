@@ -65,7 +65,7 @@
         <mybatis-plus.version>3.5.4.1</mybatis-plus.version>
         <mybatis-flex.version>1.7.5</mybatis-flex.version>
         <shiro.version>1.9.1</shiro.version>
-        <redisson.version>3.19.3</redisson.version>
+        <redisson.version>3.27.2</redisson.version>
         <jasypt.version>1.9.3</jasypt.version>
         <jasypt-starter.version>3.0.5</jasypt-starter.version>
         <powerjob.version>4.3.0</powerjob.version>

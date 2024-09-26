@@ -6,6 +6,7 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.zero.common.data.model.ShiroLoginUser;
 
+import java.io.Serializable;
 import java.util.Optional;
 
 /**
@@ -15,7 +16,6 @@ import java.util.Optional;
 @Slf4j
 @UtilityClass
 public class ShiroUtil {
-
     public Optional<ShiroLoginUser> getUserOptWithEx() {
         return Optional.ofNullable(SecurityUtils.getSubject())
                 .map(Subject::getPrincipal)
@@ -34,6 +34,14 @@ public class ShiroUtil {
 
     public ShiroLoginUser getUser() {
         return getUserOpt().orElse(null);
+    }
+
+    public Optional<Serializable> getUserIdOpt() {
+        return getUserOpt().map(ShiroLoginUser::getId);
+    }
+
+    public Serializable getUserId() {
+        return getUserIdOpt().orElse(null);
     }
 
     public Optional<String> getUsernameOpt() {

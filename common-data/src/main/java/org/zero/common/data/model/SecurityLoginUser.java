@@ -10,6 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.SpringSecurityCoreVersion;
 import org.springframework.security.core.userdetails.User;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 /**
@@ -24,18 +25,18 @@ public class SecurityLoginUser extends User {
     private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
 
     @JsonSerialize(using = ToStringSerializer.class)
-    private Long userId;
+    private Serializable id;
 
-    public SecurityLoginUser(Long userId, String username, String password,
+    public SecurityLoginUser( Serializable id, String username, String password,
                              Collection<? extends GrantedAuthority> authorities) {
         super(username, password, authorities);
-        this.userId = userId;
+        this.id = id;
     }
 
-    public SecurityLoginUser(Long userId, String username, String password,
+    public SecurityLoginUser( Serializable id, String username, String password,
                              boolean enabled, boolean accountNonExpired, boolean credentialsNonExpired, boolean accountNonLocked,
                              Collection<? extends GrantedAuthority> authorities) {
         super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
-        this.userId = userId;
+        this.id = id;
     }
 }

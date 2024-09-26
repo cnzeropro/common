@@ -22,7 +22,8 @@ public interface AbstractHandlerInterceptor extends HandlerInterceptor {
     default boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if (this.supports(handler)) {
             return this.preHandleInternal(request, response, handler);
-        } else {// 不支持时放行
+        } else {
+            // 不支持时放行
             return true;
         }
     }
