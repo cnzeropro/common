@@ -2,6 +2,7 @@ package org.zero.common.core.extension.api.deduplication;
 
 import org.springframework.util.StringUtils;
 import org.springframework.web.method.HandlerMethod;
+import org.zero.common.core.aop.aspect.deduplication.Deduplication;
 import org.zero.common.core.support.spring.webmvc.AbstractHandlerMethodInterceptor;
 import org.zero.common.core.util.jackson.JacksonUtils;
 import org.zero.common.core.util.javax.web.ResponseUtil;
@@ -53,13 +54,13 @@ public abstract class BaseDeduplicationInterceptor implements AbstractHandlerMet
         if (StringUtils.hasText(key)) {
             return key;
         }
-        return this.getDefaultKey(request,deduplication);
+        return this.getDefaultKey(request, deduplication);
     }
 
     /**
      * 获取默认的 key
      */
-    protected abstract String getDefaultKey(HttpServletRequest request,Deduplication deduplication);
+    protected abstract String getDefaultKey(HttpServletRequest request, Deduplication deduplication);
 
     /**
      * 获取防抖 value

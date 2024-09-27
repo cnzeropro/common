@@ -1,6 +1,7 @@
 package org.zero.common.core.aop.aspect.debouncing;
 
 import lombok.RequiredArgsConstructor;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.data.redis.core.RedisTemplate;
 
@@ -16,13 +17,13 @@ public class RedisTemplateDebouncingAspect extends BaseRedisDebouncingAspect {
 
     @Override
     @SuppressWarnings("unchecked")
-    protected boolean needPrevent(Debouncing debouncing) {
-        String key = this.getKey(debouncing);
+    protected boolean needPrevent(JoinPoint joinPoint, Debouncing debouncing) {
+        String key = this.getKey(joinPoint, debouncing);
         Boolean hasKey = redisTemplate.hasKey(key);
         if (Boolean.TRUE.equals(hasKey)) {
             return true;
         }
-        Object value = this.getValue(debouncing);
+        Object value = this.getValue(joinPoint, debouncing);
         redisTemplate.boundValueOps(key).set(value, debouncing.interval(), debouncing.timeUnit());
         return false;
     }

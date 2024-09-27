@@ -1,4 +1,4 @@
-package org.zero.common.core.extension.api.deduplication;
+package org.zero.common.core.aop.aspect.deduplication;
 
 /**
  * @author Zero (cnzeropro@163.com)
@@ -6,12 +6,13 @@ package org.zero.common.core.extension.api.deduplication;
  */
 public enum EquivalentVoucherType {
     NONE,
+    AUTO,
+    CUSTOM,
     REQUEST_METHOD,
     REQUEST_URI,
     REQUEST_PARAMS,
     REQUEST_BODY,
     REQUEST_HEADERS,
     REQUEST_COOKIES,
-    CUSTOM,
     ;
 }

@@ -1,6 +1,7 @@
 package org.zero.common.core.extension.api.debouncing;
 
 import org.springframework.util.StringUtils;
+import org.zero.common.core.aop.aspect.debouncing.Debouncing;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -16,8 +17,8 @@ public abstract class BaseRedisDebouncingInterceptor extends BaseDebouncingInter
     public static final String KEY_PREFIX = "sys:api:debouncing";
 
     @Override
-    protected String getDefaultKey(HttpServletRequest request) {
-        String mark = this.getMark(request);
+    protected String getDefaultKey(HttpServletRequest request, Debouncing debouncing) {
+        String mark = this.getMark(request, debouncing);
         String requestMethod = request.getMethod();
         String requestURI = request.getRequestURI();
         if (StringUtils.hasText(mark)) {
@@ -31,7 +32,7 @@ public abstract class BaseRedisDebouncingInterceptor extends BaseDebouncingInter
      * <p>
      * 建议重写，可返回 token、用户名、客户端 ip 等等
      */
-    protected String getMark(HttpServletRequest request) {
+    protected String getMark(HttpServletRequest request, Debouncing debouncing) {
         return null;
     }
 }

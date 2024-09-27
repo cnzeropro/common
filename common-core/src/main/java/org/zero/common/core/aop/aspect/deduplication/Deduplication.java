@@ -1,4 +1,4 @@
-package org.zero.common.core.extension.api.deduplication;
+package org.zero.common.core.aop.aspect.deduplication;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -38,7 +38,10 @@ public @interface Deduplication {
      */
     TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
 
-    EquivalentVoucherType[] equivalentVoucherTypes() default {EquivalentVoucherType.REQUEST_METHOD, EquivalentVoucherType.REQUEST_URI, EquivalentVoucherType.REQUEST_PARAMS, EquivalentVoucherType.REQUEST_BODY};
+    /**
+     * 等效凭证类型。默认：AUTO
+     */
+    EquivalentVoucherType[] equivalentVoucherTypes() default {EquivalentVoucherType.AUTO};
 
     /**
      * 提示消息

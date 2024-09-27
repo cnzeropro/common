@@ -54,13 +54,13 @@ public abstract class BaseDebouncingInterceptor implements AbstractHandlerMethod
         if (StringUtils.hasText(key)) {
             return key;
         }
-        return this.getDefaultKey(request);
+        return this.getDefaultKey(request,debouncing);
     }
 
     /**
      * 获取默认的 key
      */
-    protected abstract String getDefaultKey(HttpServletRequest request);
+    protected abstract String getDefaultKey(HttpServletRequest request, Debouncing debouncing);
 
     /**
      * 获取防抖 value

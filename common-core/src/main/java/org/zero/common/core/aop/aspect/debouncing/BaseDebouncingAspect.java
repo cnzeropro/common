@@ -17,7 +17,7 @@ public abstract class BaseDebouncingAspect {
             "@annotation(debouncing)")
     public void before(JoinPoint joinPoint, Debouncing debouncing) {
         if (debouncing.value()) {
-            if (this.needPrevent(debouncing)) {
+            if (this.needPrevent(joinPoint, debouncing)) {
                 throw new CommonException(debouncing.message());
             }
         }
@@ -26,39 +26,41 @@ public abstract class BaseDebouncingAspect {
     @After("@within(debouncing) || " +
             "@annotation(debouncing)")
     public void after(JoinPoint joinPoint, Debouncing debouncing) {
-        this.afterInternal();
+        this.afterInternal(joinPoint, debouncing);
     }
 
     /**
      * 验证是否需要阻止
      */
-    protected abstract boolean needPrevent(Debouncing debouncing);
+    protected abstract boolean needPrevent(JoinPoint joinPoint, Debouncing debouncing);
 
     /**
      * 后置处理
      */
-    protected abstract void afterInternal();
+    protected void afterInternal(JoinPoint joinPoint, Debouncing debouncing) {
+        // do nothing
+    }
 
     /**
      * 获取防抖 key
      */
-    protected String getKey(Debouncing debouncing) {
+    protected String getKey(JoinPoint joinPoint, Debouncing debouncing) {
         String key = debouncing.key();
         if (StringUtils.hasText(key)) {
             return key;
         }
-        return this.getDefaultKey();
+        return this.getDefaultKey(joinPoint,debouncing);
     }
 
     /**
      * 获取默认的 key
      */
-    protected abstract String getDefaultKey();
+    protected abstract String getDefaultKey(JoinPoint joinPoint, Debouncing debouncing);
 
     /**
      * 获取防抖 value
      */
-    protected Object getValue(Debouncing debouncing) {
+    protected Object getValue(JoinPoint joinPoint, Debouncing debouncing) {
         return LocalDateTime.now().toString();
     }
 }
