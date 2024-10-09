@@ -9,6 +9,8 @@ import org.springframework.boot.jackson.JsonComponent;
 import java.io.IOException;
 
 /**
+ * 注册 Hutool {@link JSONNull} 类型的 Jackson 序列化器
+ *
  * @author Zero (cnzeropro@163.com)
  * @since 2024/10/9
  */
