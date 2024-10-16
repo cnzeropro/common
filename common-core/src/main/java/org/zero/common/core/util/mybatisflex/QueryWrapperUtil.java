@@ -33,7 +33,13 @@ import java.util.stream.Stream;
 public class QueryWrapperUtil {
     public static final String SELECT_ALL = "*";
 
-    protected static ConcurrentMap<Class<?>, Map<String, Collection<Method>>> METHOD_CACHE = new ConcurrentHashMap<>();
+    /**
+     * Google Guava Cache
+     * <p>
+     * 优点：线程安全，缓存命中率高，缓存大小可控，缓存数据安全，缓存数据一致性，缓存数据自动刷新。
+     */
+    // protected static final Cache<Class<?>, Map<String, Collection<Method>>> METHOD_CACHE = CacheBuilder.newBuilder().maximumSize(1000L).build();
+    protected static final ConcurrentMap<Class<?>, Map<String, Collection<Method>>> METHOD_CACHE = new ConcurrentHashMap<>();
 
     public static <E> QueryWrapper setSelect(QueryWrapper queryWrapper, Class<E> clazz, String[] fields) {
         return setSelect(queryWrapper, clazz, CollectionUtil.newArrayList(fields));
@@ -167,6 +173,15 @@ public class QueryWrapperUtil {
         return queryWrapper;
     }
 
+    /**
+     * 模糊查询
+     * <pre>
+     * &lt;if test="property != null"&gt;
+     *      &lt;bind name="propertyLike" value="'%' + property + '%'"/&gt;
+     *      AND table.column LIKE #{propertyLike}
+     * &lt;/if&gt;
+     * </pre>
+     */
     public static <E> QueryWrapper setLike(QueryWrapper queryWrapper, E entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(entity);
         fieldValueMap.forEach((name, value) -> queryWrapper.like(name, value, Objects.nonNull(value)));
