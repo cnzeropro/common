@@ -168,6 +168,15 @@ public class QueryWrapperUtil {
         return queryWrapper;
     }
 
+    /**
+     * 模糊查询
+     * <pre>
+     * &lt;if test="property != null"&gt;
+     *      &lt;bind name="propertyLike" value="'%' + property + '%'"/&gt;
+     *      AND table.column LIKE #{propertyLike}
+     * &lt;/if&gt;
+     * </pre>
+     */
     public static <E> QueryWrapper<E> setLike(QueryWrapper<E> queryWrapper, E entity) {
         Map<String, Object> fieldValueMap = getFieldValueMap(entity);
         fieldValueMap.forEach((name, value) -> queryWrapper.like(Objects.nonNull(value), name, value));
@@ -456,6 +465,7 @@ public class QueryWrapperUtil {
                                 Collectors.toCollection(ArrayList::new))));
         Map<String, Object> fieldValueMap = new HashMap<>();
         getFieldValuesMap(clazz, entity, methodMap).forEach((k, v) -> {
+            // java.util.stream.Stream.findFirst 可能抛出 NPE
             Object value = null;
             Iterator<Object> iterator = v.iterator();
             if (iterator.hasNext()) {
