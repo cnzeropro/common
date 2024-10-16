@@ -1,4 +1,4 @@
-package org.zero.common.core.util.java;
+package org.zero.common.core.support.java;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;
