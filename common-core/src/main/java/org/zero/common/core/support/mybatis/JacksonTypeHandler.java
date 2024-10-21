@@ -1,7 +1,6 @@
 package org.zero.common.core.support.mybatis;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.type.JdbcType;
@@ -9,7 +8,6 @@ import org.apache.ibatis.type.MappedJdbcTypes;
 import org.apache.ibatis.type.MappedTypes;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -20,28 +18,18 @@ import java.util.Objects;
 @MappedTypes({Object.class})
 @MappedJdbcTypes({JdbcType.CHAR, JdbcType.VARCHAR, JdbcType.LONGVARCHAR})
 public class JacksonTypeHandler extends BaseJsonTypeHandler<Object> {
-    private static ObjectMapper objectMapper;
     private final Class<?> propertyType;
-    private Class<?> genericType;
-    private JavaType javaType;
+
+    private static ObjectMapper objectMapper;
 
     public JacksonTypeHandler(Class<?> propertyType) {
         this.propertyType = propertyType;
     }
 
-    public JacksonTypeHandler(Class<?> propertyType, Class<?> genericType) {
-        this.propertyType = propertyType;
-        this.genericType = genericType;
-    }
-
     @Override
     protected Object parseJson(String json) {
         try {
-            if (Objects.nonNull(genericType) && Collection.class.isAssignableFrom(propertyType)) {
-                return getObjectMapper().readValue(json, this.getJavaType());
-            } else {
-                return getObjectMapper().readValue(json, propertyType);
-            }
+            return getObjectMapper().readValue(json, propertyType);
         } catch (IOException e) {
             log.warn(String.format("Can not parse json string: %s", json), e);
             return null;
@@ -56,15 +44,6 @@ public class JacksonTypeHandler extends BaseJsonTypeHandler<Object> {
             log.warn(String.format("Can not convert object to Json: %s", object), e);
             return null;
         }
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    protected JavaType getJavaType() {
-        if (Objects.isNull(javaType)) {
-            javaType = getObjectMapper().getTypeFactory()
-                    .constructCollectionType((Class<? extends Collection>) propertyType, genericType);
-        }
-        return javaType;
     }
 
     protected static ObjectMapper getObjectMapper() {
