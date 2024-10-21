@@ -19,22 +19,23 @@ public @interface Retryable {
     /**
      * @return the maximum number of attempts (including the first failure), defaults to 3
      */
-    int maxAttempts() default DEFAULT_MAX_ATTEMPT;
+    int maxAttempt() default DEFAULT_MAX_ATTEMPT;
 
     /**
-     * Exception types that are retryable. Defaults to empty (and if excludes is also
-     * empty all exceptions are retried).
+     * Exception types that are retryable
      * @return exception types to retry
      */
-    Class<? extends Throwable>[] include() default {RuntimeException.class};
+    Class<? extends Throwable>[] includes() default {Throwable.class};
 
     /**
-     * Name of method in this class to use for recover. Method had to be marked with
-     * {@link Recover} annotation.
      * @return the name of recover method
      */
     String recover() default "";
 
+    /**
+     * the name of recover class. default is Object.class(user this object)
+     * @return the name of recover class
+     */
     Class<?> recoverClass() default Object.class;
 
     /**

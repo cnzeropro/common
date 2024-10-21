@@ -17,6 +17,7 @@ import org.zero.common.data.exception.CommonException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Zero (cnzeropro@163.com)
@@ -30,43 +31,48 @@ public class RetryableAspect {
     public Object around(ProceedingJoinPoint joinPoint, Retryable retryable) throws Throwable {
         RetryerBuilder<Object> retryerBuilder = RetryerBuilder.newBuilder();
 
-        Class<? extends Throwable>[] includes = retryable.include();
+        Class<? extends Throwable>[] includes = retryable.includes();
         for (Class<? extends Throwable> include : includes) {
             retryerBuilder.retryIfExceptionOfType(include);
         }
+
         Backoff backoff = retryable.backoff();
-        Backoff.RetryPolicy retryPolicy = backoff.waitStrategy();
+        long delay = backoff.delay();
+        long maxDelay = backoff.maxDelay();
+        long multiplier = backoff.multiplier();
+        TimeUnit timeUnit = backoff.timeUnit();
+        Backoff.WaitPolicy waitPolicy = backoff.waitPolicy();
         WaitStrategy waitStrategy;
-        switch (retryPolicy) {
+        switch (waitPolicy) {
             case NONE:
                 waitStrategy = WaitStrategies.noWait();
                 break;
             case FIXED:
-                waitStrategy = WaitStrategies.fixedWait(backoff.delay(), backoff.unit());
+                waitStrategy = WaitStrategies.fixedWait(delay, timeUnit);
                 break;
             case RANDOM:
-                waitStrategy = WaitStrategies.randomWait(backoff.maxTime(), backoff.unit());
+                waitStrategy = WaitStrategies.randomWait(maxDelay, timeUnit);
                 break;
             case INCREMENTING:
-                waitStrategy = WaitStrategies.incrementingWait(backoff.delay(), backoff.unit(), backoff.multiplier(), backoff.unit());
+                waitStrategy = WaitStrategies.incrementingWait(delay, timeUnit, multiplier, timeUnit);
                 break;
             case EXPONENTIAL:
-                waitStrategy = WaitStrategies.exponentialWait(backoff.multiplier(), backoff.maxTime(), backoff.unit());
+                waitStrategy = WaitStrategies.exponentialWait(multiplier, maxDelay, timeUnit);
                 break;
             case FIBONACCI:
-                waitStrategy = WaitStrategies.fibonacciWait(backoff.multiplier(), backoff.maxTime(), backoff.unit());
+                waitStrategy = WaitStrategies.fibonacciWait(multiplier, maxDelay, timeUnit);
                 break;
             default:
-                throw new CommonException(String.format("unknown wait strategy: %s", retryPolicy));
+                throw new CommonException(String.format("unknown wait strategy: %s", waitPolicy));
         }
         retryerBuilder.withWaitStrategy(waitStrategy);
 
-        int maxAttempts = retryable.maxAttempts();
+        int maxAttempt = retryable.maxAttempt();
         StopStrategy stopStrategy;
-        if (maxAttempts <= 0) {
+        if (maxAttempt <= 0) {
             stopStrategy = StopStrategies.neverStop();
         } else {
-            stopStrategy = StopStrategies.stopAfterAttempt(maxAttempts);
+            stopStrategy = StopStrategies.stopAfterAttempt(maxAttempt);
         }
         retryerBuilder.withStopStrategy(stopStrategy);
 
@@ -105,15 +111,13 @@ public class RetryableAspect {
             Optional<Method> recoverMethodOpt = ReflectUtil.getMethodOptByNameAndParam(target.getClass(), recover, argClasses);
             if (recoverMethodOpt.isPresent()) {
                 return ReflectUtil.invoke(recoverMethodOpt.get(), target, args);
-            } else {
-                recoverMethodOpt = ReflectUtil.getMethodOptByNameAndParam(target.getClass(), recover);
-                if (recoverMethodOpt.isPresent()) {
-                    return ReflectUtil.invoke(recoverMethodOpt.get(), target);
-                }
-                throw new CommonException(String.format("no such method like %s in %s", recover, target.getClass().getCanonicalName()));
             }
-        } else {
-            throw t;
+            recoverMethodOpt = ReflectUtil.getMethodOptByNameAndParam(target.getClass(), recover);
+            if (recoverMethodOpt.isPresent()) {
+                return ReflectUtil.invoke(recoverMethodOpt.get(), target);
+            }
+            throw new CommonException(String.format("no such method like %s in %s", recover, target.getClass().getCanonicalName()));
         }
+        throw t;
     }
 }

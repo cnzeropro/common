@@ -16,28 +16,35 @@ import java.util.concurrent.TimeUnit;
 @Documented
 public @interface Backoff {
     /**
-     * @return the initial or canonical backoff period in milliseconds (default 0)
+     * @return the initial or canonical backoff period
      */
     long delay() default 1000;
 
     /**
-     * @return the maximum delay between retries (default 0 = ignored)
+     * @return the maximum delay between retries
      */
-    long maxTime() default 3000;
-
+    long maxDelay() default 3000;
     /**
      * If positive, then used as a multiplier for generating the next delay for backoff.
      *
-     * @return a multiplier to use to calculate the next backoff delay (default 0 =
-     * ignored)
+     * @return a multiplier to use to calculate the next backoff delay
      */
     long multiplier() default 1;
 
-    TimeUnit unit() default TimeUnit.MILLISECONDS;
+    /**
+     * @return the time unit for the {@link #delay()}, {@link #maxDelay()} and {@link #multiplier()}
+     */
+    TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
 
-    RetryPolicy waitStrategy() default RetryPolicy.FIXED;
+    /**
+     * @return the wait policy to use for backoff
+     */
+    WaitPolicy waitPolicy() default WaitPolicy.FIXED;
 
-    enum RetryPolicy {
+    /**
+     * wait policy
+     */
+    enum WaitPolicy {
         NONE,
         FIXED,
         RANDOM,
