@@ -31,7 +31,7 @@ import java.util.TimeZone;
 import java.util.TreeSet;
 
 /**
- * copy from {@code org.quartz.CronExpression}
+ * copy from {@link org.quartz.CronExpression}
  */
 public final class CronExpression implements Serializable, Cloneable {
 
