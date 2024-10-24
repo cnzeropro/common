@@ -21,7 +21,6 @@ import org.zero.common.core.util.spring.context.SpringContextUtils;
 import org.zero.common.data.exception.UtilException;
 
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAccessor;
@@ -274,13 +273,10 @@ public class BeanMapUtil {
                 .map(NumberFormat::pattern)
                 .orElse(null);
 
-        String numStr = numObj.toString();
         if (CharSequenceUtil.isBlank(pattern)) {
-            return numStr;
-        } else {
-            BigDecimal bigDecimal = NumberUtil.toBigDecimal(numStr);
-            return NumberUtil.decimalFormat(pattern, bigDecimal);
+            return numObj.toString();
         }
+        return NumberUtil.decimalFormat(pattern, numObj);
     }
 
     private String formatDataTime(Field field, Object dataTimeObj) {
@@ -318,6 +314,6 @@ public class BeanMapUtil {
             }
             return TemporalAccessorUtil.format((TemporalAccessor) dataTimeObj, pattern);
         }
-        throw new UtilException(String.format("[%s]非日期时间类型，无法格式化", dataTimeObj.getClass()));
+        throw new UtilException(String.format("Not datetime type, cannot be formatted: %s", dataTimeObj.getClass()));
     }
 }
