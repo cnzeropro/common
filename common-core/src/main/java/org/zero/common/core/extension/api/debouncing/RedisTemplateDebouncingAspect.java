@@ -1,4 +1,4 @@
-package org.zero.common.core.aop.aspect.deduplication;
+package org.zero.common.core.extension.api.debouncing;
 
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.JoinPoint;
@@ -11,20 +11,20 @@ import org.springframework.data.redis.core.RedisTemplate;
  */
 @Aspect
 @RequiredArgsConstructor
-public class RedisTemplateDeduplicationAspect extends BaseRedisDeduplicationAspect {
+public class RedisTemplateDebouncingAspect extends BaseRedisDebouncingAspect {
     @SuppressWarnings("rawtypes")
     protected final RedisTemplate redisTemplate;
 
     @Override
     @SuppressWarnings("unchecked")
-    public boolean needPrevent(JoinPoint joinPoint, Deduplication deduplication) {
-        String key = this.getKey(joinPoint, deduplication);
+    protected boolean needPrevent(JoinPoint joinPoint, Debouncing debouncing) {
+        String key = this.getKey(joinPoint, debouncing);
         Boolean hasKey = redisTemplate.hasKey(key);
         if (Boolean.TRUE.equals(hasKey)) {
             return true;
         }
-        Object value = this.getValue(joinPoint, deduplication);
-        redisTemplate.boundValueOps(key).set(value, deduplication.interval(), deduplication.timeUnit());
+        Object value = this.getValue(joinPoint, debouncing);
+        redisTemplate.boundValueOps(key).set(value, debouncing.interval(), debouncing.timeUnit());
         return false;
     }
 }

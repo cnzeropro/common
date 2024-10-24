@@ -1,4 +1,4 @@
-package org.zero.common.core.aop.aspect.debouncing;
+package org.zero.common.core.extension.api.debouncing;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

@@ -1,7 +1,5 @@
 package org.zero.common.core.extension.api.idempotence;
 
-import org.zero.common.core.aop.aspect.idempotence.Idempotence;
-
 import javax.servlet.http.HttpServletRequest;
 
 /**

@@ -1,4 +1,4 @@
-package org.zero.common.core.aop.aspect.deduplication;
+package org.zero.common.core.extension.api.deduplication;
 
 /**
  * @author Zero (cnzeropro@163.com)

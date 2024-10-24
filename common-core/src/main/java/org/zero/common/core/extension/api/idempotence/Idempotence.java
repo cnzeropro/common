@@ -1,4 +1,4 @@
-package org.zero.common.core.aop.aspect.idempotence;
+package org.zero.common.core.extension.api.idempotence;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

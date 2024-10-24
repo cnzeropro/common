@@ -1,7 +1,6 @@
 package org.zero.common.core.extension.api.idempotence;
 
 import org.springframework.web.method.HandlerMethod;
-import org.zero.common.core.aop.aspect.idempotence.Idempotence;
 import org.zero.common.core.support.spring.webmvc.AbstractHandlerMethodInterceptor;
 import org.zero.common.core.util.jackson.JacksonUtils;
 import org.zero.common.core.util.javax.web.ResponseUtil;

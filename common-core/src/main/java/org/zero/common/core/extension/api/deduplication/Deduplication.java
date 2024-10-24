@@ -1,4 +1,4 @@
-package org.zero.common.core.aop.aspect.deduplication;
+package org.zero.common.core.extension.api.deduplication;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

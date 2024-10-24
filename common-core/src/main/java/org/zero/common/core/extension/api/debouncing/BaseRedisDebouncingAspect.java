@@ -1,4 +1,4 @@
-package org.zero.common.core.aop.aspect.debouncing;
+package org.zero.common.core.extension.api.debouncing;
 
 import org.aspectj.lang.JoinPoint;
 import org.springframework.util.StringUtils;

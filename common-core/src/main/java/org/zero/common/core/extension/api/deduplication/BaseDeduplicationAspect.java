@@ -1,4 +1,4 @@
-package org.zero.common.core.aop.aspect.deduplication;
+package org.zero.common.core.extension.api.deduplication;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;

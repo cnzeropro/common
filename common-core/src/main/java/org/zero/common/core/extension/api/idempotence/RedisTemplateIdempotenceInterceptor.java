@@ -2,7 +2,6 @@ package org.zero.common.core.extension.api.idempotence;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.zero.common.core.aop.aspect.idempotence.Idempotence;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Objects;
