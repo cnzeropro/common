@@ -132,6 +132,9 @@ public class ReschedulingRunnable implements RunnableScheduledFuture<Object> {
             return 0;
         }
         long diff = getDelay(TimeUnit.MILLISECONDS) - other.getDelay(TimeUnit.MILLISECONDS);
-        return (diff == 0 ? 0 : ((diff < 0) ? -1 : 1));
+        if (diff != 0) {
+            return diff < 0 ? -1 : 1;
+        }
+        return 0;
     }
 }

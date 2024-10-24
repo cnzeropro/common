@@ -5,9 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.zero.job.manager.BaseTaskManager;
-import org.zero.job.model.FutureBean;
-import org.zero.job.model.ScheduledFutureBean;
+import org.zero.job.model.FutureHolder;
+import org.zero.job.model.ScheduledTaskHolder;
+import org.zero.job.model.TriggeredCallableTaskHolder;
+import org.zero.job.model.TriggeredRunnableTaskHolder;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 
@@ -30,13 +33,29 @@ public class TaskManager extends BaseTaskManager {
         // 如果存在该任务先停止
         stop(key);
         Future<?> future = threadPoolTaskScheduler.submit(task);
-        FutureBean triggeredTaskHolder = FutureBean.builder()
+        FutureHolder futureHolder = TriggeredRunnableTaskHolder.builder()
                 .future(future)
-                .clazz(task.getClass())
+                .taskClass(task.getClass())
+                .task(task)
                 .build();
-        taskMap.put(key, triggeredTaskHolder);
+        taskMap.put(key, futureHolder);
         log.info("The triggered task[{}] started successfully", key);
         return true;
+    }
+
+    @Override
+    public <T> Future<T> trigger(String key, Callable<T> task) {
+        // 如果存在该任务先停止
+        stop(key);
+        Future<T> future = threadPoolTaskScheduler.submit(task);
+        FutureHolder futureHolder = TriggeredCallableTaskHolder.builder()
+                .future(future)
+                .taskClass(task.getClass())
+                .task(task)
+                .build();
+        taskMap.put(key, futureHolder);
+        log.info("The triggered task[{}] started successfully", key);
+        return future;
     }
 
     /**
@@ -47,12 +66,13 @@ public class TaskManager extends BaseTaskManager {
         // 如果存在该任务先停止
         stop(key);
         ScheduledFuture<?> scheduledFuture = threadPoolTaskScheduler.schedule(task, new CronTrigger(cron));
-        ScheduledFutureBean scheduledTaskHolder = ScheduledFutureBean.builder()
+        FutureHolder futureHolder = ScheduledTaskHolder.builder()
                 .future(scheduledFuture)
-                .clazz(task.getClass())
+                .taskClass(task.getClass())
+                .task(task)
                 .corn(cron)
                 .build();
-        taskMap.put(key, scheduledTaskHolder);
+        taskMap.put(key, futureHolder);
         log.info("The scheduled task[{}] starts successfully using [{}]", key, cron);
         return true;
     }

@@ -10,7 +10,7 @@ import lombok.experimental.SuperBuilder;
  */
 @Data
 @SuperBuilder(toBuilder = true)
-@EqualsAndHashCode(callSuper = false)
-public class ScheduledFutureBean extends FutureBean {
-    private String corn;
+@EqualsAndHashCode(callSuper = true)
+public class TriggeredRunnableTaskHolder extends TriggeredTaskHolder {
+    private Runnable task;
 }

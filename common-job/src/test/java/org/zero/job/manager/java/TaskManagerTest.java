@@ -24,6 +24,8 @@ class TaskManagerTest {
             System.out.printf("%s-%s-%s%n", Thread.currentThread(), "2", LocalDateTime.now());
         }, "0/3 * * * * ?");
         System.out.println(LocalDateTime.now() + " start");
+        boolean running = taskManager.isRunning("1");
+        System.out.println(LocalDateTime.now() + " running=" + running);
         Thread.sleep(10 * 1000);
         taskManager.stop("1");
         System.out.println(LocalDateTime.now() + " stop");

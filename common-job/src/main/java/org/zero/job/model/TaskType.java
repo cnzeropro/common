@@ -22,5 +22,9 @@ public enum TaskType {
      * 无任务
      */
     NONE,
+    /**
+     * 未知
+     */
+    UNKNOWN,
     ;
 }
