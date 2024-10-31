@@ -5,7 +5,6 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.TemporalAccessorUtil;
 import cn.hutool.core.lang.Opt;
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.NumberUtil;
@@ -28,6 +27,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -44,106 +44,165 @@ public class BeanMapUtil {
     public static final String DEFAULT_REGEX = String.format(DEFAULT_REGEX_TEMPLATE, ArrayUtil.join(DEFAULT_PACKAGE_NAMES, "|"));
 
     public Map<String, Object> encode(Object... objs) {
-        return encode(DEFAULT_PREFIX, objs);
+        return encode(true, objs);
+    }
+
+    public Map<String, Object> encode(boolean ignoreNull, Object... objs) {
+        return encode(DEFAULT_PREFIX, ignoreNull, objs);
     }
 
     public Map<String, Object> encode(String prefix, Object... objs) {
-        return encode(prefix, DEFAULT_REGEX, objs);
+        return encode(prefix, true, objs);
+    }
+
+    public Map<String, Object> encode(String prefix, boolean ignoreNull, Object... objs) {
+        return encode(prefix, DEFAULT_REGEX, ignoreNull, objs);
     }
 
     public Map<String, Object> encodeIn(String packageName, Object... objs) {
-        return encodeIn(DEFAULT_PREFIX, packageName, objs);
+        return encodeIn(packageName, true, objs);
+    }
+
+    public Map<String, Object> encodeIn(String packageName, boolean ignoreNull, Object... objs) {
+        return encodeIn(DEFAULT_PREFIX, packageName, ignoreNull, objs);
     }
 
     public Map<String, Object> encodeIn(String prefix, String packageName, Object... objs) {
+        return encodeIn(prefix, packageName, true, objs);
+    }
+
+    public Map<String, Object> encodeIn(String prefix, String packageName, boolean ignoreNull, Object... objs) {
         String regex = String.format(DEFAULT_REGEX_TEMPLATE, packageName);
-        return encode(prefix, regex, objs);
+        return encode(prefix, regex, ignoreNull, objs);
     }
 
     public Map<String, Object> encodeIn(String[] packageNames, Object... objs) {
-        return encodeIn(DEFAULT_PREFIX, packageNames, objs);
+        return encodeIn(packageNames, true, objs);
+    }
+
+    public Map<String, Object> encodeIn(String[] packageNames, boolean ignoreNull, Object... objs) {
+        return encodeIn(DEFAULT_PREFIX, packageNames, ignoreNull, objs);
     }
 
     public Map<String, Object> encodeIn(String prefix, String[] packageNames, Object... objs) {
+        return encodeIn(prefix, packageNames, true, objs);
+    }
+
+    public Map<String, Object> encodeIn(String prefix, String[] packageNames, boolean ignoreNull, Object... objs) {
         String packageNamesJoined = ArrayUtil.join(packageNames, "|");
         String regex = String.format(DEFAULT_REGEX_TEMPLATE, packageNamesJoined);
-        return encode(prefix, regex, objs);
+        return encode(prefix, regex, ignoreNull, objs);
     }
 
     public Map<String, Object> encode(String prefix, String regex, Object... objs) {
-        Map<String, Object> result = MapUtil.newHashMap(false);
+        return encode(prefix, regex, true, objs);
+    }
+
+    public Map<String, Object> encode(String prefix, String regex, boolean ignoreNull, Object... objs) {
+        Map<String, Object> result = new LinkedHashMap<>();
         if (ArrayUtil.isEmpty(objs)) {
             return result;
         }
 
         for (Object obj : objs) {
-            Map<String, Object> map = encode(prefix, regex, obj);
+            Map<String, Object> map = encode(prefix, regex, ignoreNull, obj);
             result.putAll(map);
         }
         return result;
     }
 
     public Map<String, Object> encode(Object obj) {
-        return encode(DEFAULT_PREFIX, obj);
+        return encode(true, obj);
+    }
+
+    public Map<String, Object> encode(boolean ignoreNull, Object obj) {
+        return encode(DEFAULT_PREFIX, ignoreNull, obj);
     }
 
     public Map<String, Object> encode(String prefix, Object obj) {
-        return encode(prefix, DEFAULT_REGEX, obj);
+        return encode(prefix, true, obj);
+    }
+
+    public Map<String, Object> encode(String prefix, boolean ignoreNull, Object obj) {
+        return encode(prefix, DEFAULT_REGEX, ignoreNull, obj);
     }
 
     public Map<String, Object> encodeIn(String packageName, Object obj) {
-        return encodeIn(DEFAULT_PREFIX, packageName, obj);
+        return encodeIn(packageName, true, obj);
+    }
+
+    public Map<String, Object> encodeIn(String packageName, boolean ignoreNull, Object obj) {
+        return encodeIn(DEFAULT_PREFIX, packageName, ignoreNull, obj);
     }
 
     public Map<String, Object> encodeIn(String prefix, String packageName, Object obj) {
+        return encodeIn(prefix, packageName, true, obj);
+    }
+
+    public Map<String, Object> encodeIn(String prefix, String packageName, boolean ignoreNull, Object obj) {
         String regex = String.format(DEFAULT_REGEX_TEMPLATE, packageName);
-        return encode(prefix, regex, obj);
+        return encode(prefix, regex, ignoreNull, obj);
     }
 
     public Map<String, Object> encodeIn(String[] packageNames, Object obj) {
-        return encode(DEFAULT_PREFIX, packageNames, obj);
+        return encodeIn(packageNames, true, obj);
+    }
+
+    public Map<String, Object> encodeIn(String[] packageNames, boolean ignoreNull, Object obj) {
+        return encodeIn(DEFAULT_PREFIX, packageNames, ignoreNull, obj);
     }
 
     public Map<String, Object> encodeIn(String prefix, String[] packageNames, Object obj) {
+        return encodeIn(prefix, packageNames, true, obj);
+    }
+
+    public Map<String, Object> encodeIn(String prefix, String[] packageNames, boolean ignoreNull, Object obj) {
         String packageNamesJoined = ArrayUtil.join(packageNames, "|");
         String regex = String.format(DEFAULT_REGEX_TEMPLATE, packageNamesJoined);
-        return encode(prefix, regex, obj);
+        return encode(prefix, regex, ignoreNull, obj);
     }
 
     public Map<String, Object> encode(String prefix, String regex, Object obj) {
-        Map<String, Object> result = MapUtil.newHashMap(false);
+        return encode(prefix, regex, true, obj);
+    }
 
-        // 如果为空
+    public Map<String, Object> encode(String prefix, String regex, boolean ignoreNull, Object obj) {
+        Map<String, Object> result = new LinkedHashMap<>();
+
+        // null 值
         if (Objects.isNull(obj)) {
+            if (!ignoreNull) {
+                result.put(prefix, null);
+            }
             return result;
         }
 
         Class<?> clazz = obj.getClass();
 
-        // 指定bean
+        // 指定的 bean
         if (ClassUtil.isSpecifiedClass(clazz, regex)) {
             Field[] fields = ReflectUtil.getFields(clazz);
             for (Field field : fields) {
-                Map<String, Object> map = encodeField(prefix, regex, obj, field);
+                Map<String, Object> map = encodeField(prefix, regex, obj, field, ignoreNull);
                 result.putAll(map);
             }
             return result;
         }
 
         // map
-        // 此处为什么没有直接返回objMap？是因为考虑到map的value可能是其他类型，比如Bean，List，Map等等
+        // 此处为什么没有直接返回 objMap？是因为考虑到 map 的 value 可能是其他类型，如：Bean，List，Map 等等
         if (obj instanceof Map) {
             @SuppressWarnings("unchecked")
             Map<Object, Object> objMap = (Map<Object, Object>) obj;
             objMap.forEach((k, v) -> {
                 String key = CharSequenceUtil.isBlank(prefix) ? String.valueOf(k) : CharSequenceUtil.format("{}.{}", prefix, k);
-                Map<String, Object> map = encode(key, regex, v);
+                Map<String, Object> map = encode(key, regex, v, ignoreNull);
                 result.putAll(map);
             });
             return result;
         }
 
-        // 可迭代的，如List
+        // 集合，如：List、Set 等等
         if (obj instanceof Iterable || obj instanceof Iterator || obj instanceof Enumeration) {
             Map<String, Object> map = encodeIter(prefix, regex, obj);
             result.putAll(map);
@@ -186,13 +245,13 @@ public class BeanMapUtil {
         } else {
             iterator = IterUtil.asIterator((Enumeration<Object>) iterObj);
         }
-        // 为了公用一个方法，做了一点转换，有点性能浪费的感觉，后期优化吧
+        // 为了公用一个方法，做了一点转换，有点性能浪费
         Object[] objects = ArrayUtil.toArray(iterator, Object.class);
         return encodeArray(prefix, regex, objects);
     }
 
     private Map<String, Object> encodeArray(String prefix, String regex, Object arrayObj) {
-        Map<String, Object> result = MapUtil.newHashMap(false);
+        Map<String, Object> result = new LinkedHashMap<>();
         Class<?> componentType = ArrayUtil.getComponentType(arrayObj);
         Object[] objects = ArrayUtil.cast(componentType, arrayObj);
 
@@ -225,7 +284,7 @@ public class BeanMapUtil {
         return result;
     }
 
-    private Map<String, Object> encodeField(String prefix, String regex, Object object, Field field) {
+    private Map<String, Object> encodeField(String prefix, String regex, Object object, Field field, boolean ignoreNull) {
         // 支持 feign Param 注解
         String name = Opt.ofNullable(field)
                 .map(f -> AnnotationUtils.findAnnotation(f, Param.class))
@@ -236,11 +295,12 @@ public class BeanMapUtil {
         String key = CharSequenceUtil.isBlank(prefix) ? name : CharSequenceUtil.format("{}.{}", prefix, name);
         Object fieldValue = ReflectUtil.getFieldValue(object, field);
 
-        Map<String, Object> result = MapUtil.newHashMap(false);
-        // 空值
+        Map<String, Object> result = new LinkedHashMap<>();
+        // null 值
         if (Objects.isNull(fieldValue)) {
-            // 不添加空值
-            // result.put(key, null);
+            if (!ignoreNull) {
+                result.put(key, null);
+            }
             return result;
         }
         // 数字类型
