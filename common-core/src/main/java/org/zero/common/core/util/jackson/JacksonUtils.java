@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.type.ArrayType;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
-import org.zero.common.core.util.spring.context.SpringContextUtils;
+import org.zero.common.core.util.spring.SpringUtils;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -60,7 +60,7 @@ public class JacksonUtils {
         if (Objects.isNull(objectMapper)) {
             synchronized (JacksonUtils.class) {
                 if (Objects.isNull(objectMapper)) {
-                    objectMapper = SpringContextUtils.getBeanProvider(ObjectMapper.class)
+                    objectMapper = SpringUtils.getBeanProvider(ObjectMapper.class)
                             .getIfAvailable();
                 }
                 if (Objects.isNull(objectMapper)) {

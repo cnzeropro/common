@@ -15,7 +15,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
-import org.zero.common.core.util.spring.context.SpringContextUtils;
+import org.zero.common.core.util.spring.SpringUtils;
 
 import java.time.Duration;
 import java.util.LinkedHashMap;
@@ -164,7 +164,7 @@ public class TraceLogAspect implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         // 从容器中的对象copy而来，因为要进行配置调整，避免影响到全局
-        objectMapper = SpringContextUtils.getBean(ObjectMapper.class).copy();
+        objectMapper = SpringUtils.getBean(ObjectMapper.class).copy();
         // 序列化对象的所有属性，包括为Null的属性
         objectMapper.setSerializationInclusion(JsonInclude.Include.ALWAYS);
         // 关闭 序列化时间日期为时间戳

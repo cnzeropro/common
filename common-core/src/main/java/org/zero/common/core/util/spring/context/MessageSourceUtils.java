@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.util.StringUtils;
+import org.zero.common.core.util.spring.SpringUtils;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -38,7 +39,7 @@ public class MessageSourceUtils {
         if (Objects.isNull(messageSource)) {
             synchronized (MessageSourceUtils.class) {
                 if (Objects.isNull(messageSource)) {
-                    messageSource = SpringContextUtils.getBean(MessageSource.class);
+                    messageSource = SpringUtils.getBean(MessageSource.class);
                 }
             }
         }

@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 import org.springframework.util.unit.DataSize;
 import org.springframework.web.multipart.MultipartFile;
-import org.zero.common.core.util.spring.context.SpringContextUtils;
+import org.zero.common.core.util.spring.SpringUtils;
 
 import java.io.InputStream;
 import java.util.Objects;
@@ -84,7 +84,7 @@ public class MinioUtils {
         if (Objects.isNull(minioClient)) {
             synchronized (MinioUtils.class) {
                 if (Objects.isNull(minioClient)) {
-                    minioClient = SpringContextUtils.getBean(MinioClient.class);
+                    minioClient = SpringUtils.getBean(MinioClient.class);
                 }
             }
         }

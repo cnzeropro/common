@@ -2,7 +2,7 @@ package org.zero.common.core.util.jasypt;
 
 import lombok.experimental.UtilityClass;
 import org.jasypt.encryption.StringEncryptor;
-import org.zero.common.core.util.spring.context.SpringContextUtils;
+import org.zero.common.core.util.spring.SpringUtils;
 
 import java.util.Objects;
 
@@ -35,7 +35,7 @@ public class JasyptUtils {
         if (Objects.isNull(encryptor)) {
             synchronized (JasyptUtils.class) {
                 if (Objects.isNull(encryptor)) {
-                    encryptor = SpringContextUtils.getBean(StringEncryptor.class);
+                    encryptor = SpringUtils.getBean(StringEncryptor.class);
                 }
             }
         }

@@ -16,7 +16,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.NumberFormat;
 import org.zero.common.core.util.java.ClassUtil;
-import org.zero.common.core.util.spring.context.SpringContextUtils;
+import org.zero.common.core.util.spring.SpringUtils;
 import org.zero.common.data.exception.UtilException;
 
 import java.lang.reflect.Field;
@@ -347,7 +347,7 @@ public class BeanMapUtil {
         String pattern = Opt.ofNullable(field)
                 .map(f -> AnnotationUtils.findAnnotation(f, DateTimeFormat.class))
                 .map(DateTimeFormat::pattern)
-                .or(() -> Opt.ofNullable(SpringContextUtils.getProperty("spring.mvc.format.date-time")))
+                .or(() -> Opt.ofNullable(SpringUtils.getProperty("spring.mvc.format.date-time")))
                 .orElse(null);
 
         if (dataTimeObj instanceof Date) {

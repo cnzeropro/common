@@ -13,7 +13,7 @@ import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
-import org.zero.common.core.util.spring.context.SpringContextUtils;
+import org.zero.common.core.util.spring.SpringUtils;
 
 import java.util.Date;
 import java.util.Objects;
@@ -301,7 +301,7 @@ public class QuartzUtils {
         if (Objects.isNull(scheduler)) {
             synchronized (QuartzUtils.class) {
                 if (Objects.isNull(scheduler)) {
-                    scheduler = SpringContextUtils.getBean(Scheduler.class);
+                    scheduler = SpringUtils.getBean(Scheduler.class);
                 }
             }
         }

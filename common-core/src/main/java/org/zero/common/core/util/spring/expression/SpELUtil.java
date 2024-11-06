@@ -11,7 +11,7 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.ObjectUtils;
-import org.zero.common.core.util.spring.context.SpringContextUtils;
+import org.zero.common.core.util.spring.SpringUtils;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
@@ -74,11 +74,11 @@ public class SpELUtil {
     public EvaluationContext createDefaultContext() {
         EvaluationContext context = new StandardEvaluationContext();
         // 获取属性源
-        ObjectProvider<PropertySource<?>> propertySourceObjectProvider = SpringContextUtils.getBeanProvider(ResolvableType.forClass(PropertySource.class));
+        ObjectProvider<PropertySource<?>> propertySourceObjectProvider = SpringUtils.getBeanProvider(ResolvableType.forClass(PropertySource.class));
         propertySourceObjectProvider.stream().forEach(ps -> context.setVariable(ps.getName(), ps.getSource()));
         context.setVariable("systemEnv", System.getenv());
         context.setVariable("systemProperties", System.getProperties());
-        context.setVariable("springEnv", SpringContextUtils.getEnvironment());
+        context.setVariable("springEnv", SpringUtils.getEnvironment());
         return context;
     }
 

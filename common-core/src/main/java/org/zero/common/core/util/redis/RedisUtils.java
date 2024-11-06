@@ -6,7 +6,7 @@ import lombok.experimental.UtilityClass;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.zero.common.core.util.spring.context.SpringContextUtils;
+import org.zero.common.core.util.spring.SpringUtils;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -1121,7 +1121,7 @@ public class RedisUtils {
         if (Objects.isNull(redisTemplate)) {
             synchronized (RedisUtils.class) {
                 if (Objects.isNull(redisTemplate)) {
-                    redisTemplate = SpringContextUtils.getBean(new ParameterizedTypeReference<RedisTemplate<String, Object>>() {
+                    redisTemplate = SpringUtils.getBean(new ParameterizedTypeReference<RedisTemplate<String, Object>>() {
                     });
                 }
             }

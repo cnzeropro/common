@@ -1,4 +1,4 @@
-package org.zero.common.core.util.spring.context;
+package org.zero.common.core.util.spring;
 
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -10,12 +10,12 @@ import org.springframework.core.type.AnnotationMetadata;
  * @author zero
  * @since 2021/8/17
  */
-public class SpringContextUtilsRegistrar implements ImportBeanDefinitionRegistrar {
+public class SpringUtilsRegistrar implements ImportBeanDefinitionRegistrar {
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-        String name = SpringContextUtils.class.getName();
+        String name = SpringUtils.class.getName();
         if (!registry.isBeanNameInUse(name)) {
-            AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder.rootBeanDefinition(SpringContextUtils.class).getBeanDefinition();
+            AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder.rootBeanDefinition(SpringUtils.class).getBeanDefinition();
             registry.registerBeanDefinition(name, beanDefinition);
         }
     }

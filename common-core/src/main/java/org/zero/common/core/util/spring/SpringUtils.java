@@ -1,4 +1,4 @@
-package org.zero.common.core.util.spring.context;
+package org.zero.common.core.util.spring;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -28,7 +28,7 @@ import java.util.Optional;
  * @author Zero (cnzeropro@qq.com)
  */
 // @Component
-public class SpringContextUtils implements BeanFactoryPostProcessor, ApplicationContextAware {
+public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContextAware {
     /**
      * Spring 可配置的Bean工厂
      * <p>
