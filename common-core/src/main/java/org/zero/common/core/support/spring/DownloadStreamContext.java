@@ -1,10 +1,12 @@
 package org.zero.common.core.support.spring;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.springframework.util.FastByteArrayOutputStream;
+
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Zero (cnzeropro@163.com)
@@ -13,11 +15,40 @@ import org.springframework.util.FastByteArrayOutputStream;
 @Setter
 @Getter
 @Accessors(chain = true)
-@RequiredArgsConstructor
 public class DownloadStreamContext {
-    private final FastByteArrayOutputStream content;
+    private final InputStream content;
+    /**
+     * 流并不总是知道数据长度，因此默认：-1（未知）
+     */
+    private long contentLength = -1;
     private String contentName;
-    private long contentLength;
-    private String contentType;
-    private String sign;
+    private String contentType = "application/octet-stream";
+    private String contentSign;
+    private int httpStatus = 200;
+    private Map<String, String> httpHeaders = new HashMap<>();
+
+    public static DownloadStreamContext create(InputStream content) {
+        return new DownloadStreamContext(content);
+    }
+
+    public static DownloadStreamContext create(InputStream content, long contentLength) {
+        return new DownloadStreamContext(content, contentLength);
+    }
+
+    public DownloadStreamContext addHttpHeader(String name, String value) {
+        httpHeaders.put(name, value);
+        return this;
+    }
+
+    private DownloadStreamContext(InputStream content) {
+        this.content = content;
+    }
+
+    /**
+     * 未使用 {@link java.io.InputStream#available} 在于该方法的行为依赖于具体的输入流实现，并且它的返回值并不能保证是流的总长度
+     */
+    private DownloadStreamContext(InputStream content, long contentLength) {
+        this.content = content;
+        this.contentLength = contentLength;
+    }
 }
