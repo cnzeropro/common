@@ -1,4 +1,4 @@
-package org.zero.common.core.support.spring;
+package org.zero.common.core.support.spring.web;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -16,14 +16,19 @@ import java.util.Map;
 @Getter
 @Accessors(chain = true)
 public class DownloadStreamContext {
+    /**
+     * 默认缓冲区大小：1M
+     */
+    public static final int DEFAULT_BUFFER_SIZE = 1024 * 1024;
+
     private final InputStream content;
     /**
      * 流并不总是知道数据长度，因此默认：-1（未知）
      */
     private long contentLength = -1;
+    private int bufferSize = DEFAULT_BUFFER_SIZE;
     private String contentName;
     private String contentType = "application/octet-stream";
-    private String contentSign;
     private int httpStatus = 200;
     private Map<String, String> httpHeaders = new HashMap<>();
 

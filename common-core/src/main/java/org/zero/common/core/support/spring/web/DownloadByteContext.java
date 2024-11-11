@@ -1,4 +1,4 @@
-package org.zero.common.core.support.spring;
+package org.zero.common.core.support.spring.web;
 
 import lombok.Getter;
 import lombok.Setter;
