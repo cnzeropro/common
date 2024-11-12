@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.zero.common.core.extension.xss.XssException;
+import org.zero.common.core.support.xss.XssException;
 import org.zero.common.data.model.vo.Result;
 
 /**

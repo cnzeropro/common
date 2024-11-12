@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.NumberFormat;
-import org.zero.common.core.util.java.ClassUtil;
+import org.zero.common.core.util.java.lang.ClassUtil;
 import org.zero.common.core.util.spring.SpringUtils;
 import org.zero.common.data.exception.UtilException;
 
