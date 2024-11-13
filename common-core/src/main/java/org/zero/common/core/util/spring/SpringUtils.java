@@ -21,18 +21,20 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * 通过注解使用注册器方式注入该类
+ * Spring 工具类，包括：IOC 容器获取、注册、注销 bean；获取环境配置等。
+ *
  * <p>
- * 为什么不使用@Component直接注入呢？因为考虑到三方引用可能并没有该包的ComponentScan
+ * 通过注解使用注册器方式注入该类，参见：{@link EnableSpringUtils}
+ * <p>
+ * 为什么不使用 @Component 直接注入呢？因为考虑到三方引用可能并没有该包的 ComponentScan
  *
  * @author Zero (cnzeropro@qq.com)
  */
-// @Component
 public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContextAware {
     /**
-     * Spring 可配置的Bean工厂
+     * Spring 可配置的 Bean 工厂
      * <p>
-     * "@PostConstruct"注解标记的类中，由于ApplicationContext还未加载，会导致NPE，因此实现BeanFactoryPostProcessor注入ConfigurableListableBeanFactory实现bean的操作
+     * "@PostConstruct" 注解标记的类中，由于 ApplicationContext 还未加载，会导致 NPE，因此实现 BeanFactoryPostProcessor 注入 ConfigurableListableBeanFactory 实现 bean 的操作
      */
     private static ConfigurableListableBeanFactory beanFactory;
     /**
@@ -88,28 +90,29 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
      * 获取指定Bean的Provider
      */
     public static <T> ObjectProvider<T> getBeanProvider(Class<T> type, boolean allowEagerInit) {
-        return getBeanFactory().getBeanProvider(type, allowEagerInit);
+        return getBeanFactoryOpt().map(bf -> bf.getBeanProvider(type, allowEagerInit)).orElseGet(EmptyObjectProvider::new);
     }
 
     /**
      * 获取指定Bean的Provider
      */
     public static <T> ObjectProvider<T> getBeanProvider(Class<T> type) {
-        return getBeanFactory().getBeanProvider(type);
+        return getBeanFactoryOpt().map(bf -> bf.getBeanProvider(type)).orElseGet(EmptyObjectProvider::new);
     }
 
     /**
      * 获取指定Bean的Provider
      */
     public static <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType, boolean allowEagerInit) {
-        return getBeanFactory().getBeanProvider(requiredType, allowEagerInit);
+        return getBeanFactoryOpt().map(bf -> bf.<T>getBeanProvider(requiredType, allowEagerInit)).orElseGet(EmptyObjectProvider::new);
     }
 
     /**
      * 获取指定Bean的Provider
      */
     public static <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType) {
-        return getBeanFactory().getBeanProvider(requiredType);
+        return getBeanFactoryOpt().map(bf -> bf.<T>getBeanProvider(requiredType)).orElseGet(EmptyObjectProvider::new);
+
     }
 
     /**
@@ -124,77 +127,6 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
      */
     public static String[] getBeanNamesForType(ResolvableType type) {
         return getBeanFactory().getBeanNamesForType(type);
-    }
-
-    /**
-     * 获取属性值
-     */
-    public static String getProperty(String key) {
-        return getProperty(key, (String) null);
-    }
-
-    /**
-     * 获取属性值
-     */
-    public static String getProperty(String key, String defaultValue) {
-        return getEnvironment().getProperty(key, defaultValue);
-    }
-
-    /**
-     * 获取属性值
-     */
-    public static <T> T getProperty(String key, Class<T> type) {
-        return getEnvironment().getProperty(key, type);
-    }
-
-    /**
-     * 获取属性值
-     */
-    public static <T> T getProperty(String key, Class<T> type, T defaultValue) {
-        return getEnvironment().getProperty(key, type, defaultValue);
-    }
-
-    /**
-     * 获取应用程序名称
-     */
-    public static String getAppName() {
-        return getProperty("spring.application.name");
-    }
-
-    /**
-     * 解析占位符
-     */
-    public static String resolvePlaceholders(String text) {
-        return getEnvironment().resolvePlaceholders(text);
-    }
-
-    /**
-     * 获取当前配置环境，无配置返回空数组
-     */
-    public static String[] getActiveProfiles() {
-        return getEnvironment().getActiveProfiles();
-    }
-
-    /**
-     * 获取当前配置环境，默认取第一个
-     */
-    public static String getActiveProfile() {
-        final String[] activeProfiles = getActiveProfiles();
-        return activeProfiles.length > 0 ? activeProfiles[0] : null;
-    }
-
-    /**
-     * 发布事件
-     */
-    public static void publishEvent(ApplicationEvent event) {
-        getApplicationContext().publishEvent(event);
-    }
-
-    /**
-     * 发布事件
-     */
-    public static void publishEvent(Object event) {
-        getApplicationContext().publishEvent(event);
     }
 
     /**
@@ -219,6 +151,77 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
         } else {
             throw new UtilException("Can not unregister bean, the factory is not a DefaultSingletonBeanRegistry!");
         }
+    }
+
+    /**
+     * 获取属性值
+     */
+    public static String getProperty(String key) {
+        return getProperty(key, (String) null);
+    }
+
+    /**
+     * 获取属性值
+     */
+    public static String getProperty(String key, String defaultValue) {
+        return getEnvironmentOpt().map(env -> env.getProperty(key)).orElse(defaultValue);
+    }
+
+    /**
+     * 获取属性值
+     */
+    public static <T> T getProperty(String key, Class<T> type) {
+        return getProperty(key, type, null);
+    }
+
+    /**
+     * 获取属性值
+     */
+    public static <T> T getProperty(String key, Class<T> type, T defaultValue) {
+        return getEnvironmentOpt().map(env -> env.getProperty(key, type)).orElse(defaultValue);
+    }
+
+    /**
+     * 获取应用程序名称
+     */
+    public static String getAppName() {
+        return getProperty("spring.application.name");
+    }
+
+    /**
+     * 解析占位符
+     */
+    public static String resolvePlaceholders(String text) {
+        return getEnvironmentOpt().map(env -> env.resolvePlaceholders(text)).orElse(text);
+    }
+
+    /**
+     * 获取当前配置环境，无配置返回空数组
+     */
+    public static String[] getActiveProfiles() {
+        return getEnvironmentOpt().map(Environment::getActiveProfiles).orElse(new String[0]);
+    }
+
+    /**
+     * 获取当前配置环境，默认取第一个
+     */
+    public static String getActiveProfile() {
+        final String[] activeProfiles = getActiveProfiles();
+        return activeProfiles.length > 0 ? activeProfiles[0] : null;
+    }
+
+    /**
+     * 发布事件
+     */
+    public static void publishEvent(ApplicationEvent event) {
+        getApplicationContext().publishEvent(event);
+    }
+
+    /**
+     * 发布事件
+     */
+    public static void publishEvent(Object event) {
+        getApplicationContext().publishEvent(event);
     }
 
     /* ******************************************* Context Getter ******************************************* */
