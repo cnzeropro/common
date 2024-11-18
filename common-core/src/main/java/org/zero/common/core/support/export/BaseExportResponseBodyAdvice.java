@@ -5,12 +5,14 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.lang.NonNull;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.StringUtils;
@@ -28,7 +30,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
- * 基础表格数据导出 ResponseBodyAdvice
+ * 基础文件导出 ResponseBodyAdvice
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2022/5/23
@@ -48,11 +50,14 @@ public abstract class BaseExportResponseBodyAdvice implements ResponseBodyAdvice
         return order;
     }
 
+    /**
+     * 参见：{@link org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodProcessor#writeWithMessageConverters(Object, MethodParameter, ServletServerHttpRequest, ServletServerHttpResponse)}
+     */
     @SneakyThrows
     @Override
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
-        // ResponseEntity 不做处理
-        if (body instanceof ResponseEntity) {
+        // HttpEntity 不做处理
+        if (body instanceof HttpEntity) {
             return body;
         }
         // Result 适配

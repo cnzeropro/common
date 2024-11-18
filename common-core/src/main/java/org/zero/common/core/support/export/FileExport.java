@@ -1,5 +1,7 @@
 package org.zero.common.core.support.export;
 
+import org.springframework.core.annotation.AliasFor;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -16,9 +18,13 @@ import java.lang.annotation.Target;
 @Inherited
 @Documented
 public @interface FileExport {
+    @AliasFor("filename")
+    String value() default "";
+
     /**
      * 文件名。如果为空，则默认为【当前时间.文件类型后缀名】，对于无法判断文件类型的，则默认为【当前时间】
      */
+    @AliasFor("value")
     String filename() default "";
 
     /**

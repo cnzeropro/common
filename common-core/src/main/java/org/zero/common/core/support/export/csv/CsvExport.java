@@ -1,5 +1,7 @@
 package org.zero.common.core.support.export.csv;
 
+import org.springframework.core.annotation.AliasFor;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -16,15 +18,24 @@ import java.lang.annotation.Target;
 @Inherited
 @Documented
 public @interface CsvExport {
+    @AliasFor("filename")
+    String value() default "";
+
     /**
      * 文件名。如果为空，则默认为【当前时间.文件类型后缀名】
      */
+    @AliasFor("value")
     String filename() default "";
 
     /**
      * 文件类型。默认：CSV
      */
     CsvFileType fileType() default CsvFileType.CSV;
+
+    /**
+     * 分隔符。默认：,
+     */
+    String delimiter() default ",";
 
     /**
      * 是否写入表头。默认：true

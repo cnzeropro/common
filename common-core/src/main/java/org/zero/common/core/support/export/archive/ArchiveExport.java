@@ -1,5 +1,6 @@
 package org.zero.common.core.support.export.archive;
 
+import org.springframework.core.annotation.AliasFor;
 import org.zero.common.core.support.export.FileExport;
 
 import java.lang.annotation.Documented;
@@ -19,9 +20,13 @@ import java.util.zip.ZipEntry;
 @Inherited
 @Documented
 public @interface ArchiveExport {
+    @AliasFor("filename")
+    String value() default "";
+
     /**
      * 文件名。如果为空，则默认为【当前时间.文件类型后缀名】
      */
+    @AliasFor("value")
     String filename() default "";
 
     /**

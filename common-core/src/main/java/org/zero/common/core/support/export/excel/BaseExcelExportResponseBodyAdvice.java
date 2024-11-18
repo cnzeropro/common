@@ -1,6 +1,7 @@
 package org.zero.common.core.support.export.excel;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
@@ -31,16 +32,32 @@ public abstract class BaseExcelExportResponseBodyAdvice extends BaseTabularDataE
         super(packageNames);
     }
 
+    protected BaseExcelExportResponseBodyAdvice(ConfigurableConversionService conversionService, String... packageNames) {
+        super(conversionService, packageNames);
+    }
+
     protected BaseExcelExportResponseBodyAdvice(int order, String... packageNames) {
         super(order, packageNames);
+    }
+
+    protected BaseExcelExportResponseBodyAdvice(ConfigurableConversionService conversionService, int order, String... packageNames) {
+        super(conversionService, order, packageNames);
     }
 
     protected BaseExcelExportResponseBodyAdvice(String regex) {
         super(regex);
     }
 
+    protected BaseExcelExportResponseBodyAdvice(ConfigurableConversionService conversionService, String regex) {
+        super(conversionService, regex);
+    }
+
     protected BaseExcelExportResponseBodyAdvice(int order, String regex) {
         super(order, regex);
+    }
+
+    protected BaseExcelExportResponseBodyAdvice(ConfigurableConversionService conversionService, int order, String regex) {
+        super(conversionService, order, regex);
     }
 
     @Override
@@ -95,60 +112,21 @@ public abstract class BaseExcelExportResponseBodyAdvice extends BaseTabularDataE
      * </ul>
      */
     protected FastByteArrayOutputStream handleCollection(ExcelExport excelExport, Collection<?> collection) {
-        // handle like: List<List<Object>>
+        // handle like: List<List<?>>
         if (isCollectionOfCollection(collection)) {
             @SuppressWarnings("unchecked")
             Collection<Collection<?>> collections = (Collection<Collection<?>>) collection;
             return this.handleCollectionOfCollection(excelExport, collections);
         }
-        // handle like: List<Map<String, Object>>
+        // handle like: List<Map<?, ?>>
         if (isCollectionOfMap(collection)) {
             @SuppressWarnings("unchecked")
             Collection<Map<?, ?>> maps = (Collection<Map<?, ?>>) collection;
             return this.handleCollectionOfMap(excelExport, maps);
         }
-        // handle like: List<String>
+        // handle like: List<?>
         return this.handleCollectionOfOther(excelExport, collection);
     }
-
-    /**
-     * handle like:
-     * <ul>
-     *     <li>Collection&lt;DataEntity&gt;</li>
-     *     <li>Collection&lt;String&gt;</li>
-     *     <li>...</li>
-     * </ul>
-     */
-    protected FastByteArrayOutputStream handleCollectionOfOther(ExcelExport excelExport, Collection<?> collection) {
-        boolean hasEntity = collection.stream()
-                .filter(Objects::nonNull)
-                .map(Object::getClass)
-                .allMatch(clazz -> ClassUtil.isSpecifiedClass(clazz, regex));
-        if (hasEntity) {
-            return this.handleCollectionOfEntity(excelExport, collection);
-        } else {
-            return this.handleCollectionOfBase(excelExport, collection);
-        }
-    }
-
-    /**
-     * handle like:
-     * <ul>
-     *     <li>Collection&lt;DataEntity&gt;</li>
-     *     <li>...</li>
-     * </ul>
-     */
-    protected abstract FastByteArrayOutputStream handleCollectionOfEntity(ExcelExport excelExport, Collection<?> collection);
-
-    /**
-     * handle like:
-     * <ul>
-     *     <li>Collection&lt;Integer&gt;</li>
-     *     <li>Collection&lt;String&gt;</li>
-     *     <li>...</li>
-     * </ul>
-     */
-    protected abstract FastByteArrayOutputStream handleCollectionOfBase(ExcelExport excelExport, Collection<?> collection);
 
     /**
      * handle like:
@@ -161,21 +139,40 @@ public abstract class BaseExcelExportResponseBodyAdvice extends BaseTabularDataE
      * </ul>
      */
     protected FastByteArrayOutputStream handleCollectionOfCollection(ExcelExport excelExport, Collection<Collection<?>> collections) {
-        // handle like: List<List<List<String>>>
+        // handle like: List<List<List<?>>>
         if (isCollectionOfCollectionOfCollection(collections)) {
             @SuppressWarnings("unchecked")
             Collection<Collection<Collection<?>>> collectionOfCollections = (Collection<Collection<Collection<?>>>) (Object) collections;
             return this.handleCollectionOfCollectionOfCollection(excelExport, collectionOfCollections);
         }
-        // handle like: List<List<Map<String, Object>>>
+        // handle like: List<List<Map<?, ?>>>
         if (isCollectionOfCollectionOfMap(collections)) {
             @SuppressWarnings("unchecked")
             Collection<Collection<Map<?, ?>>> collectionOfMaps = (Collection<Collection<Map<?, ?>>>) (Object) collections;
             return this.handleCollectionOfCollectionOfMap(excelExport, collectionOfMaps);
         }
-        // handle like: List<List<String>>
+        // handle like: List<List<?>>
         return this.handleCollectionOfCollectionOfOther(excelExport, collections);
     }
+
+
+    /**
+     * handle like:
+     * <ul>
+     *     <li>Collection&lt;Collection&lt;Collection&lt;String&gt;&gt;&gt;</li>
+     *     <li>...</li>
+     * </ul>
+     */
+    protected abstract FastByteArrayOutputStream handleCollectionOfCollectionOfCollection(ExcelExport excelExport, Collection<Collection<Collection<?>>> collectionOfCollections);
+
+    /**
+     * handle like:
+     * <ul>
+     *     <li>Collection&lt;Collection&lt;Map&lt;String, Date&gt;&gt;&gt;</li>
+     *     <li>...</li>
+     * </ul>
+     */
+    protected abstract FastByteArrayOutputStream handleCollectionOfCollectionOfMap(ExcelExport excelExport, Collection<Collection<Map<?, ?>>> collectionOfMaps);
 
     /**
      * handle like:
@@ -224,29 +221,51 @@ public abstract class BaseExcelExportResponseBodyAdvice extends BaseTabularDataE
     /**
      * handle like:
      * <ul>
+     *     <li>Collection&lt;DataEntity&gt;</li>
+     *     <li>Collection&lt;String&gt;</li>
+     *     <li>...</li>
+     * </ul>
+     */
+    protected FastByteArrayOutputStream handleCollectionOfOther(ExcelExport excelExport, Collection<?> collection) {
+        boolean hasEntity = collection.stream()
+                .filter(Objects::nonNull)
+                .map(Object::getClass)
+                .allMatch(clazz -> ClassUtil.isSpecifiedClass(clazz, regex));
+        if (hasEntity) {
+            return this.handleCollectionOfEntity(excelExport, collection);
+        } else {
+            return this.handleCollectionOfBase(excelExport, collection);
+        }
+    }
+
+    /**
+     * handle like:
+     * <ul>
+     *     <li>Collection&lt;DataEntity&gt;</li>
+     *     <li>...</li>
+     * </ul>
+     */
+    protected abstract FastByteArrayOutputStream handleCollectionOfEntity(ExcelExport excelExport, Collection<?> collection);
+
+    /**
+     * handle like:
+     * <ul>
+     *     <li>Collection&lt;Integer&gt;</li>
+     *     <li>Collection&lt;String&gt;</li>
+     *     <li>...</li>
+     * </ul>
+     */
+    protected abstract FastByteArrayOutputStream handleCollectionOfBase(ExcelExport excelExport, Collection<?> collection);
+
+
+    /**
+     * handle like:
+     * <ul>
      *     <li>Collection&lt;Map&lt;String, Byte&gt;&gt;</li>
      *     <li>...</li>
      * </ul>
      */
     protected abstract FastByteArrayOutputStream handleCollectionOfMap(ExcelExport excelExport, Collection<Map<?, ?>> maps);
-
-    /**
-     * handle like:
-     * <ul>
-     *     <li>Collection&lt;Collection&lt;Collection&lt;String&gt;&gt;&gt;</li>
-     *     <li>...</li>
-     * </ul>
-     */
-    protected abstract FastByteArrayOutputStream handleCollectionOfCollectionOfCollection(ExcelExport excelExport, Collection<Collection<Collection<?>>> collectionOfCollections);
-
-    /**
-     * handle like:
-     * <ul>
-     *     <li>Collection&lt;Collection&lt;Map&lt;String, Date&gt;&gt;&gt;</li>
-     *     <li>...</li>
-     * </ul>
-     */
-    protected abstract FastByteArrayOutputStream handleCollectionOfCollectionOfMap(ExcelExport excelExport, Collection<Collection<Map<?, ?>>> collectionOfMaps);
 
     /* ********************************************************* Map Handler ********************************************************* */
 
@@ -272,23 +291,15 @@ public abstract class BaseExcelExportResponseBodyAdvice extends BaseTabularDataE
      * </ul>
      */
     protected FastByteArrayOutputStream handleMap(ExcelExport excelExport, Map<?, ?> map) {
-        // handle like: Map<String, List<Object>>
+        // handle like: Map<?, List<?>>
         if (isMapOfCollection(map)) {
             @SuppressWarnings("unchecked")
             Map<?, Collection<?>> mapOfCollection = (Map<?, Collection<?>>) map;
             return this.handleMapOfCollection(excelExport, mapOfCollection);
         }
-        // handle like: Map<String, Object>
+        // handle like: Map<?, ?>
         return this.handleMapOfOther(excelExport, map);
     }
-
-    /**
-     * handle like:
-     * <ul>
-     *     <li>Map&lt;String, Number&gt;</li>
-     * </ul>
-     */
-    protected abstract FastByteArrayOutputStream handleMapOfOther(ExcelExport excelExport, Map<?, ?> map);
 
     /**
      * handle like:
@@ -301,21 +312,40 @@ public abstract class BaseExcelExportResponseBodyAdvice extends BaseTabularDataE
      * </ul>
      */
     protected FastByteArrayOutputStream handleMapOfCollection(ExcelExport excelExport, Map<?, Collection<?>> collectionMap) {
-        // handle like: Map<String, List<Map<String, Object>>>
+        // handle like: Map<?, List<Map<?, ?>>>
         if (isMapOfCollectionOfMap(collectionMap)) {
             @SuppressWarnings("unchecked")
             Map<?, Collection<Map<?, ?>>> collectionOfMapMap = (Map<?, Collection<Map<?, ?>>>) (Object) collectionMap;
             return this.handleMapOfCollectionOfMap(excelExport, collectionOfMapMap);
         }
-        // handle like: Map<String, List<List<Object>>>
+        // handle like: Map<?, List<List<?>>>
         if (isMapOfCollectionOfCollection(collectionMap)) {
             @SuppressWarnings("unchecked")
             Map<?, Collection<Collection<?>>> collectionOfCollectionMap = (Map<?, Collection<Collection<?>>>) (Object) collectionMap;
             return this.handleMapOfCollectionOfCollection(excelExport, collectionOfCollectionMap);
         }
-        // handle like: Map<String, List<String>>
+        // handle like: Map<?, List<?>>
         return this.handleMapOfCollectionOfOther(excelExport, collectionMap);
     }
+
+    /**
+     * handle like:
+     * <ul>
+     *     <li>Map&lt;String, Collection&lt;Map&lt;String, Float&gt;&gt;&gt;</li>
+     *     <li>...</li>
+     * </ul>
+     */
+    protected abstract FastByteArrayOutputStream handleMapOfCollectionOfMap(ExcelExport excelExport, Map<?, Collection<Map<?, ?>>> collectionOfMapMap);
+
+    /**
+     * handle like:
+     * <ul>
+     *     <li>Map&lt;String, Collection&lt;Collection&lt;String&gt;&gt;&gt;</li>
+     *     <li>Map&lt;String, Collection&lt;Collection&lt;Double&gt;&gt;&gt;</li>
+     *     <li>...</li>
+     * </ul>
+     */
+    protected abstract FastByteArrayOutputStream handleMapOfCollectionOfCollection(ExcelExport excelExport, Map<?, Collection<Collection<?>>> collectionOfCollectionMap);
 
     /**
      * handle like:
@@ -365,19 +395,8 @@ public abstract class BaseExcelExportResponseBodyAdvice extends BaseTabularDataE
     /**
      * handle like:
      * <ul>
-     *     <li>Map&lt;String, Collection&lt;Map&lt;String, Float&gt;&gt;&gt;</li>
-     *     <li>...</li>
+     *     <li>Map&lt;String, Number&gt;</li>
      * </ul>
      */
-    protected abstract FastByteArrayOutputStream handleMapOfCollectionOfMap(ExcelExport excelExport, Map<?, Collection<Map<?, ?>>> collectionOfMapMap);
-
-    /**
-     * handle like:
-     * <ul>
-     *     <li>Map&lt;String, Collection&lt;Collection&lt;String&gt;&gt;&gt;</li>
-     *     <li>Map&lt;String, Collection&lt;Collection&lt;Double&gt;&gt;&gt;</li>
-     *     <li>...</li>
-     * </ul>
-     */
-    protected abstract FastByteArrayOutputStream handleMapOfCollectionOfCollection(ExcelExport excelExport, Map<?, Collection<Collection<?>>> collectionOfCollectionMap);
+    protected abstract FastByteArrayOutputStream handleMapOfOther(ExcelExport excelExport, Map<?, ?> map);
 }

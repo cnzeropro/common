@@ -34,7 +34,9 @@ public abstract class BasePoiResponseBodyAdvice extends BaseExcelExportResponseB
         if (StringUtils.hasText(password)) {
             if (workbook instanceof XSSFWorkbook) {
                 XSSFWorkbook xssfWorkbook = (XSSFWorkbook) workbook;
+                // 工作簿密码
                 xssfWorkbook.setWorkbookPassword(password, HashAlgorithm.sha512);
+                // 修订密码
                 xssfWorkbook.setRevisionsPassword(password, HashAlgorithm.md5);
             }
             if (workbook instanceof HSSFWorkbook) {

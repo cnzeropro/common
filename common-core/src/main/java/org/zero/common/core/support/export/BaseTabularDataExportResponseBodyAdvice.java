@@ -1,6 +1,10 @@
 package org.zero.common.core.support.export;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.support.ConfigurableConversionService;
+import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
@@ -8,8 +12,11 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * 基础表格数据导出 ResponseBodyAdvice
@@ -22,24 +29,43 @@ public abstract class BaseTabularDataExportResponseBodyAdvice extends BaseExport
     protected static final String DEFAULT_REGEX_TEMPLATE = "^(\\w+\\.)*(%s)(\\.\\w+)*$";
     protected static final String DEFAULT_REGEX = String.format(DEFAULT_REGEX_TEMPLATE, StringUtils.arrayToDelimitedString(DEFAULT_PACKAGE_NAMES, "|"));
 
-    protected String regex = DEFAULT_REGEX;
+    protected ConfigurableConversionService conversionService = new DefaultFormattingConversionService();
+
+    /**
+     * 判断是否是 pojo bean 的正则表达式。默认：包名称中带有 "model", "entity", "domain", "pojo" 的是 pojo bean
+     */
+    protected String regex;
 
     protected BaseTabularDataExportResponseBodyAdvice(String... packageNames) {
         super();
-        if (!ObjectUtils.isEmpty(packageNames)) {
-            this.regex = String.format(DEFAULT_REGEX_TEMPLATE, StringUtils.arrayToDelimitedString(packageNames, "|"));
-        }
+        this.regex = generateRegex(packageNames);
+    }
+
+    protected BaseTabularDataExportResponseBodyAdvice(ConfigurableConversionService conversionService, String... packageNames) {
+        super();
+        this.conversionService = conversionService;
+        this.regex = generateRegex(packageNames);
     }
 
     protected BaseTabularDataExportResponseBodyAdvice(int order, String... packageNames) {
         super(order);
-        if (!ObjectUtils.isEmpty(packageNames)) {
-            this.regex = String.format(DEFAULT_REGEX_TEMPLATE, StringUtils.arrayToDelimitedString(packageNames, "|"));
-        }
+        this.regex = generateRegex(packageNames);
+    }
+
+    protected BaseTabularDataExportResponseBodyAdvice(ConfigurableConversionService conversionService, int order, String... packageNames) {
+        super(order);
+        this.conversionService = conversionService;
+        this.regex = generateRegex(packageNames);
     }
 
     protected BaseTabularDataExportResponseBodyAdvice(String regex) {
         super();
+        this.regex = regex;
+    }
+
+    protected BaseTabularDataExportResponseBodyAdvice(ConfigurableConversionService conversionService, String regex) {
+        super();
+        this.conversionService = conversionService;
         this.regex = regex;
     }
 
@@ -48,9 +74,43 @@ public abstract class BaseTabularDataExportResponseBodyAdvice extends BaseExport
         this.regex = regex;
     }
 
+    protected BaseTabularDataExportResponseBodyAdvice(ConfigurableConversionService conversionService, int order, String regex) {
+        super(order);
+        this.conversionService = conversionService;
+        this.regex = regex;
+    }
+
     @Override
     protected FileExportEntity export(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
         return null;
+    }
+
+    protected String generateRegex(String... packageNames) {
+        if (ObjectUtils.isEmpty(packageNames)) {
+            return DEFAULT_REGEX;
+        }
+        return String.format(DEFAULT_REGEX_TEMPLATE, StringUtils.arrayToDelimitedString(packageNames, "|"));
+    }
+
+    protected <T> T convert(Object obj, Field field, Class<T> type) {
+        if (Objects.isNull(obj)) {
+            return null;
+        }
+        if (Objects.isNull(field)) {
+            if (conversionService.canConvert(obj.getClass(), type)) {
+                return conversionService.convert(obj, type);
+            }
+            // 转换不了的直接强转
+            return type.cast(obj);
+        }
+        TypeDescriptor sourceType = new TypeDescriptor(field);
+        TypeDescriptor targetType = new TypeDescriptor(ResolvableType.forClass(type), type, null);
+        if (conversionService.canConvert(sourceType, targetType)) {
+            Object converted = conversionService.convert(obj, sourceType, targetType);
+            return type.cast(converted);
+        }
+        // 转换不了的直接强转
+        return type.cast(obj);
     }
 
     /**
@@ -192,5 +252,13 @@ public abstract class BaseTabularDataExportResponseBodyAdvice extends BaseExport
      */
     protected static boolean isMap(Object obj) {
         return isExpectedType(obj, Map.class);
+    }
+
+    protected static <T> T getNonNullFirst(Collection<T> collection) {
+        return getNonNullFirstOpt(collection).orElse(null);
+    }
+
+    protected static <T> Optional<T> getNonNullFirstOpt(Collection<T> collection) {
+        return collection.stream().filter(Objects::nonNull).findFirst();
     }
 }

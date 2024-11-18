@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.zero.common.core.support.export.excel.BaseExcelExportResponseBodyAdvice;
+import org.zero.common.core.support.export.excel.BasePoiResponseBodyAdvice;
 import org.zero.common.core.support.export.excel.ExcelExport;
 import org.zero.common.core.support.export.excel.ExcelFileType;
 import org.zero.common.data.exception.CommonException;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  */
 @NoArgsConstructor
 @ControllerAdvice
-public class EasyExcelResponseBodyAdvice extends BaseExcelExportResponseBodyAdvice {
+public class EasyExcelResponseBodyAdvice extends BasePoiResponseBodyAdvice {
     public EasyExcelResponseBodyAdvice(String... packageNames) {
         super(packageNames);
     }

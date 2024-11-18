@@ -272,6 +272,6 @@ public class CsvUtil {
     }
 
     private String warp(String data) {
-        return data + "\n";
+        return data + System.lineSeparator();
     }
 }
