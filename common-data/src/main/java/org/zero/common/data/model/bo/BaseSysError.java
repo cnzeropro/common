@@ -1,4 +1,4 @@
-package org.zero.common.data.enumeration;
+package org.zero.common.data.model.bo;
 
 import lombok.Getter;
 

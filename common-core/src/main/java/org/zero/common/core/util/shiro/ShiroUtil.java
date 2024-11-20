@@ -4,7 +4,7 @@ import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
-import org.zero.common.data.model.ShiroLoginUser;
+import org.zero.common.data.model.to.ShiroLoginUser;
 
 import java.io.Serializable;
 import java.util.Optional;

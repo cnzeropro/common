@@ -1,4 +1,4 @@
-package org.zero.common.data.model;
+package org.zero.common.data.model.to;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;

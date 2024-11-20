@@ -1,4 +1,4 @@
-package org.zero.common.data.model;
+package org.zero.common.data.model.to;
 
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;

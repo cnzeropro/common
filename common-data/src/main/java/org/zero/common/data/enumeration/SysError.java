@@ -2,6 +2,7 @@ package org.zero.common.data.enumeration;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
+import org.zero.common.data.model.bo.BaseSysError;
 
 /**
  * @author Zero (cnzeropro@qq.com)

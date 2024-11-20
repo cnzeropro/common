@@ -19,18 +19,32 @@ import java.util.Objects;
  */
 @Slf4j
 public class MessageSourceUtils {
-    private static String message(String code, Object... args) {
+    public static String message(String code, Object... args) {
         Locale locale = LocaleContextHolder.getLocale();
         return message(code, locale, args);
     }
 
-    private static String message(String code, Locale locale, Object... args) {
+    public static String message(String code, Object[] args, String defaultMessage) {
+        Locale locale = LocaleContextHolder.getLocale();
+        return message(code, locale, defaultMessage, args);
+    }
+
+    public static String message(String code, Locale locale, Object... args) {
         return getMessageSource().getMessage(code, args, locale);
     }
 
-    private static String message(String code, String localeStr, Object... args) {
-        Locale locale = StringUtils.parseLocale(localeStr);
+    public static String message(String code, Locale locale, Object[] args, String defaultMessage) {
+        return getMessageSource().getMessage(code, args, defaultMessage, locale);
+    }
+
+    public static String message(String code, String localeValue, Object... args) {
+        Locale locale = StringUtils.parseLocale(localeValue);
         return message(code, Objects.isNull(locale) ? LocaleContextHolder.getLocale() : locale, args);
+    }
+
+    public static String message(String code, String localeValue, Object[] args, String defaultMessage) {
+        Locale locale = StringUtils.parseLocale(localeValue);
+        return message(code, Objects.isNull(locale) ? LocaleContextHolder.getLocale() : locale, defaultMessage, args);
     }
 
     private static MessageSource messageSource;

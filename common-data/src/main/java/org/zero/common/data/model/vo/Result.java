@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import org.zero.common.data.enumeration.BaseSysError;
+import org.zero.common.data.model.bo.BaseSysError;
 
 import java.time.LocalDateTime;
 import java.util.Objects;

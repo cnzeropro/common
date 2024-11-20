@@ -1,4 +1,4 @@
-package org.zero.common.data.model.qo;
+package org.zero.common.core.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.With;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.zero.common.core.util.java.lang.ClassUtil;
 
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
@@ -235,7 +236,7 @@ public class Condition implements Serializable {
         }
 
         Class<?> clazz = param.getClass();
-        if (isNumClass(clazz)) {
+        if (ClassUtil.isNumClass(clazz)) {
             return param.toString();
         } else {
             String str = param.toString();
@@ -245,18 +246,6 @@ public class Condition implements Serializable {
                 return String.format("'%s'", param);
             }
         }
-    }
-
-    /**
-     * 是否是数字类型
-     */
-    static boolean isNumClass(Class<?> clazz) {
-        return Objects.nonNull(clazz) &&
-                (Number.class.isAssignableFrom(clazz) ||
-                        (clazz.isPrimitive() &&
-                                (clazz == int.class || clazz == long.class ||
-                                        clazz == short.class || clazz == byte.class ||
-                                        clazz == float.class || clazz == double.class)));
     }
 
     /**

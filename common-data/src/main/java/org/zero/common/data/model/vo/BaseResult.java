@@ -1,7 +1,7 @@
 package org.zero.common.data.model.vo;
 
 import org.springframework.http.HttpStatus;
-import org.zero.common.data.enumeration.BaseSysError;
+import org.zero.common.data.model.bo.BaseSysError;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -16,8 +16,8 @@ public interface BaseResult<T> extends Serializable {
     int FAIL_CODE = HttpStatus.INTERNAL_SERVER_ERROR.value();
 
     String OK_MSG = "操作成功";
-    String ERROR_MSG = "操作失败";
-    String FAIL_MSG = "请求错误";
+    String ERROR_MSG = "操作错误";
+    String FAIL_MSG = "操作失败";
 
     int getCode();
 
