@@ -35,7 +35,7 @@ public abstract class BaseDebouncingInterceptor implements AbstractHandlerMethod
         if (!this.needPrevent(request, debouncing)) {
             return true;
         }
-        String jsonStr = JacksonUtils.toJsonStr(Result.error(debouncing.message()));
+        String jsonStr = JacksonUtils.toJsonStr(Result.fail(debouncing.message()));
         ResponseUtil.writeOkJson(response, jsonStr);
         return false;
     }

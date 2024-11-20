@@ -33,7 +33,7 @@ public abstract class BaseIdempotenceInterceptor implements AbstractHandlerMetho
         if (!this.needPrevent(request, idempotence)) {
             return true;
         }
-        String jsonStr = JacksonUtils.toJsonStr(Result.error(idempotence.message()));
+        String jsonStr = JacksonUtils.toJsonStr(Result.fail(idempotence.message()));
         ResponseUtil.writeOkJson(response, jsonStr);
         return false;
     }

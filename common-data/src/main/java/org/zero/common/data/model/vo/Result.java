@@ -49,7 +49,6 @@ public final class Result<T> implements BaseResult<T> {
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @Builder.Default
     private LocalDateTime time = LocalDateTime.now();
-
     /**
      * 数据对象
      */
@@ -74,23 +73,31 @@ public final class Result<T> implements BaseResult<T> {
 
     /* ******************************************************** 请求成功但没有达到预期响应 ******************************************************** */
     public static <T> Result<T> error() {
-        return error(ERROR_MSG);
+        return error((T) null);
     }
 
     public static <T> Result<T> error(String message) {
-        return error(message, BaseSysError.DefaultSysError.ERROR);
+        return error(message, null);
+    }
+
+    public static <T> Result<T> error(BaseSysError error) {
+        return error(error, null);
     }
 
     public static <T> Result<T> error(T data) {
         return error(ERROR_MSG, data);
     }
 
+    public static <T> Result<T> error(String message, BaseSysError error) {
+        return error(message, error, null);
+    }
+
     public static <T> Result<T> error(String message, T data) {
         return error(message, BaseSysError.DefaultSysError.ERROR, data);
     }
 
-    public static <T> Result<T> error(String message, BaseSysError error) {
-        return error(message, error, null);
+    public static <T> Result<T> error(BaseSysError error, T data) {
+        return error(ERROR_MSG, error, data);
     }
 
     public static <T> Result<T> error(String message, BaseSysError error, T data) {
@@ -103,7 +110,7 @@ public final class Result<T> implements BaseResult<T> {
     }
 
     public static <T> Result<T> fail(String message) {
-        return fail(message, BaseSysError.DefaultSysError.ERROR);
+        return fail(FAIL_CODE, message);
     }
 
     public static <T> Result<T> fail(String message, BaseSysError error) {
@@ -130,6 +137,10 @@ public final class Result<T> implements BaseResult<T> {
             success = success && error.isOk();
         }
         return of(code, message, error, success, time, data);
+    }
+
+    public static <T> Result<T> of(int code, String message, BaseSysError error, boolean success, T data) {
+        return of(code, message, error, success, LocalDateTime.now(), data);
     }
 
     public static <T> Result<T> of(int code, String message, BaseSysError error, boolean success, LocalDateTime time, T data) {

@@ -49,7 +49,7 @@ public class JavaExceptionHandler {
     @ExceptionHandler(java.sql.SQLSyntaxErrorException.class)
     public Result<Void> sqlSyntaxErrorException(java.sql.SQLSyntaxErrorException e) {
         log.error("SQL syntax error", e);
-        return Result.error("SQL 语法错误");
+        return Result.fail("SQL 语法错误");
     }
 
     @ExceptionHandler(java.sql.SQLException.class)

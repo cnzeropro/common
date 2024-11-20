@@ -2,7 +2,6 @@ package org.zero.common.data.exception;
 
 import lombok.Getter;
 import org.zero.common.data.enumeration.BaseSysError;
-import org.zero.common.data.enumeration.SysError;
 
 /**
  * @author Zero (cnzeropro@qq.com)
@@ -19,20 +18,22 @@ public class BaseException extends RuntimeException {
      */
     protected final BaseSysError sysError;
 
+    /* ************************************************************** Exception() ************************************************************** */
     public BaseException() {
-        this((String) null);
-    }
-
-    public BaseException(String message) {
-        this(message, message);
+        this(BaseSysError.DefaultSysError.ERROR);
     }
 
     public BaseException(BaseSysError sysError) {
         this(sysError.getMessage(), sysError);
     }
 
+    /* ************************************************************** Exception(java.lang.String) ************************************************************** */
+    public BaseException(String message) {
+        this(message, message);
+    }
+
     public BaseException(String message, String promptMessage) {
-        this(message, promptMessage, SysError.ERROR);
+        this(message, promptMessage, BaseSysError.DefaultSysError.ERROR);
     }
 
     public BaseException(String message, BaseSysError sysError) {
@@ -45,38 +46,45 @@ public class BaseException extends RuntimeException {
         this.sysError = sysError;
     }
 
+    /* ************************************************************** Exception(java.lang.Throwable) ************************************************************** */
     public BaseException(Throwable cause) {
-        this(SysError.ERROR, cause);
+        this(cause, BaseSysError.DefaultSysError.ERROR);
     }
 
+    public BaseException(Throwable cause, String promptMessage) {
+        this(cause, promptMessage, BaseSysError.DefaultSysError.ERROR);
+    }
+
+    public BaseException(Throwable cause, BaseSysError sysError) {
+        this(cause, sysError.getMessage(), sysError);
+    }
+
+    public BaseException(Throwable cause, String promptMessage, BaseSysError sysError) {
+        super(cause);
+        this.promptMessage = promptMessage;
+        this.sysError = sysError;
+    }
+
+    /* ************************************************************** Exception(java.lang.String, java.lang.Throwable) ************************************************************** */
     public BaseException(String message, Throwable cause) {
-        this(message, SysError.ERROR, cause);
+        this(message, cause, message);
     }
 
-    public BaseException(BaseSysError sysError, Throwable cause) {
-        this(sysError.getMessage(), sysError, cause);
+    public BaseException(String message, Throwable cause, String promptMessage) {
+        this(message, cause, promptMessage, BaseSysError.DefaultSysError.ERROR);
     }
 
-    public BaseException(String message, String promptMessage, Throwable cause) {
-        this(message, promptMessage, SysError.ERROR, cause);
+    public BaseException(String message, Throwable cause, BaseSysError sysError) {
+        this(message, cause, message, sysError);
     }
 
-    public BaseException(String message, BaseSysError sysError, Throwable cause) {
-        this(message, message, sysError, cause);
-    }
-
-    public BaseException(String message, String promptMessage, BaseSysError sysError, Throwable cause) {
+    public BaseException(String message, Throwable cause, String promptMessage, BaseSysError sysError) {
         super(message, cause);
         this.promptMessage = promptMessage;
         this.sysError = sysError;
     }
 
-    protected BaseException(String message, String promptMessage, BaseSysError sysError, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-        this.promptMessage = promptMessage;
-        this.sysError = sysError;
-    }
-
+    /* ************************************************************** other ************************************************************** */
     public String getErrorCode() {
         return sysError.getCode();
     }

@@ -35,7 +35,7 @@ public abstract class BaseDeduplicationInterceptor implements AbstractHandlerMet
         if (!this.needPrevent(request, deduplication)) {
             return true;
         }
-        String jsonStr = JacksonUtils.toJsonStr(Result.error(deduplication.message()));
+        String jsonStr = JacksonUtils.toJsonStr(Result.fail(deduplication.message()));
         ResponseUtil.writeOkJson(response, jsonStr);
         return false;
     }
