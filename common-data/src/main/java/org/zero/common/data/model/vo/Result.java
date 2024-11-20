@@ -8,11 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import org.springframework.http.HttpStatus;
 import org.zero.common.data.enumeration.BaseSysError;
-import org.zero.common.data.enumeration.SysError;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -25,16 +22,8 @@ import java.util.Objects;
 @Accessors(chain = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public final class Result<T> implements Serializable {
+public final class Result<T> implements BaseResult<T> {
     private static final long serialVersionUID = 7893804841950761019L;
-
-    public static final int OK_CODE = HttpStatus.OK.value();
-    public static final int ERROR_CODE = OK_CODE;
-    public static final int FAIL_CODE = HttpStatus.INTERNAL_SERVER_ERROR.value();
-
-    public static final String OK_MSG = "操作成功";
-    public static final String ERROR_MSG = "操作失败";
-    public static final String FAIL_MSG = "请求错误";
 
     /**
      * 状态码
@@ -80,7 +69,7 @@ public final class Result<T> implements Serializable {
     }
 
     public static <T> Result<T> ok(String message, T data) {
-        return of(OK_CODE, message, SysError.OK, data);
+        return of(OK_CODE, message, BaseSysError.DefaultSysError.OK, data);
     }
 
     /* ******************************************************** 请求成功但没有达到预期响应 ******************************************************** */
@@ -89,7 +78,7 @@ public final class Result<T> implements Serializable {
     }
 
     public static <T> Result<T> error(String message) {
-        return error(message, SysError.ERROR);
+        return error(message, BaseSysError.DefaultSysError.ERROR);
     }
 
     public static <T> Result<T> error(T data) {
@@ -97,7 +86,7 @@ public final class Result<T> implements Serializable {
     }
 
     public static <T> Result<T> error(String message, T data) {
-        return error(message, SysError.ERROR, data);
+        return error(message, BaseSysError.DefaultSysError.ERROR, data);
     }
 
     public static <T> Result<T> error(String message, BaseSysError error) {
@@ -114,7 +103,7 @@ public final class Result<T> implements Serializable {
     }
 
     public static <T> Result<T> fail(String message) {
-        return fail(message, SysError.ERROR);
+        return fail(message, BaseSysError.DefaultSysError.ERROR);
     }
 
     public static <T> Result<T> fail(String message, BaseSysError error) {
@@ -122,7 +111,7 @@ public final class Result<T> implements Serializable {
     }
 
     public static <T> Result<T> fail(int code, String message) {
-        return fail(code, message, SysError.ERROR);
+        return fail(code, message, BaseSysError.DefaultSysError.ERROR);
     }
 
     public static <T> Result<T> fail(int code, String message, BaseSysError error) {
@@ -138,7 +127,7 @@ public final class Result<T> implements Serializable {
     public static <T> Result<T> of(int code, String message, BaseSysError error, LocalDateTime time, T data) {
         boolean success = OK_CODE == code;
         if (Objects.nonNull(error)) {
-            success = success && SysError.OK.getCode().equals(error.getCode());
+            success = success && error.isOk();
         }
         return of(code, message, error, success, time, data);
     }

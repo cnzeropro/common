@@ -13,11 +13,11 @@ public enum SysError implements BaseSysError {
     /**
      * 一切ok
      */
-    OK("00000", "ok"),
+    OK(OK_CODE, "ok"),
     /**
      * 宏观错误
      */
-    ERROR("11111", "error"),
+    ERROR(ERROR_CODE, "error"),
     ;
 
     private final String code;
