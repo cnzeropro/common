@@ -8,6 +8,9 @@ import java.util.Map;
  * @since 2024/10/15
  */
 public class LRUCache<K, V> extends LinkedHashMap<K, V> {
+    /**
+     * 默认最大缓存数量，1 * 2^16 = 65536
+     */
     public static final int DEFAULT_MAX_SIZE = 1 << 16;
 
     private final int maxSize;
@@ -17,6 +20,7 @@ public class LRUCache<K, V> extends LinkedHashMap<K, V> {
     }
 
     public LRUCache(int maxSize) {
+        super();
         this.maxSize = maxSize;
     }
 

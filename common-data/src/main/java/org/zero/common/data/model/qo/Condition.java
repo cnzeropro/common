@@ -1,4 +1,4 @@
-package org.zero.common.core.model;
+package org.zero.common.data.model.qo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.With;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.zero.common.core.util.java.lang.ClassUtil;
 
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
@@ -236,7 +235,7 @@ public class Condition implements Serializable {
         }
 
         Class<?> clazz = param.getClass();
-        if (ClassUtil.isNumClass(clazz)) {
+        if (isNumClass(clazz)) {
             return param.toString();
         } else {
             String str = param.toString();
@@ -271,5 +270,14 @@ public class Condition implements Serializable {
             return value;
         }
         return paramMapper.apply(value);
+    }
+
+    static boolean isNumClass(Class<?> clazz) {
+        return Objects.nonNull(clazz) &&
+                (Number.class.isAssignableFrom(clazz) ||
+                        (clazz.isPrimitive() &&
+                                (clazz == int.class || clazz == long.class ||
+                                        clazz == short.class || clazz == byte.class ||
+                                        clazz == float.class || clazz == double.class)));
     }
 }
