@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
-import org.zero.common.api.extra.loki.model.common.Stats;
-import org.zero.common.api.extra.loki.model.common.Stream;
+import org.zero.common.api.extra.loki.model.common.LokiStats;
+import org.zero.common.api.extra.loki.model.common.LokiStream;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -20,30 +20,34 @@ class LokiResultTest {
     @SneakyThrows
     @Test
     void test() {
-        Stream.Value value1 = new Stream.Value();
+        LokiStream.Value value1 = new LokiStream.Value();
         Instant now = Instant.now();
         long epochNano = now.getEpochSecond() * 1_000_000_000L + now.getNano();
+        System.out.println("epochNano: " + epochNano);
         value1.add(String.valueOf(epochNano));
         value1.add("log line");
-        Stream stream = Stream.builder().stream(Collections.singletonMap("a", "b"))
+        LokiStream lokiStream = LokiStream.builder().stream(Collections.singletonMap("a", "b"))
                 .value(value1)
                 .build();
 
         ObjectMapper objectMapper = new ObjectMapper();
-        String serialize = objectMapper.writeValueAsString(stream);
-        System.out.println(serialize);
-        Map<String, Object> map = objectMapper.readValue(serialize, new TypeReference<Map<String, Object>>() {
+        String lokiStreamJsonStr = objectMapper.writeValueAsString(lokiStream);
+        System.out.println("lokiStreamJsonStr: " + lokiStreamJsonStr);
+        Map<String, Object> lokiStreamMap = objectMapper.readValue(lokiStreamJsonStr, new TypeReference<Map<String, Object>>() {
         });
         LokiResult<LokiQueryRangeResponse> lokiResult = LokiResult.<LokiQueryRangeResponse>builder()
-                .data(LokiQueryRangeResponse.builder()
-                        .result(Collections.singletonList(map))
-                        .resultType("streams")
-                        .stats(Stats.builder().build())
-                        .build())
                 .status("success")
+                .data(LokiQueryRangeResponse.builder()
+                        .resultType("streams")
+                        .result(Collections.singletonList(lokiStreamMap))
+                        .stats(LokiStats.builder()
+                                .summary(Collections.singletonMap("bytes", 1))
+                                .build())
+                        .build())
                 .build();
 
+        System.out.println("lokiResult: " + lokiResult);
         String lokiResultJsonStr = objectMapper.writeValueAsString(lokiResult);
-        System.out.println(lokiResultJsonStr);
+        System.out.println("lokiResultJsonStr: " + lokiResultJsonStr);
     }
 }

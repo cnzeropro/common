@@ -16,7 +16,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class Stats implements Serializable {
+public class LokiStats implements Serializable {
     private Map<String, Object> summary;
     private Map<String, Object> querier;
     private Map<String, Object> ingester;

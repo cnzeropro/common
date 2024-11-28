@@ -16,26 +16,25 @@ import java.util.Map;
  * @author Zero (cnzeropro@163.com)
  * @since 2024/11/27
  */
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class Stream implements Serializable {
-    private Map<String, Object> stream;
+public class LokiMatrix implements Serializable {
+    private Map<String, Object> metric;
     @Singular
     private List<Value> values;
 
     @Data
     @EqualsAndHashCode(callSuper = true)
     @ToString(callSuper = true)
-    public static class Value extends org.zero.common.api.extra.loki.model.common.Value {
+    public static class Value extends LokiValue {
         public Value() {
             super();
         }
 
-        public String getEpochNano() {
-            return (String) this.get(0);
+        public Long getEpochSecond() {
+            return (Long) this.get(0);
         }
 
         public String getLogLine() {

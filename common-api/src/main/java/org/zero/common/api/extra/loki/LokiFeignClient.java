@@ -32,7 +32,7 @@ public interface LokiFeignClient {
      * 写入日志数据
      */
     @PostMapping("/loki/api/v1/push")
-    LokiResult<Void> push(@RequestBody LokiPushRequest lokiPush);
+    LokiResult<Void> push(@RequestBody LokiPushRequest pushRequest);
 
     /* **************************************************** Query endpoints **************************************************** */
 
@@ -40,23 +40,23 @@ public interface LokiFeignClient {
      * 查询单个时间节点的日志数据
      */
     @GetMapping("/loki/api/v1/query")
-    LokiResult<LokiQueryResponse> query(@SpringQueryMap LokiQueryRequest lokiQuery);
+    LokiResult<LokiQueryResponse> query(@SpringQueryMap LokiQueryRequest queryRequest);
 
     /**
      * 查询时间范围内的日志数据
      */
     @GetMapping("/loki/api/v1/query_range")
-    LokiResult<LokiQueryRangeResponse> queryRange(@SpringQueryMap LokiQueryRangeRequest lokiQueryRange);
+    LokiResult<LokiQueryRangeResponse> queryRange(@SpringQueryMap LokiQueryRangeRequest queryRangeRequest);
 
     /**
      * 查询标签
      */
     @GetMapping("/loki/api/v1/labels")
-    LokiResult<List<String>> labels(@SpringQueryMap LokiLabelsRequest lokiLabels);
+    LokiResult<List<String>> labels(@SpringQueryMap LokiLabelsRequest labelsRequest);
 
     /**
      * 查询标签值
      */
     @GetMapping("/loki/api/v1/label/{name}/values")
-    LokiResult<List<String>> labelValues(@PathVariable String name, @SpringQueryMap LokiLabelValuesRequest lokiLabelValues);
+    LokiResult<List<String>> labelValues(@PathVariable String name, @SpringQueryMap LokiLabelValuesRequest labelValuesRequest);
 }

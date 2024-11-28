@@ -4,7 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.zero.common.api.extra.loki.model.common.Stats;
+import org.zero.common.api.extra.loki.model.common.LokiStats;
+import org.zero.common.api.extra.loki.model.common.LokiStream;
+import org.zero.common.api.extra.loki.model.common.LokiVector;
 
 import java.io.Serializable;
 import java.util.List;
@@ -22,8 +24,8 @@ public class LokiQueryResponse implements Serializable {
     /**
      * 返回数据类型。vector 或 streams
      *
-     * @see org.zero.common.api.extra.loki.model.common.Vector
-     * @see org.zero.common.api.extra.loki.model.common.Stream
+     * @see LokiVector
+     * @see LokiStream
      */
     private String resultType;
     /**
@@ -33,5 +35,5 @@ public class LokiQueryResponse implements Serializable {
     /**
      * 统计信息
      */
-    private Stats stats;
+    private LokiStats stats;
 }

@@ -20,7 +20,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class Matrix implements Serializable {
+public class LokiVector implements Serializable {
     private Map<String, Object> metric;
     @Singular
     private List<Value> values;
@@ -28,7 +28,7 @@ public class Matrix implements Serializable {
     @Data
     @EqualsAndHashCode(callSuper = true)
     @ToString(callSuper = true)
-    public static class Value extends org.zero.common.api.extra.loki.model.common.Value {
+    public static class Value extends LokiValue {
         public Value() {
             super();
         }
