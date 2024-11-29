@@ -1,7 +1,6 @@
 package org.zero.common.data.exception;
 
 import lombok.Getter;
-import org.zero.common.data.model.bo.BaseSysError;
 
 /**
  * @author Zero (cnzeropro@qq.com)

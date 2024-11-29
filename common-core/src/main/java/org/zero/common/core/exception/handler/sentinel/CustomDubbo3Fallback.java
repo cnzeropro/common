@@ -7,7 +7,7 @@ import org.apache.dubbo.rpc.AppResponse;
 import org.apache.dubbo.rpc.AsyncRpcResult;
 import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Invoker;
-import org.zero.common.data.model.vo.Result;
+import org.zero.common.data.model.view.Result;
 
 /**
  * Dubbo3 端 Sentinel 统一异常处理

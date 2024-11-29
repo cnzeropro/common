@@ -7,7 +7,7 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpResponse;
 import org.zero.common.core.util.jackson.JacksonUtils;
-import org.zero.common.data.model.vo.Result;
+import org.zero.common.data.model.view.Result;
 
 /**
  * RestTemplate Sentinel 统一异常处理

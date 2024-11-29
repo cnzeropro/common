@@ -6,7 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.zero.common.data.model.to.SecurityLoginUser;
+import org.zero.common.data.model.security.SecurityLoginUser;
 
 import java.io.Serializable;
 import java.util.Collection;

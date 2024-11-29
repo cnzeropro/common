@@ -11,7 +11,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import org.zero.common.core.util.java.lang.ClassUtil;
-import org.zero.common.data.model.vo.Result;
+import org.zero.common.data.model.view.Result;
 
 /**
  * 统一返回结果处理

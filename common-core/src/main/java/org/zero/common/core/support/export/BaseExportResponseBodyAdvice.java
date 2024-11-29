@@ -18,7 +18,7 @@ import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import org.zero.common.data.exception.CommonException;
-import org.zero.common.data.model.vo.Result;
+import org.zero.common.data.model.view.Result;
 
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;

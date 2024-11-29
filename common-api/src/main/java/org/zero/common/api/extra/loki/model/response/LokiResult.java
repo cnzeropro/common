@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import org.zero.common.data.model.BaseResult;
+import org.zero.common.data.model.transfer.BaseResult;
 
 /**
  * @author zero
