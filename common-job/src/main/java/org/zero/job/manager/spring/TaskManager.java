@@ -10,6 +10,7 @@ import org.zero.job.model.ScheduledTaskHolder;
 import org.zero.job.model.TriggeredCallableTaskHolder;
 import org.zero.job.model.TriggeredRunnableTaskHolder;
 
+import java.io.Serializable;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
@@ -29,32 +30,35 @@ public class TaskManager extends BaseTaskManager {
      * 运行触发任务
      */
     @Override
-    public boolean trigger(String key, Runnable task) {
-        // 如果存在该任务先停止
-        stop(key);
+    public void trigger(Serializable key, Runnable task) {
+        if (this.isRunning(key)) {
+            throw new IllegalStateException(String.format("The task[%s] is running", key));
+        }
         Future<?> future = threadPoolTaskScheduler.submit(task);
         FutureHolder futureHolder = TriggeredRunnableTaskHolder.builder()
                 .future(future)
-                .taskClass(task.getClass())
                 .task(task)
                 .build();
         taskMap.put(key, futureHolder);
-        log.info("The triggered task[{}] started successfully", key);
-        return true;
+        if (log.isDebugEnabled()) {
+            log.debug("The triggered task[{}] started successfully", key);
+        }
     }
 
     @Override
-    public <T> Future<T> trigger(String key, Callable<T> task) {
-        // 如果存在该任务先停止
-        stop(key);
+    public <T> Future<T> trigger(Serializable key, Callable<T> task) {
+        if (this.isRunning(key)) {
+            throw new IllegalStateException(String.format("The task[%s] is running", key));
+        }
         Future<T> future = threadPoolTaskScheduler.submit(task);
         FutureHolder futureHolder = TriggeredCallableTaskHolder.builder()
                 .future(future)
-                .taskClass(task.getClass())
                 .task(task)
                 .build();
         taskMap.put(key, futureHolder);
-        log.info("The triggered task[{}] started successfully", key);
+        if (log.isDebugEnabled()) {
+            log.debug("The triggered task[{}] started successfully", key);
+        }
         return future;
     }
 
@@ -62,18 +66,19 @@ public class TaskManager extends BaseTaskManager {
      * 运行调度任务
      */
     @Override
-    public boolean schedule(String key, Runnable task, String cron) {
-        // 如果存在该任务先停止
-        stop(key);
+    public void schedule(Serializable key, Runnable task, String cron) {
+        if (this.isRunning(key)) {
+            throw new IllegalStateException(String.format("The task[%s] is running", key));
+        }
         ScheduledFuture<?> scheduledFuture = threadPoolTaskScheduler.schedule(task, new CronTrigger(cron));
         FutureHolder futureHolder = ScheduledTaskHolder.builder()
                 .future(scheduledFuture)
-                .taskClass(task.getClass())
                 .task(task)
                 .corn(cron)
                 .build();
         taskMap.put(key, futureHolder);
-        log.info("The scheduled task[{}] starts successfully using [{}]", key, cron);
-        return true;
+        if (log.isDebugEnabled()) {
+            log.debug("The scheduled task[{}] started successfully using [{}]", key, cron);
+        }
     }
 }

@@ -17,5 +17,4 @@ import java.util.concurrent.Future;
 @AllArgsConstructor
 public class FutureHolder {
     private Future<?> future;
-    private Class<?> taskClass;
 }

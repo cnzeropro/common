@@ -1,14 +1,9 @@
-package org.zero.job.model;
-
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+package org.zero.job.enumeration;
 
 /**
  * @author zero
  * @since 2023/3/29
  */
-@Getter
-@RequiredArgsConstructor
 public enum TaskType {
     /**
      * 触发任务

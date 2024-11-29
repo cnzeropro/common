@@ -18,58 +18,60 @@ import java.util.concurrent.TimeoutException;
  * @since 2024/10/23
  */
 public class ReschedulingRunnable implements RunnableScheduledFuture<Object> {
-    private final Object locker = new Object();
+    protected final Object locker = new Object();
 
-    private final Runnable runnable;
-    private final ScheduledExecutorService executor;
-    private final CronExpression cronExpression;
+    protected final Runnable delegate;
+    protected final ScheduledExecutorService executor;
+    protected final CronExpression cron;
 
     @Setter
-    private Date startTime;
+    protected Date startTime;
     @Setter
-    private Date endDate;
+    protected Date endDate;
     private ScheduledFuture<?> currentFuture;
 
 
-    public ReschedulingRunnable(ScheduledExecutorService executor, Runnable runnable, CronExpression cronExpression) {
-        this(executor, runnable, cronExpression, new Date());
+    public ReschedulingRunnable(ScheduledExecutorService executor, Runnable runnable, CronExpression cron) {
+        this(executor, runnable, cron, new Date());
     }
 
-    public ReschedulingRunnable(ScheduledExecutorService executor, Runnable runnable, CronExpression cronExpression, Date startTime) {
-        this(executor, runnable, cronExpression, startTime, null);
+    public ReschedulingRunnable(ScheduledExecutorService executor, Runnable runnable, CronExpression cron, Date startTime) {
+        this(executor, runnable, cron, startTime, null);
     }
 
-    public ReschedulingRunnable(ScheduledExecutorService executor, Runnable runnable, CronExpression cronExpression, Date startTime, Date endDate) {
-        this.runnable = runnable;
+    public ReschedulingRunnable(ScheduledExecutorService executor, Runnable runnable, CronExpression cron, Date startTime, Date endDate) {
+        this.delegate = runnable;
         this.executor = executor;
-        this.cronExpression = cronExpression;
+        this.cron = cron;
         this.startTime = startTime;
         this.endDate = endDate;
     }
 
+    public ReschedulingRunnable schedule() {
+        synchronized (this.locker) {
+            Date nextDate = this.cron.getNextValidTimeAfter(this.startTime);
+            if (Objects.nonNull(endDate) && endDate.before(nextDate)) {
+                return this;
+            }
+            long delay = nextDate.getTime() - this.startTime.getTime();
+            this.currentFuture = this.executor.schedule(this, delay, TimeUnit.MILLISECONDS);
+            this.startTime = nextDate;
+            return this;
+        }
+    }
+
     protected ScheduledFuture<?> obtainCurrentFuture() {
+        Objects.requireNonNull(this.currentFuture, "No current future");
         return this.currentFuture;
     }
 
     @Override
     public void run() {
-        runnable.run();
+        delegate.run();
         synchronized (this.locker) {
             if (!isCancelled()) {
                 schedule();
             }
-        }
-    }
-
-    public void schedule() {
-        synchronized (this.locker) {
-            Date nextDate = this.cronExpression.getNextValidTimeAfter(this.startTime);
-            if (Objects.nonNull(endDate) && endDate.before(nextDate)) {
-                return;
-            }
-            long delay = nextDate.getTime() - this.startTime.getTime();
-            this.currentFuture = this.executor.schedule(this, delay, TimeUnit.MILLISECONDS);
-            this.startTime = nextDate;
         }
     }
 
