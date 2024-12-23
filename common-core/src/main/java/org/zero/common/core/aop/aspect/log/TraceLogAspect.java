@@ -60,7 +60,7 @@ public class TraceLogAspect implements InitializingBean {
             outputLog(logLevel, "Method[{}] execution exception", e, signatureName);
             throw e;
         } finally {
-            outputLog(logLevel, "Method[{}] execution completes, time-consuming: {}", null, signatureName, Duration.ofNanos(endTime - startTime));
+            outputLog(logLevel, "Method[{}] execution completes, time consumption: {}", null, signatureName, Duration.ofNanos(endTime - startTime));
         }
 
         return result;
