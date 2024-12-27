@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * copy from {@link  org.apache.commons.io.output.NullOutputStream}
+ * copy from {@linkplain org.apache.commons.io.output.NullOutputStream apache commons io NullOutputStream}
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2024/11/11

@@ -1,8 +1,7 @@
 package org.zero.common.core.extension.java;
 
-import lombok.SneakyThrows;
-
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Formatter;
@@ -10,12 +9,12 @@ import java.util.Locale;
 import java.util.Objects;
 
 /**
- * 可以写入字节、字符、字符串、字符序列等等的输出流，通过融合各类方法，解决了传统OutputStream（字节输出流）只能写字节相关的信息和传统Writer（字符输出流）只能写字符相关的信息的问题。
- * 但也导致了其他一些问题，比如：字符默认使用UTF_8编码（也可指定），如果写入的字节不是通过指定编码而来的话，可能会出现乱码。
+ * 可以写入字节、字符、字符串、字符序列等等的输出流，通过融合各类方法，解决了传统 OutputStream（字节输出流）只能写字节相关的信息和传统 Writer（字符输出流）只能写字符相关的信息的问题。
+ * 但该类也导致了其他一些问题，比如：字符默认使用 UTF_8 编码（也可指定），如果写入的字节不是通过指定编码而来的话，可能会出现乱码。
  * <p>
- * 多个类拷贝融合而来，包括{@link java.io.PrintWriter}、{@link javax.servlet.ServletOutputStream}、{@link java.io.OutputStreamWriter}等等。
+ * 多个类拷贝融合而来，包括 {@link java.io.PrintWriter}、{@link javax.servlet.ServletOutputStream}、{@link java.io.OutputStreamWriter} 等等。
  * <p>
- * 可以的话还是应该继承自{@link cn.hutool.core.io.FastByteArrayOutputStream}或者{@link org.springframework.util.FastByteArrayOutputStream}等实现，此处为了不依赖其他非官方文件，所以选择继承了{@link ByteArrayOutputStream}。
+ * 可以的话还是应该继承自 {@link cn.hutool.core.io.FastByteArrayOutputStream} 或者 {@link org.springframework.util.FastByteArrayOutputStream} 等实现，此处为了不依赖其他非官方文件，所以选择继承了 {@link ByteArrayOutputStream}。
  *
  * @author zero
  * @since 2022/11/28
@@ -37,9 +36,12 @@ public class ByteArrayOutputStreamWriter extends ByteArrayOutputStream implement
         write(chars, 0, chars.length);
     }
 
-    @SneakyThrows
     public void write(char[] chars, int off, int len) {
-        write(new String(chars, off, len).getBytes(charset));
+        try {
+            write(new String(chars, off, len).getBytes(charset));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void write(String str) {
