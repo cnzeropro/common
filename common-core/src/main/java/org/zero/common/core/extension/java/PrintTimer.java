@@ -19,7 +19,7 @@ public class PrintTimer extends BaseTimer<PrintTimer> {
 
     @Override
     public void close()  {
-        this.print().close();
+        this.print().reset();
     }
 
     protected PrintTimer() {
