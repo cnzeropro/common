@@ -57,6 +57,7 @@ public class CsvResponseBodyAdvice extends BaseCsvResponseBodyAdvice {
         super(conversionService, order, regex);
     }
 
+    @SneakyThrows
     @Override
     protected FastByteArrayOutputStream handleCollectionOfCollection(CsvExport csvExport, Collection<Collection<?>> collections) {
         FastByteArrayOutputStream outputStream = new FastByteArrayOutputStream();
@@ -73,6 +74,7 @@ public class CsvResponseBodyAdvice extends BaseCsvResponseBodyAdvice {
         return outputStream;
     }
 
+    @SneakyThrows
     @Override
     protected FastByteArrayOutputStream handleCollectionOfMap(CsvExport csvExport, Collection<Map<?, ?>> maps) {
         FastByteArrayOutputStream outputStream = new FastByteArrayOutputStream();
@@ -130,6 +132,7 @@ public class CsvResponseBodyAdvice extends BaseCsvResponseBodyAdvice {
         return outputStream;
     }
 
+    @SneakyThrows
     @Override
     protected FastByteArrayOutputStream handleCollectionOfBase(CsvExport csvExport, Collection<?> collection) {
         FastByteArrayOutputStream outputStream = new FastByteArrayOutputStream();
@@ -144,6 +147,7 @@ public class CsvResponseBodyAdvice extends BaseCsvResponseBodyAdvice {
         return outputStream;
     }
 
+    @SneakyThrows
     @Override
     protected FastByteArrayOutputStream handleMapOfOther(CsvExport csvExport, Map<?, ?> map) {
         FastByteArrayOutputStream outputStream = new FastByteArrayOutputStream();
@@ -171,7 +175,7 @@ public class CsvResponseBodyAdvice extends BaseCsvResponseBodyAdvice {
     @SneakyThrows
     private OutputStreamWriter getOutputStreamWriter(FastByteArrayOutputStream outputStream, CsvExport csvExport) {
         String charset = csvExport.charset();
-        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FastByteArrayOutputStream(), charset);
+        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream, charset);
         // write bom
         if (csvExport.withBom()) {
             String bom = ByteOrderMark.queryOpt(charset)

@@ -48,8 +48,8 @@ public class MpEnumUtil {
             String className = clazz.getName();
             // 此处可使用自定义父类和注解，但因为Mp已经提供，所以无需重复造轮子
             if (IEnum.class.isAssignableFrom(clazz)) {
-                return ReflectUtil.getMethodOptByNameAndParam(clazz, "getValue")
-                        .orElseThrow(() -> new UtilException(String.format("No getValue() method found in class[%s]", className)));
+                return ReflectUtil.getMethodOptByNameAndParam(clazz, "convert")
+                        .orElseThrow(() -> new UtilException(String.format("No convert() method found in class[%s]", className)));
             } else {
                 Field field = ReflectUtil.getAnnotatedFieldOpt(clazz, EnumValue.class)
                         .orElseThrow(() -> new UtilException(String.format("No field with @EnumValue annotation found in class[%s]", className)));
