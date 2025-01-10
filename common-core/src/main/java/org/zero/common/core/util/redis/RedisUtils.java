@@ -3,7 +3,8 @@ package org.zero.common.core.util.redis;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ArrayUtil;
 import lombok.experimental.UtilityClass;
-import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.core.ResolvableType;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.zero.common.core.util.spring.SpringUtils;
@@ -1121,8 +1122,8 @@ public class RedisUtils {
         if (Objects.isNull(redisTemplate)) {
             synchronized (RedisUtils.class) {
                 if (Objects.isNull(redisTemplate)) {
-                    redisTemplate = SpringUtils.getBean(new ParameterizedTypeReference<RedisTemplate<String, Object>>() {
-                    });
+                    ObjectProvider<RedisTemplate<String, Object>> beanProvider = SpringUtils.getBeanProvider(ResolvableType.forClassWithGenerics(RedisTemplate.class, String.class, Object.class));
+                    redisTemplate = beanProvider.getObject();
                 }
             }
         }

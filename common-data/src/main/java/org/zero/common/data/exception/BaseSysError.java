@@ -5,6 +5,8 @@ import lombok.Getter;
 import java.io.Serializable;
 
 /**
+ * 基础系统错误
+ *
  * @author Zero
  * @since 2021/8/24
  */
@@ -20,6 +22,7 @@ public interface BaseSysError extends Serializable {
         return OK_CODE.equals(this.getCode());
     }
 
+    // @RequiredArgsConstructor(access = AccessLevel.PROTECTED, staticName = "of")
     @Getter
     class DefaultSysError implements BaseSysError {
         public static final BaseSysError OK = new DefaultSysError(OK_CODE, "ok");
@@ -28,13 +31,13 @@ public interface BaseSysError extends Serializable {
         protected final String code;
         protected final String message;
 
+        public static DefaultSysError of(String code, String message) {
+            return new DefaultSysError(code, message);
+        }
+
         protected DefaultSysError(String code, String message) {
             this.code = code;
             this.message = message;
-        }
-
-        public static DefaultSysError of(String code, String message) {
-            return new DefaultSysError(code, message);
         }
     }
 }

@@ -19,7 +19,7 @@ import java.io.IOException;
 public class XssFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        Mode mode = getEnvironment().getProperty("sys.web.xss.mode", Mode.class, Mode.FILTER);
+        Mode mode = this.getEnvironment().getProperty("sys.web.xss.mode", Mode.class, Mode.FILTER);
         filterChain.doFilter(new XssHttpServletRequestWrapper(request, mode), response);
     }
 }

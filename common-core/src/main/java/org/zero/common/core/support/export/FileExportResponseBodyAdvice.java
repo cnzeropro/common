@@ -128,12 +128,15 @@ public class FileExportResponseBodyAdvice extends BaseExportResponseBodyAdvice {
     }
 
     protected FileExportEntity handleFile(FileExport fileExport, File file) {
-        if (file.isFile()) {
-            String filename = FileUtil.getName(file);
-            InputStream inputStream = FileUtil.getInputStream(file);
-            this.handleStream(fileExport, filename, inputStream);
+        if (file.exists()) {
+            if (file.isFile()) {
+                String filename = FileUtil.getName(file);
+                InputStream inputStream = FileUtil.getInputStream(file);
+                this.handleStream(fileExport, filename, inputStream);
+            }
+            throw new CommonException(String.format("The value is not a supported file: %s", file));
         }
-        throw new CommonException(String.format("The value is not a support file: %s", file));
+        throw new CommonException(String.format("The value is not an existing file: %s", file));
     }
 
     /**

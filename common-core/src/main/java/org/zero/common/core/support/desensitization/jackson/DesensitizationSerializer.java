@@ -6,15 +6,16 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
+import com.fasterxml.jackson.databind.util.ClassUtil;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.zero.common.core.support.desensitization.Desensitization;
 import org.zero.common.core.support.desensitization.DesensitizationProvider;
 import org.zero.common.core.support.desensitization.DesensitizationType;
-import org.zero.common.core.util.java.reflect.ReflectUtil;
+import org.zero.common.core.support.desensitization.Desensitizer;
+import org.zero.common.data.exception.CommonException;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
@@ -30,22 +31,21 @@ public class DesensitizationSerializer extends JsonSerializer<String> implements
     @Override
     public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         String desensitized = value;
+        if (Objects.nonNull(desensitizationProvider)) {
+            Desensitizer desensitizer = ClassUtil.createInstance(desensitizationProvider.value(), true);
+            if (Objects.isNull(desensitizer)) {
+                throw new CommonException("no desensitizer provided");
+            }
+            desensitized = desensitizer.desensitize(value);
+        }
         if (Objects.nonNull(desensitization)) {
             DesensitizationType desensitizationType = desensitization.type();
             if (desensitizationType == DesensitizationType.CUSTOM) {
-                desensitized = desensitizationType.desensitize(value, desensitization.start(), desensitization.end(), desensitization.value());
+                desensitized = desensitizationType.desensitize(value, desensitization.start(), desensitization.end(), desensitization.replacement());
             } else {
                 desensitized = desensitizationType.desensitize(value);
             }
         }
-        if (Objects.nonNull(desensitizationProvider)) {
-            Class<?> type = desensitizationProvider.type();
-            String methodName = desensitizationProvider.method();
-            Method method = ReflectUtil.getMethodByNameAndParam(type, methodName);
-            Object instance = ReflectUtil.newInstance(type);
-            desensitized = ReflectUtil.invoke(method, instance, String.class);
-        }
-
         gen.writeString(desensitized);
     }
 
@@ -58,10 +58,10 @@ public class DesensitizationSerializer extends JsonSerializer<String> implements
                 Desensitization desensitization = property.getAnnotation(Desensitization.class);
                 DesensitizationProvider desensitizationProvider = property.getAnnotation(DesensitizationProvider.class);
                 // 如果字段上没有注解，则从上下文中获取注解
-                if (Objects.nonNull(desensitization)) {
+                if (Objects.isNull(desensitization)) {
                     desensitization = property.getContextAnnotation(Desensitization.class);
                 }
-                if (Objects.nonNull(desensitizationProvider)) {
+                if (Objects.isNull(desensitizationProvider)) {
                     desensitizationProvider = property.getContextAnnotation(DesensitizationProvider.class);
                 }
                 // 如果找到了注解，创建新的序列化实例

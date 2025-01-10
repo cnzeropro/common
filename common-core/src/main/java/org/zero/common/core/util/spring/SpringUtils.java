@@ -1,7 +1,7 @@
 package org.zero.common.core.util.spring;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -10,13 +10,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
 import org.zero.common.data.exception.UtilException;
 
-import java.lang.reflect.Type;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -31,19 +28,12 @@ import java.util.Optional;
  * @author Zero (cnzeropro@qq.com)
  */
 public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContextAware {
-    /**
-     * Spring 可配置的 Bean 工厂
-     * <p>
-     * "@PostConstruct" 注解标记的类中，由于 ApplicationContext 还未加载，会导致 NPE，因此实现 BeanFactoryPostProcessor 注入 ConfigurableListableBeanFactory 实现 bean 的操作
-     */
-    private static ConfigurableListableBeanFactory beanFactory;
-    /**
-     * Spring 上下文对象实例
-     */
-    private static ApplicationContext applicationContext;
-
     public static Object getBean(String name) {
         return getBeanFactory().getBean(name);
+    }
+
+    public static Object getBean(String name, Object... args) {
+        return getBeanFactory().getBean(name, args);
     }
 
     public static <T> T getBean(Class<T> type) {
@@ -54,103 +44,81 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
         return getBeanFactory().getBean(name, type);
     }
 
-    /**
-     * 获取带泛型参数的Bean
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T getBean(ParameterizedTypeReference<T> reference) {
-        Type type = reference.getType();
-        ResolvableType resolvableType = ResolvableType.forType(type);
-        Class<T> rawClass = (Class<T>) resolvableType.getRawClass();
-        ResolvableType[] generics = resolvableType.getGenerics();
-
-        if (Objects.isNull(rawClass)) {
-            return getBean((Class<T>) type);
-        }
-
-        final String[] beanNames = getBeanNamesForType(ResolvableType.forClassWithGenerics(rawClass, generics));
-        return getBean(beanNames[0], rawClass);
+    public static <T> T getBean(Class<T> type, Object... args) {
+        return getBeanFactory().getBean(type, args);
     }
 
     /**
-     * 获取指定类型对应的所有Bean，包括子类
-     */
-    public static <T> Map<String, T> getBeansOfType(Class<T> type) {
-        return getBeanFactory().getBeansOfType(type);
-    }
-
-    /**
-     * 获取指定类型对应的所有Bean，包括子类
-     */
-    public static <T> Map<String, T> getBeansOfType(Class<T> type, boolean includeNonSingletons, boolean allowEagerInit) {
-        return getBeanFactory().getBeansOfType(type, includeNonSingletons, allowEagerInit);
-    }
-
-    /**
-     * 获取指定Bean的Provider
-     */
-    public static <T> ObjectProvider<T> getBeanProvider(Class<T> type, boolean allowEagerInit) {
-        return getBeanFactoryOpt().map(bf -> bf.getBeanProvider(type, allowEagerInit)).orElseGet(EmptyObjectProvider::new);
-    }
-
-    /**
-     * 获取指定Bean的Provider
+     * 获取指定 Bean 的 Provider
+     * <p>
+     * Spring 5.1+ 支持获取 Bean Provider
      */
     public static <T> ObjectProvider<T> getBeanProvider(Class<T> type) {
         return getBeanFactoryOpt().map(bf -> bf.getBeanProvider(type)).orElseGet(EmptyObjectProvider::new);
     }
 
     /**
-     * 获取指定Bean的Provider
+     * 获取指定 Bean 的 Provider
+     * <p>
+     * Spring 5.1+ 支持获取 Bean Provider
      */
-    public static <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType, boolean allowEagerInit) {
-        return getBeanFactoryOpt().map(bf -> bf.<T>getBeanProvider(requiredType, allowEagerInit)).orElseGet(EmptyObjectProvider::new);
+    public static <T> ObjectProvider<T> getBeanProvider(ResolvableType type) {
+        return getBeanFactoryOpt().map(bf -> bf.<T>getBeanProvider(type)).orElseGet(EmptyObjectProvider::new);
     }
 
     /**
-     * 获取指定Bean的Provider
+     * 获取指定 Bean 的 Provider
+     * <p>
+     * Spring 5.3+ 才支持 allowEagerInit 参数
      */
-    public static <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType) {
-        return getBeanFactoryOpt().map(bf -> bf.<T>getBeanProvider(requiredType)).orElseGet(EmptyObjectProvider::new);
-
+    public static <T> ObjectProvider<T> getBeanProvider(Class<T> type, boolean allowEagerInit) {
+        return getApplicationContextOpt().map(ac -> ac.getBeanProvider(type, allowEagerInit)).orElseGet(EmptyObjectProvider::new);
     }
 
     /**
-     * 获取指定类型对应的Bean名称，包括子类
+     * 获取指定 Bean 的 Provider
+     * <p>
+     * Spring 5.3+ 才支持 allowEagerInit 参数
      */
-    public static String[] getBeanNamesForType(Class<?> type) {
-        return getBeanFactory().getBeanNamesForType(type);
+    public static <T> ObjectProvider<T> getBeanProvider(ResolvableType type, boolean allowEagerInit) {
+        return getApplicationContextOpt().map(ac -> ac.<T>getBeanProvider(type, allowEagerInit)).orElseGet(EmptyObjectProvider::new);
     }
 
     /**
-     * 获取指定类型对应的Bean名称，包括子类
-     */
-    public static String[] getBeanNamesForType(ResolvableType type) {
-        return getBeanFactory().getBeanNamesForType(type);
-    }
-
-    /**
-     * 动态向 Spring 注册 Bean
+     * 动态向 Spring 容器注册 Bean
      */
     public static <T> void registerBean(String beanName, T bean) {
-        final ConfigurableListableBeanFactory factory = getConfigurableBeanFactory();
-        factory.autowireBean(bean);
-        factory.registerSingleton(beanName, bean);
+        final BeanFactory beanFactory = getBeanFactory();
+        if (beanFactory instanceof ConfigurableListableBeanFactory) {
+            ConfigurableListableBeanFactory factory = (ConfigurableListableBeanFactory) beanFactory;
+            factory.autowireBean(bean);
+            factory.registerSingleton(beanName, bean);
+            return;
+        }
+        final ApplicationContext applicationContext = getApplicationContext();
+        if (applicationContext instanceof ConfigurableApplicationContext) {
+            ConfigurableApplicationContext context = (ConfigurableApplicationContext) applicationContext;
+            ConfigurableListableBeanFactory factory = context.getBeanFactory();
+            factory.autowireBean(bean);
+            factory.registerSingleton(beanName, bean);
+            return;
+        }
+        throw new UtilException("Can not register bean, the factory or context not supported");
     }
 
     /**
-     * 注销 Bean
+     * 动态从 Spring 容器注销 Bean
      * <p>
      * 注意：请谨慎使用
      */
     public static void unregisterBean(String beanName) {
-        final ConfigurableListableBeanFactory factory = getConfigurableBeanFactory();
-        if (factory instanceof DefaultSingletonBeanRegistry) {
-            DefaultSingletonBeanRegistry registry = (DefaultSingletonBeanRegistry) factory;
+        final BeanFactory beanFactory = getBeanFactory();
+        if (beanFactory instanceof DefaultSingletonBeanRegistry) {
+            DefaultSingletonBeanRegistry registry = (DefaultSingletonBeanRegistry) beanFactory;
             registry.destroySingleton(beanName);
-        } else {
-            throw new UtilException("Can not unregister bean, the factory is not a DefaultSingletonBeanRegistry!");
+            return;
         }
+        throw new UtilException("Can not unregister bean, the factory or context not supported");
     }
 
     /**
@@ -219,12 +187,36 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
 
     /**
      * 发布事件
+     * <p>
+     * Spring 4.2+ 事件可以不再是{@link ApplicationEvent}的子类
      */
     public static void publishEvent(Object event) {
         getApplicationContext().publishEvent(event);
     }
 
     /* ******************************************* Context Getter ******************************************* */
+
+    /**
+     * 获取 {@link BeanFactory}
+     */
+    public static BeanFactory getBeanFactory() {
+        return getBeanFactoryOpt().orElseThrow(() -> new UtilException("BeanFactory is null"));
+    }
+
+    public static Optional<BeanFactory> getBeanFactoryOpt() {
+        return Objects.nonNull(beanFactory) ? Optional.of(beanFactory) : Optional.ofNullable(applicationContext);
+    }
+
+    /**
+     * 获取 {@link ConfigurableListableBeanFactory}
+     */
+    public static ConfigurableListableBeanFactory getConfigurableListableBeanFactory() {
+        return getConfigurableListableBeanFactoryOpt().orElseThrow(() -> new UtilException("ConfigurableListableBeanFactory is null"));
+    }
+
+    public static Optional<ConfigurableListableBeanFactory> getConfigurableListableBeanFactoryOpt() {
+        return Optional.ofNullable(beanFactory);
+    }
 
     /**
      * 获取 {@link ApplicationContext}
@@ -238,37 +230,10 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
     }
 
     /**
-     * 获取 {@link ListableBeanFactory}
-     */
-    public static ListableBeanFactory getBeanFactory() {
-        return getBeanFactoryOpt().orElseThrow(() -> new UtilException("BeanFactory is null"));
-    }
-
-    public static Optional<ListableBeanFactory> getBeanFactoryOpt() {
-        return Objects.nonNull(beanFactory) ? Optional.of(beanFactory) : Optional.ofNullable(applicationContext);
-    }
-
-    /**
-     * 获取 {@link ConfigurableListableBeanFactory}
-     */
-    public static ConfigurableListableBeanFactory getConfigurableBeanFactory() {
-        return getConfigurableBeanFactoryOpt().orElseThrow(() -> new UtilException("No ConfigurableListableBeanFactory from context"));
-    }
-
-    public static Optional<ConfigurableListableBeanFactory> getConfigurableBeanFactoryOpt() {
-        if (Objects.nonNull(beanFactory)) {
-            return Optional.of(beanFactory);
-        } else if (applicationContext instanceof ConfigurableApplicationContext) {
-            return Optional.of(((ConfigurableApplicationContext) applicationContext).getBeanFactory());
-        }
-        return Optional.empty();
-    }
-
-    /**
      * 获取 {@link Environment}
      */
     public static Environment getEnvironment() {
-        return getEnvironmentOpt().orElseThrow(() -> new UtilException("No Environment from context"));
+        return getEnvironmentOpt().orElseThrow(() -> new UtilException("No Environment from spring context"));
     }
 
     public static Optional<Environment> getEnvironmentOpt() {
@@ -277,27 +242,25 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
 
     /* ******************************************* Context Setter ******************************************* */
 
-    /**
-     * Set {@link ApplicationContext}
-     */
-    public static void setAppContext(ApplicationContext ac) {
-        applicationContext = ac;
-    }
+    private static ConfigurableListableBeanFactory beanFactory;
 
-    /**
-     * Set {@link ConfigurableListableBeanFactory}
-     */
-    public static void setConfigurableListableBeanFactory(ConfigurableListableBeanFactory bf) {
+    protected static void setCLBF(ConfigurableListableBeanFactory bf) {
         beanFactory = bf;
     }
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        setConfigurableListableBeanFactory(beanFactory);
+        setCLBF(beanFactory);
+    }
+
+    private static ApplicationContext applicationContext;
+
+    protected static void setAC(ApplicationContext ac) {
+        applicationContext = ac;
     }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        setAppContext(applicationContext);
+        setAC(applicationContext);
     }
 }

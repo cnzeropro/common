@@ -1,7 +1,5 @@
 package org.zero.common.core.aop.aspect.log;
 
-import cn.hutool.core.text.StrFormatter;
-import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -11,13 +9,17 @@ import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
-import org.zero.common.core.util.spring.SpringUtils;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -30,13 +32,17 @@ import java.util.Objects;
 @Aspect
 @Order(0)
 @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
-public class TraceLogAspect implements InitializingBean {
+public class TraceLogAspect implements InitializingBean, BeanFactoryAware {
+    private BeanFactory beanFactory;
     private ObjectMapper objectMapper;
 
     // @Around("org.zero.common.core.aop.pointcut.Pointcuts.allMethod()")
     @Around("@within(traceLog) || " +
             "@annotation(traceLog)")
     public Object around(ProceedingJoinPoint joinPoint, TraceLog traceLog) throws Throwable {
+        if (!traceLog.enable()) {
+            return joinPoint.proceed();
+        }
         Object[] args = joinPoint.getArgs();
         Signature signature = joinPoint.getSignature();
         // 只处理方法签名，不是方法的签名直接跳过
@@ -45,22 +51,22 @@ public class TraceLogAspect implements InitializingBean {
         }
         String signatureName = signature.getName();
         MethodSignature methodSignature = (MethodSignature) signature;
-
-        LogLevel logLevel = traceLog.value();
+        // 确保 @AliasFor 注解生效
+        LogLevel logLevel = AnnotationUtils.synthesizeAnnotation(traceLog, null).level();
         long endTime = 0L;
         Object result;
-        outputLog(logLevel, "Method[{}] starts executing, args: {}", null, signatureName, this.toExpectedStr(this.toMap(methodSignature.getParameterNames(), args)));
+        this.outputLog(logLevel, "Method[%s] begins to execute, args: %s", null, signatureName, this.toExpectedStr(this.toMap(methodSignature.getParameterNames(), args)));
         long startTime = System.nanoTime();
         try {
             result = joinPoint.proceed();
             endTime = System.nanoTime();
-            outputLog(logLevel, "Method[{}] execution succeeded, result: {}", null, signatureName, this.toExpectedStr(result));
+            this.outputLog(logLevel, "Method[%s] was executed successfully, result: %s", null, signatureName, this.toExpectedStr(result));
         } catch (Throwable e) {
             endTime = System.nanoTime();
-            outputLog(logLevel, "Method[{}] execution exception", e, signatureName);
+            this.outputLog(logLevel, "Method[%s] execution exception", e, signatureName);
             throw e;
         } finally {
-            outputLog(logLevel, "Method[{}] execution completes, time consumption: {}", null, signatureName, Duration.ofNanos(endTime - startTime));
+            this.outputLog(logLevel, "Method[%s] execution completed, time consumption: %s", null, signatureName, Duration.ofNanos(endTime - startTime));
         }
 
         return result;
@@ -83,9 +89,17 @@ public class TraceLogAspect implements InitializingBean {
         try {
             return objectMapper.writeValueAsString(obj);
         } catch (Exception ignored) {
-            // ignored
+            // ignored exception
         }
-        return StrUtil.utf8Str(obj);
+        if (obj instanceof String) {
+            return (String) obj;
+        }
+        Class<?> clazz = obj.getClass();
+        if (clazz.isArray()) {
+            Object[] array = (Object[]) obj;
+            return Arrays.toString(array);
+        }
+        return Objects.toString(obj);
     }
 
     private void outputLog(LogLevel logLevel, String msg, Throwable throwable, Object... args) {
@@ -114,9 +128,9 @@ public class TraceLogAspect implements InitializingBean {
     private void outputTraceLog(String msg, Throwable throwable, Object... args) {
         if (log.isTraceEnabled()) {
             if (Objects.isNull(throwable)) {
-                log.trace(StrFormatter.format(msg, args));
+                log.trace(String.format(msg, args));
             } else {
-                log.trace(StrFormatter.format(msg, args), throwable);
+                log.trace(String.format(msg, args), throwable);
             }
         }
     }
@@ -124,9 +138,9 @@ public class TraceLogAspect implements InitializingBean {
     private void outputDebugLog(String msg, Throwable throwable, Object... args) {
         if (log.isDebugEnabled()) {
             if (Objects.isNull(throwable)) {
-                log.debug(StrFormatter.format(msg, args));
+                log.debug(String.format(msg, args));
             } else {
-                log.debug(StrFormatter.format(msg, args), throwable);
+                log.debug(String.format(msg, args), throwable);
             }
         }
     }
@@ -134,9 +148,9 @@ public class TraceLogAspect implements InitializingBean {
     private void outputInfoLog(String msg, Throwable throwable, Object... args) {
         if (log.isInfoEnabled()) {
             if (Objects.isNull(throwable)) {
-                log.info(StrFormatter.format(msg, args));
+                log.info(String.format(msg, args));
             } else {
-                log.info(StrFormatter.format(msg, args), throwable);
+                log.info(String.format(msg, args), throwable);
             }
         }
     }
@@ -144,9 +158,9 @@ public class TraceLogAspect implements InitializingBean {
     private void outputWarnLog(String msg, Throwable throwable, Object... args) {
         if (log.isWarnEnabled()) {
             if (Objects.isNull(throwable)) {
-                log.warn(StrFormatter.format(msg, args));
+                log.warn(String.format(msg, args));
             } else {
-                log.warn(StrFormatter.format(msg, args), throwable);
+                log.warn(String.format(msg, args), throwable);
             }
         }
     }
@@ -154,9 +168,9 @@ public class TraceLogAspect implements InitializingBean {
     private void outputErrorLog(String msg, Throwable throwable, Object... args) {
         if (log.isErrorEnabled()) {
             if (Objects.isNull(throwable)) {
-                log.error(StrFormatter.format(msg, args));
+                log.error(String.format(msg, args));
             } else {
-                log.error(StrFormatter.format(msg, args), throwable);
+                log.error(String.format(msg, args), throwable);
             }
         }
     }
@@ -164,12 +178,17 @@ public class TraceLogAspect implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         // 从容器中的对象copy而来，因为要进行配置调整，避免影响到全局
-        objectMapper = SpringUtils.getBean(ObjectMapper.class).copy();
+        objectMapper = beanFactory.getBean(ObjectMapper.class).copy();
         // 序列化对象的所有属性，包括为Null的属性
         objectMapper.setSerializationInclusion(JsonInclude.Include.ALWAYS);
         // 关闭 序列化时间日期为时间戳
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         // 关闭 空对象报错（对应属性没有get方法）
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+    }
+
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+        this.beanFactory = beanFactory;
     }
 }

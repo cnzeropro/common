@@ -22,7 +22,5 @@ import java.lang.annotation.Target;
 @JacksonAnnotationsInside
 @JsonSerialize(using = DesensitizationSerializer.class)
 public @interface DesensitizationProvider {
-    Class<?> type();
-
-    String method() default "desensitize";
+    Class<? extends Desensitizer> value();
 }

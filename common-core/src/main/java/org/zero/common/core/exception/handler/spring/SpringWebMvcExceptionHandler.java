@@ -3,8 +3,8 @@ package org.zero.common.core.exception.handler.spring;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.zero.common.data.model.view.Result;
 
 /**
@@ -16,7 +16,7 @@ import org.zero.common.data.model.view.Result;
  * @since 2020/03/21
  */
 @Slf4j
-@ControllerAdvice
+@RestControllerAdvice
 @ConditionalOnWebApplication
 public class SpringWebMvcExceptionHandler {
     /* *************************************************** Web MVC 异常 *************************************************** */

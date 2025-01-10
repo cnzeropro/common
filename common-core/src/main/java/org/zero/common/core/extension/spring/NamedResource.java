@@ -13,11 +13,10 @@ import org.springframework.lang.NonNull;
 @Getter
 @RequiredArgsConstructor
 public class NamedResource implements Resource {
-    private final String name;
-    @Delegate
-    private final Resource delegate;
+    private final @NonNull String name;
 
-    @NonNull
+    private final @NonNull @Delegate Resource delegate;
+
     @Override
     public String getFilename() {
         return name;

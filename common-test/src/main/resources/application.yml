@@ -1,0 +1,66 @@
+server:
+  port: 34567
+  error:
+    whitelabel:
+      enabled: true
+  tomcat:
+    relaxed-path-chars:
+      - '['
+      - ']'
+      - '{'
+      - '}'
+    relaxed-query-chars:
+      - '['
+      - ']'
+      - '{'
+      - '}'
+spring:
+  application:
+    name: test-demo
+  web:
+    resources:
+      add-mappings: false
+  mvc:
+    throw-exception-if-no-handler-found: true
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss.SSS
+    time-zone: GMT+8:00
+  datasource:
+    url: jdbc:h2:mem:test
+    #url: jdbc:h2:file:./data/test
+    #url: jdbc:h2:tcp//localhost:8080/data/test
+    username: root
+    password: abc123
+    driver-class-name: org.h2.Driver
+  sql:
+    init:
+      schema-locations: classpath:db/schema-h2.sql
+      data-locations: classpath:db/data-h2.sql
+      mode: always
+  h2:
+    console:
+      enabled: true
+      path: /h2
+      settings:
+        web-allow-others: true
+
+logging:
+  file:
+    name: ./logs/app.log
+
+mybatis:
+  mapper-locations: classpath:mappers/*xml
+
+management:
+  server:
+    port: "${random.int[1024,49151]}"
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    jmx:
+      exposure:
+        include: '*'
+    web:
+      exposure:
+        include: '*'

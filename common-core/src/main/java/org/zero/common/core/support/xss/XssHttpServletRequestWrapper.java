@@ -105,8 +105,8 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
         String characterEncoding = super.getCharacterEncoding();
         ServletInputStream inputStream = super.getInputStream();
         Charset charset = CharsetUtil.charset(characterEncoding);
-        String escaped = this.mode.apply(IoUtil.read(inputStream, charset));
-        final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(escaped.getBytes(characterEncoding));
+        String result = this.mode.apply(IoUtil.read(inputStream, charset));
+        final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(result.getBytes(characterEncoding));
         return new ServletInputStream() {
             @Override
             public boolean isFinished() {
@@ -139,7 +139,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     public BufferedReader getReader() throws IOException {
         BufferedReader reader = super.getReader();
         String input = IoUtil.read(reader);
-        String escaped = this.mode.apply(input);
-        return new BufferedReader(new StringReader(escaped));
+        String result = this.mode.apply(input);
+        return new BufferedReader(new StringReader(result));
     }
 }

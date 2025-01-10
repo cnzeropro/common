@@ -1,7 +1,7 @@
 package org.zero.common.core.util.java.io;
 
 import lombok.SneakyThrows;
-import org.zero.common.core.extension.java.NullOutputStream;
+import org.zero.common.core.extension.java.io.NullOutputStream;
 
 import java.io.FileInputStream;
 import java.io.IOException;

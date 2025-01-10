@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.zero.common.data.constant.CommonConstant.DEFAULT_PAGE_SIZE;
+
 /**
  * 带修正的分页对象（新建、更新时自动修正相关参数，但是影响性能）
  *
@@ -22,33 +24,26 @@ public class PageDTO<T> implements Serializable {
     private static final long serialVersionUID = 8463126863903128798L;
 
     /**
-     * 默认每页数目：10
-     */
-    public static final String DEFAULT_PAGE_SIZE_STR = "10";
-    // public static final int DEFAULT_PAGE_SIZE = 10;
-    public static final int DEFAULT_PAGE_SIZE = Integer.parseInt(DEFAULT_PAGE_SIZE_STR);
-
-    /**
      * 当前页码
      */
-    private long currentPage = 1L;
+    protected long currentPage = 1L;
     /**
      * 每页数目
      */
-    private long pageSize = DEFAULT_PAGE_SIZE;
+    protected long pageSize = DEFAULT_PAGE_SIZE;
     /**
      * 总页码
      */
-    private long totalPage = 0L;
+    protected long totalPage = 0L;
     /**
-     * 记录总数
+     * 数据总数
      */
-    private long recordCount = 0L;
+    protected long recordCount = 0L;
 
     /**
      * 数据对象列表
      */
-    private Collection<T> records = Collections.emptyList();
+    protected Collection<T> records = Collections.emptyList();
 
     /**
      * 设置并修正当前页码
@@ -119,15 +114,15 @@ public class PageDTO<T> implements Serializable {
         return new PageDTO<>(currentPage, pageSize, recordCount);
     }
 
-    private PageDTO() {
+    protected PageDTO() {
     }
 
-    private PageDTO(long currentPage, long pageSize) {
+    protected PageDTO(long currentPage, long pageSize) {
         setCurrentPage(currentPage);
         setPageSize(pageSize);
     }
 
-    private PageDTO(long currentPage, long pageSize, long recordCount) {
+    protected PageDTO(long currentPage, long pageSize, long recordCount) {
         this(currentPage, pageSize);
         setRecordCount(recordCount);
     }

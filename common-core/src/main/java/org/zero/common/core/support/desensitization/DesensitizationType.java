@@ -10,7 +10,7 @@ import java.util.Objects;
  * @since 2024/8/12
  */
 @Getter
-public enum DesensitizationType {
+public enum DesensitizationType implements Desensitizer {
     /**
      * 不脱敏
      */
@@ -51,7 +51,7 @@ public enum DesensitizationType {
      *     {@code 北京市朝阳区国家体育场南路1号  ->  北京市朝阳区*********}
      * </pre>
      */
-    ADDRESS() {
+    ADDRESS {
         /**
          * ”区“后面的字符串脱敏
          */
@@ -63,7 +63,7 @@ public enum DesensitizationType {
             if (value.contains("区")) {
                 int start = value.indexOf("区") + 1;
                 int end = value.length() - 1;
-                return super.desensitize(value, start, end, replacement);
+                return this.desensitize(value, start, end, replacement);
             }
             return value;
         }
@@ -222,58 +222,24 @@ public enum DesensitizationType {
     ;
 
     /**
-     * 脱敏填充字符
-     */
-    private String replacement = "*";
-
-    /**
      * 脱敏开始位置
      * <p>
-     * 小于 0 表示不脱敏
+     * 从 0 开始，小于 0 时表示不脱敏
      */
-    private int start;
+    private int start = 0;
 
     /**
-     * 脱敏结束位置
+     * 脱敏结束位置（包含）
      * <p>
-     * 小于 0 时，-n 表示“脱敏字串长度-n”，如：-1 表示脱敏结束位置到整个字串长度
+     * 可以为 0<br>
+     * 小于 0 时，-n 表示：脱敏字串长度-n<br>
+     * 如：-1 表示脱敏结束位置到整个字串长度
      */
     private int end = -1;
 
-    /**
-     * 脱敏，如果重写以重写方法的规则为主
-     */
-    public String desensitize(String value) {
-        return this.desensitize(value, replacement);
-    }
-
-    /**
-     * 脱敏，如果重写以重写方法的规则为主
-     */
+    @Override
     public String desensitize(String value, String replacement) {
         return this.desensitize(value, start, end, replacement);
-    }
-
-    /**
-     * 脱敏，如果重写以重写方法的规则为主
-     */
-    public String desensitize(String value, int start, int end, String replacement) {
-        if (Objects.isNull(value)) {
-            return null;
-        }
-        // 如果外部传入的脱敏填充字符为空，则使用内部配置的脱敏填充字符
-        if (CharSequenceUtil.isBlank(replacement)) {
-            replacement = this.replacement;
-        }
-        // 如果结束位置小于0，则重新计算结束位置
-        if (end < 0) {
-            end = value.length() + end;
-        }
-        // 如果给定的起始位置还小于0，则不脱敏
-        if (start < 0) {
-            return value;
-        }
-        return CharSequenceUtil.replace(value, start, end + 1, replacement);
     }
 
     DesensitizationType() {
@@ -286,11 +252,5 @@ public enum DesensitizationType {
     DesensitizationType(int start, int end) {
         this.start = start;
         this.end = end;
-    }
-
-    DesensitizationType(int start, int end, String replacement) {
-        this.start = start;
-        this.end = end;
-        this.replacement = replacement;
     }
 }

@@ -15,14 +15,17 @@ import java.util.Objects;
  * 前端列表查询参数对象
  * <p>
  * 两种使用方式：
- * 1、直接使用：直接用于承接前端传入参数（不建议，导致接收参数实体增多）
- * 2、继承使用：查询实体继承其并进行扩展
- * <p>
+ * <ul>
+ *     <li>直接使用：直接用于承接前端传入参数（不建议，导致接收参数实体增多）</li>
+ *     <li>继承使用：查询实体继承其并进行扩展</li>
+ * </ul>
  * <b>警告：因数据库字段由前端传入，所以请注意 SQL 注入检查</b>
  * <p>
- * 常见有两种方式：
- * 1、把前端传入的字段与具体的数据实体（PO、DO 或者 Entity）字段做比较
- * 2、SQL 注入关键词过滤，如：delete，insert，set 等等，可以自己实现也可以使用一些开源工具类
+ * SQL 注入检查常见的两种方式：
+ * <ul>
+ *     <li>把前端传入的字段与具体的数据实体（PO、DO 或者 Entity）字段做比较（推荐）</li>
+ *     <li>SQL 注入关键词过滤，如：delete，insert，set 等等，可以自己实现也可以使用一些开源工具类</li>
+ * </ul>
  *
  * @author Zero (cnzeropro@qq.com)
  * @since 2021/1/5
@@ -36,7 +39,7 @@ public class BaseQO implements Serializable {
      */
     @Valid
     @NotEmpty
-    private Alias[] aliases = {};
+    private Field[] fields = {};
 
     /**
      * 分组字段（GROUP BY x）
@@ -60,22 +63,26 @@ public class BaseQO implements Serializable {
     @With
     @NoArgsConstructor
     @AllArgsConstructor(staticName = "create")
-    public static class Alias implements Serializable {
+    public static class Field implements Serializable {
         public static final String AS_TEMPLATE = "%s AS %s";
 
         /**
          * 字段
          */
         @NotEmpty
-        private String field;
+        private String name;
 
         /**
          * 别名
          */
         private String alias;
 
-        public String getAliasColumn() {
-            return Objects.isNull(alias) ? field : String.format(AS_TEMPLATE, field, alias);
+        public String getFieldColumn() {
+            return Objects.isNull(alias) ? name : String.format(AS_TEMPLATE, name, alias);
+        }
+
+        public static Field create(String name) {
+            return new Field(name, null);
         }
     }
 

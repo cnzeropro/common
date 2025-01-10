@@ -17,23 +17,17 @@ import org.zero.common.data.model.view.Result;
  * 统一返回结果处理
  * <p>
  * 使用方式：
- * 因在外部库中，所以处理方案建议三选一
  * <p>
- * 添加到包扫描路径
- * <pre>
- *     {@code
+ * 方式一：添加到包扫描路径
+ * <pre>{@code
  *     @SpringBootApplication(scanBasePackages = {"org.zero.common.core.support.common"})
- *     }
- * </pre>
+ * }</pre>
  * 或
- * <pre>
- *     {@code
+ * <pre>{@code
  *     @ComponentScan(scanBasePackages = {"org.zero.common.core.support.common"})
- *     }
- * </pre>
- * 使用 @Bean 注入（推荐）
- * <pre>
- *     {@code
+ * }</pre>
+ * 方式二：使用 @Bean 注入（推荐）
+ * <pre>{@code
  *     @Configuration(proxyBeanMethods = false)
  *     public class AppConfig {
  *         @Bean
@@ -41,17 +35,14 @@ import org.zero.common.data.model.view.Result;
  *             return new ResultResponseBodyAdvice("aaa.bbb", "xxx.yyy.zzz");
  *         }
  *     }
- *     }
- * </pre>
- * 使用 @Import 注入
- * <pre>
- *     {@code
+ * }</pre>
+ * 方式三：使用 @Import 注入
+ * <pre>{@code
  *     @Import({ResultResponseBodyAdvice.class})
  *     @Configuration(proxyBeanMethods = false)
  *     public class AppConfig {
  *     }
- *     }
- * </pre>
+ * }</pre>
  *
  * @author Zero (cnzeropro@163.com)
  * @see org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyAdviceChain

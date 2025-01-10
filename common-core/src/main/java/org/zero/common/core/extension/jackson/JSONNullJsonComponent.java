@@ -17,8 +17,8 @@ import java.io.IOException;
 @JsonComponent
 public class JSONNullJsonComponent {
     public static class JSONNullSerializer extends StdSerializer<JSONNull> {
-        protected JSONNullSerializer(Class<JSONNull> t) {
-            super(t);
+        protected JSONNullSerializer() {
+            super(JSONNull.class);
         }
 
         @Override

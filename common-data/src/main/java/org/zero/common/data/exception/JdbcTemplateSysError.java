@@ -5,18 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
- * 使用前请先使用{@link JdbcTemplateSysError#setJdbcTemplate(JdbcTemplate)}注册{@link JdbcTemplate}，
- * 使用{@link JdbcTemplateSysError#setQuerySql(String)}注册用于根据错误码查询错误信息的 SQL
+ * 使用前请先使用 {@link #setJdbcTemplate(JdbcTemplate)} 注册 {@link JdbcTemplate}，
+ * 使用 {@link #setQuerySql(String)} 注册用于根据错误码查询错误信息的 SQL
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2024/11/18
  */
 @Slf4j
 public class JdbcTemplateSysError extends BaseSysError.DefaultSysError {
-    protected JdbcTemplateSysError(String code, String message) {
-        super(code, message);
-    }
-
     @Setter
     protected static JdbcTemplate jdbcTemplate;
     @Setter
@@ -27,9 +23,13 @@ public class JdbcTemplateSysError extends BaseSysError.DefaultSysError {
         try {
             message = jdbcTemplate.queryForObject(querySql, String.class, code);
         } catch (Exception e) {
-            log.warn(String.format("Failed to query message with the SQL[%s] and code[%s]", querySql, code), e);
+            log.warn(String.format("Failed to query message with the code[%s] in SQL[%s]", code, querySql), e);
             message = e.getMessage();
         }
         return new JdbcTemplateSysError(code, message);
+    }
+
+    protected JdbcTemplateSysError(String code, String message) {
+        super(code, message);
     }
 }

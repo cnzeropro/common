@@ -5,6 +5,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
+import org.zero.common.data.exception.CommonException;
 
 /**
  * @author zero
@@ -14,7 +15,9 @@ public class SpringUtilsRegistrar implements ImportBeanDefinitionRegistrar {
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
         String name = SpringUtils.class.getName();
-        if (!registry.isBeanNameInUse(name)) {
+        if (registry.isBeanNameInUse(name)) {
+            throw new CommonException("SpringUtils already exists!");
+        } else {
             AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder.rootBeanDefinition(SpringUtils.class).getBeanDefinition();
             registry.registerBeanDefinition(name, beanDefinition);
         }

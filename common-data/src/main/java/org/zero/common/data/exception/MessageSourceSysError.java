@@ -8,17 +8,13 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import java.util.Locale;
 
 /**
- * 使用前请先使用{@link MessageSourceSysError#setMessageSource(MessageSource)}注册{@link MessageSource}
+ * 使用前请先使用 {@link #setMessageSource(MessageSource)} 注册 {@link MessageSource}
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2024/11/18
  */
 @Slf4j
 public class MessageSourceSysError extends BaseSysError.DefaultSysError {
-    protected MessageSourceSysError(String code, String message) {
-        super(code, message);
-    }
-
     @Setter
     protected static MessageSource messageSource;
     @Setter
@@ -37,5 +33,9 @@ public class MessageSourceSysError extends BaseSysError.DefaultSysError {
             message = e.getMessage();
         }
         return new MessageSourceSysError(code, message);
+    }
+
+    protected MessageSourceSysError(String code, String message) {
+        super(code, message);
     }
 }
