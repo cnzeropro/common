@@ -24,9 +24,6 @@
         <java.version>8</java.version>
         <project.encoding>UTF-8</project.encoding>
         <resource.delimiter>@</resource.delimiter>
-        <maven.compiler.release>${java.version}</maven.compiler.release>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.encoding>${project.encoding}</maven.compiler.encoding>
         <project.build.sourceEncoding>${project.encoding}</project.build.sourceEncoding>
         <project.reporting.outputEncoding>${project.encoding}</project.reporting.outputEncoding>
@@ -415,25 +412,22 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
                     <configuration>
-                        <release>${maven.compiler.release}</release>
-                        <source>${maven.compiler.source}</source>
-                        <target>${maven.compiler.target}</target>
-                         <annotationProcessorPaths combine.children="append">
+                        <annotationProcessorPaths combine.children="append">
                             <path>
                                 <groupId>org.projectlombok</groupId>
                                 <artifactId>lombok</artifactId>
                                 <version>${lombok.version}</version>
                             </path>
-                             <path>
-                                 <groupId>org.mapstruct</groupId>
-                                 <artifactId>mapstruct-processor</artifactId>
-                                 <version>${mapstruct.version}</version>
-                             </path>
-                             <path>
-                                 <groupId>org.projectlombok</groupId>
-                                 <artifactId>lombok-mapstruct-binding</artifactId>
-                                 <version>${lombok-mapstruct-binding.version}</version>
-                             </path>
+                            <path>
+                                <groupId>org.mapstruct</groupId>
+                                <artifactId>mapstruct-processor</artifactId>
+                                <version>${mapstruct.version}</version>
+                            </path>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok-mapstruct-binding</artifactId>
+                                <version>${lombok-mapstruct-binding.version}</version>
+                            </path>
                         </annotationProcessorPaths>
                     </configuration>
                 </plugin>
@@ -508,6 +502,28 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>above-java8</id>
+            <properties>
+                <maven.compiler.release>${java.version}</maven.compiler.release>
+            </properties>
+            <activation>
+                <jdk>(1.8,)</jdk>
+            </activation>
+        </profile>
+        <profile>
+            <id>java8-and-below</id>
+            <properties>
+                <maven.compiler.source>${java.version}</maven.compiler.source>
+                <maven.compiler.target>${java.version}</maven.compiler.target>
+            </properties>
+            <activation>
+                <jdk>(,1.8]</jdk>
+            </activation>
+        </profile>
+    </profiles>
 
     <!-- setting.xml 文件中指定用户名和密码
     <server>
