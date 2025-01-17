@@ -10,7 +10,6 @@
     </parent>
 
     <artifactId>common-data</artifactId>
-    <version>1.0.0</version>
 
     <packaging>jar</packaging>
 
@@ -63,6 +62,8 @@
             <artifactId>hutool-core</artifactId>
             <scope>provided</scope>
         </dependency>
+
+
     </dependencies>
 
     <build>

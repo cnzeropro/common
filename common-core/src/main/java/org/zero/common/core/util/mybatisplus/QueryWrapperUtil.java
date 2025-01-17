@@ -34,6 +34,12 @@ import java.util.stream.Stream;
 public class QueryWrapperUtil {
     public static final String SELECT_ALL = "*";
 
+    /**
+     * 方法缓存
+     * <p>
+     * 如有条件，建议换成三方内存缓存组件，像：Google Guava Cache、Caffeine Cache 等等。
+     * 这些组件提供的 API 一般有更好的线程安全、缓存命中、数据一致性，并且缓存可控（大小，数量等等）
+     */
     protected static ConcurrentMap<Class<?>, Map<String, Collection<Method>>> METHOD_CACHE = new ConcurrentHashMap<>();
 
     public static <E> QueryWrapper<E> setSelect(QueryWrapper<E> queryWrapper, Class<E> clazz, String[] fields) {
@@ -465,7 +471,7 @@ public class QueryWrapperUtil {
                                 Collectors.toCollection(ArrayList::new))));
         Map<String, Object> fieldValueMap = new HashMap<>();
         getFieldValuesMap(clazz, entity, methodMap).forEach((k, v) -> {
-            // java.util.stream.Stream.findFirst 可能抛出 NPE
+            // 当第一个元素为 null 时，Stream.findFirst 可能抛出 NPE，因此不建议使用
             Object value = null;
             Iterator<Object> iterator = v.iterator();
             if (iterator.hasNext()) {

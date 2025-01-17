@@ -34,11 +34,11 @@ public class QueryWrapperUtil {
     public static final String SELECT_ALL = "*";
 
     /**
-     * Google Guava Cache
+     * 方法缓存
      * <p>
-     * 优点：线程安全，缓存命中率高，缓存大小可控，缓存数据安全，缓存数据一致性，缓存数据自动刷新。
+     * 如有条件，建议换成三方内存缓存组件，像：Google Guava Cache、Caffeine Cache 等等。
+     * 这些组件提供的 API 一般有更好的线程安全、缓存命中、数据一致性，并且缓存可控（大小，数量等等）
      */
-    // protected static final Cache<Class<?>, Map<String, Collection<Method>>> METHOD_CACHE = CacheBuilder.newBuilder().maximumSize(1000L).build();
     protected static final ConcurrentMap<Class<?>, Map<String, Collection<Method>>> METHOD_CACHE = new ConcurrentHashMap<>();
 
     public static <E> QueryWrapper setSelect(QueryWrapper queryWrapper, Class<E> clazz, String[] fields) {
@@ -481,6 +481,7 @@ public class QueryWrapperUtil {
                                 Collectors.toCollection(ArrayList::new))));
         Map<String, Object> fieldValueMap = new HashMap<>();
         getFieldValuesMap(clazz, entity, methodMap).forEach((k, v) -> {
+            // 当第一个元素为 null 时，Stream.findFirst 可能抛出 NPE，因此不建议使用
             Object value = null;
             Iterator<Object> iterator = v.iterator();
             if (iterator.hasNext()) {

@@ -26,22 +26,6 @@
         <site-maven-plugin.version>0.12</site-maven-plugin.version>
     </properties>
 
-    <!-- setting.xml 文件中指定用户名和密码
-    <server>
-        <id>github</id>
-        <username>YOUR_USERNAME</username>
-        <password>YOUR_PASSWORD</password>
-    </server>
-    -->
-
-    <distributionManagement>
-        <repository>
-            <id>local-staging-repository</id>
-            <name>Local Staging Repository</name>
-            <url>file://${project.build.directory}/mvn-repo</url>
-        </repository>
-    </distributionManagement>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -154,4 +138,20 @@
             </plugin>
         </plugins>
     </build>
+
+    <!-- setting.xml 文件中指定用户名和密码
+    <server>
+        <id>github</id>
+        <username>YOUR_USERNAME</username>
+        <password>YOUR_PASSWORD</password>
+    </server>
+    -->
+
+    <distributionManagement>
+        <repository>
+            <id>local-staging-repository</id>
+            <name>Local Staging Repository</name>
+            <url>file://${project.build.directory}/mvn-repo</url>
+        </repository>
+    </distributionManagement>
 </project>
