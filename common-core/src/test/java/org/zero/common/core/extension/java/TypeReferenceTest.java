@@ -3,7 +3,6 @@ package org.zero.common.core.extension.java;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
-import org.zero.common.core.extension.java.TypeReference;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -41,18 +40,18 @@ class TypeReferenceTest {
     public <T> void get(com.fasterxml.jackson.core.type.TypeReference<T> reference) {
         Type type = reference.getType();
         System.out.println(type);
-
-        ResolvableType resolvableType = ResolvableType.forType(type);
-        Class<T> rawClass = (Class<T>) resolvableType.getRawClass();
-        System.out.println(rawClass);
-        ResolvableType[] generics = resolvableType.getGenerics();
-        System.out.println(Arrays.toString(generics));
-        ResolvableType rv = ResolvableType.forClassWithGenerics(rawClass, generics);
-        System.out.println(rv);
     }
 
     public <T> void get(ParameterizedTypeReference<T> reference) {
         Type type = reference.getType();
         System.out.println(type);
+
+        ResolvableType resolvableType = ResolvableType.forType(type);
+        Class<?> rawClass = resolvableType.getRawClass();
+        System.out.println(rawClass);
+        ResolvableType[] generics = resolvableType.getGenerics();
+        System.out.println(Arrays.toString(generics));
+        ResolvableType rv = ResolvableType.forClassWithGenerics(rawClass, generics);
+        System.out.println(rv);
     }
 }

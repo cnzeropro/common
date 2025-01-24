@@ -1,6 +1,11 @@
-package org.zero.common.data.model.transfer;
+package org.zero.common.core.extension.spring.webmvc;
+
+import cn.hutool.core.convert.ConverterRegistry;
+import cn.hutool.core.util.ClassUtil;
+import org.zero.common.core.util.java.reflect.ReflectUtil;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -14,36 +19,62 @@ import java.util.function.Function;
 public class DynamicBean extends LinkedHashMap<CharSequence, Object> {
     /* ***************************************************** creater ***************************************************** */
     public DynamicBean() {
-        super(16);
+        this(12);
+    }
+
+    protected DynamicBean(int numMappings) {
+        super(calculateMapCapacity(numMappings));
     }
 
     public static DynamicBean create() {
         return new DynamicBean();
     }
 
+    public static DynamicBean create(Object bean) {
+        Field[] fields = bean.getClass().getDeclaredFields();
+        DynamicBean instance = new DynamicBean(fields.length);
+        for (Field field : fields) {
+            instance.set(field.getName(), ReflectUtil.getFieldValue(field, bean));
+        }
+        return instance;
+    }
+
     public static DynamicBean create(Class<?> beanType) {
-        DynamicBean instance = new DynamicBean();
-        for (Field field : beanType.getDeclaredFields()) {
-            instance.set(field.getName(), null);
+        Field[] fields = beanType.getDeclaredFields();
+        DynamicBean instance = new DynamicBean(fields.length);
+        for (Field field : fields) {
+            instance.set(field.getName(), ClassUtil.getDefaultValue(field.getType()));
         }
         return instance;
     }
 
     public static DynamicBean create(Map<? extends CharSequence, ?> map) {
-        return new DynamicBean().set(map);
+        return new DynamicBean(map.size()).set(map);
+    }
+
+    static int calculateMapCapacity(int numMappings) {
+        return (int) Math.ceil(numMappings / 0.75f);
     }
 
     /* ***************************************************** getter ***************************************************** */
-    public <T> Optional<T> getOpt(CharSequence name, Class<T> asType) {
-        return Optional.ofNullable(get(name)).map(asType::cast);
+    public Object get(CharSequence name) {
+        return super.get(name);
     }
 
-    public <T> T get(CharSequence name, Class<T> asType, T defaultValue) {
-        return getOpt(name, asType).orElse(defaultValue);
+    public Optional<Object> getOpt(CharSequence name) {
+        return Optional.ofNullable(this.get(name));
     }
 
-    public <T> T get(CharSequence name, Class<T> asType) {
-        return get(name, asType, null);
+    public <T> Optional<T> getOpt(CharSequence name, Type type) {
+        return this.getOpt(name).map(o -> converterRegistry.convert(type, o));
+    }
+
+    public <T> T get(CharSequence name, Type type, T defaultValue) {
+        return this.<T>getOpt(name, type).orElse(defaultValue);
+    }
+
+    public <T> T get(CharSequence name, Type type) {
+        return get(name, type, null);
     }
 
     public byte getByte(CharSequence name) {
@@ -76,6 +107,19 @@ public class DynamicBean extends LinkedHashMap<CharSequence, Object> {
 
     public boolean getBoolean(CharSequence name) {
         return get(name, Boolean.class, false);
+    }
+
+    public String getString(CharSequence name) {
+        return getString(name, null);
+    }
+
+    public String getString(CharSequence name, String defaultValue) {
+        return get(name, String.class, defaultValue);
+    }
+
+    public <T> T getAndConvert(CharSequence name, Function<Object, T> converter) {
+        Object value = get(name);
+        return converter.apply(value);
     }
 
     /* ***************************************************** setter ***************************************************** */
@@ -116,5 +160,12 @@ public class DynamicBean extends LinkedHashMap<CharSequence, Object> {
     public DynamicBean set(Map<? extends CharSequence, ?> map) {
         putAll(map);
         return this;
+    }
+
+    /* ***************************************************** other ***************************************************** */
+    private static ConverterRegistry converterRegistry = ConverterRegistry.getInstance();
+
+    public static void setConverter(ConverterRegistry converterRegistry) {
+        DynamicBean.converterRegistry = converterRegistry;
     }
 }

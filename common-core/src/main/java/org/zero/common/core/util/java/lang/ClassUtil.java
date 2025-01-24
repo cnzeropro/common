@@ -1,23 +1,28 @@
 package org.zero.common.core.util.java.lang;
 
-import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.zero.common.core.exception.AnyThrow;
 
 import java.io.File;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.time.temporal.TemporalAccessor;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author zero
@@ -32,142 +37,127 @@ public class ClassUtil {
     private static final String PACKAGE_SEPARATOR = ".";
     private static final String INNER_CLASS_SEPARATOR = "$";
 
-    /**
-     * 获取指定包下类对象列表
-     */
-    public static List<Class<?>> getClasses(String packageName) {
-        List<Class<?>> classes = new LinkedList<>();
-        List<String> classNames = getClassNames(packageName);
-        classNames.forEach(className -> {
+    public static Collection<Class<?>> getClasses(Package p) {
+        return getClasses(p.getName());
+    }
+
+    public static Collection<Class<?>> getClasses(String packageName) {
+        return getClassMap(packageName).values();
+    }
+
+    public static Map<String, Class<?>> getClassMap(Package p) {
+        return getClassMap(p.getName());
+    }
+
+    public static Map<String, Class<?>> getClassMap(String packageName) {
+        Map<String, Class<?>> classMap = new LinkedHashMap<>();
+        Collection<String> classNames = getClassNames(packageName);
+        for (String className : classNames) {
+            Class<?> clazz;
             try {
-                classes.add(Class.forName(className));
+                clazz = Class.forName(className);
             } catch (Throwable throwable) {
-                log.warn(String.format("Get class[%s] exception under package[%s], skipped", className, packageName), throwable);
+                log.debug(String.format("Get class[%s] exception under package[%s], skipped", className, packageName), throwable);
+                clazz = null;
             }
-        });
-        return classes;
-    }
-
-    /**
-     * 获取指定包下类名列表
-     */
-    @SneakyThrows
-    public static List<String> getClassNames(String packageName) {
-        List<String> classNames = new LinkedList<>();
-        String packageFileName = packageName.replace(PACKAGE_SEPARATOR, CLASS_FILE_SEPARATOR);
-        Enumeration<URL> urls = Thread.currentThread()
-                .getContextClassLoader()
-                .getResources(packageFileName);
-        while (urls.hasMoreElements()) {
-            URL url = urls.nextElement();
-            String protocol = url.getProtocol();
-            if ("file".equals(protocol)) {
-                String packagePath = url.getPath()
-                        .replace("%5c", CLASS_FILE_SEPARATOR)
-                        .replace("%20", " ");
-                File file = new File(packagePath);
-                List<String> classNamesByFile = getClassNamesByFile(file, packageName);
-                classNames.addAll(classNamesByFile);
-            } else if ("jar".equals(protocol)) {
-                JarFile jarFile = ((JarURLConnection) url.openConnection())
-                        .getJarFile();
-                if (Objects.nonNull(jarFile)) {
-                    List<String> classNamesByJar = getClassNamesByJar(jarFile, packageName);
-                    classNames.addAll(classNamesByJar);
-                }
-            }
+            classMap.put(className, clazz);
         }
-        return classNames;
+        return classMap;
     }
 
-    /**
-     * 在文件中获取指定包名的类名
-     */
-    public static List<String> getClassNamesByFile(File file, String packageName) {
+    public static Collection<String> getClassNames(Package p) {
+        return getClassNames(p.getName());
+    }
+
+    public static Collection<String> getClassNames(String packageName) {
+        String packageFileName = packageName.replace(PACKAGE_SEPARATOR, CLASS_FILE_SEPARATOR);
+        Enumeration<URL> urls = AnyThrow.sneakyThrow(Thread.currentThread().getContextClassLoader(),
+                classLoader -> classLoader.getResources(packageFileName));
+        return Collections.list(urls)
+                .stream()
+                .flatMap(url -> getClassNamesByUrl(url, packageName).stream())
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    public static Collection<String> getClassNamesByUrl(URL url, String packageName) {
+        return getClassNamesByUrl(url, packageName, true, false);
+    }
+
+    public static Collection<String> getClassNamesByUrl(URL url, String packageName, boolean withChildClass, boolean withInnerClass) {
+        String protocol = url.getProtocol();
+        if ("file".equals(protocol)) {
+            return Optional.ofNullable(AnyThrow.sneakyThrow(url, URL::toURI))
+                    .map(File::new)
+                    .map(file -> getClassNamesByFile(file, packageName, withChildClass, withInnerClass))
+                    .orElseGet(LinkedHashSet::new);
+        }
+        if ("jar".equals(protocol)) {
+            return Optional.ofNullable(AnyThrow.sneakyThrow(url, URL::openConnection))
+                    .filter(JarURLConnection.class::isInstance)
+                    .map(JarURLConnection.class::cast)
+                    .map(AnyThrow.sneakyThrow(JarURLConnection::getJarFile))
+                    .map(jarFile -> getClassNamesByJar(jarFile, packageName, withChildClass, withInnerClass))
+                    .orElseGet(LinkedHashSet::new);
+        }
+        return Collections.emptyList();
+    }
+
+    public static Collection<String> getClassNamesByFile(File file, String packageName) {
         return getClassNamesByFile(file, packageName, true, false);
     }
 
-    /**
-     * 在文件中获取指定包名的类名
-     */
-    public static List<String> getClassNamesByFile(File file, String packageName, boolean withChildClass, boolean withInnerClass) {
-        List<String> classNames = new LinkedList<>();
-        // File 对象为 null 或其不存在
-        if (Objects.isNull(file) || !file.exists()) {
-            return classNames;
-        }
-        // File 对象是目录且又不包含子包类
-        if (!withChildClass && file.isDirectory()) {
-            return classNames;
-        }
-        if (file.isFile()) {
-            String path = file.getPath();
-            // 不包含内部类但存在内部类标识
-            if (!withInnerClass && path.contains(INNER_CLASS_SEPARATOR)) {
-                return classNames;
-            }
-            // 存在类文件标识（）
-            if (path.endsWith(CLASS_FILE_SUFFIX) && path.contains(CLASS_FILE_PREFIX)) {
-                String classFileName = path.substring(path.indexOf(CLASS_FILE_PREFIX) + CLASS_FILE_PREFIX.length())
-                        .replace(CLASS_FILE_SEPARATOR, PACKAGE_SEPARATOR);
-                String className = classFileName.substring(0, classFileName.lastIndexOf(PACKAGE_SEPARATOR));
-                if (withChildClass) {
-                    if (className.startsWith(packageName)) {
-                        classNames.add(className);
+    public static Collection<String> getClassNamesByFile(File file, String packageName, boolean withChildClass, boolean withInnerClass) {
+        return Optional.ofNullable(file)
+                .filter(File::exists)
+                .filter(f -> withChildClass || !f.isDirectory())
+                .<Collection<String>>map(f -> {
+                    if (f.isFile()) {
+                        return Optional.of(f.getPath())
+                                .filter(filePath -> withInnerClass || !filePath.contains(INNER_CLASS_SEPARATOR))
+                                .filter(filePath -> filePath.endsWith(CLASS_FILE_SUFFIX) && filePath.contains(CLASS_FILE_PREFIX))
+                                .map(filePath -> filePath.substring(filePath.indexOf(CLASS_FILE_PREFIX) + CLASS_FILE_PREFIX.length())
+                                        .replace(CLASS_FILE_SEPARATOR, PACKAGE_SEPARATOR)
+                                        .replace(CLASS_FILE_SUFFIX, ""))
+                                .filter(className -> {
+                                    if (withChildClass) {
+                                        return className.startsWith(packageName);
+                                    }
+                                    return packageName.equals(className.substring(0, className.lastIndexOf(PACKAGE_SEPARATOR)));
+                                })
+                                .<Collection<String>>map(Collections::singletonList)
+                                .orElseGet(LinkedHashSet::new);
                     }
-                } else {
-                    if (packageName.equals(className.substring(0, className.lastIndexOf(PACKAGE_SEPARATOR)))) {
-                        classNames.add(className);
+                    if (f.isDirectory()) {
+                        return Optional.ofNullable(f.listFiles())
+                                .map(Stream::of)
+                                .orElseGet(Stream::empty)
+                                .flatMap(nextFile -> getClassNamesByFile(nextFile, packageName, withChildClass, withInnerClass).stream())
+                                .collect(Collectors.toCollection(LinkedHashSet::new));
                     }
-                }
-            }
-        } else if (file.isDirectory()) {
-            File[] files = file.listFiles();
-            if (Objects.nonNull(files)) {
-                for (File f : files) {
-                    List<String> classNamesByFile = getClassNamesByFile(f, packageName, withChildClass, withInnerClass);
-                    classNames.addAll(classNamesByFile);
-                }
-            }
-        }
-        return classNames;
+                    return Collections.emptyList();
+                })
+                .orElseGet(LinkedHashSet::new);
     }
 
-    /**
-     * 通过JarFile获取其中全限定类名
-     */
-    public static List<String> getClassNamesByJar(JarFile jarFile, String packageName) {
+    public static Collection<String> getClassNamesByJar(JarFile jarFile, String packageName) {
         return getClassNamesByJar(jarFile, packageName, true, false);
     }
 
-    /**
-     * 通过JarFile获取其中全限定类名
-     */
-    public static List<String> getClassNamesByJar(JarFile jarFile, String packageName, boolean withChildClass, boolean withInnerClass) {
-        List<String> classNames = new LinkedList<>();
-        Enumeration<JarEntry> entries = jarFile.entries();
-        while (entries.hasMoreElements()) {
-            JarEntry jarEntry = entries.nextElement();
-            String jarEntryName = jarEntry.getName();
-            // 是 class 文件
-            if (jarEntryName.endsWith(CLASS_FILE_SUFFIX)) {
-                String replacedJarEntryName = jarEntryName.replace(CLASS_FILE_SUFFIX, "")
-                        .replace(CLASS_FILE_SEPARATOR, PACKAGE_SEPARATOR);
-                if (!withInnerClass && replacedJarEntryName.contains(INNER_CLASS_SEPARATOR)) {
-                    continue;
-                }
-                if (withChildClass) {
-                    if (replacedJarEntryName.startsWith(packageName)) {
-                        classNames.add(replacedJarEntryName);
+    public static Collection<String> getClassNamesByJar(JarFile jarFile, String packageName, boolean withChildClass, boolean withInnerClass) {
+        return Optional.ofNullable(jarFile)
+                .map(JarFile::stream)
+                .orElseGet(Stream::empty)
+                .map(JarEntry::getName)
+                .filter(entryName -> entryName.endsWith(CLASS_FILE_SUFFIX))
+                .map(entryName -> entryName.replace(CLASS_FILE_SUFFIX, "").replace(CLASS_FILE_SEPARATOR, PACKAGE_SEPARATOR))
+                .filter(className -> withInnerClass || !className.contains(INNER_CLASS_SEPARATOR))
+                .filter(className -> {
+                    if (withChildClass) {
+                        return className.startsWith(packageName);
                     }
-                } else {
-                    if (packageName.equals(replacedJarEntryName.substring(0, replacedJarEntryName.lastIndexOf(PACKAGE_SEPARATOR)))) {
-                        classNames.add(replacedJarEntryName);
-                    }
-                }
-            }
-        }
-        return classNames;
+                    return packageName.equals(className.substring(0, className.lastIndexOf(PACKAGE_SEPARATOR)));
+                })
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     /**
@@ -237,5 +227,31 @@ public class ClassUtil {
                 (Date.class.isAssignableFrom(clazz) ||
                         Calendar.class.isAssignableFrom(clazz) ||
                         TemporalAccessor.class.isAssignableFrom(clazz));
+    }
+
+    /**
+     * 获取指定类型的默认值
+     */
+    public static Object getDefaultValue(Class<?> clazz) {
+        if (clazz.isPrimitive()) {
+            if (long.class == clazz) {
+                return 0L;
+            } else if (int.class == clazz) {
+                return 0;
+            } else if (short.class == clazz) {
+                return (short) 0;
+            } else if (byte.class == clazz) {
+                return (byte) 0;
+            } else if (char.class == clazz) {
+                return '\u0000';
+            } else if (double.class == clazz) {
+                return 0.0;
+            } else if (float.class == clazz) {
+                return 0.0F;
+            } else if (boolean.class == clazz) {
+                return false;
+            }
+        }
+        return null;
     }
 }

@@ -1,12 +1,19 @@
 package org.zero.common.core.extension.java.converter;
 
+import java.util.function.Function;
+
 /**
  * @author Zero (cnzeropro@163.com)
  * @since 2024/12/30
  */
 @FunctionalInterface
-public interface GenericConverter<T> extends Converter {
+public interface GenericConverter<T> extends Function<Object, T>, Converter {
     T convert(Object source);
+
+    @Override
+    default T apply(Object o) {
+        return this.convert(o);
+    }
 
     default <U> GenericConverter<U> andThen(GenericConverter<? extends U> after) {
         return source -> after.convert(convert(source));

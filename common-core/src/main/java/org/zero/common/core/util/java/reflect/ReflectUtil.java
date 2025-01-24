@@ -1,6 +1,7 @@
 package org.zero.common.core.util.java.reflect;
 
 import lombok.experimental.UtilityClass;
+import org.zero.common.core.extension.java.TypeReference;
 import org.zero.common.core.util.java.lang.StringUtil;
 
 import java.lang.annotation.Annotation;
@@ -9,6 +10,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -103,18 +105,30 @@ public class ReflectUtil {
                 .findFirst();
     }
 
-    public static <T> T getFieldValue(Field field, Object obj, Class<T> asType) {
-        return getFieldValueOpt(field, obj, asType).orElse(null);
+    public static Object getStaticFieldValue(Field field) {
+        return getStaticFieldValue(field, Object.class);
     }
 
-    public static <T> Optional<T> getFieldValueOpt(Field field, Object obj, Class<T> asType) {
+    public static <T> T getStaticFieldValue(Field field, Type type) {
+        return getFieldValue(field, null, type);
+    }
+
+    public static Object getFieldValue(Field field, Object obj) {
+        return getFieldValue(field, obj, Object.class);
+    }
+
+    public static <T> T getFieldValue(Field field, Object obj, Type type) {
+        return ReflectUtil.<T>getFieldValueOpt(field, obj, type).orElse(null);
+    }
+
+    public static <T> Optional<T> getFieldValueOpt(Field field, Object obj, Type type) {
         int modifiers = field.getModifiers();
         if (!Modifier.isPublic(modifiers)) {
             setAccessible(field);
         }
         try {
             Object got = field.get(obj);
-            T result = asType.cast(got);
+            T result = casting(got, type);
             return Optional.ofNullable(result);
         } catch (Exception ignored) {
             return Optional.empty();
@@ -260,6 +274,18 @@ public class ReflectUtil {
         return getFilteredMethods(clazz, withSuperClassMethods, method -> method.getName().equals(methodName));
     }
 
+    public static Object invokeStatic(final Method method, final Object... args) {
+        return invokeStatic(method, Object.class, args);
+    }
+
+    public static <T> T invokeStatic(final Method method, final Type type, final Object... args) {
+        return ReflectUtil.<T>invokeStaticOpt(method, type, args).orElse(null);
+    }
+
+    public static <T> Optional<T> invokeStaticOpt(final Method method, final Type type, final Object... args) {
+        return invokeOpt(method, null, type, args);
+    }
+
     /**
      * 调用方法获取结果
      */
@@ -270,8 +296,8 @@ public class ReflectUtil {
     /**
      * 调用方法获取结果
      */
-    public static <T> T invoke(final Method method, final Object target, final Class<T> asType, final Object... args) {
-        return invokeOpt(method, target, asType, args).orElse(null);
+    public static <T> T invoke(final Method method, final Object target, final Type type, final Object... args) {
+        return ReflectUtil.<T>invokeOpt(method, target, type, args).orElse(null);
     }
 
     /**
@@ -284,7 +310,7 @@ public class ReflectUtil {
     /**
      * 调用方法获取结果
      */
-    public static <T> Optional<T> invokeOpt(final Method method, final Object target, final Class<T> asType, final Object... args) {
+    public static <T> Optional<T> invokeOpt(final Method method, final Object target, final Type type, final Object... args) {
         if (Objects.isNull(method)) {
             return Optional.empty();
         }
@@ -299,7 +325,7 @@ public class ReflectUtil {
         }
         try {
             Object invoked = method.invoke(obj, args);
-            T result = asType.cast(invoked);
+            T result = casting(invoked, type);
             return Optional.ofNullable(result);
         } catch (Exception ignored) {
             return Optional.empty();
@@ -483,5 +509,26 @@ public class ReflectUtil {
                 })
                 .filter(clazz::isInstance)
                 .map(clazz::cast);
+    }
+
+    /* ********************************************************* Other ********************************************************* */
+    @SuppressWarnings("unchecked")
+    public static <T> T casting(Object obj, Type type) {
+        if (Objects.isNull(obj)) {
+            return null;
+        }
+
+        if (type instanceof Class) {
+            Class<T> clazz = (Class<T>) type;
+            return clazz.cast(obj);
+        }
+
+        if (type instanceof TypeReference) {
+            TypeReference<T> typeReference = (TypeReference<T>) type;
+            Type referenceType = typeReference.getType();
+            return casting(obj, referenceType);
+        }
+
+        return (T) obj;
     }
 }

@@ -2,7 +2,7 @@ server:
   port: 34567
   error:
     whitelabel:
-      enabled: true
+      enabled: false
   tomcat:
     relaxed-path-chars:
       - '['
@@ -25,6 +25,9 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss.SSS
     time-zone: GMT+8:00
+    # 可见性配置。默认配置参见：com.fasterxml.jackson.annotation.JsonAutoDetect.Value.DEFAULT
+    visibility:
+      creator: protected_and_public
   datasource:
     # url: jdbc:h2:file:./data/test
     # url: jdbc:h2:tcp//localhost:8080/data/test

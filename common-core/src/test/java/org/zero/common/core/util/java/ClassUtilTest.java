@@ -3,7 +3,8 @@ package org.zero.common.core.util.java;
 import org.junit.jupiter.api.Test;
 import org.zero.common.core.util.java.lang.ClassUtil;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author Zero (cnzeropro@qq.com)
@@ -11,14 +12,14 @@ import java.util.List;
  */
 class ClassUtilTest {
     @Test
-    void getClasses() {
-        List<Class<?>> classes = ClassUtil.getClasses("org.zero.common.data.model");
-        classes.forEach(System.out::println);
+    void getClassMap() {
+        Map<String, Class<?>> classMap = ClassUtil.getClassMap("org.zero.common.data.model");
+        System.out.println(classMap);
     }
 
     @Test
     void getClassNames() {
-        List<String> classNames = ClassUtil.getClassNames("org.zero.common.data");
+        Collection<String> classNames = ClassUtil.getClassNames("org.zero.common");
         classNames.forEach(System.out::println);
     }
 }
