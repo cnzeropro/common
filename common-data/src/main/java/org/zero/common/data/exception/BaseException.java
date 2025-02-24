@@ -93,4 +93,9 @@ public class BaseException extends RuntimeException {
     public String getErrorMessage() {
         return sysError.getMessage();
     }
+
+    @Override
+    public String getLocalizedMessage() {
+        return this.getPromptMessage();
+    }
 }

@@ -22,4 +22,14 @@ class ClassUtilTest {
         Collection<String> classNames = ClassUtil.getClassNames("org.zero.common");
         classNames.forEach(System.out::println);
     }
+
+    @Test
+    void isAssignable() {
+        System.out.println(ClassUtil.isAssignable(Number.class, Integer.class));
+        System.out.println(ClassUtil.isAssignable(Integer.class, int.class));
+        System.out.println(ClassUtil.isAssignable(int.class, Integer.class));
+        System.out.println(ClassUtil.isAssignable(Number[].class, Integer[].class));
+        System.out.println(ClassUtil.isAssignable(Integer[].class, int[].class));
+        System.out.println(ClassUtil.isAssignable(Integer.class, Double.class));
+    }
 }

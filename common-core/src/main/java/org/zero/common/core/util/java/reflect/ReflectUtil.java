@@ -128,7 +128,7 @@ public class ReflectUtil {
         }
         try {
             Object got = field.get(obj);
-            T result = casting(got, type);
+            T result = cast(got, type);
             return Optional.ofNullable(result);
         } catch (Exception ignored) {
             return Optional.empty();
@@ -325,7 +325,7 @@ public class ReflectUtil {
         }
         try {
             Object invoked = method.invoke(obj, args);
-            T result = casting(invoked, type);
+            T result = cast(invoked, type);
             return Optional.ofNullable(result);
         } catch (Exception ignored) {
             return Optional.empty();
@@ -513,7 +513,7 @@ public class ReflectUtil {
 
     /* ********************************************************* Other ********************************************************* */
     @SuppressWarnings("unchecked")
-    public static <T> T casting(Object obj, Type type) {
+    public static <T> T cast(Object obj, Type type) {
         if (Objects.isNull(obj)) {
             return null;
         }
@@ -526,7 +526,7 @@ public class ReflectUtil {
         if (type instanceof TypeReference) {
             TypeReference<T> typeReference = (TypeReference<T>) type;
             Type referenceType = typeReference.getType();
-            return casting(obj, referenceType);
+            return cast(obj, referenceType);
         }
 
         return (T) obj;

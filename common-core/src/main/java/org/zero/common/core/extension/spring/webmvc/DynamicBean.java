@@ -1,11 +1,13 @@
 package org.zero.common.core.extension.spring.webmvc;
 
-import cn.hutool.core.convert.ConverterRegistry;
-import cn.hutool.core.util.ClassUtil;
+import org.zero.common.core.extension.java.TypeReference;
+import org.zero.common.core.extension.java.converter.ConverterComposite;
+import org.zero.common.core.util.java.lang.ClassUtil;
 import org.zero.common.core.util.java.reflect.ReflectUtil;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -28,6 +30,10 @@ public class DynamicBean extends LinkedHashMap<CharSequence, Object> {
 
     public static DynamicBean create() {
         return new DynamicBean();
+    }
+
+    public static DynamicBean create(int numMappings) {
+        return new DynamicBean(numMappings);
     }
 
     public static DynamicBean create(Object bean) {
@@ -66,7 +72,9 @@ public class DynamicBean extends LinkedHashMap<CharSequence, Object> {
     }
 
     public <T> Optional<T> getOpt(CharSequence name, Type type) {
-        return this.getOpt(name).map(o -> converterRegistry.convert(type, o));
+        return this.getOpt(name)
+                .filter(o -> converterComposite.canConvert(type, false))
+                .map(o -> converterComposite.convertQuietly(type, o, false));
     }
 
     public <T> T get(CharSequence name, Type type, T defaultValue) {
@@ -117,6 +125,16 @@ public class DynamicBean extends LinkedHashMap<CharSequence, Object> {
         return get(name, String.class, defaultValue);
     }
 
+    public <T> Collection<T> getCollection(CharSequence name, Type type) {
+        return this.get(name, new TypeReference<Collection<T>>() {
+        }.getType());
+    }
+
+    public <T> T[] getArray(CharSequence name, Type type) {
+        return this.get(name, new TypeReference<T[]>() {
+        }.getType());
+    }
+
     public <T> T getAndConvert(CharSequence name, Function<Object, T> converter) {
         Object value = get(name);
         return converter.apply(value);
@@ -163,9 +181,9 @@ public class DynamicBean extends LinkedHashMap<CharSequence, Object> {
     }
 
     /* ***************************************************** other ***************************************************** */
-    private static ConverterRegistry converterRegistry = ConverterRegistry.getInstance();
+    private static ConverterComposite converterComposite = ConverterComposite.getInstance();
 
-    public static void setConverter(ConverterRegistry converterRegistry) {
-        DynamicBean.converterRegistry = converterRegistry;
+    public static void setConverter(ConverterComposite converterComposite) {
+        DynamicBean.converterComposite = converterComposite;
     }
 }

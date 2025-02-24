@@ -29,6 +29,9 @@ public abstract class BaseTabularDataExportResponseBodyAdvice extends BaseExport
     protected static final String DEFAULT_REGEX_TEMPLATE = "^(\\w+\\.)*(%s)(\\.\\w+)*$";
     protected static final String DEFAULT_REGEX = String.format(DEFAULT_REGEX_TEMPLATE, StringUtils.arrayToDelimitedString(DEFAULT_PACKAGE_NAMES, "|"));
 
+    /**
+     * ConversionService conversionService = DefaultConversionService.getSharedInstance();
+     */
     protected ConfigurableConversionService conversionService = new DefaultFormattingConversionService();
 
     /**

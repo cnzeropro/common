@@ -26,6 +26,11 @@
 
         <dependency>
             <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-gateway-server</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-openfeign-core</artifactId>
             <scope>provided</scope>
         </dependency>
@@ -96,6 +101,11 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-redis</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jpa</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

@@ -24,6 +24,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-       resolvers.add(new DynamicBeanArgumentResolver());
+        resolvers.add(new DynamicBeanArgumentResolver(true));
     }
 }

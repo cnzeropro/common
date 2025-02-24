@@ -12,27 +12,23 @@ import org.zero.common.core.extension.spring.webmvc.DynamicBeanArgumentResolver;
 import org.zero.common.data.model.query.BaseQO;
 import org.zero.common.data.model.view.Result;
 
-import java.util.Collection;
-
 /**
  * @author Zero (cnzeropro@163.com)
  * @since 2025/1/6
  */
 @Slf4j
 @RestController
-@RequestMapping("query")
-public class QueryController {
+@RequestMapping("result")
+public class ResultController {
     @TraceLog(level = LogLevel.INFO)
-    @GetMapping("q1")
-    public Result<BaseQO> q1(@Validated BaseQO param) {
+    @GetMapping("r1")
+    public Result<BaseQO> r1(@Validated BaseQO param) {
         return Result.ok(param);
     }
 
-    @GetMapping("q2")
-    public Result<DynamicBean> q2(@DynamicBeanArgumentResolver.DynamicBeanParam DynamicBean param) {
-        Collection<Integer> a = param.getCollection("c");
-        int b = param.getInt("b");
-        Integer[] c = param.getArray("c", Integer.class);
+    @GetMapping("r2")
+    public Result<DynamicBean> r2(@DynamicBeanArgumentResolver.DynamicBeanParam DynamicBean param) {
+        param.getString("");
         return Result.ok(param);
     }
 }

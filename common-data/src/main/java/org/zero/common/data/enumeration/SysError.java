@@ -14,7 +14,7 @@ import org.zero.common.data.exception.BaseSysError;
 @AllArgsConstructor
 public enum SysError implements BaseSysError {
     /**
-     * 一切ok
+     * 一切可行
      */
     OK(OK_CODE, "ok"),
     /**

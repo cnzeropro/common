@@ -15,10 +15,23 @@ public class ToBool implements GenericConverter<Boolean> {
             return (Boolean) source;
         }
         if (source instanceof Number) {
-            return ((Number) source).intValue() != 0;
+            int i = ((Number) source).intValue();
+            if (i == 0) {
+                return Boolean.FALSE;
+            }
+            if (i == 1) {
+                return Boolean.TRUE;
+            }
         }
         if (Objects.nonNull(source)) {
-            return Boolean.valueOf(source.toString());
+            // return Boolean.valueOf(source.toString());
+            String string = source.toString();
+            if ("true".equalsIgnoreCase(string)) {
+                return Boolean.TRUE;
+            }
+            if ("false".equalsIgnoreCase(string)) {
+                return Boolean.FALSE;
+            }
         }
         return null;
     }

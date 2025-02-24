@@ -46,7 +46,7 @@ class ExcelUtilTest {
         Set<String> keys = result.stream()
                 .findFirst()
                 .map(Map::keySet)
-                .orElseThrow(() -> new UtilException("数据表头为空"));
+                .orElseThrow(() -> new UtilException("Data header is empty"));
 
         // 通过表头获取树节点列表
         List<TreeNode<String>> treeNodes = TreeUtil.toTreeNodeList(keys, ".");

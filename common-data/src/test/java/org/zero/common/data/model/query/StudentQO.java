@@ -1,9 +1,9 @@
-package org.zero.common.data.model;
+package org.zero.common.data.model.query;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.zero.common.data.model.query.BaseQO;
+import org.zero.common.data.model.StudentPO;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

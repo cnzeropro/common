@@ -230,9 +230,46 @@ public class ClassUtil {
     }
 
     /**
+     * 检查目标类是否可以从原类转化
+     * <ul>
+     *     <li>目标类（Collection.class）是原类（ArrayList.class）实现的接口或者继承的（抽象）超类</li>
+     *     <li>两者是原始类型或者包装类型（相互转换）</li>
+     * </ul>
+     *
+     * @param targetType 目标类型，如：Number.class
+     * @param sourceType 原始类型，如：Integer.class
+     * @return 是否可以转化
+     */
+    public static boolean isAssignable(Class<?> targetType, Class<?> sourceType) {
+        if (Objects.isNull(targetType) || Objects.isNull(sourceType)) {
+            return false;
+        }
+
+        // 对象类型
+        if (targetType.isAssignableFrom(sourceType)) {
+            return true;
+        }
+
+        // 基本类型
+        if (targetType.isPrimitive()) {
+            // 原始类型
+            Class<?> resolvedPrimitive = PrimitiveType.unwrap(sourceType);
+            return targetType.equals(resolvedPrimitive);
+        }
+
+        // 包装类型
+        Class<?> resolvedWrapper = PrimitiveType.wrap(sourceType);
+        return Objects.nonNull(resolvedWrapper) && targetType.isAssignableFrom(resolvedWrapper);
+    }
+
+    /**
      * 获取指定类型的默认值
      */
     public static Object getDefaultValue(Class<?> clazz) {
+        if (Objects.isNull(clazz)) {
+            return null;
+        }
+        // 原始类型
         if (clazz.isPrimitive()) {
             if (long.class == clazz) {
                 return 0L;
@@ -252,6 +289,7 @@ public class ClassUtil {
                 return false;
             }
         }
+        // 引用类型
         return null;
     }
 }

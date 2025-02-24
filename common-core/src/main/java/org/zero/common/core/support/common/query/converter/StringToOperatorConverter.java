@@ -50,8 +50,7 @@ public class StringToOperatorConverter implements Converter<String, Operator> {
                     if (Objects.isNull(v)) {
                         operators = new TreeSet<>(Comparator.comparingInt(Operator::getOrder));
                     }
-                    this.getComparisonOperator(k)
-                            .ifPresent(operators::add);
+                    this.getComparisonOperator(k).ifPresent(operators::add);
                     return operators;
                 })
                 .stream()
