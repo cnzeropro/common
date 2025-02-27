@@ -10,7 +10,7 @@ public class ToBoolArray extends ToArray<Boolean> {
     }
 
     public ToBoolArray(ConverterComposite converterComposite) {
-        super(converterComposite, Boolean.class);
+        super(Boolean.class,converterComposite);
     }
 
     @Override

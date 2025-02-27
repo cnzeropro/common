@@ -3,8 +3,15 @@ package org.zero.common.core.util.java.lang;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.zero.common.core.exception.AnyThrow;
+import org.zero.common.core.extension.java.TypeReference;
 
 import java.io.File;
+import java.lang.reflect.Array;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.time.temporal.TemporalAccessor;
@@ -229,6 +236,78 @@ public class ClassUtil {
                         TemporalAccessor.class.isAssignableFrom(clazz));
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> T cast(Object obj, Type type) {
+        if (Objects.isNull(obj)) {
+            return null;
+        }
+        if (type instanceof Class) {
+            Class<T> clazz = (Class<T>) type;
+            return clazz.cast(obj);
+        }
+        if (type instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) type;
+            Type rawType = parameterizedType.getRawType();
+            return cast(obj, rawType);
+        }
+        if (type instanceof GenericArrayType) {
+            GenericArrayType genericArrayType = (GenericArrayType) type;
+            Type componentType = genericArrayType.getGenericComponentType();
+            Object[] inputArray = (Object[]) obj;
+            int length = inputArray.length;
+            Class<?> componentClass = getRawClass(componentType);
+            Object outputArray = Array.newInstance(componentClass, length);
+            for (int i = 0; i < length; i++) {
+                Array.set(outputArray, i, cast(inputArray[i], componentType));
+            }
+            return (T) outputArray;
+        }
+        if (type instanceof TypeVariable) {
+            TypeVariable<?> typeVariable = (TypeVariable<?>) type;
+            Type[] bounds = typeVariable.getBounds();
+            Type boundType = bounds.length > 0 ? bounds[0] : Object.class;
+            return cast(obj, boundType);
+        }
+        if (type instanceof WildcardType) {
+            WildcardType wildcardType = (WildcardType) type;
+            Type[] upperBounds = wildcardType.getUpperBounds();
+            if (upperBounds.length > 0 && upperBounds[0] != Object.class) {
+                return cast(obj, upperBounds[0]);
+            }
+            Type[] lowerBounds = wildcardType.getLowerBounds();
+            if (lowerBounds.length > 0) {
+                return cast(obj, lowerBounds[0]);
+            }
+        }
+        if (type instanceof TypeReference) {
+            TypeReference<T> typeReference = (TypeReference<T>) type;
+            Type referenceType = typeReference.getType();
+            return cast(obj, referenceType);
+        }
+        return (T) obj;
+    }
+
+    public static Class<?> getRawClass(Type type) {
+        if (type == null) {
+            return null;
+        }
+        if (type instanceof Class) {
+            return (Class<?>) type;
+        }
+        if (type instanceof ParameterizedType) {
+            return getRawClass(((ParameterizedType) type).getRawType());
+        }
+        if (type instanceof GenericArrayType) {
+            Class<?> componentClass = getRawClass(((GenericArrayType) type).getGenericComponentType());
+            return Array.newInstance(componentClass, 0).getClass();
+        }
+        if (type instanceof TypeVariable) {
+            Type[] bounds = ((TypeVariable<?>) type).getBounds();
+            return bounds.length > 0 ? getRawClass(bounds[0]) : Object.class;
+        }
+        return Object.class;
+    }
+
     /**
      * 检查目标类是否可以从原类转化
      * <ul>
@@ -290,6 +369,30 @@ public class ClassUtil {
             }
         }
         // 引用类型
+        return null;
+    }
+
+    public static Object[] getArray(Object source) {
+        if (Objects.isNull(source)) {
+            return null;
+        }
+        Class<?> clazz = source.getClass();
+        if (clazz.isArray()) {
+            Object[] array;
+            Class<?> componentType = clazz.getComponentType();
+            if (componentType.isPrimitive()) {
+                // 处理原始类型数组（如int[]）
+                int length = Array.getLength(source);
+                array = new Object[length];
+                for (int i = 0; i < length; i++) {
+                    array[i] = Array.get(source, i);
+                }
+            } else {
+                // 处理对象数组（如String[]）
+                array = (Object[]) source;
+            }
+            return array;
+        }
         return null;
     }
 }

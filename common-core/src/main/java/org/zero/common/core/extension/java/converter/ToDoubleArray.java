@@ -10,7 +10,7 @@ public class ToDoubleArray extends ToArray<Double> {
     }
 
     public ToDoubleArray(ConverterComposite converterComposite) {
-        super(converterComposite, Double.class);
+        super(Double.class, converterComposite);
     }
 
     @Override

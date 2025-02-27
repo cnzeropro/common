@@ -7,8 +7,10 @@ import org.springframework.core.ResolvableType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 /**
@@ -17,7 +19,17 @@ import java.util.Set;
  */
 class TypeReferenceTest {
     @Test
-    void test() {
+    void test () {
+        Type type1 = new TypeReference<Map<List<Map<Long, Date>>[], Set<String>[]>>() {
+        }.getType();
+        System.out.println(type1);
+        Type type2 = new TypeReference<Map<Queue<Short>, String>[]>() {
+        }.getType();
+        System.out.println(type2);
+    }
+
+    @Test
+    void compare () {
         TypeReference<List<Map<String, Set<BigDecimal>>>> reference = new TypeReference<List<Map<String, Set<BigDecimal>>>>() {
         };
         com.fasterxml.jackson.core.type.TypeReference<Map<String, Integer>> reference1 = new com.fasterxml.jackson.core.type.TypeReference<Map<String, Integer>>() {
@@ -37,12 +49,12 @@ class TypeReferenceTest {
         System.out.println(type);
     }
 
-    public <T> void get(com.fasterxml.jackson.core.type.TypeReference<T> reference) {
+    private <T> void get(com.fasterxml.jackson.core.type.TypeReference<T> reference) {
         Type type = reference.getType();
         System.out.println(type);
     }
 
-    public <T> void get(ParameterizedTypeReference<T> reference) {
+    private <T> void get(ParameterizedTypeReference<T> reference) {
         Type type = reference.getType();
         System.out.println(type);
 

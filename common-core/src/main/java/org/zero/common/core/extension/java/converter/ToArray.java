@@ -1,6 +1,7 @@
 package org.zero.common.core.extension.java.converter;
 
-import org.zero.common.core.extension.java.EnumerationIterator;
+import org.zero.common.core.extension.java.collection.EnumerationIterator;
+import org.zero.common.core.util.java.lang.ClassUtil;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ public abstract class ToArray<T> implements GenericConverter<T[]> {
     protected final Class<T> componentType;
     protected final ConverterComposite converterComposite;
 
-    protected ToArray(ConverterComposite converterComposite, Class<T> componentType) {
+    protected ToArray(Class<T> componentType, ConverterComposite converterComposite) {
         this.converterComposite = converterComposite;
         this.componentType = componentType;
     }
@@ -35,19 +36,7 @@ public abstract class ToArray<T> implements GenericConverter<T[]> {
         }
         Class<?> sourceClass = source.getClass();
         if (sourceClass.isArray()) {
-            Object[] array;
-            Class<?> componentType = sourceClass.getComponentType();
-            if (componentType.isPrimitive()) {
-                // 处理原始类型数组（如int[]）
-                int length = Array.getLength(source);
-                array = new Object[length];
-                for (int i = 0; i < length; i++) {
-                    array[i] = Array.get(source, i);
-                }
-            } else {
-                // 处理对象数组（如String[]）
-                array = (Object[]) source;
-            }
+            Object[] array = ClassUtil.getArray(source);
             return this.convertArrayElement(array);
         }
         if (source instanceof Collection) {

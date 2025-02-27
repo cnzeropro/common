@@ -10,7 +10,7 @@ public class ToCharArray extends ToArray<Character> {
     }
 
     public ToCharArray(ConverterComposite converterComposite) {
-        super(converterComposite, Character.class);
+        super(Character.class, converterComposite);
     }
 
     @Override

@@ -10,7 +10,7 @@ public class ToIntArray extends ToArray<Integer> {
     }
 
     public ToIntArray(ConverterComposite converterComposite) {
-        super(converterComposite, Integer.class);
+        super(Integer.class,converterComposite);
     }
 
     @Override

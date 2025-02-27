@@ -1,4 +1,4 @@
-package org.zero.common.core.extension.java;
+package org.zero.common.core.extension.java.collection;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

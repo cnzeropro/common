@@ -1,7 +1,7 @@
 package org.zero.common.core.util.java.reflect;
 
 import lombok.experimental.UtilityClass;
-import org.zero.common.core.extension.java.TypeReference;
+import org.zero.common.core.util.java.lang.ClassUtil;
 import org.zero.common.core.util.java.lang.StringUtil;
 
 import java.lang.annotation.Annotation;
@@ -128,7 +128,7 @@ public class ReflectUtil {
         }
         try {
             Object got = field.get(obj);
-            T result = cast(got, type);
+            T result = ClassUtil.cast(got, type);
             return Optional.ofNullable(result);
         } catch (Exception ignored) {
             return Optional.empty();
@@ -325,7 +325,7 @@ public class ReflectUtil {
         }
         try {
             Object invoked = method.invoke(obj, args);
-            T result = cast(invoked, type);
+            T result = ClassUtil.cast(invoked, type);
             return Optional.ofNullable(result);
         } catch (Exception ignored) {
             return Optional.empty();
@@ -509,26 +509,5 @@ public class ReflectUtil {
                 })
                 .filter(clazz::isInstance)
                 .map(clazz::cast);
-    }
-
-    /* ********************************************************* Other ********************************************************* */
-    @SuppressWarnings("unchecked")
-    public static <T> T cast(Object obj, Type type) {
-        if (Objects.isNull(obj)) {
-            return null;
-        }
-
-        if (type instanceof Class) {
-            Class<T> clazz = (Class<T>) type;
-            return clazz.cast(obj);
-        }
-
-        if (type instanceof TypeReference) {
-            TypeReference<T> typeReference = (TypeReference<T>) type;
-            Type referenceType = typeReference.getType();
-            return cast(obj, referenceType);
-        }
-
-        return (T) obj;
     }
 }

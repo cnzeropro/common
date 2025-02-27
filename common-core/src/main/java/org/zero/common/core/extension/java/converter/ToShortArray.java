@@ -10,7 +10,7 @@ public class ToShortArray extends ToArray<Short> {
     }
 
     public ToShortArray(ConverterComposite converterComposite) {
-        super(converterComposite, Short.class);
+        super(Short.class, converterComposite);
     }
 
     @Override

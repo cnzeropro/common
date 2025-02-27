@@ -10,7 +10,7 @@ public class ToFloatArray extends ToArray<Float> {
     }
 
     public ToFloatArray(ConverterComposite converterComposite) {
-        super(converterComposite, Float.class);
+        super(Float.class, converterComposite);
     }
 
     @Override

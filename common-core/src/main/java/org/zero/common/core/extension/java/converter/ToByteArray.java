@@ -10,7 +10,7 @@ public class ToByteArray extends ToArray<Byte> {
     }
 
     public ToByteArray(ConverterComposite converterComposite) {
-        super(converterComposite, Byte.class);
+        super(Byte.class, converterComposite);
     }
 
     @Override
