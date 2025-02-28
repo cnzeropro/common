@@ -1,7 +1,8 @@
 package org.zero.common.core.extension.spring.webmvc;
 
-import org.zero.common.core.extension.java.TypeReference;
-import org.zero.common.core.extension.java.converter.ConverterComposite;
+import org.zero.common.core.extension.java.reflect.GenericArrayTypeImpl;
+import org.zero.common.core.extension.java.reflect.ParameterizedTypeImpl;
+import org.zero.common.core.support.converter.ConverterComposite;
 import org.zero.common.core.util.java.lang.ClassUtil;
 import org.zero.common.core.util.java.reflect.ReflectUtil;
 
@@ -126,13 +127,11 @@ public class DynamicBean extends LinkedHashMap<CharSequence, Object> {
     }
 
     public <T> Collection<T> getCollection(CharSequence name, Type type) {
-        return this.get(name, new TypeReference<Collection<T>>() {
-        }.getType());
+        return this.get(name, ParameterizedTypeImpl.make(Collection.class, type));
     }
 
     public <T> T[] getArray(CharSequence name, Type type) {
-        return this.get(name, new TypeReference<T[]>() {
-        }.getType());
+        return this.get(name, GenericArrayTypeImpl.make(type));
     }
 
     public <T> T getAndConvert(CharSequence name, Function<Object, T> converter) {

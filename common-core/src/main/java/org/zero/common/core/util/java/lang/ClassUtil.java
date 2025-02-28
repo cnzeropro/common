@@ -309,36 +309,93 @@ public class ClassUtil {
     }
 
     /**
-     * 检查目标类是否可以从原类转化
-     * <ul>
-     *     <li>目标类（Collection.class）是原类（ArrayList.class）实现的接口或者继承的（抽象）超类</li>
-     *     <li>两者是原始类型或者包装类型（相互转换）</li>
-     * </ul>
+     * 检查目标类型是否可以从源类型转化
+     * <p>
+     * 注意：该方法支持 Java 中可强转的和可以相互兼容的类型，因此当该方法返回 true，不一定可强转。
      *
      * @param targetType 目标类型，如：Number.class
-     * @param sourceType 原始类型，如：Integer.class
+     * @param sourceType 源类型，如：Integer.class
      * @return 是否可以转化
      */
-    public static boolean isAssignable(Class<?> targetType, Class<?> sourceType) {
+    public static boolean isAssignable(Type targetType, Type sourceType) {
         if (Objects.isNull(targetType) || Objects.isNull(sourceType)) {
             return false;
         }
-
-        // 对象类型
-        if (targetType.isAssignableFrom(sourceType)) {
+        if (targetType.equals(sourceType)) {
             return true;
         }
-
-        // 基本类型
-        if (targetType.isPrimitive()) {
-            // 原始类型
-            Class<?> resolvedPrimitive = PrimitiveType.unwrap(sourceType);
-            return targetType.equals(resolvedPrimitive);
+        if (targetType instanceof Class) {
+            Class<?> targetClass = (Class<?>) targetType;
+            if (sourceType instanceof Class) {
+                Class<?> sourceClass = (Class<?>) sourceType;
+                // 对象类型
+                if (targetClass.isAssignableFrom(sourceClass)) {
+                    return true;
+                }
+                // 数组类型
+                if (targetClass.isArray() && sourceClass.isArray()) {
+                    return isAssignable(targetClass.getComponentType(), sourceClass.getComponentType());
+                }
+                // 基本类型
+                if (targetClass.isPrimitive()) {
+                    Class<?> resolvedPrimitive = PrimitiveType.unwrap(sourceClass);
+                    return targetClass.equals(resolvedPrimitive);
+                }
+                // 包装类型
+                Class<?> resolvedWrapper = PrimitiveType.wrap(sourceClass);
+                return Objects.nonNull(resolvedWrapper) && targetClass.isAssignableFrom(resolvedWrapper);
+            }
+            if (sourceType instanceof GenericArrayType && targetClass.isArray()) {
+                GenericArrayType sourceGenericArrayType = (GenericArrayType) sourceType;
+                return isAssignable(targetClass.getComponentType(), sourceGenericArrayType.getGenericComponentType());
+            }
+            if (sourceType instanceof ParameterizedType) {
+                ParameterizedType sourceParameterizedType = (ParameterizedType) sourceType;
+                return isAssignable(targetClass, sourceParameterizedType.getRawType());
+            }
+            return false;
         }
-
-        // 包装类型
-        Class<?> resolvedWrapper = PrimitiveType.wrap(sourceType);
-        return Objects.nonNull(resolvedWrapper) && targetType.isAssignableFrom(resolvedWrapper);
+        if (targetType instanceof ParameterizedType) {
+            ParameterizedType targetParameterizedType = (ParameterizedType) targetType;
+            if (sourceType instanceof ParameterizedType) {
+                ParameterizedType sourceParameterizedType = (ParameterizedType) sourceType;
+                Type targetRawType = targetParameterizedType.getRawType();
+                Type sourceRawType = sourceParameterizedType.getRawType();
+                if (!isAssignable(targetRawType, sourceRawType)) {
+                    return false;
+                }
+                Type[] targetActualTypeArguments = targetParameterizedType.getActualTypeArguments();
+                Type[] sourceActualTypeArguments = sourceParameterizedType.getActualTypeArguments();
+                if (targetActualTypeArguments.length != sourceActualTypeArguments.length) {
+                    return false;
+                }
+                for (int i = 0; i < targetActualTypeArguments.length && i < sourceActualTypeArguments.length; i++) {
+                    Type targetActualTypeArgument = targetActualTypeArguments[i];
+                    Type sourceActualTypeArgument = sourceActualTypeArguments[i];
+                    if (!isAssignable(targetActualTypeArgument, sourceActualTypeArgument)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+        if (targetType instanceof GenericArrayType) {
+            GenericArrayType targetGenericArrayType = (GenericArrayType) targetType;
+            if (sourceType instanceof Class) {
+                Class<?> sourceClass = (Class<?>) sourceType;
+                if (sourceClass.isArray()) {
+                    return isAssignable(targetGenericArrayType.getGenericComponentType(), sourceClass.getComponentType());
+                }
+                return false;
+            }
+            if (sourceType instanceof GenericArrayType) {
+                GenericArrayType sourceGenericArrayType = (GenericArrayType) sourceType;
+                return isAssignable(targetGenericArrayType.getGenericComponentType(), sourceGenericArrayType.getGenericComponentType());
+            }
+            return false;
+        }
+        return false;
     }
 
     /**

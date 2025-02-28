@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.zero.common.core.aop.aspect.log.LogLevel;
-import org.zero.common.core.aop.aspect.log.TraceLog;
+import org.zero.common.core.aop.aspect.log.LogTracker;
 import org.zero.common.core.support.export.FileExport;
 import org.zero.common.core.support.export.archive.ArchiveExport;
 import org.zero.common.core.support.export.excel.ExcelExport;
@@ -22,7 +22,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("export")
 public class ExportController {
-    @TraceLog(LogLevel.INFO)
+    @LogTracker(LogLevel.INFO)
     @FileExport
     @GetMapping("e1")
     public String e1() {
@@ -30,7 +30,7 @@ public class ExportController {
         // return "file:///C:/Users/Rongan/Desktop/其他.txt";
     }
 
-    @TraceLog(LogLevel.INFO)
+    @LogTracker(LogLevel.INFO)
     @ExcelExport
     @GetMapping("e2")
     public List<Map<String, Object>> e2() {

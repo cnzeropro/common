@@ -57,7 +57,6 @@ class TypeReferenceTest {
     private <T> void get(ParameterizedTypeReference<T> reference) {
         Type type = reference.getType();
         System.out.println(type);
-
         ResolvableType resolvableType = ResolvableType.forType(type);
         Class<?> rawClass = resolvableType.getRawClass();
         System.out.println(rawClass);

@@ -8,11 +8,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -21,7 +16,7 @@ import java.util.Objects;
  * {@link DynamicBean} 参数解析器
  * <p>
  * 因为 {@link DynamicBean} 继承了 {@link Map}, 所以在参数解析时，会优先使用 {@linkplain org.springframework.web.method.annotation.MapMethodProcessor MapMethodProcessor} 参数解析器，
- * 因此需要自定义一个注解来标识该参数，避免被 {@linkplain org.springframework.web.method.annotation.MapMethodProcessor MapMethodProcessor} 参数解析器解析
+ * 因此需要自定义一个注解 {@link DynamicBeanParam} 来标识该参数，避免被 {@linkplain org.springframework.web.method.annotation.MapMethodProcessor MapMethodProcessor} 参数解析器解析
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2025/1/21
@@ -32,7 +27,7 @@ public class DynamicBeanArgumentResolver implements HandlerMethodArgumentResolve
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return DynamicBean.class.isAssignableFrom(parameter.getParameterType());
+        return DynamicBean.class.equals(parameter.getParameterType()) && parameter.hasParameterAnnotation(DynamicBeanParam.class);
     }
 
     @Override
@@ -44,16 +39,14 @@ public class DynamicBeanArgumentResolver implements HandlerMethodArgumentResolve
                 dynamicBean.set(key, null);
                 return;
             }
-            String[] processedValues = needSplit ? Arrays.stream(values).flatMap(s -> Arrays.stream(StringUtils.commaDelimitedListToStringArray(s))).toArray(String[]::new) : Arrays.copyOf(values, values.length);
+            String[] processedValues = needSplit ?
+                    Arrays.stream(values)
+                            .flatMap(s -> Arrays.stream(StringUtils.commaDelimitedListToStringArray(s)))
+                            .toArray(String[]::new) :
+                    Arrays.copyOf(values, values.length);
             Object finalValue = processedValues.length == 1 ? processedValues[0] : processedValues;
             dynamicBean.set(key, finalValue);
         });
         return dynamicBean;
-    }
-
-    @Target({ElementType.PARAMETER})
-    @Retention(RetentionPolicy.RUNTIME)
-    @Documented
-    public @interface DynamicBeanParam {
     }
 }
