@@ -1,5 +1,6 @@
 package org.zero.common.core.extension.java;
 
+import lombok.SneakyThrows;
 import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,6 +33,7 @@ public class PropertiesEnhancer {
         return new PropertiesEnhancer(properties);
     }
 
+    @SneakyThrows
     public static PropertiesEnhancer init(String filePath) {
         final Properties properties = new Properties();
         try (InputStream inputStream = Files.newInputStream(Paths.get(filePath))) {
@@ -40,8 +42,6 @@ public class PropertiesEnhancer {
             } else {
                 properties.load(inputStream);
             }
-        } catch (Exception e) {
-            log.warn(String.format("load file[%s] failed", filePath), e);
         }
         return init(properties);
     }

@@ -19,15 +19,23 @@ import java.util.Map;
 @RestController
 @RequestMapping("/jackson")
 public class JacksonController {
+    /**
+     * @see org.zero.common.core.extension.jackson.JSONNullJsonComponent
+     */
     @RequestMapping("/null")
     public Result<JSON> jsonNullType() {
         JSONConfig jsonConfig = JSONConfig.create()
                 .setIgnoreNullValue(false);
         JSONObject jsonObject = JSONUtil.createObj(jsonConfig)
-                .set("id", null);
+                .set("id", 12345L)
+                .set("name", "Bob")
+                .set("age", null);
         return Result.ok(jsonObject);
     }
 
+    /**
+     * @see org.zero.common.core.extension.jackson.JavaTimeJackson2ObjectMapperBuilderCustomizer
+     */
     @RequestMapping("/datetime")
     public Result<Map<String, Serializable>> datetimeType() {
         Map<String, Serializable> datetimeMap = MapBuilder.<String, Serializable>create(true)
@@ -59,11 +67,17 @@ public class JacksonController {
         return Result.ok(datetimeMap);
     }
 
+    /**
+     * @see org.zero.common.core.extension.jackson.NumberJsonComponent.LongSerializer
+     */
     @RequestMapping("/long")
     public Result<Long> longType() {
         return Result.ok(100L);
     }
 
+    /**
+     * @see org.zero.common.core.extension.jackson.NumberJsonComponent.DoubleSerializer
+     */
     @RequestMapping("/double")
     public Result<Double> doubleType() {
         return Result.ok(Double.MAX_VALUE);

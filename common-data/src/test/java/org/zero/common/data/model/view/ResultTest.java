@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.zero.common.data.enumeration.Gender;
 import org.zero.common.data.enumeration.Status;
 import org.zero.common.data.enumeration.SysError;
-import org.zero.common.data.model.StudentDTO;
 import org.zero.common.data.model.transfer.PageDTO;
+import org.zero.common.data.model.transfer.UserDTO;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -22,27 +22,27 @@ class ResultTest {
         System.out.println(okVoid);
         Result<Integer> okInt = Result.ok(10);
         System.out.println(okInt);
-        Result<PageDTO<StudentDTO>> okPageStudent = Result.ok("分页查询成功", PageDTO.<StudentDTO>of()
-                .setPageSize(20L)
-                .setCurrentPage(12L)
+        Result<PageDTO<UserDTO>> okPageStudent = Result.ok("分页查询成功", PageDTO.<UserDTO>of()
+                .setSize(20L)
+                .setCurrent(12L)
                 .setRecordCount(107L)
-                .setRecords(Arrays.asList(StudentDTO.builder()
-                                .id(1L)
+                .setRecords(Arrays.asList(UserDTO.builder()
+                                .id(1566546546L)
                                 .code("s00001")
                                 .name("小明")
                                 .gender(Gender.MALE)
                                 .status(Status.FREEZE)
-                                .createTime(LocalDateTime.now())
-                                .updateBy("admin")
+                                .createdAt(LocalDateTime.now())
+                                .updatedBy(1L)
                                 .build(),
-                        StudentDTO.builder()
-                                .id(2L)
+                        UserDTO.builder()
+                                .id(2344353L)
                                 .code("s00002")
                                 .name("小红")
                                 .gender(Gender.FEMALE)
                                 .status(Status.NORMAL)
-                                .createTime(LocalDateTime.now())
-                                .updateBy("admin")
+                                .createdAt(LocalDateTime.now())
+                                .updatedBy(1L)
                                 .build())));
         System.out.println(okPageStudent);
     }

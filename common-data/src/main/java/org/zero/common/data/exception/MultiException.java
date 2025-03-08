@@ -16,8 +16,8 @@ public class MultiException extends BaseException {
     public MultiException(Throwable... throwables) {
         this(String.format("MultiException: %s",
                         Arrays.stream(throwables)
-                                .map(Throwable::getMessage)
-                                .collect(Collectors.joining(", "))),
+                                .map(Throwable::toString)
+                                .collect(Collectors.joining("; "))),
                 throwables);
     }
 

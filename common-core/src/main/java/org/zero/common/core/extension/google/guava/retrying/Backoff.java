@@ -24,6 +24,7 @@ public @interface Backoff {
      * @return the maximum delay between retries
      */
     long maxDelay() default 3000;
+
     /**
      * If positive, then used as a multiplier for generating the next delay for backoff.
      *

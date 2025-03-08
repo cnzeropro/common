@@ -1,5 +1,6 @@
 package org.zero.common.core.util.quartz;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.Job;
@@ -13,6 +14,7 @@ import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
+import org.quartz.impl.StdSchedulerFactory;
 import org.zero.common.core.util.spring.SpringUtils;
 
 import java.util.Date;
@@ -24,15 +26,6 @@ import java.util.Objects;
  */
 @Slf4j
 public class QuartzUtils {
-    protected QuartzUtils() {
-    }
-
-    protected static final String GROUP_SUFFIX = "-group";
-    protected static final String JOB_SUFFIX = "-job";
-    protected static final String JOB_GROUP_SUFFIX = JOB_SUFFIX + GROUP_SUFFIX;
-    protected static final String TRIGGER_SUFFIX = "-trigger";
-    protected static final String TRIGGER_GROUP_SUFFIX = TRIGGER_SUFFIX + GROUP_SUFFIX;
-
     public static boolean scheduleJob(String key, Class<? extends Job> clazz, String cron) {
         return scheduleJob(key, clazz, cron, new JobDataMap());
     }
@@ -295,16 +288,38 @@ public class QuartzUtils {
         return new TriggerKey(triggerKey + TRIGGER_SUFFIX, groupKey + TRIGGER_SUFFIX);
     }
 
-    private static Scheduler scheduler;
+    /* **************************************************** Other **************************************************** */
+    protected static final String GROUP_SUFFIX = "-group";
+    protected static final String JOB_SUFFIX = "-job";
+    protected static final String JOB_GROUP_SUFFIX = JOB_SUFFIX + GROUP_SUFFIX;
+    protected static final String TRIGGER_SUFFIX = "-trigger";
+    protected static final String TRIGGER_GROUP_SUFFIX = TRIGGER_SUFFIX + GROUP_SUFFIX;
 
-    protected static Scheduler getScheduler() {
+    @Setter
+    protected static volatile Scheduler scheduler;
+
+    public static Scheduler getScheduler() {
+        checkAndCreate();
+        return scheduler;
+    }
+
+    protected static void checkAndCreate() {
         if (Objects.isNull(scheduler)) {
             synchronized (QuartzUtils.class) {
                 if (Objects.isNull(scheduler)) {
-                    scheduler = SpringUtils.getBean(Scheduler.class);
+                    scheduler = SpringUtils.getBeanProvider(Scheduler.class).getIfAvailable();
+                }
+                if (Objects.isNull(scheduler)) {
+                    try {
+                        scheduler = StdSchedulerFactory.getDefaultScheduler();
+                    } catch (SchedulerException ignored) {
+                    }
                 }
             }
         }
-        return scheduler;
+    }
+
+    protected QuartzUtils() {
+        throw new UnsupportedOperationException();
     }
 }

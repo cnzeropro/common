@@ -26,7 +26,8 @@ class LokiResultTest {
         System.out.println("epochNano: " + epochNano);
         value1.add(String.valueOf(epochNano));
         value1.add("log line");
-        LokiStream lokiStream = LokiStream.builder().stream(Collections.singletonMap("a", "b"))
+        LokiStream lokiStream = LokiStream.builder()
+                .stream(Collections.singletonMap("a", "b"))
                 .value(value1)
                 .build();
 

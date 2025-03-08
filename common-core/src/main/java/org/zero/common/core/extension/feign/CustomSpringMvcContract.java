@@ -30,11 +30,13 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * SpringCloud OpenFeign Contract（{@link SpringMvcContract}）只支持 SpringMvc 注解和少量 Feign 原生注解，
+ * SpringCloud OpenFeign Contract（{@link SpringMvcContract}）只支持 SpringMVC 注解和少量 Feign 原生注解，
  * 而 Feign 默认的 Contract（{@link feign.Contract.Default}）只支持 Feign 原生注解，
  * 因此需要自定义 Contract 用于支持两种实现（也就是各自的注解都支持）。
  *
  * @author zero
+ * @see SpringMvcContract
+ * @see feign.Contract.Default
  * @since 2024/3/8
  */
 public class CustomSpringMvcContract extends SpringMvcContract implements EnvironmentAware {

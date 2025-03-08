@@ -2,119 +2,108 @@ package org.zero.common.core.exception.controller;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.web.ErrorProperties;
-import org.springframework.boot.autoconfigure.web.servlet.error.AbstractErrorController;
+import org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorViewResolver;
-import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.StringJoiner;
 
 /**
- * 用于统一处理所有HTTP错误，包括但不限于由控制器抛出的异常所引起的错误
+ * Spring Boot 全局错误处理控制器，负责生成统一错误响应。<br>
+ * 当其他异常处理机制未处理异常时，作为兜底机制触发。例如未配置 {@code @ExceptionHandler} 或未覆盖默认异常处理的场景。
  *
  * @author zero
  * @see org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController
  * @see org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration#basicErrorController(ErrorAttributes, ObjectProvider)
  * @since 2024/4/12
  */
+@Controller
 @RequestMapping("${server.error.path:${error.path:/error}}")
-public class CustomErrorController extends AbstractErrorController {
-    protected final ErrorProperties errorProperties;
-
+public class CustomErrorController extends BasicErrorController {
     public CustomErrorController(ErrorAttributes errorAttributes, ErrorProperties errorProperties) {
-        super(errorAttributes);
-        this.errorProperties = errorProperties;
+        super(errorAttributes, errorProperties);
     }
 
-    public CustomErrorController(ErrorAttributes errorAttributes, List<ErrorViewResolver> errorViewResolvers, ErrorProperties errorProperties) {
-        super(errorAttributes, errorViewResolvers);
-        this.errorProperties = errorProperties;
+    public CustomErrorController(ErrorAttributes errorAttributes, ErrorProperties errorProperties, List<ErrorViewResolver> errorViewResolvers) {
+        super(errorAttributes, errorProperties, errorViewResolvers);
     }
 
-    @RequestMapping(produces = MediaType.TEXT_HTML_VALUE)
-    public ModelAndView errorHtml(HttpServletRequest request, HttpServletResponse response) {
-        HttpStatus status = this.getStatus(request);
-        ErrorAttributeOptions errorAttributeOptions = getErrorAttributeOptions(request);
-        Map<String, Object> model = this.getErrorAttributes(request, errorAttributeOptions);
-        response.setStatus(status.value());
-        ModelAndView modelAndView = this.resolveErrorView(request, response, status, model);
-        return Objects.nonNull(modelAndView) ? modelAndView : new ModelAndView("error", model);
-    }
-
+    /**
+     * "timestamp": "2025-03-06 16:52:35.487"<br>
+     * "status": 500<br>
+     * "error": "Internal Server Error"<br>
+     * "trace": "org.zero.common.data.exception.CommonException: xxx\r\n\tat org.zero.common.core.support.export.FileExportResponseBodyAdvice.handleFile(FileExportResponseBodyAdvice.java:139)\r\n\t"<br>
+     * "message": "xxx"<br>
+     * "path": "/export/e1"
+     */
+    @ResponseBody
     @RequestMapping(produces = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity<Map<String, Object>> errorText(HttpServletRequest request) {
+    public ResponseEntity<String> errorText(HttpServletRequest request) {
         HttpStatus status = getStatus(request);
         if (status == HttpStatus.NO_CONTENT) {
             return new ResponseEntity<>(status);
         }
-        ErrorAttributeOptions errorAttributeOptions = getErrorAttributeOptions(request);
-        Map<String, Object> body = this.getErrorAttributes(request, errorAttributeOptions);
+        Map<String, Object> body = getErrorAttributes(request, getErrorAttributeOptions(request, MediaType.TEXT_PLAIN));
+        StringJoiner joiner = new StringJoiner(System.lineSeparator());
+        body.forEach((key, value) -> joiner.add(key + ": " + value));
+        return new ResponseEntity<>(joiner.toString(), status);
+    }
+
+    /**
+     * {
+     * "timestamp": "2025-03-06 16:52:35.487",
+     * "status": 500,
+     * "error": "Internal Server Error",
+     * "trace": "org.zero.common.data.exception.CommonException: xxx\r\n\tat org.zero.common.core.support.export.FileExportResponseBodyAdvice.handleFile(FileExportResponseBodyAdvice.java:139)\r\n\t",
+     * "message": "xxx",
+     * "path": "/export/e1"
+     * }
+     */
+    @ResponseBody
+    @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Object>> errorJson(HttpServletRequest request) {
+        HttpStatus status = getStatus(request);
+        if (status == HttpStatus.NO_CONTENT) {
+            return new ResponseEntity<>(status);
+        }
+        Map<String, Object> body = getErrorAttributes(request, getErrorAttributeOptions(request, MediaType.APPLICATION_JSON));
         return new ResponseEntity<>(body, status);
     }
 
-    @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    /**
+     * 需要 {@code jackson-dataformat-xml} lib 支持
+     * <p>
+     * &lt;Result&gt;<br>
+     * &lt;Timestamp&gt;2025-03-06 17:51:15.245&lt;/Timestamp&gt;<br>
+     * &lt;Status&gt;500&lt;/Status&gt;<br>
+     * &lt;Error&gt;Internal Server Error&lt;/Error&gt;<br>
+     * &lt;Trace&gt;org.zero.common.data.exception.CommonException: xxx&#xd;
+     * at org.zero.common.core.support.export.FileExportResponseBodyAdvice.handleFile(FileExportResponseBodyAdvice.java:139)&#xd;
+     * &lt;/Trace&gt;
+     * &lt;Message&gt;xxx&lt;/Message&gt;<br>
+     * &lt;Path&gt;/export/e1&lt;/Path&gt;<br>
+     * &lt;/Result&gt;
+     */
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> errorJson(HttpServletRequest request) {
-        return errorText(request);
-    }
-
-    protected ErrorAttributeOptions getErrorAttributeOptions(HttpServletRequest request) {
-        ErrorAttributeOptions options = ErrorAttributeOptions.defaults();
-        if (this.errorProperties.isIncludeException()) {
-            options.including(ErrorAttributeOptions.Include.EXCEPTION);
+    @RequestMapping(produces = MediaType.APPLICATION_XML_VALUE)
+    public ResponseEntity<SpringXmlResult> errorXml(HttpServletRequest request) {
+        HttpStatus status = getStatus(request);
+        if (status == HttpStatus.NO_CONTENT) {
+            return ResponseEntity.status(status).build();
         }
-        if (isIncludeStackTrace(request)) {
-            options.including(ErrorAttributeOptions.Include.STACK_TRACE);
-        }
-        if (isIncludeMessage(request)) {
-            options.including(ErrorAttributeOptions.Include.MESSAGE);
-        }
-        if (isIncludeBindingErrors(request)) {
-            options.including(ErrorAttributeOptions.Include.BINDING_ERRORS);
-        }
-        return options;
-    }
-
-    protected boolean isIncludeStackTrace(HttpServletRequest request) {
-        switch (this.errorProperties.getIncludeStacktrace()) {
-            case ALWAYS:
-                return true;
-            case ON_PARAM:
-                return getTraceParameter(request);
-            default:
-                return false;
-        }
-    }
-
-    protected boolean isIncludeMessage(HttpServletRequest request) {
-        switch (this.errorProperties.getIncludeMessage()) {
-            case ALWAYS:
-                return true;
-            case ON_PARAM:
-                return getMessageParameter(request);
-            default:
-                return false;
-        }
-    }
-
-    protected boolean isIncludeBindingErrors(HttpServletRequest request) {
-        switch (this.errorProperties.getIncludeBindingErrors()) {
-            case ALWAYS:
-                return true;
-            case ON_PARAM:
-                return getErrorsParameter(request);
-            default:
-                return false;
-        }
+        Map<String, Object> body = getErrorAttributes(request, getErrorAttributeOptions(request, MediaType.APPLICATION_XML));
+        SpringXmlResult result = SpringXmlResult.of(body);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_XML)
+                .body(result);
     }
 }

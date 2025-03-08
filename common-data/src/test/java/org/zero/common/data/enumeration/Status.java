@@ -1,14 +1,14 @@
 package org.zero.common.data.enumeration;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 /**
  * @author Zero (cnzeropro@qq.com)
  * @date 2021/8/26 11:30
  */
 @Getter
-@AllArgsConstructor
+@RequiredArgsConstructor
 public enum Status {
     NORMAL(1, "正常"),
     LOCKED(2, "锁定"),

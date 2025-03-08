@@ -1,7 +1,12 @@
 package org.zero.common.data.model.transfer;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.With;
 import lombok.experimental.Accessors;
+import lombok.experimental.WithBy;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -19,69 +24,75 @@ import static org.zero.common.data.constant.CommonConstant.DEFAULT_PAGE_SIZE;
  * @since 2021/8/18 9:07
  */
 @Data
+@With
+@WithBy
 @Accessors(chain = true)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class PageDTO<T> implements Serializable {
     private static final long serialVersionUID = 8463126863903128798L;
 
     /**
      * 当前页码
      */
-    protected long currentPage = 1L;
+    protected long current = 1L;
     /**
      * 每页数目
      */
-    protected long pageSize = DEFAULT_PAGE_SIZE;
+    protected long size = DEFAULT_PAGE_SIZE;
     /**
-     * 总页码
+     * 总页数
      */
-    protected long totalPage = 0L;
+    protected long total = 0L;
     /**
      * 数据总数
      */
     protected long recordCount = 0L;
 
     /**
-     * 数据对象列表
+     * 数据列表
      */
     protected Collection<T> records = Collections.emptyList();
+
+    /* ******************************************************* setter ******************************************************* */
 
     /**
      * 设置并修正当前页码
      */
-    public PageDTO<T> setCurrentPage(long currentPage) {
-        if (totalPage > 0 && totalPage < currentPage) {
-            currentPage = totalPage;
+    public PageDTO<T> setCurrent(long current) {
+        if (total > 0 && total < current) {
+            current = total;
         }
-        if (currentPage < 1) {
-            currentPage = 1;
+        if (current < 1) {
+            current = 1;
         }
-        this.currentPage = currentPage;
+        this.current = current;
         return this;
     }
 
     /**
      * 设置并修正每页条数
      */
-    public PageDTO<T> setPageSize(long pageSize) {
-        if (pageSize <= 0) {
-            pageSize = DEFAULT_PAGE_SIZE;
+    public PageDTO<T> setSize(long size) {
+        if (size <= 0) {
+            size = DEFAULT_PAGE_SIZE;
         }
-        this.pageSize = pageSize;
-        return setTotalPage(totalPage);
+        this.size = size;
+        return setTotal(total);
     }
 
     /**
      * 设置并修正总页数
      */
-    public PageDTO<T> setTotalPage(long totalPage) {
-        if (recordCount > 0 && pageSize > 0) {
-            totalPage = recordCount / pageSize;
-            if (recordCount % pageSize != 0) {
-                totalPage++;
+    public PageDTO<T> setTotal(long total) {
+        if (recordCount > 0 && size > 0) {
+            total = recordCount / size;
+            if (recordCount % size != 0) {
+                total++;
             }
         }
-        this.totalPage = totalPage;
-        return setCurrentPage(currentPage);
+        this.total = total;
+        return setCurrent(current);
     }
 
     /**
@@ -89,41 +100,53 @@ public class PageDTO<T> implements Serializable {
      */
     public PageDTO<T> setRecordCount(long recordCount) {
         this.recordCount = recordCount;
-        return setTotalPage(totalPage);
+        return setTotal(total);
     }
 
-    @SuppressWarnings("unchecked")
-    public <R> PageDTO<R> convert(Function<? super T, ? extends R> mapper) {
-        List<R> data = this.getRecords().stream().map(mapper).collect(Collectors.toList());
-        return ((PageDTO<R>) this).setRecords(data);
-    }
+    /* ******************************************************* builder ******************************************************* */
 
     public static <T> PageDTO<T> of() {
         return new PageDTO<>();
     }
 
-    public static <T> PageDTO<T> of(long currentPage) {
-        return new PageDTO<>(currentPage, DEFAULT_PAGE_SIZE);
+    public static <T> PageDTO<T> of(long current) {
+        return of(current, DEFAULT_PAGE_SIZE);
     }
 
-    public static <T> PageDTO<T> of(long currentPage, long pageSize) {
-        return new PageDTO<>(currentPage, pageSize);
+    public static <T> PageDTO<T> of(long current, long size) {
+        return of(current, size, 0L);
     }
 
-    public static <T> PageDTO<T> of(long currentPage, long pageSize, long recordCount) {
-        return new PageDTO<>(currentPage, pageSize, recordCount);
+    public static <T> PageDTO<T> of(long current, long size, long recordCount) {
+        return new PageDTO<>(current, size, recordCount);
     }
 
-    protected PageDTO() {
-    }
-
-    protected PageDTO(long currentPage, long pageSize) {
-        setCurrentPage(currentPage);
-        setPageSize(pageSize);
-    }
-
-    protected PageDTO(long currentPage, long pageSize, long recordCount) {
-        this(currentPage, pageSize);
+    protected PageDTO(long current, long size, long recordCount) {
+        this();
+        setCurrent(current);
+        setSize(size);
         setRecordCount(recordCount);
+    }
+
+    /* ******************************************************* converter ******************************************************* */
+
+    public <R> PageDTO<R> convert(Function<? super T, ? extends R> mapper) {
+        List<R> data = this.getRecords().stream().map(mapper).collect(Collectors.toList());
+        return this.convert(data);
+    }
+
+    public <R> PageDTO<R> convertNew(Function<? super T, ? extends R> mapper) {
+        List<R> data = this.getRecords().stream().map(mapper).collect(Collectors.toList());
+        return this.convertNew(data);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <R> PageDTO<R> convert(Collection<R> data) {
+        return ((PageDTO<R>) this).setRecords(data);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <R> PageDTO<R> convertNew(Collection<R> data) {
+        return ((PageDTO<R>) this).withRecords(data);
     }
 }

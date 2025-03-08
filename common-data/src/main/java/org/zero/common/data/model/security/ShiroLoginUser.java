@@ -9,7 +9,7 @@ import java.io.Serializable;
  * @since 2021/8/22
  */
 @Data
-public class ShiroLoginUser {
+public class ShiroLoginUser implements Serializable {
     private final Serializable id;
     private final String name;
 }

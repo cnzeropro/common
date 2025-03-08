@@ -132,7 +132,7 @@ public class FileExportResponseBodyAdvice extends BaseExportResponseBodyAdvice {
             if (file.isFile()) {
                 String filename = FileUtil.getName(file);
                 InputStream inputStream = FileUtil.getInputStream(file);
-                this.handleStream(fileExport, filename, inputStream);
+                return this.handleStream(fileExport, filename, inputStream);
             }
             throw new CommonException(String.format("The value is not a supported file: %s", file));
         }

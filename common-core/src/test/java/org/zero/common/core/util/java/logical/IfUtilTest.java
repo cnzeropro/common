@@ -24,14 +24,14 @@ class IfUtilTest {
 
     @Test
     void get() {
-        Date date = IfUtil.get(new Date(1), Date::new, () -> true, () -> true, () -> true);
+        Date date = IfUtil.provide(new Date(1), Date::new, () -> true, () -> true, () -> true);
         System.out.println(date);
     }
 
     @Test
     void deal() {
-        IfUtil.deal(log, l -> l.warn("测试使用"), true);
-        IfUtil.deal(1, 2, System.out::println, () -> true, () -> false, () -> true);
+        IfUtil.consume(log, l -> l.warn("测试使用"), true);
+        IfUtil.consume(1, 2, System.out::println, () -> true, () -> false, () -> true);
     }
 
     @Test

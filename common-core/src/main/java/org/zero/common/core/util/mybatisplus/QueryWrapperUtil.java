@@ -9,6 +9,8 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.sql.SqlInjectionUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.zero.common.core.support.cache.Cache;
+import org.zero.common.core.support.cache.GuavaCache;
 import org.zero.common.core.util.java.reflect.ReflectUtil;
 import org.zero.common.data.exception.UtilException;
 
@@ -23,7 +25,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,11 +37,8 @@ public class QueryWrapperUtil {
 
     /**
      * 方法缓存
-     * <p>
-     * 如有条件，建议换成三方内存缓存组件，像：Google Guava Cache、Caffeine Cache 等等。
-     * 这些组件提供的 API 一般有更好的线程安全、缓存命中、数据一致性，并且缓存可控（大小，数量等等）
      */
-    protected static ConcurrentMap<Class<?>, Map<String, Collection<Method>>> METHOD_CACHE = new ConcurrentHashMap<>();
+    protected static final Cache<Class<?>, Map<String, Collection<Method>>> METHOD_CACHE = GuavaCache.of(10_000L);
 
     public static <E> QueryWrapper<E> setSelect(QueryWrapper<E> queryWrapper, Class<E> clazz, String[] fields) {
         return setSelect(queryWrapper, clazz, CollectionUtils.toList(fields));
@@ -463,7 +461,7 @@ public class QueryWrapperUtil {
             return Collections.emptyMap();
         }
         Class<?> entityClass = entity.getClass();
-        Map<String, Collection<Method>> methodMap = METHOD_CACHE.computeIfAbsent(entityClass,
+        Map<String, Collection<Method>> methodMap = METHOD_CACHE.mapAndSetIfAbsent(entityClass,
                 c -> ReflectUtil.getFilteredPublicMethods(c, method -> ReflectUtil.isGetter(method, false))
                         .stream()
                         .collect(Collectors.groupingBy(ReflectUtil::getFieldNameFromGetterMethod,

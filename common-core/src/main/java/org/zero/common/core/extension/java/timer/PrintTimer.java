@@ -4,7 +4,7 @@ package org.zero.common.core.extension.java.timer;
  * @author Zero (cnzeropro@163.com)
  * @since 2024/12/26
  */
-public class PrintTimer extends BaseTimer<PrintTimer> {
+public final class PrintTimer extends BaseTimer<PrintTimer> {
     public static PrintTimer start() {
         return new PrintTimer();
     }
@@ -22,11 +22,11 @@ public class PrintTimer extends BaseTimer<PrintTimer> {
         this.print().reset();
     }
 
-    protected PrintTimer() {
+    private PrintTimer() {
         super();
     }
 
-    protected PrintTimer(String name) {
+    private PrintTimer(String name) {
         super(name);
     }
 }

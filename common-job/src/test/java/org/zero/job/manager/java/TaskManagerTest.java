@@ -4,9 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
-import java.util.concurrent.CountDownLatch;
+import java.util.Scanner;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * @author Zero (cnzeropro@163.com)
@@ -14,46 +13,54 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 class TaskManagerTest {
     TaskManager taskManager;
-    CountDownLatch countDownLatch;
 
     @BeforeEach
     void before() {
-        ScheduledExecutorService threadPool = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
-        taskManager = new TaskManager(threadPool);
-        countDownLatch = new CountDownLatch(3);
+        taskManager = new TaskManager(Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors()));
     }
 
     @Test
-    void test() throws InterruptedException {
-        String key = "1";
-
-        taskManager.trigger(1, () -> {
+    void trigger() {
+        System.out.printf("start: %s%n", LocalDateTime.now());
+        taskManager.trigger("test", () -> {
+            System.out.printf("%s %s %s%n", LocalDateTime.now(), Thread.currentThread(), "start");
             try {
-                Thread.sleep(500000000);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+            System.out.printf("%s %s %s%n", LocalDateTime.now(), Thread.currentThread(), "end");
         });
 
-        System.out.printf("run: %s%n", LocalDateTime.now());
-        taskManager.schedule(key, () -> {
+        // 阻塞主线程
+        new Scanner(System.in).nextLine();
+    }
+
+    @Test
+    void schedule() {
+        System.out.printf("start: %s%n", LocalDateTime.now());
+        taskManager.schedule("test", () -> {
                     System.out.printf("%s %s %s%n", LocalDateTime.now(), Thread.currentThread(), "start");
-                    // try {
-                    //     Thread.sleep(500);
-                    // } catch (InterruptedException e) {
-                    //     throw new RuntimeException(e);
-                    // }
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                     System.out.printf("%s %s %s%n", LocalDateTime.now(), Thread.currentThread(), "end");
-                    countDownLatch.countDown();
                 },
                 "0/3 * * * * ?");
+        taskManager.schedule("test2", () -> {
+                    System.out.printf("%s %s %s%n", LocalDateTime.now(), Thread.currentThread(), "start");
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    System.out.printf("%s %s %s%n", LocalDateTime.now(), Thread.currentThread(), "end");
+                },
+                "0/5 * * * * ?");
 
-        boolean running = taskManager.isRunning(key);
-        System.out.printf("running: %s%n", running);
-
-        countDownLatch.await();
-
-        System.out.printf("stop: %s%n", LocalDateTime.now());
-        taskManager.stop(key);
+        // 阻塞主线程
+        new Scanner(System.in).nextLine();
     }
 }

@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.ArrayType;
 import com.fasterxml.jackson.databind.type.CollectionType;
+import lombok.Setter;
 import lombok.SneakyThrows;
-import lombok.experimental.UtilityClass;
 import org.zero.common.core.util.spring.SpringUtils;
 
 import java.lang.reflect.Type;
@@ -17,10 +17,8 @@ import java.util.Objects;
  * @author zero
  * @since 2023/7/19
  */
-@UtilityClass
+// @UtilityClass
 public class JacksonUtils {
-    private static volatile ObjectMapper objectMapper;
-
     @SneakyThrows
     public static String toJsonStr(Object value) {
         return getObjectMapper().writeValueAsString(value);
@@ -56,18 +54,39 @@ public class JacksonUtils {
         return toObj(jsonStr, arrayType);
     }
 
-    private static ObjectMapper getObjectMapper() {
+    /* **************************************************** Other **************************************************** */
+    @Setter
+    private static volatile ObjectMapper objectMapper;
+
+    /**
+     * 获取工具类中 {@link ObjectMapper} 实例
+     * <p>
+     * 注意：请勿修改获取到的 {@link ObjectMapper} 实例中的属性或者使其为 null，否则可能会影响工具类的使用。
+     * 如要修改，请使用 {@link #copyObjectMapper()} 方法拷贝  {@link ObjectMapper} 实例。
+     */
+    public static ObjectMapper getObjectMapper() {
+        checkAndCreate();
+        return objectMapper;
+    }
+
+    public static ObjectMapper copyObjectMapper() {
+        return getObjectMapper().copy();
+    }
+
+    protected static void checkAndCreate() {
         if (Objects.isNull(objectMapper)) {
             synchronized (JacksonUtils.class) {
                 if (Objects.isNull(objectMapper)) {
-                    objectMapper = SpringUtils.getBeanProvider(ObjectMapper.class)
-                            .getIfAvailable();
+                    objectMapper = SpringUtils.getBeanProvider(ObjectMapper.class).getIfAvailable();
                 }
                 if (Objects.isNull(objectMapper)) {
                     objectMapper = new ObjectMapper();
                 }
             }
         }
-        return objectMapper;
+    }
+
+    protected JacksonUtils() {
+        throw new UnsupportedOperationException();
     }
 }

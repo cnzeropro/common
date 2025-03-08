@@ -1,7 +1,7 @@
 package org.zero.common.core.util.java;
 
 import org.junit.jupiter.api.Test;
-import org.zero.common.core.util.java.lang.ClassUtil;
+import org.zero.common.core.util.java.reflect.ClassUtil;
 
 import java.util.Collection;
 import java.util.Map;
@@ -24,12 +24,12 @@ class ClassUtilTest {
     }
 
     @Test
-    void isAssignable() {
-        System.out.println(ClassUtil.isAssignable(Number.class, Integer.class));
-        System.out.println(ClassUtil.isAssignable(Integer.class, int.class));
-        System.out.println(ClassUtil.isAssignable(int.class, Integer.class));
-        System.out.println(ClassUtil.isAssignable(Number[].class, Integer[].class));
-        System.out.println(ClassUtil.isAssignable(Integer[].class, int[].class));
-        System.out.println(ClassUtil.isAssignable(Integer.class, Double.class));
+    void isConvertible() {
+        System.out.println(ClassUtil.isConvertible(Number.class, Integer.class));
+        System.out.println(ClassUtil.isConvertible(Integer.class, int.class));
+        System.out.println(ClassUtil.isConvertible(int.class, Integer.class));
+        System.out.println(ClassUtil.isConvertible(Number[].class, Integer[].class));
+        System.out.println(ClassUtil.isConvertible(Integer[].class, int[].class));
+        System.out.println(ClassUtil.isConvertible(Integer.class, Double.class));
     }
 }

@@ -2,6 +2,7 @@ package org.zero.common.core.util.java.lang;
 
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
+import org.zero.common.core.util.java.reflect.ClassUtil;
 import org.zero.common.core.util.java.reflect.ReflectUtil;
 
 import java.lang.reflect.Field;

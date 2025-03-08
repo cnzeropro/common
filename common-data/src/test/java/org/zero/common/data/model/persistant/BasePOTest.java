@@ -1,9 +1,9 @@
 package org.zero.common.data.model.persistant;
 
-import cn.hutool.json.JSONUtil;
 import org.junit.jupiter.api.Test;
+import org.zero.common.data.enumeration.Gender;
+import org.zero.common.data.enumeration.Status;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -13,20 +13,18 @@ import java.time.LocalDateTime;
 class BasePOTest {
     @Test
     void test() {
-        ProductPO product = ProductPO.builder()
+        UserPO user = UserPO.builder()
                 .id(1L)
-                .name("apple")
-                .description("Big Apple")
-                .price(new BigDecimal("2.31"))
-                .inventory(100L)
+                .name("Bob")
                 .createdBy(65474L)
+                .gender(Gender.MALE)
+                .status(Status.FREEZE)
                 .createdAt(LocalDateTime.now())
                 .updatedBy(91232234L)
                 .updatedAt(LocalDateTime.now())
                 .deleted(Boolean.FALSE)
                 .version(2L)
                 .build();
-        String jsonStr = JSONUtil.toJsonStr(product);
-        System.out.println(jsonStr);
+        System.out.println(user);
     }
 }

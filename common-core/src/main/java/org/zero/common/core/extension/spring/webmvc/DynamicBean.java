@@ -3,7 +3,7 @@ package org.zero.common.core.extension.spring.webmvc;
 import org.zero.common.core.extension.java.reflect.GenericArrayTypeImpl;
 import org.zero.common.core.extension.java.reflect.ParameterizedTypeImpl;
 import org.zero.common.core.support.converter.ConverterComposite;
-import org.zero.common.core.util.java.lang.ClassUtil;
+import org.zero.common.core.util.java.reflect.ClassUtil;
 import org.zero.common.core.util.java.reflect.ReflectUtil;
 
 import java.lang.reflect.Field;
@@ -180,7 +180,7 @@ public class DynamicBean extends LinkedHashMap<CharSequence, Object> {
     }
 
     /* ***************************************************** other ***************************************************** */
-    private static ConverterComposite converterComposite = ConverterComposite.getInstance();
+    protected static ConverterComposite converterComposite = ConverterComposite.getInstance();
 
     public static void setConverter(ConverterComposite converterComposite) {
         DynamicBean.converterComposite = converterComposite;

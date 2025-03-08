@@ -117,7 +117,7 @@ public class IoUtil {
      * @return 输入流的大小（总字节数）
      */
     @SneakyThrows
-    private long getStreamSizeTentatively(InputStream in) {
+    private long getStreamSizeAvailable(InputStream in) {
         // 使用 InputStream#available() 方法获取流中总字节数并不总是准确，与 available 方法具体实现有关，特别是网络流
         // 但文件流可使用 available() 方法
         if (in instanceof FileInputStream) {

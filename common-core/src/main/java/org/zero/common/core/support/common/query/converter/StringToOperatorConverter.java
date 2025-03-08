@@ -9,10 +9,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.TreeSet;
 
 /**
  * @author Zero (cnzeropro@163.com)
@@ -24,8 +24,7 @@ public class StringToOperatorConverter implements Converter<String, Operator> {
         if (!StringUtils.hasText(source)) {
             return ComparisonOperator.EQ;
         }
-
-        return convertInternal(source);
+        return this.convertInternal(source);
     }
 
     protected Map<String, Collection<Operator>> operatorMap = new HashMap<>();
@@ -48,13 +47,14 @@ public class StringToOperatorConverter implements Converter<String, Operator> {
         return operatorMap.compute(name, (k, v) -> {
                     Collection<Operator> operators = v;
                     if (Objects.isNull(v)) {
-                        operators = new TreeSet<>(Comparator.comparingInt(Operator::getOrder));
+                        operators = new LinkedHashSet<>();
                     }
                     this.getComparisonOperator(k).ifPresent(operators::add);
                     return operators;
                 })
                 .stream()
-                .findFirst()
+                // 按优先级排序
+                .max(Comparator.comparingInt(Operator::order))
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Operator [%s] is not supported", name)));
     }
 

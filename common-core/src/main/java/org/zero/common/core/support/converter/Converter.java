@@ -1,6 +1,6 @@
 package org.zero.common.core.support.converter;
 
-import org.zero.common.core.extension.java.Ordered;
+import org.zero.common.data.model.util.Ordered;
 
 /**
  * @author Zero (cnzeropro@163.com)

@@ -10,6 +10,6 @@ import java.lang.annotation.Target;
  * @since 2024/10/31
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.PARAMETER })
+@Target({ElementType.PARAMETER})
 public @interface QueryBean {
 }

@@ -4,7 +4,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.zero.common.core.extension.spring.webmvc.AbstractHandlerMethodInterceptor;
 import org.zero.common.core.util.jackson.JacksonUtils;
-import org.zero.common.core.util.javax.web.ResponseUtil;
+import org.zero.common.core.util.javax.servlet.ResponseUtil;
 import org.zero.common.data.model.view.Result;
 
 import javax.servlet.http.HttpServletRequest;

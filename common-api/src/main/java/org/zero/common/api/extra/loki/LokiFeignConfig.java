@@ -16,7 +16,7 @@ public class LokiFeignConfig {
      */
     @Bean
     public Retryer retryer() {
-        return new Retryer.Default(300, TimeUnit.SECONDS.toMillis(5), 3);
+        return new Retryer.Default(150, 1500, 3);
     }
 
     /**
@@ -24,7 +24,7 @@ public class LokiFeignConfig {
      */
     @Bean
     Request.Options options() {
-        return new Request.Options(30, TimeUnit.SECONDS, 60, TimeUnit.SECONDS, true);
+        return new Request.Options(5, TimeUnit.SECONDS, 30, TimeUnit.SECONDS, true);
     }
 
     /**

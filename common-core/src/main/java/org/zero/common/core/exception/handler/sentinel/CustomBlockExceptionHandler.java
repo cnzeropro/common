@@ -4,7 +4,7 @@ import com.alibaba.csp.sentinel.adapter.spring.webmvc.callback.BlockExceptionHan
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import lombok.extern.slf4j.Slf4j;
 import org.zero.common.core.util.jackson.JacksonUtils;
-import org.zero.common.core.util.javax.web.ResponseUtil;
+import org.zero.common.core.util.javax.servlet.ResponseUtil;
 import org.zero.common.data.model.view.Result;
 
 import javax.servlet.http.HttpServletRequest;

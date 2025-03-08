@@ -1,8 +1,12 @@
 package org.zero.common.core.util.javax.net;
 
 import org.junit.jupiter.api.Test;
+import org.zero.common.core.util.javax.servlet.IpUtil;
 
 import java.util.Arrays;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Zero (cnzeropro@qq.com)
@@ -49,7 +53,15 @@ class IpUtilTest {
 
     @Test
     void isIpv4() {
-        String ip = "1.120.234.0";
-        System.out.println(IpUtil.isIpv4(ip));
+        // 有效地址
+        assertTrue(IpUtil.isIpv4("0.0.0.0"));          // 全零地址
+        assertTrue(IpUtil.isIpv4("192.168.1.1"));      // 常规地址
+        assertTrue(IpUtil.isIpv4("255.255.255.255"));  // 最大地址
+
+        // 无效地址
+        assertFalse(IpUtil.isIpv4("192.168.01.1"));    // 含前导零
+        assertFalse(IpUtil.isIpv4("256.0.0.0"));       // 超范围数值
+        assertFalse(IpUtil.isIpv4("1.2.3.4.5"));       // 多段异常
+        assertFalse(IpUtil.isIpv4("2001:db8::1"));     // IPv6地址干扰
     }
 }

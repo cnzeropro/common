@@ -21,8 +21,6 @@ import java.util.stream.IntStream;
  **/
 @UtilityClass
 public class TreeUtil {
-
-
     /**
      * 获取指定同级树节点的最大深度
      *

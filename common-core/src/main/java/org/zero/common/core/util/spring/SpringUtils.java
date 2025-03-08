@@ -12,18 +12,18 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
+import org.zero.common.core.extension.spring.EmptyObjectProvider;
 import org.zero.common.data.exception.UtilException;
 
 import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Spring 工具类，包括：IOC 容器获取、注册、注销 bean；获取环境配置等。
- *
+ * Spring 工具类
+ * <p>
+ * 功能包括：从 IOC 容器获取、注册、注销 bean；获取环境配置；发布事件等等。
  * <p>
  * 通过注解使用注册器方式注入该类，参见：{@link EnableSpringUtils}
- * <p>
- * 为什么不使用 @Component 直接注入呢？因为考虑到三方引用可能并没有该包的 ComponentScan
  *
  * @author Zero (cnzeropro@qq.com)
  */

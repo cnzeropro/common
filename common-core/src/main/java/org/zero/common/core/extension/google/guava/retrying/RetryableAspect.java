@@ -11,6 +11,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.util.StringUtils;
+import org.zero.common.core.exception.AnyThrow;
 import org.zero.common.core.util.java.reflect.ReflectUtil;
 import org.zero.common.data.exception.CommonException;
 
@@ -30,12 +31,12 @@ public class RetryableAspect {
             "@annotation(retryable)")
     public Object around(ProceedingJoinPoint joinPoint, Retryable retryable) throws Throwable {
         RetryerBuilder<Object> retryerBuilder = RetryerBuilder.newBuilder();
-
+        // 设置需要重试的引发异常
         Class<? extends Throwable>[] includes = retryable.includes();
         for (Class<? extends Throwable> include : includes) {
             retryerBuilder.retryIfExceptionOfType(include);
         }
-
+        // 设置重试策略
         Backoff backoff = retryable.backoff();
         long delay = backoff.delay();
         long maxDelay = backoff.maxDelay();
@@ -66,7 +67,7 @@ public class RetryableAspect {
                 throw new CommonException(String.format("unknown wait strategy: %s", waitPolicy));
         }
         retryerBuilder.withWaitStrategy(waitStrategy);
-
+        // 设置停止重试策略
         int maxAttempt = retryable.maxAttempt();
         StopStrategy stopStrategy;
         if (maxAttempt <= 0) {
@@ -84,11 +85,11 @@ public class RetryableAspect {
                 } catch (Exception e) {
                     throw e;
                 } catch (Throwable e) {
-                    throw new CommonException("invocation failed", e);
+                    throw AnyThrow.throwUnchecked(e);
                 }
             });
         } catch (Throwable t) {
-            return recover(joinPoint, retryable, t);
+            return this.recover(joinPoint, retryable, t);
         }
     }
 
@@ -108,15 +109,16 @@ public class RetryableAspect {
             Class<?>[] argClasses = Arrays.stream(args)
                     .map(Object::getClass)
                     .toArray(Class[]::new);
-            Optional<Method> recoverMethodOpt = ReflectUtil.getMethodOptByNameAndParam(target.getClass(), recover, argClasses);
+            Class<?> targetClass = target.getClass();
+            Optional<Method> recoverMethodOpt = ReflectUtil.getMethodOptByNameAndParam(targetClass, recover, argClasses);
             if (recoverMethodOpt.isPresent()) {
                 return ReflectUtil.invoke(recoverMethodOpt.get(), target, args);
             }
-            recoverMethodOpt = ReflectUtil.getMethodOptByNameAndParam(target.getClass(), recover);
+            recoverMethodOpt = ReflectUtil.getMethodOptByNameAndParam(targetClass, recover);
             if (recoverMethodOpt.isPresent()) {
                 return ReflectUtil.invoke(recoverMethodOpt.get(), target);
             }
-            throw new CommonException(String.format("no such method like %s in %s", recover, target.getClass().getCanonicalName()));
+            throw new CommonException(String.format("no such method like %s in %s", recover, targetClass.getCanonicalName()));
         }
         throw t;
     }

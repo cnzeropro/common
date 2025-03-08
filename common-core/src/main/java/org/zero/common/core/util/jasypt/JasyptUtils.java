@@ -1,6 +1,6 @@
 package org.zero.common.core.util.jasypt;
 
-import lombok.experimental.UtilityClass;
+import lombok.Setter;
 import org.jasypt.encryption.StringEncryptor;
 import org.zero.common.core.util.spring.SpringUtils;
 
@@ -10,28 +10,38 @@ import java.util.Objects;
  * @author Zero (cnzeropro@qq.com)
  * @since 2022/12/8
  */
-@UtilityClass
+// @UtilityClass
 public class JasyptUtils {
-    /* **************************************************** Public **************************************************** */
-
+    /* **************************************************** Delegate **************************************************** */
     /**
      * 加密
      */
-    public String encrypt(String src) {
+    public static String encrypt(String src) {
         return getEncryptor().encrypt(src);
     }
 
     /**
      * 解密
      */
-    public String decrypt(String src) {
+    public static String decrypt(String src) {
         return getEncryptor().decrypt(src);
     }
 
-    /* **************************************************** Private **************************************************** */
-    private volatile StringEncryptor encryptor;
+    /* **************************************************** Init **************************************************** */
+    @Setter
+    private static volatile StringEncryptor encryptor;
 
-    private StringEncryptor getEncryptor() {
+    /**
+     * 获取工具类中 {@link StringEncryptor} 实例
+     * <p>
+     * 注意：请勿修改获取到的 {@link StringEncryptor} 实例中的属性或者使其为 null，否则可能会影响工具类的使用。
+     */
+    public static StringEncryptor getEncryptor() {
+        checkAndCreate();
+        return encryptor;
+    }
+
+    protected static void checkAndCreate() {
         if (Objects.isNull(encryptor)) {
             synchronized (JasyptUtils.class) {
                 if (Objects.isNull(encryptor)) {
@@ -39,6 +49,9 @@ public class JasyptUtils {
                 }
             }
         }
-        return encryptor;
+    }
+
+    protected JasyptUtils() {
+        throw new UnsupportedOperationException();
     }
 }

@@ -4,13 +4,13 @@ import com.baomidou.mybatisplus.annotation.EnumValue;
 import com.baomidou.mybatisplus.annotation.IEnum;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.zero.common.core.support.cache.Cache;
+import org.zero.common.core.support.cache.GuavaCache;
 import org.zero.common.core.util.java.reflect.ReflectUtil;
 import org.zero.common.data.exception.UtilException;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author Zero (cnzeropro@qq.com)
@@ -22,7 +22,7 @@ public class MpEnumUtil {
     /**
      * 方法缓存
      */
-    private static final ConcurrentMap<Class<? extends Enum<?>>, Method> METHOD_CACHE = new ConcurrentHashMap<>();
+    private static final Cache<Class<? extends Enum<?>>, Method> METHOD_CACHE = GuavaCache.of(10_000L);
 
     /**
      * 获取枚举对象的值
@@ -44,7 +44,7 @@ public class MpEnumUtil {
      * 获取枚举对象的值的对应方法
      */
     public static Method getMethod(Class<? extends Enum<?>> enumClass) {
-        return METHOD_CACHE.computeIfAbsent(enumClass, clazz -> {
+        return METHOD_CACHE.mapAndSetIfAbsent(enumClass, clazz -> {
             String className = clazz.getName();
             // 此处可使用自定义父类和注解，但因为Mp已经提供，所以无需重复造轮子
             if (IEnum.class.isAssignableFrom(clazz)) {

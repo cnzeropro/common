@@ -18,7 +18,7 @@ import org.zero.common.api.extra.loki.model.response.LokiResult;
 import java.util.List;
 
 /**
- * LokiClient
+ * Loki Client
  * <p>
  * 封装 <a href="https://grafana.com/docs/loki/latest/reference/api/">Grafana Loki HTTP API</a>
  */

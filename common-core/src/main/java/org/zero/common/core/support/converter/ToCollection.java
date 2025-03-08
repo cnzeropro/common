@@ -2,7 +2,7 @@ package org.zero.common.core.support.converter;
 
 import org.zero.common.core.extension.java.collection.EnumerationIterable;
 import org.zero.common.core.extension.java.collection.IteratorIterable;
-import org.zero.common.core.util.java.lang.ClassUtil;
+import org.zero.common.core.util.java.reflect.ClassUtil;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;

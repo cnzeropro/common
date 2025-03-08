@@ -1,5 +1,6 @@
 package org.zero.common.core.util.spring.context;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -47,9 +48,16 @@ public class MessageSourceUtils {
         return message(code, Objects.isNull(locale) ? LocaleContextHolder.getLocale() : locale, defaultMessage, args);
     }
 
-    private static MessageSource messageSource;
+    /* **************************************************** Other **************************************************** */
+    @Setter
+    protected static volatile MessageSource messageSource;
 
-    private static MessageSource getMessageSource() {
+    public static MessageSource getMessageSource() {
+        checkAndCreate();
+        return messageSource;
+    }
+
+    protected static void checkAndCreate() {
         if (Objects.isNull(messageSource)) {
             synchronized (MessageSourceUtils.class) {
                 if (Objects.isNull(messageSource)) {
@@ -57,6 +65,9 @@ public class MessageSourceUtils {
                 }
             }
         }
-        return messageSource;
+    }
+
+    protected MessageSourceUtils() {
+        throw new UnsupportedOperationException();
     }
 }

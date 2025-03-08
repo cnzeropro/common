@@ -1,9 +1,9 @@
 package org.zero.common.core.support.converter;
 
-import org.zero.common.core.extension.java.Ordered;
 import org.zero.common.core.extension.java.TypeReference;
-import org.zero.common.core.util.java.lang.ClassUtil;
+import org.zero.common.core.util.java.reflect.ClassUtil;
 import org.zero.common.core.util.java.reflect.ReflectUtil;
+import org.zero.common.data.model.util.Ordered;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -110,7 +110,7 @@ public class ConverterComposite {
             types.stream()
                     // 精确类型转换器已添加，此处排除
                     .filter(t -> !t.equals(type))
-                    .filter(t -> ClassUtil.isAssignable(type, t))
+                    .filter(t -> ClassUtil.isConvertible(type, t))
                     .map(c -> converterMap.getOrDefault(c, Collections.emptySet()))
                     .forEach(converters::addAll);
         }

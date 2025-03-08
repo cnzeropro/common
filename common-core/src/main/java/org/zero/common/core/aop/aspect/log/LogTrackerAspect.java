@@ -86,13 +86,13 @@ public class LogTrackerAspect implements InitializingBean, BeanFactoryAware {
         if (Objects.isNull(obj)) {
             return null;
         }
+        if (obj instanceof String) {
+            return (String) obj;
+        }
         try {
             return objectMapper.writeValueAsString(obj);
         } catch (Exception ignored) {
             // ignored exception
-        }
-        if (obj instanceof String) {
-            return (String) obj;
         }
         Class<?> clazz = obj.getClass();
         if (clazz.isArray()) {
@@ -179,7 +179,7 @@ public class LogTrackerAspect implements InitializingBean, BeanFactoryAware {
     public void afterPropertiesSet() {
         // 从容器中的对象copy而来，因为要进行配置调整，避免影响到全局
         objectMapper = beanFactory.getBean(ObjectMapper.class).copy();
-        // 序列化对象的所有属性，包括为Null的属性
+        // 序列化对象的所有属性，包括为 null 的属性
         objectMapper.setSerializationInclusion(JsonInclude.Include.ALWAYS);
         // 关闭 序列化时间日期为时间戳
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);

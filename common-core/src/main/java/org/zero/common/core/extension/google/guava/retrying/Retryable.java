@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * @author Zero (cnzeropro@163.com)
  * @since 2024/10/21
  */
-@Target({ ElementType.METHOD, ElementType.TYPE })
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Retryable {
@@ -23,6 +23,7 @@ public @interface Retryable {
 
     /**
      * Exception types that are retryable
+     *
      * @return exception types to retry
      */
     Class<? extends Throwable>[] includes() default {Throwable.class};
@@ -34,6 +35,7 @@ public @interface Retryable {
 
     /**
      * the name of recover class. default is Object.class(user this object)
+     *
      * @return the name of recover class
      */
     Class<?> recoverClass() default Object.class;
@@ -42,6 +44,7 @@ public @interface Retryable {
      * Specify the backoff properties for retrying this operation. The default is a simple
      * {@link Backoff} specification with no properties - see its documentation for
      * defaults.
+     *
      * @return a backoff specification
      */
     Backoff backoff() default @Backoff();

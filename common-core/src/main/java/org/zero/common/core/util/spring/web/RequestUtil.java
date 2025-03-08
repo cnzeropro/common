@@ -16,14 +16,14 @@ import java.util.Optional;
 @UtilityClass
 public class RequestUtil {
     /**
-     * 获取当前HttpServletRequest
+     * 获取当前 HttpServletRequest
      */
     public static HttpServletRequest getHttpServletRequest() {
         return getHttpServletRequestOpt().orElse(null);
     }
 
     /**
-     * 获取当前HttpServletRequest
+     * 获取当前 HttpServletRequest
      */
     public static Optional<HttpServletRequest> getHttpServletRequestOpt() {
         return Optional.ofNullable(RequestContextHolder.getRequestAttributes())
@@ -32,25 +32,27 @@ public class RequestUtil {
     }
 
     /**
-     * protocol :// hostname[:port] / path / [;parameters] [?query] [#fragment]
+     * protocol://host[:port]/path?query#fragment
      * <p>
-     * 如：http://127.0.0.1:8080/demo/test?a=bbb
-     * 取：http://127.0.0.1:8080/
+     * 示例：http://127.0.0.1:8080/demo/test?a=bbb
+     * 结果：http://127.0.0.1:8080/demo
      */
     public static String getDomain() {
         return getHttpServletRequestOpt()
-                .map(RequestUtil::getDomain)
+                .map(org.zero.common.core.util.javax.servlet.RequestUtil::getDomain)
                 .orElse(null);
     }
 
     /**
-     * protocol :// hostname[:port] / path / [;parameters] [?query] [#fragment]
+     * protocol://host[:port]/path?query#fragment
      * <p>
-     * 如：http://127.0.0.1:8080/demo/test?a=bbb
-     * 取：http://127.0.0.1:8080/
+     * 示例：http://127.0.0.1:8080/demo/test?a=bbb
+     * 结果：http://127.0.0.1:8080
      */
-    public static String getDomain(HttpServletRequest request) {
-        return String.format("%s://%s:%d%s", request.getScheme(), request.getServerName(), request.getServerPort(), request.getContextPath());
+    public static String getServerDomain() {
+        return getHttpServletRequestOpt()
+                .map(org.zero.common.core.util.javax.servlet.RequestUtil::getServerDomain)
+                .orElse(null);
     }
 
     public static String getContentType() {
@@ -59,18 +61,20 @@ public class RequestUtil {
                 .orElse(null);
     }
 
+    private static String getContentType(ServletRequest request) {
+        return request.getContentType();
+    }
+
     public static MediaType getMediaType() {
         return getHttpServletRequestOpt()
                 .map(RequestUtil::getMediaType)
                 .orElse(null);
     }
 
-    public static String getContentType(ServletRequest request) {
-        return request.getContentType();
-    }
-
     public static MediaType getMediaType(ServletRequest request) {
-        String contentType = getContentType(request);
-        return MediaType.valueOf(contentType);
+        return Optional.ofNullable(request)
+                .map(RequestUtil::getContentType)
+                .map(MediaType::valueOf)
+                .orElse(null);
     }
 }

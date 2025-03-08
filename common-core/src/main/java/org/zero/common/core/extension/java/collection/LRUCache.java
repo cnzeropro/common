@@ -1,5 +1,6 @@
 package org.zero.common.core.extension.java.collection;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -13,34 +14,74 @@ public class LRUCache<K, V> extends LinkedHashMap<K, V> {
      */
     public static final int DEFAULT_MAX_SIZE = 1 << 16;
 
-    private final int maxSize;
+    protected transient int maxCapacity;
 
-    public LRUCache() {
+    protected LRUCache() {
         this(DEFAULT_MAX_SIZE);
     }
 
-    public LRUCache(int maxSize) {
+    protected LRUCache(int maxCapacity) {
         super();
-        this.maxSize = maxSize;
+        this.maxCapacity = maxCapacity;
     }
 
-    public LRUCache(int maxSize, int initialCapacity) {
+    protected LRUCache(int maxCapacity, int initialCapacity) {
         super(initialCapacity);
-        this.maxSize = maxSize;
+        this.maxCapacity = maxCapacity;
     }
 
-    public LRUCache(int maxSize, int initialCapacity, float loadFactor) {
+    protected LRUCache(int maxCapacity, int initialCapacity, float loadFactor) {
         super(initialCapacity, loadFactor);
-        this.maxSize = maxSize;
+        this.maxCapacity = maxCapacity;
     }
 
-    public LRUCache(int maxSize, int initialCapacity, float loadFactor, boolean accessOrder) {
+    protected LRUCache(int maxCapacity, int initialCapacity, float loadFactor, boolean accessOrder) {
         super(initialCapacity, loadFactor, accessOrder);
-        this.maxSize = maxSize;
+        this.maxCapacity = maxCapacity;
     }
 
     @Override
     protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
-        return this.size() > maxSize;
+        return this.size() > maxCapacity;
+    }
+
+    public static <K, V> Map<K, V> create() {
+        return new LRUCache<>();
+    }
+
+    public static <K, V> Map<K, V> createThreadSafe() {
+        return Collections.synchronizedMap(create());
+    }
+
+    public static <K, V> Map<K, V> create(int maxCapacity) {
+        return new LRUCache<>(maxCapacity);
+    }
+
+    public static <K, V> Map<K, V> createThreadSafe(int maxCapacity) {
+        return Collections.synchronizedMap(create(maxCapacity));
+    }
+
+    public static <K, V> Map<K, V> create(int maxCapacity, int initialCapacity) {
+        return new LRUCache<>(maxCapacity, initialCapacity);
+    }
+
+    public static <K, V> Map<K, V> createThreadSafe(int maxCapacity, int initialCapacity) {
+        return Collections.synchronizedMap(create(maxCapacity, initialCapacity));
+    }
+
+    public static <K, V> Map<K, V> create(int maxCapacity, int initialCapacity, float loadFactor) {
+        return new LRUCache<>(maxCapacity, initialCapacity, loadFactor);
+    }
+
+    public static <K, V> Map<K, V> createThreadSafe(int maxCapacity, int initialCapacity, float loadFactor) {
+        return Collections.synchronizedMap(create(maxCapacity, initialCapacity, loadFactor));
+    }
+
+    public static <K, V> Map<K, V> create(int maxCapacity, int initialCapacity, float loadFactor, boolean accessOrder) {
+        return new LRUCache<>(maxCapacity, initialCapacity, loadFactor, accessOrder);
+    }
+
+    public static <K, V> Map<K, V> createThreadSafe(int maxCapacity, int initialCapacity, float loadFactor, boolean accessOrder) {
+        return Collections.synchronizedMap(create(maxCapacity, initialCapacity, loadFactor, accessOrder));
     }
 }

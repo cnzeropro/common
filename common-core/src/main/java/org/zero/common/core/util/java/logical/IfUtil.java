@@ -85,21 +85,21 @@ public class IfUtil {
     /**
      * 如果提供的表达式（suppliers）都为true，则从supplier中获取值
      */
-    public <T> T get(Supplier<T> supplier, BooleanSupplier... suppliers) {
-        return get(null, supplier, suppliers);
+    public <T> T provide(Supplier<T> supplier, BooleanSupplier... suppliers) {
+        return provide(null, supplier, suppliers);
     }
 
     /**
      * 如果提供的条件（conditions）都为true，则从supplier中获取值
      */
-    public <T> T get(Supplier<T> supplier, boolean... conditions) {
-        return get(null, supplier, conditions);
+    public <T> T provide(Supplier<T> supplier, boolean... conditions) {
+        return provide(null, supplier, conditions);
     }
 
     /**
      * 如果提供的表达式（suppliers）都为true，则从supplier中获取值，否则返回otherVal
      */
-    public <T> T get(T otherVal, Supplier<T> supplier, BooleanSupplier... suppliers) {
+    public <T> T provide(T otherVal, Supplier<T> supplier, BooleanSupplier... suppliers) {
         if (Objects.isNull(supplier)) {
             return null;
         }
@@ -112,7 +112,7 @@ public class IfUtil {
     /**
      * 如果提供的条件（conditions）都为true，则从supplier中获取值，否则返回otherVal
      */
-    public <T> T get(T otherVal, Supplier<T> supplier, boolean... conditions) {
+    public <T> T provide(T otherVal, Supplier<T> supplier, boolean... conditions) {
         if (Objects.isNull(supplier)) {
             return null;
         }
@@ -125,7 +125,7 @@ public class IfUtil {
     /**
      * 如果提供的表达式（suppliers）都为true，则消费val
      */
-    public <T> void deal(T val, Consumer<T> consumer, BooleanSupplier... suppliers) {
+    public <T> void consume(T val, Consumer<T> consumer, BooleanSupplier... suppliers) {
         if (Objects.nonNull(consumer) && allTrue(suppliers)) {
             consumer.accept(val);
         }
@@ -134,7 +134,7 @@ public class IfUtil {
     /**
      * 如果提供的条件（conditions）都为true，则消费val
      */
-    public <T> void deal(T val, Consumer<T> consumer, boolean... conditions) {
+    public <T> void consume(T val, Consumer<T> consumer, boolean... conditions) {
         if (Objects.nonNull(consumer) && allTrue(conditions)) {
             consumer.accept(val);
         }
@@ -143,7 +143,7 @@ public class IfUtil {
     /**
      * 如果提供的表达式（suppliers）都为true，则消费val，否则消费otherVal
      */
-    public <T> void deal(T val, T otherVal, Consumer<T> consumer, BooleanSupplier... suppliers) {
+    public <T> void consume(T val, T otherVal, Consumer<T> consumer, BooleanSupplier... suppliers) {
         if (Objects.nonNull(consumer)) {
             if (allTrue(suppliers)) {
                 consumer.accept(val);
@@ -156,7 +156,7 @@ public class IfUtil {
     /**
      * 如果提供的条件（conditions）都为true，则消费val，否则消费otherVal
      */
-    public <T> void deal(T val, T otherVal, Consumer<T> consumer, boolean... conditions) {
+    public <T> void consume(T val, T otherVal, Consumer<T> consumer, boolean... conditions) {
         if (Objects.nonNull(consumer)) {
             if (allTrue(conditions)) {
                 consumer.accept(val);
@@ -169,7 +169,7 @@ public class IfUtil {
     /**
      * 如果提供的表达式（suppliers）都为true，则消费val1和val2
      */
-    public <T, U> void deal(T val1, U val2, BiConsumer<T, U> consumer, BooleanSupplier... suppliers) {
+    public <T, U> void consume(T val1, U val2, BiConsumer<T, U> consumer, BooleanSupplier... suppliers) {
         if (Objects.nonNull(consumer) && allTrue(suppliers)) {
             consumer.accept(val1, val2);
         }
@@ -178,7 +178,7 @@ public class IfUtil {
     /**
      * 如果提供的条件（conditions）都为true，则消费val1和val2
      */
-    public <T, U> void deal(T val1, U val2, BiConsumer<T, U> consumer, boolean... conditions) {
+    public <T, U> void consume(T val1, U val2, BiConsumer<T, U> consumer, boolean... conditions) {
         if (Objects.nonNull(consumer) && allTrue(conditions)) {
             consumer.accept(val1, val2);
         }

@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
  * @since 2024/12/23
  */
 @Slf4j
-public class LogTimer extends BaseTimer<LogTimer> {
+public final class LogTimer extends BaseTimer<LogTimer> {
     public static LogTimer start() {
         return new LogTimer();
     }
@@ -25,11 +25,11 @@ public class LogTimer extends BaseTimer<LogTimer> {
         this.log().reset();
     }
 
-    protected LogTimer() {
+    private LogTimer() {
         super();
     }
 
-    protected LogTimer(String name) {
+    private LogTimer(String name) {
         super(name);
     }
 }
