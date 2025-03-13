@@ -1,6 +1,7 @@
 package org.zero.common.core.exception;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -120,6 +121,39 @@ public final class AnyThrow {
         };
     }
 
+    public static <T> T ignore(Supplier<T> supplier) {
+        return ignoreOpt(supplier).orElse(null);
+    }
+
+    public static <T> Optional<T> ignoreOpt(Supplier<T> supplier) {
+        return Optional.ofNullable(ignore(supplier, (T) null));
+    }
+
+    public static <T> T ignore(Supplier<T> supplier, T exceptionDefault) {
+        try {
+            return supplier.get();
+        } catch (Throwable ignored) {
+            return exceptionDefault;
+        }
+    }
+
+    public static <T, R> R ignore(T o, Function<T, R> function) {
+        return AnyThrow.ignoreOpt(o, function).orElse(null);
+    }
+
+    public static <T, R> Optional<R> ignoreOpt(T o, Function<T, R> function) {
+        return Optional.ofNullable(ignore(o, function, null));
+    }
+
+    public static <T, R> R ignore(T o, Function<T, R> function, R exceptionDefault) {
+        try {
+            return function.apply(o);
+        } catch (Throwable ignored) {
+            return exceptionDefault;
+        }
+    }
+
     private AnyThrow() {
+        throw new UnsupportedOperationException();
     }
 }

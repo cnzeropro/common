@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.zero.common.core.support.export.excel.BasePoiResponseBodyAdvice;
 import org.zero.common.core.support.export.excel.ExcelExport;
 import org.zero.common.core.support.export.excel.ExcelFileType;
-import org.zero.common.core.util.java.reflect.ReflectUtil;
+import org.zero.common.core.util.java.reflect.FieldUtil;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
@@ -253,8 +253,8 @@ public class PoiResponseBodyAdvice extends BasePoiResponseBodyAdvice {
     }
 
     private Map<String, Object> getEntityMap(Object entity) {
-        List<Field> fields = ReflectUtil.getAllDeclaredFields(entity.getClass());
-        return fields.stream().collect(Collectors.toMap(Field::getName, field -> ReflectUtil.getFieldValue(field, entity, Object.class)));
+        List<Field> fields = FieldUtil.getAllDeclaredFields(entity.getClass());
+        return fields.stream().collect(Collectors.toMap(Field::getName, field -> FieldUtil.getFieldValue(field, entity)));
     }
 
     private void writeMap(Sheet sheet, Collection<Map<?, ?>> maps, boolean withHeader) {

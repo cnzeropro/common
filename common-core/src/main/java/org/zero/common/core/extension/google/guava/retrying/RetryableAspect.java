@@ -12,11 +12,13 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.util.StringUtils;
 import org.zero.common.core.exception.AnyThrow;
-import org.zero.common.core.util.java.reflect.ReflectUtil;
+import org.zero.common.core.util.java.reflect.ConstructorUtil;
+import org.zero.common.core.util.java.reflect.MethodUtil;
 import org.zero.common.data.exception.CommonException;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -103,20 +105,25 @@ public class RetryableAspect {
                 // 获取目标对象（原始对象）实例，而不是代理对象
                 target = joinPoint.getTarget();
             } else {
-                target = ReflectUtil.newInstanceOpt(recoverClass)
+                target = ConstructorUtil.newInstanceOpt(recoverClass)
                         .orElseThrow(() -> new CommonException(String.format("%s does not provide a no-argument constructor", recoverClass.getCanonicalName())));
             }
             Class<?>[] argClasses = Arrays.stream(args)
-                    .map(Object::getClass)
+                    .map(o -> {
+                        if (Objects.isNull(o)) {
+                            return void.class;
+                        }
+                        return o.getClass();
+                    })
                     .toArray(Class[]::new);
             Class<?> targetClass = target.getClass();
-            Optional<Method> recoverMethodOpt = ReflectUtil.getMethodOptByNameAndParam(targetClass, recover, argClasses);
+            Optional<Method> recoverMethodOpt = MethodUtil.getMethodOptByNameAndParam(targetClass, recover, argClasses);
             if (recoverMethodOpt.isPresent()) {
-                return ReflectUtil.invoke(recoverMethodOpt.get(), target, args);
+                return MethodUtil.invoke(recoverMethodOpt.get(), target, args);
             }
-            recoverMethodOpt = ReflectUtil.getMethodOptByNameAndParam(targetClass, recover);
+            recoverMethodOpt = MethodUtil.getMethodOptByNameAndParam(targetClass, recover);
             if (recoverMethodOpt.isPresent()) {
-                return ReflectUtil.invoke(recoverMethodOpt.get(), target);
+                return MethodUtil.invoke(recoverMethodOpt.get(), target);
             }
             throw new CommonException(String.format("no such method like %s in %s", recover, targetClass.getCanonicalName()));
         }

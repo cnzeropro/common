@@ -180,7 +180,7 @@ public class BeanMapUtil {
         Class<?> clazz = obj.getClass();
 
         // 指定的 bean
-        if (ClassUtil.isSpecifiedClass(clazz, regex)) {
+        if (ClassUtil.isSpecifiedClassWithRegexp(clazz, regex)) {
             Field[] fields = ReflectUtil.getFields(clazz);
             for (Field field : fields) {
                 Map<String, Object> map = encodeField(prefix, regex, obj, field, ignoreNull);

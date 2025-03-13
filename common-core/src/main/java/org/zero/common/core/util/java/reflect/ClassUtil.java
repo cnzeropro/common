@@ -16,12 +16,12 @@ import java.lang.reflect.WildcardType;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.time.temporal.TemporalAccessor;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -39,51 +39,80 @@ import java.util.stream.Stream;
 @Slf4j
 @UtilityClass
 public class ClassUtil {
-    private static final String CLASS_FILE_SUFFIX = ".class";
-    private static final String CLASS_FILE_PREFIX = File.separator + "classes" + File.separator;
-    private static final String CLASS_FILE_SEPARATOR = File.separator;
-    private static final String PACKAGE_SEPARATOR = ".";
-    private static final String INNER_CLASS_SEPARATOR = "$";
+    public static final String CLASS_FILE_SUFFIX = ".class";
+    public static final String CLASS_FILE_PREFIX = File.separator + "classes" + File.separator;
+    public static final String CLASS_FILE_SEPARATOR = File.separator;
+    public static final String PACKAGE_SEPARATOR = ".";
+    public static final String INNER_CLASS_SEPARATOR = "$";
 
+    /**
+     * 获取包下的所有类
+     *
+     * @param p 包
+     * @return 类对象
+     */
     public static Collection<Class<?>> getClasses(Package p) {
         return getClasses(p.getName());
     }
 
+    /**
+     * 获取包下的所有类
+     *
+     * @param packageName 包名
+     * @return 类对象
+     */
     public static Collection<Class<?>> getClasses(String packageName) {
-        return getClassMap(packageName).values();
+        return getClassMap(packageName).values()
+                .stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
+    /**
+     * 获取包下的所有类
+     *
+     * @param p 包
+     * @return 类对象
+     */
     public static Map<String, Class<?>> getClassMap(Package p) {
         return getClassMap(p.getName());
     }
 
+    /**
+     * 获取包下的所有类
+     *
+     * @param packageName 包名
+     * @return 类对象
+     */
     public static Map<String, Class<?>> getClassMap(String packageName) {
-        Map<String, Class<?>> classMap = new LinkedHashMap<>();
         Collection<String> classNames = getClassNames(packageName);
-        for (String className : classNames) {
-            Class<?> clazz;
-            try {
-                clazz = Class.forName(className);
-            } catch (Throwable throwable) {
-                log.debug(String.format("Get class[%s] exception under package[%s], skipped", className, packageName), throwable);
-                clazz = null;
-            }
-            classMap.put(className, clazz);
-        }
-        return classMap;
+        return ClassLoaderUtil.loadClass(classNames);
     }
 
+    /**
+     * 获取包下的所有全限定类名
+     *
+     * @param p 包
+     * @return 全限定类名
+     */
     public static Collection<String> getClassNames(Package p) {
         return getClassNames(p.getName());
     }
 
+    /**
+     * 获取包下的所有全限定类名
+     *
+     * @param packageName 包名
+     * @return 全限定类名
+     */
     public static Collection<String> getClassNames(String packageName) {
         String packageFileName = packageName.replace(PACKAGE_SEPARATOR, CLASS_FILE_SEPARATOR);
         Enumeration<URL> urls = AnyThrow.sneakyThrow(Thread.currentThread().getContextClassLoader(),
                 classLoader -> classLoader.getResources(packageFileName));
         return Collections.list(urls)
                 .stream()
-                .flatMap(url -> getClassNamesByUrl(url, packageName).stream())
+                .map(url -> getClassNamesByUrl(url, packageName))
+                .flatMap(Collection::stream)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
@@ -91,12 +120,12 @@ public class ClassUtil {
         return getClassNamesByUrl(url, packageName, true, false);
     }
 
-    public static Collection<String> getClassNamesByUrl(URL url, String packageName, boolean withChildClass, boolean withInnerClass) {
+    public static Collection<String> getClassNamesByUrl(URL url, String packageName, boolean withSubordinateClass, boolean withInnerClass) {
         String protocol = url.getProtocol();
         if ("file".equals(protocol)) {
             return Optional.ofNullable(AnyThrow.sneakyThrow(url, URL::toURI))
                     .map(File::new)
-                    .map(file -> getClassNamesByFile(file, packageName, withChildClass, withInnerClass))
+                    .map(file -> getClassNamesByFile(file, packageName, withSubordinateClass, withInnerClass))
                     .orElseGet(LinkedHashSet::new);
         }
         if ("jar".equals(protocol)) {
@@ -104,7 +133,7 @@ public class ClassUtil {
                     .filter(JarURLConnection.class::isInstance)
                     .map(JarURLConnection.class::cast)
                     .map(AnyThrow.sneakyThrow(JarURLConnection::getJarFile))
-                    .map(jarFile -> getClassNamesByJar(jarFile, packageName, withChildClass, withInnerClass))
+                    .map(jarFile -> getClassNamesByJar(jarFile, packageName, withSubordinateClass, withInnerClass))
                     .orElseGet(LinkedHashSet::new);
         }
         return Collections.emptyList();
@@ -114,10 +143,10 @@ public class ClassUtil {
         return getClassNamesByFile(file, packageName, true, false);
     }
 
-    public static Collection<String> getClassNamesByFile(File file, String packageName, boolean withChildClass, boolean withInnerClass) {
+    public static Collection<String> getClassNamesByFile(File file, String packageName, boolean withSubordinateClass, boolean withInnerClass) {
         return Optional.ofNullable(file)
                 .filter(File::exists)
-                .filter(f -> withChildClass || !f.isDirectory())
+                .filter(f -> withSubordinateClass || !f.isDirectory())
                 .<Collection<String>>map(f -> {
                     if (f.isFile()) {
                         return Optional.of(f.getPath())
@@ -127,7 +156,7 @@ public class ClassUtil {
                                         .replace(CLASS_FILE_SEPARATOR, PACKAGE_SEPARATOR)
                                         .replace(CLASS_FILE_SUFFIX, ""))
                                 .filter(className -> {
-                                    if (withChildClass) {
+                                    if (withSubordinateClass) {
                                         return className.startsWith(packageName);
                                     }
                                     return packageName.equals(className.substring(0, className.lastIndexOf(PACKAGE_SEPARATOR)));
@@ -137,9 +166,10 @@ public class ClassUtil {
                     }
                     if (f.isDirectory()) {
                         return Optional.ofNullable(f.listFiles())
-                                .map(Stream::of)
+                                .map(Arrays::stream)
                                 .orElseGet(Stream::empty)
-                                .flatMap(nextFile -> getClassNamesByFile(nextFile, packageName, withChildClass, withInnerClass).stream())
+                                .map(nextFile -> getClassNamesByFile(nextFile, packageName, withSubordinateClass, withInnerClass))
+                                .flatMap(Collection::stream)
                                 .collect(Collectors.toCollection(LinkedHashSet::new));
                     }
                     return Collections.emptyList();
@@ -151,7 +181,7 @@ public class ClassUtil {
         return getClassNamesByJar(jarFile, packageName, true, false);
     }
 
-    public static Collection<String> getClassNamesByJar(JarFile jarFile, String packageName, boolean withChildClass, boolean withInnerClass) {
+    public static Collection<String> getClassNamesByJar(JarFile jarFile, String packageName, boolean withSubordinateClass, boolean withInnerClass) {
         return Optional.ofNullable(jarFile)
                 .map(JarFile::stream)
                 .orElseGet(Stream::empty)
@@ -160,7 +190,7 @@ public class ClassUtil {
                 .map(entryName -> entryName.replace(CLASS_FILE_SUFFIX, "").replace(CLASS_FILE_SEPARATOR, PACKAGE_SEPARATOR))
                 .filter(className -> withInnerClass || !className.contains(INNER_CLASS_SEPARATOR))
                 .filter(className -> {
-                    if (withChildClass) {
+                    if (withSubordinateClass) {
                         return className.startsWith(packageName);
                     }
                     return packageName.equals(className.substring(0, className.lastIndexOf(PACKAGE_SEPARATOR)));
@@ -169,26 +199,31 @@ public class ClassUtil {
     }
 
     /**
-     * 是否是指定包下的类
+     * 是否是指定正则匹配的类
      */
-    public static boolean isSpecifiedClass(Class<?> clazz, String regex) {
+    public static boolean isSpecifiedClassWithRegexp(Class<?> clazz, String... regexps) {
         return Optional.ofNullable(clazz)
-                .map(Class::getPackage)
-                .map(Package::getName)
-                .map(name -> Pattern.matches(regex, name))
+                .map(Class::getName)
+                .map(name -> {
+                    for (String regexp : regexps) {
+                        if (Pattern.matches(regexp, name)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                })
                 .orElse(Boolean.FALSE);
     }
 
     /**
-     * 是否是指定包下的类
+     * 是否是指定前缀的类
      */
-    public static boolean isSpecifiedClassWithPrefix(Class<?> clazz, String... packageNames) {
+    public static boolean isSpecifiedClassWithPrefix(Class<?> clazz, String... prefixes) {
         return Optional.ofNullable(clazz)
-                .map(Class::getPackage)
-                .map(Package::getName)
+                .map(Class::getName)
                 .map(name -> {
-                    for (String packageName : packageNames) {
-                        if (name.startsWith(packageName)) {
+                    for (String prefix : prefixes) {
+                        if (name.startsWith(prefix)) {
                             return true;
                         }
                     }
@@ -200,7 +235,7 @@ public class ClassUtil {
     /**
      * 是否是指定包下的类
      */
-    public static boolean isSpecifiedClass(Class<?> clazz, String... packageNames) {
+    public static boolean isSpecifiedClassWithPackageName(Class<?> clazz, String... packageNames) {
         return Optional.ofNullable(clazz)
                 .map(Class::getPackage)
                 .map(Package::getName)
@@ -237,6 +272,14 @@ public class ClassUtil {
                         TemporalAccessor.class.isAssignableFrom(clazz));
     }
 
+    /**
+     * 将对象转换为指定类型对象
+     *
+     * @param obj  对象
+     * @param type 类型
+     * @param <T>  泛型类型
+     * @return 转换后的对象
+     */
     @SuppressWarnings("unchecked")
     public static <T> T cast(Object obj, Type type) {
         if (Objects.isNull(obj)) {
@@ -288,6 +331,12 @@ public class ClassUtil {
         return (T) obj;
     }
 
+    /**
+     * 获取原始类型
+     *
+     * @param type 类型
+     * @return 原始类型
+     */
     public static Class<?> getRawClass(Type type) {
         if (type == null) {
             return null;
@@ -310,14 +359,14 @@ public class ClassUtil {
     }
 
     /**
-     * 检查目标类是否可以从原类转化<br>
-     * 转化包括：<br>
-     * 1、原类是对象，目标类型是原类型实现的接口<br>
-     * 2、目标类型是原类型的父类<br>
+     * 检查目标类型是否从源类型分配而来<br>
+     * 包括：<br>
+     * 1、原类是对象，目标类型是源类型实现的接口<br>
+     * 2、目标类型是源类型的父类<br>
      * 3、两者是原始类型或者包装类型（相互转换）
      *
-     * @param targetClass 目标类型
-     * @param sourceClass 原类型
+     * @param targetClass 目标类型，如：int.class
+     * @param sourceClass 源类型，如：Integer.class
      * @return 是否可转化
      */
     public static boolean isAssignable(Class<?> targetClass, Class<?> sourceClass) {
@@ -343,8 +392,8 @@ public class ClassUtil {
      * <p>
      * 注意：该方法支持 Java 中可强转的和可以相互兼容的类型，因此当该方法返回 true，不一定可强转。
      *
-     * @param targetType 目标类型，如：Number.class
-     * @param sourceType 源类型，如：Integer.class
+     * @param targetType 目标类型，如：int[].class
+     * @param sourceType 源类型，如：Integer[].class
      * @return 是否可以转化
      */
     public static boolean isConvertible(Type targetType, Type sourceType) {
@@ -419,6 +468,9 @@ public class ClassUtil {
 
     /**
      * 获取指定类型的默认值
+     *
+     * @param clazz 类型
+     * @return 默认值
      */
     public static Object getDefaultValue(Class<?> clazz) {
         if (Objects.isNull(clazz)) {
@@ -426,49 +478,41 @@ public class ClassUtil {
         }
         // 原始类型
         if (clazz.isPrimitive()) {
-            if (long.class == clazz) {
-                return 0L;
-            } else if (int.class == clazz) {
-                return 0;
-            } else if (short.class == clazz) {
-                return (short) 0;
-            } else if (byte.class == clazz) {
-                return (byte) 0;
-            } else if (char.class == clazz) {
-                return '\u0000';
-            } else if (double.class == clazz) {
-                return 0.0;
-            } else if (float.class == clazz) {
-                return 0.0F;
-            } else if (boolean.class == clazz) {
-                return false;
-            }
+            return PrimitiveType.getOptByPrimitiveClass(clazz)
+                    .map(PrimitiveType::getDefaultValue)
+                    .orElse(null);
         }
         // 引用类型
         return null;
     }
 
+    /**
+     * 将指定对象转换为对象数组
+     *
+     * @param source 源对象
+     * @return 数组
+     */
     public static Object[] getArray(Object source) {
         if (Objects.isNull(source)) {
             return null;
         }
         Class<?> clazz = source.getClass();
         if (clazz.isArray()) {
-            Object[] array;
             Class<?> componentType = clazz.getComponentType();
+            // 处理原始类型数组（如int[]）
+            // 因为原始类型数组继承自 Object，因此无法使用 (Object[]) source 强转
+            // 使用 source instanceof int[] 判断又过于麻烦，因此原始类型数组统一处理
             if (componentType.isPrimitive()) {
-                // 处理原始类型数组（如int[]）
                 int length = Array.getLength(source);
-                array = new Object[length];
+                Object[] array = new Object[length];
                 for (int i = 0; i < length; i++) {
                     array[i] = Array.get(source, i);
                 }
-            } else {
-                // 处理对象数组（如String[]）
-                array = (Object[]) source;
+                return array;
             }
-            return array;
+            // 处理对象数组（如String[]）
+            return (Object[]) source;
         }
-        return null;
+        return new Object[]{source};
     }
 }

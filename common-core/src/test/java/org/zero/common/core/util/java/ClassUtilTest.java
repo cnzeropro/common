@@ -14,7 +14,7 @@ class ClassUtilTest {
     @Test
     void getClassMap() {
         Map<String, Class<?>> classMap = ClassUtil.getClassMap("org.zero.common.data.model");
-        System.out.println(classMap);
+        classMap.forEach((k, v) -> System.out.println(k + ":" + v));
     }
 
     @Test

@@ -4,7 +4,7 @@ import org.zero.common.core.extension.java.reflect.GenericArrayTypeImpl;
 import org.zero.common.core.extension.java.reflect.ParameterizedTypeImpl;
 import org.zero.common.core.support.converter.ConverterComposite;
 import org.zero.common.core.util.java.reflect.ClassUtil;
-import org.zero.common.core.util.java.reflect.ReflectUtil;
+import org.zero.common.core.util.java.reflect.FieldUtil;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -41,7 +41,7 @@ public class DynamicBean extends LinkedHashMap<CharSequence, Object> {
         Field[] fields = bean.getClass().getDeclaredFields();
         DynamicBean instance = new DynamicBean(fields.length);
         for (Field field : fields) {
-            instance.set(field.getName(), ReflectUtil.getFieldValue(field, bean));
+            instance.set(field.getName(), FieldUtil.getFieldValue(field, bean));
         }
         return instance;
     }

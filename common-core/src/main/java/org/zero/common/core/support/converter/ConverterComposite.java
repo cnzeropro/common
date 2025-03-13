@@ -2,7 +2,9 @@ package org.zero.common.core.support.converter;
 
 import org.zero.common.core.extension.java.TypeReference;
 import org.zero.common.core.util.java.reflect.ClassUtil;
-import org.zero.common.core.util.java.reflect.ReflectUtil;
+import org.zero.common.core.util.java.reflect.ConstructorUtil;
+import org.zero.common.core.util.java.reflect.FieldUtil;
+import org.zero.common.core.util.java.reflect.MethodUtil;
 import org.zero.common.data.model.util.Ordered;
 
 import java.lang.reflect.Constructor;
@@ -50,18 +52,18 @@ public class ConverterComposite {
                 .filter(clazz -> !clazz.isInterface())
                 .filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()))
                 .map(clazz -> {
-                    Optional<GenericConverter<?>> converterOpt = ReflectUtil.getFilteredFields(clazz, field -> Objects.equals(field.getType(), clazz))
+                    Optional<GenericConverter<?>> converterOpt = FieldUtil.getFilteredFields(clazz, field -> Objects.equals(field.getType(), clazz))
                             .stream()
                             .findFirst()
-                            .map(field -> ReflectUtil.getStaticFieldValue(field, GenericConverter.class));
+                            .map(field -> FieldUtil.getStaticFieldValue(field, GenericConverter.class));
                     if (converterOpt.isPresent()) {
                         return converterOpt.get();
                     }
-                    Optional<Constructor<?>> constructorOpt = ReflectUtil.getConstructorOptByParam(clazz, ConverterComposite.class);
+                    Optional<Constructor<?>> constructorOpt = ConstructorUtil.getConstructorOptByParam(clazz, ConverterComposite.class);
                     if (constructorOpt.isPresent()) {
-                        return ReflectUtil.newInstance(clazz, this);
+                        return ConstructorUtil.newInstance(constructorOpt.get(), this);
                     }
-                    return ReflectUtil.newInstance(clazz);
+                    return ConstructorUtil.newInstance(clazz);
                 })
                 .filter(GenericConverter.class::isInstance)
                 .map(o -> ClassUtil.<GenericConverter<?>>cast(o, new TypeReference<GenericConverter<?>>() {
@@ -76,7 +78,7 @@ public class ConverterComposite {
     }
 
     public ConverterComposite addConverter(GenericConverter<?> converter) {
-        ReflectUtil.getMethodsByName(converter.getClass(), false, "convert")
+        MethodUtil.getMethodsByName(converter.getClass(), false, "convert")
                 .stream()
                 // 当子类继承带有泛型的父类或接口时，编译器会生成桥接方法来保持类型安全
                 // 因此此处 convert 方法可能存在多个

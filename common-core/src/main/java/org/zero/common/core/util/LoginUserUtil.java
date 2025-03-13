@@ -1,11 +1,11 @@
 package org.zero.common.core.util;
 
 import lombok.experimental.UtilityClass;
+import org.zero.common.core.exception.AnyThrow;
 import org.zero.common.core.util.shiro.ShiroUtil;
 import org.zero.common.core.util.spring.security.SpringSecurityUtil;
 
 import java.io.Serializable;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -15,24 +15,13 @@ import java.util.Optional;
 @UtilityClass
 public class LoginUserUtil {
     public static Optional<Serializable> getIdOpt() {
-        Serializable userId = null;
         // attempt to obtain from shiro
-        try {
-            userId = ShiroUtil.getUserId();
-        } catch (Exception ignored) {
-        }
-        if (Objects.nonNull(userId)) {
-            return Optional.of(userId);
+        Optional<Serializable> userIdOpt = AnyThrow.ignoreOpt(ShiroUtil::getUserId);
+        if (userIdOpt.isPresent()) {
+            return userIdOpt;
         }
         // attempt to obtain from spring security
-        try {
-            userId = SpringSecurityUtil.getUserId();
-        } catch (Exception ignored) {
-        }
-        if (Objects.nonNull(userId)) {
-            return Optional.of(userId);
-        }
-        return Optional.empty();
+        return AnyThrow.ignoreOpt(SpringSecurityUtil::getUserId);
     }
 
     public static Serializable getId() {
@@ -40,24 +29,13 @@ public class LoginUserUtil {
     }
 
     public static Optional<String> getNameOpt() {
-        String username = null;
         // attempt to obtain from shiro
-        try {
-            username = ShiroUtil.getUsername();
-        } catch (Exception ignored) {
-        }
-        if (Objects.nonNull(username)) {
-            return Optional.of(username);
+        Optional<String> usernameOpt = AnyThrow.ignoreOpt(ShiroUtil::getUsername);
+        if (usernameOpt.isPresent()) {
+            return usernameOpt;
         }
         // attempt to obtain from spring security
-        try {
-            username = SpringSecurityUtil.getUsername();
-        } catch (Exception ignored) {
-        }
-        if (Objects.nonNull(username)) {
-            return Optional.of(username);
-        }
-        return Optional.empty();
+        return AnyThrow.ignoreOpt(SpringSecurityUtil::getUsername);
     }
 
     public static String getName() {

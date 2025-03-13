@@ -6,7 +6,8 @@ import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.zero.common.core.support.cache.Cache;
 import org.zero.common.core.support.cache.GuavaCache;
-import org.zero.common.core.util.java.reflect.ReflectUtil;
+import org.zero.common.core.util.java.reflect.FieldUtil;
+import org.zero.common.core.util.java.reflect.MethodUtil;
 import org.zero.common.data.exception.UtilException;
 
 import java.lang.reflect.Field;
@@ -29,7 +30,7 @@ public class MpEnumUtil {
      */
     public static Object getValue(Enum<?> enumObj) {
         Method method = getMethod(enumObj.getDeclaringClass());
-        return ReflectUtil.invoke(method, enumObj);
+        return MethodUtil.invoke(method, enumObj);
     }
 
     /**
@@ -48,12 +49,14 @@ public class MpEnumUtil {
             String className = clazz.getName();
             // 此处可使用自定义父类和注解，但因为Mp已经提供，所以无需重复造轮子
             if (IEnum.class.isAssignableFrom(clazz)) {
-                return ReflectUtil.getMethodOptByNameAndParam(clazz, "convert")
+                return MethodUtil.getMethodOptByNameAndParam(clazz, "convert")
                         .orElseThrow(() -> new UtilException(String.format("No convert() method found in class[%s]", className)));
             } else {
-                Field field = ReflectUtil.getAnnotatedFieldOpt(clazz, EnumValue.class)
+                Field field = FieldUtil.getAnnotatedFields(clazz, EnumValue.class)
+                        .stream()
+                        .findFirst()
                         .orElseThrow(() -> new UtilException(String.format("No field with @EnumValue annotation found in class[%s]", className)));
-                return ReflectUtil.getGetterMethodOptByField(clazz, field)
+                return MethodUtil.getGetterMethodOptByField(clazz, field)
                         .orElseThrow(() -> new UtilException(String.format("No needed method found in class[%s]", className)));
             }
         });

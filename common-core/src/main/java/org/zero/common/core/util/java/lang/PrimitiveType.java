@@ -1,25 +1,42 @@
 package org.zero.common.core.util.java.lang;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+
+import java.util.Optional;
 
 /**
  * @author Zero (cnzeropro@163.com)
  * @since 2025/2/19
  */
+@Getter
 @RequiredArgsConstructor
 public enum PrimitiveType {
-    BYTE(byte.class, Byte.class),
-    SHORT(short.class, Short.class),
-    INT(int.class, Integer.class),
-    LONG(long.class, Long.class),
-    FLOAT(float.class, Float.class),
-    DOUBLE(double.class, Double.class),
-    CHAR(char.class, Character.class),
-    BOOLEAN(boolean.class, Boolean.class),
+    /* ********************************************* 基本数据类型 ********************************************* */
+    BYTE(byte.class, Byte.class, (byte) 0),
+    SHORT(short.class, Short.class, (short) 0),
+    INT(int.class, Integer.class, 0),
+    LONG(long.class, Long.class, 0L),
+    FLOAT(float.class, Float.class, 0.0F),
+    DOUBLE(double.class, Double.class, 0.0D),
+    CHAR(char.class, Character.class, '\u0000'),
+    BOOLEAN(boolean.class, Boolean.class, false),
+    /* ********************************************* 特殊类型 ********************************************* */
+    VOID(void.class, Void.class, null),
     ;
 
     private final Class<?> primitiveClass;
     private final Class<?> wrappedClass;
+    private final Object defaultValue;
+
+    public static Optional<PrimitiveType> getOptByPrimitiveClass(Class<?> primitiveClass) {
+        for (PrimitiveType primitiveType : values()) {
+            if (primitiveType.primitiveClass == primitiveClass) {
+                return Optional.of(primitiveType);
+            }
+        }
+        return Optional.empty();
+    }
 
     public static Class<?> wrap(Class<?> clazz) {
         if (null == clazz || !clazz.isPrimitive()) {

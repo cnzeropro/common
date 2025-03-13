@@ -3,7 +3,7 @@ package org.zero.common.core.util.java.lang;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import org.zero.common.core.util.java.reflect.ClassUtil;
-import org.zero.common.core.util.java.reflect.ReflectUtil;
+import org.zero.common.core.util.java.reflect.FieldUtil;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -35,7 +35,7 @@ public class EnumUtil {
         Field[] fields = enumType.getDeclaredFields();
         for (E enumObj : enumType.getEnumConstants()) {
             for (Field field : fields) {
-                Object fieldValue = ReflectUtil.getFieldValue(field, enumObj, Object.class);
+                Object fieldValue = FieldUtil.getFieldValue(field, enumObj, Object.class);
                 if (equalsFieldVal(fieldValue, val)) {
                     return enumObj;
                 }
@@ -52,7 +52,7 @@ public class EnumUtil {
         Field[] fields = enumObj.getDeclaringClass().getDeclaredFields();
         for (Field field : fields) {
             if (field.getName().equalsIgnoreCase(valName)) {
-                return ReflectUtil.getFieldValue(field, enumObj, Object.class);
+                return FieldUtil.getFieldValue(field, enumObj);
             }
         }
         return null;
@@ -66,7 +66,7 @@ public class EnumUtil {
         Field[] fields = enumObj.getDeclaringClass().getDeclaredFields();
         for (Field field : fields) {
             if (Objects.equals(field.getType(), valType)) {
-                return ReflectUtil.getFieldValue(field, enumObj, valType);
+                return FieldUtil.getFieldValue(field, enumObj, valType);
             }
         }
         return null;
@@ -80,7 +80,7 @@ public class EnumUtil {
         Field[] fields = enumObj.getDeclaringClass().getDeclaredFields();
         for (Field field : fields) {
             if (field.getName().equalsIgnoreCase(valName)) {
-                return ReflectUtil.getFieldValue(field, enumObj, valType);
+                return FieldUtil.getFieldValue(field, enumObj, valType);
             }
         }
         return null;

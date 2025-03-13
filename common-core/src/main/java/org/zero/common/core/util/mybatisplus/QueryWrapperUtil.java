@@ -11,7 +11,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.zero.common.core.support.cache.Cache;
 import org.zero.common.core.support.cache.GuavaCache;
-import org.zero.common.core.util.java.reflect.ReflectUtil;
+import org.zero.common.core.util.java.reflect.FieldUtil;
+import org.zero.common.core.util.java.reflect.MethodUtil;
 import org.zero.common.data.exception.UtilException;
 
 import java.lang.reflect.Method;
@@ -462,9 +463,9 @@ public class QueryWrapperUtil {
         }
         Class<?> entityClass = entity.getClass();
         Map<String, Collection<Method>> methodMap = METHOD_CACHE.mapAndSetIfAbsent(entityClass,
-                c -> ReflectUtil.getFilteredPublicMethods(c, method -> ReflectUtil.isGetter(method, false))
+                c -> MethodUtil.getFilteredPublicMethods(c, method -> MethodUtil.isGetter(method, false))
                         .stream()
-                        .collect(Collectors.groupingBy(ReflectUtil::getFieldNameFromGetterMethod,
+                        .collect(Collectors.groupingBy(FieldUtil::getFieldNameFromGetterMethod,
                                 ConcurrentHashMap::new,
                                 Collectors.toCollection(ArrayList::new))));
         Map<String, Object> fieldValueMap = new HashMap<>();
@@ -491,7 +492,7 @@ public class QueryWrapperUtil {
                                 .filter(CollectionUtils::isNotEmpty)
                                 .map(Collection::stream)
                                 .orElseGet(Stream::empty)
-                                .map(method -> ReflectUtil.invoke(method, entity))
+                                .map(method -> MethodUtil.invoke(method, entity))
                                 .collect(Collectors.toList()),
                         (oldVal, newVal) -> newVal,
                         HashMap::new));

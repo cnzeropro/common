@@ -13,26 +13,26 @@ import java.util.List;
 class ReflectUtilTest {
     @Test
     void getAllDeclaredFields() {
-        List<Field> allDeclaredFields = ReflectUtil.getAllDeclaredFields(SubTestClass.class);
+        List<Field> allDeclaredFields = FieldUtil.getAllDeclaredFields(SubTestClass.class);
         System.out.println(allDeclaredFields);
     }
 
     @Test
     void getAllDeclaredMethods() {
-        List<Method> allDeclaredMethods = ReflectUtil.getAllDeclaredMethods(SubTestClass.class);
+        List<Method> allDeclaredMethods = MethodUtil.getAllDeclaredMethods(SubTestClass.class);
         System.out.println(allDeclaredMethods);
     }
 
     @Test
     void getMethodByNameAndParam() {
-        Method method = ReflectUtil.getMethodByNameAndParam(SubTestClass.class, "publicSuperMethod", String.class, Integer.class);
+        Method method = MethodUtil.getMethodByNameAndParam(SubTestClass.class, "publicSuperMethod", String.class, Integer.class);
         System.out.println(method);
     }
 
     @Test
     void invoke() {
-        Method method = ReflectUtil.getMethodByNameAndParam(SubTestClass.class, "defaultStaticSuperMethod");
-        Object invoke = ReflectUtil.invoke(method, ReflectUtil.newInstance(SubTestClass.class));
+        Method method = MethodUtil.getMethodByNameAndParam(SubTestClass.class, "defaultStaticSuperMethod");
+        Object invoke = MethodUtil.invoke(method, ConstructorUtil.newInstance(SubTestClass.class));
         System.out.println(invoke);
     }
 }

@@ -73,8 +73,9 @@
         <mysql.version>8.0.32</mysql.version>
         <dynamic-datasource.version>4.2.0</dynamic-datasource.version>
         <mybatis.version>3.5.19</mybatis.version>
-        <mybatis-plus.version>3.5.4.1</mybatis-plus.version>
+        <mybatis-spring.version>2.1.2</mybatis-spring.version>
         <mybatis-starter.version>2.3.2</mybatis-starter.version>
+        <mybatis-plus.version>3.5.4.1</mybatis-plus.version>
         <mybatis-flex.version>1.7.5</mybatis-flex.version>
         <redisson.version>3.27.2</redisson.version>
         <jasypt.version>1.9.3</jasypt.version>
@@ -99,6 +100,7 @@
         <springdoc-openapi-webmvc.version>2.1.0</springdoc-openapi-webmvc.version>
         <hutool.version>5.8.35</hutool.version>
         <disruptor.version>3.4.4</disruptor.version>
+        <jctools.version>4.0.5</jctools.version>
         <devh-grpc.version>2.15.0.RELEASE</devh-grpc.version>
         <grpc.version>1.59.0</grpc.version>
         <protobuf.version>3.24.4</protobuf.version>
@@ -295,12 +297,6 @@
                 <version>${gson.version}</version>
             </dependency>
             <!-- ################################### Other ################################### -->
-            <!-- https://mvnrepository.com/artifact/org.mybatis.spring.boot/mybatis-spring-boot-starter -->
-            <dependency>
-                <groupId>org.mybatis.spring.boot</groupId>
-                <artifactId>mybatis-spring-boot-starter</artifactId>
-                <version>${mybatis-starter.version}</version>
-            </dependency>
             <!-- https://mvnrepository.com/artifact/com.baomidou/mybatis-plus-core -->
             <dependency>
                 <groupId>com.baomidou</groupId>
@@ -372,6 +368,18 @@
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson</artifactId>
                 <version>${redisson.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.jctools/jctools-core -->
+            <dependency>
+                <groupId>org.jctools</groupId>
+                <artifactId>jctools-core</artifactId>
+                <version>${jctools.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.lmax/disruptor -->
+            <dependency>
+                <groupId>com.lmax</groupId>
+                <artifactId>disruptor</artifactId>
+                <version>${disruptor.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
