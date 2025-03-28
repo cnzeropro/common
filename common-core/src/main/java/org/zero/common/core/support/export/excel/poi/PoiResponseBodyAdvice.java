@@ -253,7 +253,7 @@ public class PoiResponseBodyAdvice extends BasePoiResponseBodyAdvice {
     }
 
     private Map<String, Object> getEntityMap(Object entity) {
-        List<Field> fields = FieldUtil.getAllDeclaredFields(entity.getClass());
+        List<Field> fields = FieldUtil.getAllFields(entity.getClass());
         return fields.stream().collect(Collectors.toMap(Field::getName, field -> FieldUtil.getFieldValue(field, entity)));
     }
 

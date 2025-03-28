@@ -6,7 +6,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -20,25 +19,30 @@ import java.util.stream.Collectors;
 @UtilityClass
 public class ConstructorUtil extends ReflectUtil {
     /**
-     * 获取所有声明的构造器
-     * <p>
-     * 包含父类的构造器
+     * 获取所有构造器
      *
      * @param clazz 目标类
      * @return 构造器
      */
-    public static List<Constructor<?>> getAllDeclaredConstructors(final Class<?> clazz) {
-        return getDeclaredConstructors(clazz, true);
+    public static List<Constructor<?>> getAllConstructors(final Class<?> clazz) {
+        return getConstructors(clazz, true);
     }
 
     /**
-     * 获取声明的构造器
+     * 获取构造器
+     */
+    public static List<Constructor<?>> getConstructors(final Class<?> clazz) {
+        return getConstructors(clazz, false);
+    }
+
+    /**
+     * 获取构造器
      *
      * @param clazz                      目标类
      * @param withSuperClassConstructors 是否获取父类的构造器
      * @return 构造器
      */
-    public static List<Constructor<?>> getDeclaredConstructors(final Class<?> clazz, final boolean withSuperClassConstructors) {
+    public static List<Constructor<?>> getConstructors(final Class<?> clazz, final boolean withSuperClassConstructors) {
         List<Constructor<?>> allConstructors = new ArrayList<>();
         Class<?> searchType = clazz;
         while (Objects.nonNull(searchType)) {
@@ -47,6 +51,26 @@ public class ConstructorUtil extends ReflectUtil {
             searchType = withSuperClassConstructors ? searchType.getSuperclass() : null;
         }
         return allConstructors;
+    }
+
+    /**
+     * 获取公共构造器
+     *
+     * @param clazz 目标类
+     * @return 公共构造器
+     */
+    public static List<Constructor<?>> getPublicConstructors(final Class<?> clazz) {
+        return new ArrayList<>(Arrays.asList(clazz.getConstructors()));
+    }
+
+    /**
+     * 获取封闭构造器（即在构造器内部定义的局部类或匿名类的构造方法）{@link Optional}
+     *
+     * @param clazz 目标类
+     * @return 封闭构造器 {@link Optional}
+     */
+    public static Optional<Constructor<?>> getEnclosingConstructorOpt(final Class<?> clazz) {
+        return Optional.ofNullable(clazz.getEnclosingConstructor());
     }
 
     /**
@@ -71,7 +95,7 @@ public class ConstructorUtil extends ReflectUtil {
      * @return 构造器
      */
     public static List<Constructor<?>> getFilteredConstructors(final Class<?> clazz, final boolean withSuperClassConstructors, final Predicate<Constructor<?>> filter) {
-        List<Constructor<?>> declaredConstructors = getDeclaredConstructors(clazz, withSuperClassConstructors);
+        List<Constructor<?>> declaredConstructors = getConstructors(clazz, withSuperClassConstructors);
         if (Objects.isNull(filter)) {
             return declaredConstructors;
         }
@@ -81,25 +105,25 @@ public class ConstructorUtil extends ReflectUtil {
     }
 
     /**
-     * 根据参数类型获取构造器
+     * 根据参数类型获取构造器 {@link Optional}
      * <p>
      * 不包含父类的构造器
      *
      * @param clazz          目标类
      * @param parameterTypes 参数类型
-     * @return 构造器
+     * @return 构造器 {@link Optional}
      */
     public static Optional<Constructor<?>> getConstructorOptByParam(final Class<?> clazz, final Class<?>... parameterTypes) {
         return getConstructorOptByParam(clazz, false, parameterTypes);
     }
 
     /**
-     * 根据参数类型获取构造器
+     * 根据参数类型获取构造器 {@link Optional}
      *
      * @param clazz                      目标类
      * @param withSuperClassConstructors 是否获取父类的构造器
      * @param parameterTypes             参数类型
-     * @return 构造器
+     * @return 构造器 {@link Optional}
      */
     public static Optional<Constructor<?>> getConstructorOptByParam(final Class<?> clazz, final boolean withSuperClassConstructors, final Class<?>... parameterTypes) {
         List<Constructor<?>> filteredConstructors = getFilteredConstructors(clazz, withSuperClassConstructors, (constructor -> {
@@ -127,8 +151,9 @@ public class ConstructorUtil extends ReflectUtil {
                 return Optional.of(constructor);
             }
         }
+        // 优先返回可访问的构造器
         return filteredConstructors.stream()
-                .max(Comparator.comparingInt(ACCESSIBLE_COMPARATOR));
+                .min(ACCESSIBLE_COMPARATOR);
     }
 
     /**

@@ -12,7 +12,7 @@ import org.zero.common.data.exception.BaseSysError;
  */
 @Getter
 @AllArgsConstructor
-public enum SysError implements BaseSysError {
+public enum SysError implements BaseSysError{
     /**
      * 一切可行
      */

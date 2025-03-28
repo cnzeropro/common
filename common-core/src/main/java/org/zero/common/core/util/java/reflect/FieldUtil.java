@@ -26,25 +26,33 @@ import static org.zero.common.core.util.java.reflect.MethodUtil.GETTER_METHOD_PR
 @UtilityClass
 public class FieldUtil extends ReflectUtil {
     /**
-     * 获取所有声明的字段
-     * <p>
-     * 包含父类的字段
+     * 获取所有字段
      *
      * @param clazz 目标类
      * @return 字段
      */
-    public static List<Field> getAllDeclaredFields(final Class<?> clazz) {
-        return getDeclaredFields(clazz, true);
+    public static List<Field> getAllFields(final Class<?> clazz) {
+        return getFields(clazz, true);
     }
 
     /**
-     * 获取声明的字段
+     * 获取字段
+     *
+     * @param clazz 目标类
+     * @return 字段
+     */
+    public static List<Field> getFields(final Class<?> clazz) {
+        return getFields(clazz, false);
+    }
+
+    /**
+     * 获取字段
      *
      * @param clazz                目标类
      * @param withSuperClassFields 是否获取父类的字段
      * @return 字段
      */
-    public static List<Field> getDeclaredFields(final Class<?> clazz, final boolean withSuperClassFields) {
+    public static List<Field> getFields(final Class<?> clazz, final boolean withSuperClassFields) {
         List<Field> allFields = new ArrayList<>();
         Class<?> searchType = clazz;
         while (Objects.nonNull(searchType)) {
@@ -53,6 +61,16 @@ public class FieldUtil extends ReflectUtil {
             searchType = withSuperClassFields ? searchType.getSuperclass() : null;
         }
         return allFields;
+    }
+
+    /**
+     * 获取公共字段
+     *
+     * @param clazz 目标类
+     * @return 公共字段
+     */
+    public static List<Field> getPublicFields(final Class<?> clazz) {
+        return new ArrayList<>(Arrays.asList(clazz.getFields()));
     }
 
     /**
@@ -77,13 +95,36 @@ public class FieldUtil extends ReflectUtil {
      * @return 字段
      */
     public static List<Field> getFilteredFields(final Class<?> clazz, final boolean withSuperClassFields, final Predicate<Field> filter) {
-        List<Field> declaredFields = getDeclaredFields(clazz, withSuperClassFields);
+        List<Field> declaredFields = getFields(clazz, withSuperClassFields);
         if (Objects.isNull(filter)) {
             return declaredFields;
         }
         return declaredFields.stream()
                 .filter(filter)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 获取静态字段
+     * <p>
+     * 包含父类的字段
+     *
+     * @param targetClass 目标类
+     * @return 静态字段
+     */
+    public static List<Field> getStaticFields(final Class<?> targetClass) {
+        return getStaticFields(targetClass, true);
+    }
+
+    /**
+     * 获取静态字段
+     *
+     * @param targetClass          目标类
+     * @param withSuperClassFields 是否获取父类的字段
+     * @return 静态字段
+     */
+    public static List<Field> getStaticFields(final Class<?> targetClass, final boolean withSuperClassFields) {
+        return getFilteredFields(targetClass, withSuperClassFields, field -> Modifier.isStatic(field.getModifiers()));
     }
 
     /**
@@ -112,25 +153,25 @@ public class FieldUtil extends ReflectUtil {
     }
 
     /**
-     * 通过字段名获取字段
+     * 通过字段名获取字段 {@link Optional}
      * <p>
      * 包含父类的字段
      *
      * @param clazz     目标类
      * @param fieldName 字段名称
-     * @return 字段
+     * @return 字段 {@link Optional}
      */
     public static Optional<Field> getFieldOptByName(final Class<?> clazz, final String fieldName) {
         return getFieldOptByName(clazz, true, fieldName);
     }
 
     /**
-     * 通过字段名获取字段
+     * 通过字段名获取字段 {@link Optional}
      *
      * @param clazz                目标类
      * @param withSuperClassFields 是否获取父类的字段
      * @param fieldName            字段名称
-     * @return 字段
+     * @return 字段 {@link Optional}
      */
     public static Optional<Field> getFieldOptByName(final Class<?> clazz, final boolean withSuperClassFields, final String fieldName) {
         List<Field> filteredFields = getFilteredFields(clazz, withSuperClassFields, field -> Objects.equals(field.getName(), fieldName));
@@ -138,19 +179,19 @@ public class FieldUtil extends ReflectUtil {
                 .findFirst();
     }
 
-    public static Object getStaticFieldValue(Field field) {
+    public static Object getStaticFieldValue(final Field field) {
         return getStaticFieldValue(field, Object.class);
     }
 
-    public static <T> T getStaticFieldValue(Field field, Type type) {
+    public static <T> T getStaticFieldValue(final Field field, final Type type) {
         return getFieldValue(field, null, type);
     }
 
-    public static Object getFieldValue(Field field, Object target) {
+    public static Object getFieldValue(final Field field, final Object target) {
         return getFieldValue(field, target, Object.class);
     }
 
-    public static <T> T getFieldValue(Field field, Object target, Type type) {
+    public static <T> T getFieldValue(final Field field, final Object target, final Type type) {
         return FieldUtil.<T>getFieldValueOpt(field, target, type).orElse(null);
     }
 
@@ -177,7 +218,7 @@ public class FieldUtil extends ReflectUtil {
         }
     }
 
-    public static <T, R> Optional<R> getStaticFieldValueOpt(final Class<T> clazz, String fieldName, final Type type) {
+    public static <T, R> Optional<R> getStaticFieldValueOpt(final Class<T> clazz, final String fieldName, final Type type) {
         return getFieldValueOpt(clazz, false, null, fieldName, type);
     }
 
@@ -242,5 +283,18 @@ public class FieldUtil extends ReflectUtil {
             return StringUtil.removePrefixAndFirst2Lower(methodName, BOOL_GETTER_METHOD_PREFIX);
         }
         return methodName;
+    }
+
+
+    /**
+     * 是否为父类引用字段
+     * <p>
+     * 当字段所在类是对象子类时（对象中定义的非 static 的 class），会自动生成一个以 {@code this$0} 为名称的字段，指向父类对象
+     *
+     * @param field 字段
+     * @return 是否为父类引用字段
+     */
+    public static boolean isOuterClassField(Field field) {
+        return "this$0".equals(field.getName());
     }
 }

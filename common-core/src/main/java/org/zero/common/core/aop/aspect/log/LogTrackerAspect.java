@@ -68,7 +68,6 @@ public class LogTrackerAspect implements InitializingBean, BeanFactoryAware {
         } finally {
             this.outputLog(logLevel, "Method[%s] execution completed, time consumption: %s", null, signatureName, Duration.ofNanos(endTime - startTime));
         }
-
         return result;
     }
 

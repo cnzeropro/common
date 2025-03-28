@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * @author Zero (cnzeropro@163.com)
@@ -91,5 +92,9 @@ public class MapCache<K, V> implements Cache<K, V> {
     @Override
     public long size() {
         return cache.size();
+    }
+
+    public static <K, V> MapCache<K, V> of(Supplier<Map<K, V>> supplier) {
+        return of(supplier.get());
     }
 }

@@ -1,12 +1,13 @@
 package org.zero.common.core.util.java.reflect;
 
+import org.zero.common.core.exception.AnyThrow;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -23,25 +24,33 @@ public class MethodUtil extends ReflectUtil {
     public static final String BOOL_GETTER_METHOD_PREFIX = "is";
 
     /**
-     * 获取所有声明的方法
-     * <p>
-     * 包含父类的方法
+     * 获取所有方法
      *
      * @param clazz 目标类
      * @return 方法
      */
-    public static List<Method> getAllDeclaredMethods(final Class<?> clazz) {
-        return getDeclaredMethods(clazz, true);
+    public static List<Method> getAllMethods(final Class<?> clazz) {
+        return getMethods(clazz, true);
     }
 
     /**
-     * 获取声明的方法
+     * 获取方法
+     *
+     * @param clazz 目标类
+     * @return 方法
+     */
+    public static List<Method> getMethods(final Class<?> clazz) {
+        return getMethods(clazz, false);
+    }
+
+    /**
+     * 获取方法
      *
      * @param clazz                 目标类
      * @param withSuperClassMethods 是否获取父类的方法
      * @return 方法
      */
-    public static List<Method> getDeclaredMethods(final Class<?> clazz, final boolean withSuperClassMethods) {
+    public static List<Method> getMethods(final Class<?> clazz, final boolean withSuperClassMethods) {
         List<Method> allMethods = new ArrayList<>();
         Class<?> searchType = clazz;
         while (Objects.nonNull(searchType)) {
@@ -50,6 +59,27 @@ public class MethodUtil extends ReflectUtil {
             searchType = withSuperClassMethods ? searchType.getSuperclass() : null;
         }
         return allMethods;
+    }
+
+
+    /**
+     * 获取公共方法
+     *
+     * @param clazz 目标类
+     * @return 公共方法
+     */
+    public static List<Method> getPublicMethods(final Class<?> clazz) {
+        return new ArrayList<>(Arrays.asList(clazz.getMethods()));
+    }
+
+    /**
+     * 获取封闭方法（即包含该类的方法）{@link Optional}
+     *
+     * @param clazz 目标类
+     * @return 封闭方法 {@link Optional}
+     */
+    public static Optional<Method> getEnclosingMethodOpt(final Class<?> clazz) {
+        return Optional.ofNullable(clazz.getEnclosingMethod());
     }
 
     /**
@@ -74,7 +104,7 @@ public class MethodUtil extends ReflectUtil {
      * @return 方法
      */
     public static List<Method> getFilteredMethods(final Class<?> clazz, final boolean withSuperClassMethods, final Predicate<Method> filter) {
-        final List<Method> methods = getDeclaredMethods(clazz, withSuperClassMethods);
+        final List<Method> methods = getMethods(clazz, withSuperClassMethods);
         if (Objects.isNull(filter)) {
             return methods;
         }
@@ -84,35 +114,26 @@ public class MethodUtil extends ReflectUtil {
     }
 
     /**
-     * 获取公共方法
+     * 获取静态方法
      * <p>
-     * 不包含父类的方法（子类默认包含父类公共方法）
+     * 包含父类的方法
      *
      * @param clazz 目标类
-     * @return 方法
+     * @return 静态方法
      */
-    public static List<Method> getPublicMethods(final Class<?> clazz) {
-        return getFilteredMethods(clazz, false, method -> Modifier.isPublic(method.getModifiers()));
+    public static List<Method> getStaticMethods(final Class<?> clazz) {
+        return getStaticMethods(clazz, true);
     }
 
     /**
-     * 获取过滤后的公共方法
-     * <p>
-     * 不包含父类的方法（子类默认包含父类公共方法）
+     * 获取静态方法
      *
-     * @param clazz  目标类
-     * @param filter 过滤器
-     * @return 方法
+     * @param clazz                 目标类
+     * @param withSuperClassMethods 是否获取父类的方法
+     * @return 静态方法
      */
-    public static List<Method> getFilteredPublicMethods(final Class<?> clazz, final Predicate<Method> filter) {
-        List<Method> publicMethods = getPublicMethods(clazz);
-        if (Objects.isNull(filter)) {
-            return publicMethods;
-        }
-
-        return publicMethods.stream()
-                .filter(filter)
-                .collect(Collectors.toList());
+    public static List<Method> getStaticMethods(final Class<?> clazz, final boolean withSuperClassMethods) {
+        return getFilteredMethods(clazz, withSuperClassMethods, method -> Modifier.isStrict(method.getModifiers()));
     }
 
     /**
@@ -141,7 +162,7 @@ public class MethodUtil extends ReflectUtil {
     }
 
     /**
-     * 通过方法名和参数类型获取方法
+     * 通过方法名和参数类型获取方法 {@link Optional}
      * <p>
      * 包含父类的方法
      *
@@ -155,7 +176,7 @@ public class MethodUtil extends ReflectUtil {
     }
 
     /**
-     * 通过方法名和参数类型获取方法
+     * 通过方法名和参数类型获取方法 {@link Optional}
      *
      * @param clazz                 目标类
      * @param withSuperClassMethods 是否获取父类的方法
@@ -218,35 +239,64 @@ public class MethodUtil extends ReflectUtil {
                 return Optional.of(method);
             }
         }
+        // 优先返回可访问的方法
         return filteredMethods.stream()
-                .max(Comparator.comparingInt(ACCESSIBLE_COMPARATOR));
+                .min(ACCESSIBLE_COMPARATOR);
     }
 
     public static Object invokeStatic(final Method method, final Object... args) {
-        return invokeStatic(method, Object.class, args);
+        return invokeStatic(method, false, args);
+    }
+
+    public static Object invokeStatic(final Method method, final boolean quietIfException, final Object... args) {
+        return invokeStatic(method, Object.class, false, args);
     }
 
     public static <T> T invokeStatic(final Method method, final Type type, final Object... args) {
-        return MethodUtil.<T>invokeStaticOpt(method, type, args).orElse(null);
+        return invokeStatic(method, type, false, args);
+    }
+
+    public static <T> T invokeStatic(final Method method, final Type type, boolean quietIfException, final Object... args) {
+        return MethodUtil.<T>invokeStaticOpt(method, type, quietIfException, args).orElse(null);
     }
 
     public static <T> Optional<T> invokeStaticOpt(final Method method, final Type type, final Object... args) {
-        return invokeOpt(method, null, type, args);
+        return invokeStaticOpt(method, type, true, args);
+    }
+
+    public static <T> Optional<T> invokeStaticOpt(final Method method, final Type type, final boolean quietIfException, final Object... args) {
+        return invokeOpt(method, null, type, quietIfException, args);
     }
 
     public static Object invoke(final Method method, final Object target, final Object... args) {
-        return invokeOpt(method, target, args).orElse(null);
+        return invoke(method, target, false, args);
+    }
+
+    public static Object invoke(final Method method, final Object target, final boolean quietIfException, final Object... args) {
+        return invokeOpt(method, target, quietIfException, args).orElse(null);
     }
 
     public static <T> T invoke(final Method method, final Object target, final Type type, final Object... args) {
-        return MethodUtil.<T>invokeOpt(method, target, type, args).orElse(null);
+        return invoke(method, target, type, false, args);
+    }
+
+    public static <T> T invoke(final Method method, final Object target, final Type type, final boolean quietIfException, final Object... args) {
+        return MethodUtil.<T>invokeOpt(method, target, type, quietIfException, args).orElse(null);
     }
 
     public static Optional<Object> invokeOpt(final Method method, final Object target, final Object... args) {
-        return invokeOpt(method, target, Object.class, args);
+        return invokeOpt(method, target, true, args);
+    }
+
+    public static Optional<Object> invokeOpt(final Method method, final Object target, final boolean quietIfException, final Object... args) {
+        return invokeOpt(method, target, Object.class, quietIfException, args);
     }
 
     public static <T> Optional<T> invokeOpt(final Method method, final Object target, final Type type, final Object... args) {
+        return invokeOpt(method, target, type, true, args);
+    }
+
+    public static <T> Optional<T> invokeOpt(final Method method, final Object target, final Type type, final boolean quietIfException, final Object... args) {
         if (Objects.isNull(method)) {
             return Optional.empty();
         }
@@ -262,8 +312,11 @@ public class MethodUtil extends ReflectUtil {
             Object invoked = method.invoke(obj, args);
             T result = ClassUtil.cast(invoked, type);
             return Optional.ofNullable(result);
-        } catch (Exception ignored) {
-            return Optional.empty();
+        } catch (Exception e) {
+            if (quietIfException) {
+                return Optional.empty();
+            }
+            throw AnyThrow.throwUnchecked(e);
         } finally {
             setInaccessible(method);
         }
@@ -272,10 +325,18 @@ public class MethodUtil extends ReflectUtil {
 
     public static <T, R> Optional<R> invokeStaticOpt(final Class<T> clazz, String methodName, final Type type, final Object... args) {
         // 静态方法不能被重写，因此不需要获取父类的方法
-        return invokeOpt(clazz, false, null, methodName, type, args);
+        return invokeOpt(clazz, false, null, methodName, type, true, args);
+    }
+
+    public static <T, R> Optional<R> invokeStaticOpt(final Class<T> clazz, String methodName, final Type type, final boolean quietIfException, final Object... args) {
+        return invokeOpt(clazz, false, null, methodName, type, quietIfException, args);
     }
 
     public static <T, R> Optional<R> invokeOpt(final Class<T> clazz, final boolean withSuperClassMethods, final T target, String methodName, final Type type, final Object... args) {
+        return invokeOpt(clazz, withSuperClassMethods, target, methodName, type, true, args);
+    }
+
+    public static <T, R> Optional<R> invokeOpt(final Class<T> clazz, final boolean withSuperClassMethods, final T target, String methodName, final Type type, boolean quietIfException, final Object... args) {
         Class<?>[] parameterTypes = Arrays.stream(args)
                 .map(o -> {
                     if (Objects.isNull(o)) {
@@ -286,7 +347,7 @@ public class MethodUtil extends ReflectUtil {
                 .toArray(Class[]::new);
         // 当 clazz 为 null 时，默认使用 target 的类对象
         // 当 target 是 null 时，默认其为静态方法，而静态方法不能被重写，因此不需要获取父类的方法
-        return getMethodOptByNameAndParam(Objects.isNull(clazz) ? target.getClass() : clazz, Objects.nonNull(target) && withSuperClassMethods, methodName, parameterTypes).flatMap(method -> invokeOpt(method, target, type, args));
+        return getMethodOptByNameAndParam(Objects.isNull(clazz) ? target.getClass() : clazz, Objects.nonNull(target) && withSuperClassMethods, methodName, parameterTypes).flatMap(method -> invokeOpt(method, target, type, quietIfException, args));
     }
 
     /**
@@ -378,8 +439,20 @@ public class MethodUtil extends ReflectUtil {
      * @return Getter 方法
      */
     public static Optional<Method> getGetterMethodOptByField(final Class<?> clazz, final boolean withSuperClassMethods, Field field, final boolean boxedBoolWithIsPrefix) {
-        String methodName = getGetterMethodNameByFieldName(field, boxedBoolWithIsPrefix);
+        String methodName = getGetterMethodNameByField(field, boxedBoolWithIsPrefix);
         return getMethodOptByNameAndParam(clazz, withSuperClassMethods, methodName);
+    }
+
+    /**
+     * 通过字段获取其对应的 Getter 方法名
+     * <p>
+     * {@link Boolean} 类型字段不使用 is 前缀（使用 get 前缀）
+     *
+     * @param field 字段
+     * @return Getter 方法名
+     */
+    public static String getGetterMethodNameByField(final Field field) {
+        return getGetterMethodNameByField(field, false);
     }
 
     /**
@@ -389,7 +462,7 @@ public class MethodUtil extends ReflectUtil {
      * @param boxedBoolWithIsPrefix {@link Boolean} 类型字段是否使用 is 前缀
      * @return Getter 方法名
      */
-    public static String getGetterMethodNameByFieldName(final Field field, final boolean boxedBoolWithIsPrefix) {
+    public static String getGetterMethodNameByField(final Field field, final boolean boxedBoolWithIsPrefix) {
         String fieldName = field.getName();
         Class<?> fieldType = field.getType();
 
@@ -407,5 +480,30 @@ public class MethodUtil extends ReflectUtil {
             return String.format("%s%s%s", methodPrefix, Character.toUpperCase(firstChar), fieldName.substring(1));
         }
         return String.format("%s%s", methodPrefix, fieldName);
+    }
+
+    /**
+     * 通过字段获取其对应的 Setter 方法名
+     *
+     * @param field 字段
+     * @return Setter 方法名
+     */
+    public static String getSetterMethodNameByField(final Field field) {
+        String fieldName = field.getName();
+        char firstChar = fieldName.charAt(0);
+        if (Character.isLowerCase(firstChar)) {
+            return String.format("%s%s%s", SETTER_METHOD_PREFIX, Character.toUpperCase(firstChar), fieldName.substring(1));
+        }
+        return String.format("%s%s", SETTER_METHOD_PREFIX, fieldName);
+    }
+
+    /**
+     * 判断方法是否为构建方法
+     *
+     * @param method 方法
+     * @return 是否为构建方法
+     */
+    public static boolean isBuilderMethod(Method method) {
+        return Modifier.isStatic(method.getModifiers()) && method.getReturnType().equals(method.getDeclaringClass());
     }
 }

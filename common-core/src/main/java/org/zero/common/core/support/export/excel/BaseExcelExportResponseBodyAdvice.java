@@ -191,7 +191,7 @@ public abstract class BaseExcelExportResponseBodyAdvice extends BaseTabularDataE
                 .orElseGet(Stream::empty)
                 .filter(Objects::nonNull)
                 .map(Object::getClass)
-                .allMatch(clazz -> ClassUtil.isSpecifiedClassWithRegexp(clazz, regex));
+                .allMatch(clazz -> ClassUtil.isClassWithRegexp(clazz, regex));
         if (hasEntity) {
             return this.handleCollectionOfCollectionOfEntity(excelExport, collections);
         } else {
@@ -230,7 +230,7 @@ public abstract class BaseExcelExportResponseBodyAdvice extends BaseTabularDataE
         boolean hasEntity = collection.stream()
                 .filter(Objects::nonNull)
                 .map(Object::getClass)
-                .allMatch(clazz -> ClassUtil.isSpecifiedClassWithRegexp(clazz, regex));
+                .allMatch(clazz -> ClassUtil.isClassWithRegexp(clazz, regex));
         if (hasEntity) {
             return this.handleCollectionOfEntity(excelExport, collection);
         } else {
@@ -364,7 +364,7 @@ public abstract class BaseExcelExportResponseBodyAdvice extends BaseTabularDataE
                 .orElseGet(Stream::empty)
                 .filter(Objects::nonNull)
                 .map(Object::getClass)
-                .allMatch(clazz -> ClassUtil.isSpecifiedClassWithRegexp(clazz, regex));
+                .allMatch(clazz -> ClassUtil.isClassWithRegexp(clazz, regex));
         if (hasEntity) {
             return this.handleMapOfCollectionOfEntity(excelExport, collectionMap);
         } else {

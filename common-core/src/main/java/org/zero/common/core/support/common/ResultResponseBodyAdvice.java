@@ -66,7 +66,7 @@ public class ResultResponseBodyAdvice implements ResponseBodyAdvice<Object>, Ord
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
         Class<?> containingClass = returnType.getContainingClass();
         // 跳过指定包名前缀
-        if (!ObjectUtils.isEmpty(skippedPackageNames) && ClassUtil.isSpecifiedClassWithPrefix(containingClass, skippedPackageNames)) {
+        if (!ObjectUtils.isEmpty(skippedPackageNames) && ClassUtil.isClassWithPrefix(containingClass, skippedPackageNames)) {
             return false;
         }
         // 跳过指定注解

@@ -3,7 +3,7 @@ package org.zero.common.core.extension.feign;
 import feign.RequestTemplate;
 import feign.codec.EncodeException;
 import feign.codec.Encoder;
-import org.zero.common.core.util.BeanMapUtil;
+import org.zero.common.core.util.BeanPathMapUtil;
 
 import java.lang.reflect.Type;
 import java.util.Map;
@@ -42,7 +42,7 @@ import java.util.Objects;
  */
 public class CustomEncoder implements Encoder {
     protected final Encoder delegate;
-    protected String[] beanBasePackages = BeanMapUtil.DEFAULT_PACKAGE_NAMES;
+    protected String[] beanBasePackages = BeanPathMapUtil.DEFAULT_PACKAGE_LEVEL_NAMES;
 
     public CustomEncoder(Encoder delegate) {
         this.delegate = delegate;
@@ -60,7 +60,7 @@ public class CustomEncoder implements Encoder {
     public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
         if (bodyType == Object[].class) {
             Object[] objects = (Object[]) object;
-            Map<String, Object> map = BeanMapUtil.encodeIn(beanBasePackages, objects);
+            Map<String, Object> map = BeanPathMapUtil.toMapIn(beanBasePackages, objects);
             map.forEach((k, v) -> template.query(k, Objects.toString(v, null)));
         } else {
             delegate.encode(object, bodyType, template);

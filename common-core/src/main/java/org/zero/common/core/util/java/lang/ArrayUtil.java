@@ -261,6 +261,6 @@ public class ArrayUtil {
     }
 
     private ArrayUtil() {
-        throw new IllegalStateException("No instance");
+        throw new UnsupportedOperationException();
     }
 }

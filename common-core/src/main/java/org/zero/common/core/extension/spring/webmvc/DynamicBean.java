@@ -3,6 +3,7 @@ package org.zero.common.core.extension.spring.webmvc;
 import org.zero.common.core.extension.java.reflect.GenericArrayTypeImpl;
 import org.zero.common.core.extension.java.reflect.ParameterizedTypeImpl;
 import org.zero.common.core.support.converter.ConverterComposite;
+import org.zero.common.core.util.java.map.MapUtil;
 import org.zero.common.core.util.java.reflect.ClassUtil;
 import org.zero.common.core.util.java.reflect.FieldUtil;
 
@@ -26,7 +27,7 @@ public class DynamicBean extends LinkedHashMap<CharSequence, Object> {
     }
 
     protected DynamicBean(int numMappings) {
-        super(calculateMapCapacity(numMappings));
+        super(MapUtil.calculateCapacity(numMappings));
     }
 
     public static DynamicBean create() {
@@ -59,9 +60,6 @@ public class DynamicBean extends LinkedHashMap<CharSequence, Object> {
         return new DynamicBean(map.size()).set(map);
     }
 
-    static int calculateMapCapacity(int numMappings) {
-        return (int) Math.ceil(numMappings / 0.75f);
-    }
 
     /* ***************************************************** getter ***************************************************** */
     public Object get(CharSequence name) {

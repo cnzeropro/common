@@ -463,8 +463,9 @@ public class QueryWrapperUtil {
         }
         Class<?> entityClass = entity.getClass();
         Map<String, Collection<Method>> methodMap = METHOD_CACHE.mapAndSetIfAbsent(entityClass,
-                c -> MethodUtil.getFilteredPublicMethods(c, method -> MethodUtil.isGetter(method, false))
+                c -> MethodUtil.getPublicMethods(c)
                         .stream()
+                        .filter(method -> MethodUtil.isGetter(method, false))
                         .collect(Collectors.groupingBy(FieldUtil::getFieldNameFromGetterMethod,
                                 ConcurrentHashMap::new,
                                 Collectors.toCollection(ArrayList::new))));

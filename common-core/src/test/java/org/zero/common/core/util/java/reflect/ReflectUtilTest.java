@@ -13,13 +13,13 @@ import java.util.List;
 class ReflectUtilTest {
     @Test
     void getAllDeclaredFields() {
-        List<Field> allDeclaredFields = FieldUtil.getAllDeclaredFields(SubTestClass.class);
+        List<Field> allDeclaredFields = FieldUtil.getAllFields(SubTestClass.class);
         System.out.println(allDeclaredFields);
     }
 
     @Test
     void getAllDeclaredMethods() {
-        List<Method> allDeclaredMethods = MethodUtil.getAllDeclaredMethods(SubTestClass.class);
+        List<Method> allDeclaredMethods = MethodUtil.getAllMethods(SubTestClass.class);
         System.out.println(allDeclaredMethods);
     }
 

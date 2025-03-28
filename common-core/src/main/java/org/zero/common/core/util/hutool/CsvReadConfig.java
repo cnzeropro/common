@@ -1,4 +1,4 @@
-package org.zero.common.core.util;
+package org.zero.common.core.util.hutool;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,13 +10,16 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * @author Zero (cnzeropro@163.com)
- * @since 2025/3/13
+ * @since 2025/3/17
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CsvWriteConfig extends cn.hutool.core.text.csv.CsvWriteConfig {
-    protected boolean append;
+public class CsvReadConfig extends cn.hutool.core.text.csv.CsvReadConfig {
     protected Charset charset = StandardCharsets.UTF_8;
+
+    public static CsvReadConfig defaultConfig() {
+        return new CsvReadConfig();
+    }
 }

@@ -72,7 +72,7 @@ public final class Result<T> implements BaseResult<T> {
     }
 
     public static <T> Result<T> error(String message) {
-        return error(message, null);
+        return error(message, (T) null);
     }
 
     public static <T> Result<T> error(BaseSysError error) {

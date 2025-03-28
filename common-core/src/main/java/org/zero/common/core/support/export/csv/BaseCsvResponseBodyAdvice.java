@@ -143,7 +143,7 @@ public abstract class BaseCsvResponseBodyAdvice extends BaseTabularDataExportRes
         boolean hasEntity = collection.stream()
                 .filter(Objects::nonNull)
                 .map(Object::getClass)
-                .allMatch(clazz -> ClassUtil.isSpecifiedClassWithRegexp(clazz, regex));
+                .allMatch(clazz -> ClassUtil.isClassWithRegexp(clazz, regex));
         if (hasEntity) {
             return this.handleCollectionOfEntity(csvExport, collection);
         } else {

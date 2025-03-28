@@ -7,8 +7,12 @@ import org.zero.common.core.extension.java.TypeReference;
 import org.zero.common.core.util.java.lang.PrimitiveType;
 
 import java.io.File;
+import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -23,9 +27,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
@@ -201,7 +207,7 @@ public class ClassUtil {
     /**
      * 是否是指定正则匹配的类
      */
-    public static boolean isSpecifiedClassWithRegexp(Class<?> clazz, String... regexps) {
+    public static boolean isClassWithRegexp(Class<?> clazz, String... regexps) {
         return Optional.ofNullable(clazz)
                 .map(Class::getName)
                 .map(name -> {
@@ -218,7 +224,7 @@ public class ClassUtil {
     /**
      * 是否是指定前缀的类
      */
-    public static boolean isSpecifiedClassWithPrefix(Class<?> clazz, String... prefixes) {
+    public static boolean isClassWithPrefix(Class<?> clazz, String... prefixes) {
         return Optional.ofNullable(clazz)
                 .map(Class::getName)
                 .map(name -> {
@@ -235,7 +241,7 @@ public class ClassUtil {
     /**
      * 是否是指定包下的类
      */
-    public static boolean isSpecifiedClassWithPackageName(Class<?> clazz, String... packageNames) {
+    public static boolean isClassWithPackageName(Class<?> clazz, String... packageNames) {
         return Optional.ofNullable(clazz)
                 .map(Class::getPackage)
                 .map(Package::getName)
@@ -248,6 +254,72 @@ public class ClassUtil {
                     return false;
                 })
                 .orElse(Boolean.FALSE);
+    }
+
+    /**
+     * 是否是 Bean 类型
+     */
+    public static boolean isJavaStrictBeanClass(Class<?> clazz) {
+        // null 验证
+        if (Objects.isNull(clazz)) {
+            return false;
+        }
+        // 类型验证
+        if (clazz.isInterface()) {
+            return false;
+        }
+        if (clazz.isArray()) {
+            return false;
+        }
+        if (clazz.isPrimitive()) {
+            return false;
+        }
+        if (clazz.isEnum()) {
+            return false;
+        }
+        if (isNumClass(clazz)) {
+            return false;
+        }
+        if (isDateTimeClass(clazz)) {
+            return false;
+        }
+        // 类名验证
+        if (isClassWithPrefix(clazz, "java", "javax", "jdk", "sun", "com.sun", "jakarta")) {
+            return false;
+        }
+        // 继承验证（必须实现自 Serializable）
+        if (!(Serializable.class.isAssignableFrom(clazz))) {
+            return false;
+        }
+        // 构造函数验证（必须存在无参构造函数）
+        if (!ConstructorUtil.getConstructorOptByParam(clazz).isPresent()) {
+            return false;
+        }
+        // 字段验证
+        List<Field> fields = FieldUtil.getFilteredFields(clazz, field -> {
+            int mod = field.getModifiers();
+            // 不是父类引用字段
+            return !FieldUtil.isOuterClassField(field) &&
+                    // 不是静态字段
+                    !Modifier.isStatic(mod) &&
+                    // 是私有字段
+                    Modifier.isPrivate(mod) &&
+                    // 不是合成字段
+                    !field.isSynthetic();
+        });
+        if (fields.isEmpty()) {
+            return false;
+        }
+        // 方法验证（必须存在 Public 的 getter 和 setter 方法）
+        Map<String, Method> methodMap = MethodUtil.getPublicMethods(clazz)
+                .stream()
+                .collect(Collectors.toMap(Method::getName, Function.identity()));
+        return fields.stream()
+                .map(MethodUtil::getSetterMethodNameByField)
+                .allMatch(name -> Objects.nonNull(methodMap.get(name))) &&
+                fields.stream()
+                        .map(MethodUtil::getSetterMethodNameByField)
+                        .allMatch(name -> Objects.nonNull(methodMap.get(name)));
     }
 
     /**

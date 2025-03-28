@@ -3,7 +3,7 @@ package org.zero.common.core.extension.feign;
 import feign.QueryMapEncoder;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import org.zero.common.core.util.BeanMapUtil;
+import org.zero.common.core.util.BeanPathMapUtil;
 
 import java.util.Map;
 
@@ -26,10 +26,10 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CustomQueryMapEncoder implements QueryMapEncoder {
-    protected String[] beanBasePackages = BeanMapUtil.DEFAULT_PACKAGE_NAMES;
+    protected String[] beanBasePackages = BeanPathMapUtil.DEFAULT_PACKAGE_LEVEL_NAMES;
 
     @Override
     public Map<String, Object> encode(Object object) {
-        return BeanMapUtil.encodeIn(beanBasePackages, object);
+        return BeanPathMapUtil.toMap(beanBasePackages, object);
     }
 }
