@@ -1,7 +1,7 @@
 package org.zero.common.test.config;
 
 import org.springframework.context.annotation.Configuration;
-import org.zero.common.core.aop.aspect.log.EnableLogTracker;
+import org.zero.common.core.support.log.EnableLogTracker;
 import org.zero.common.core.extension.java.TypeReference;
 import org.zero.common.core.extension.java.reflect.ParameterizedTypeImpl;
 import org.zero.common.core.support.converter.ConverterComposite;

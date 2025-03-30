@@ -1,4 +1,4 @@
-package org.zero.common.core.aop.aspect.log;
+package org.zero.common.core.support.log;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,7 +8,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.reflect.MethodSignature;
+import org.aspectj.lang.reflect.CodeSignature;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -17,6 +17,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
+import org.springframework.util.ObjectUtils;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -26,6 +27,7 @@ import java.util.Objects;
 
 /**
  * @author zero
+ * @see org.springframework.aop.aspectj.MethodInvocationProceedingJoinPoint
  * @since 2022/1/3
  */
 @Slf4j
@@ -45,17 +47,16 @@ public class LogTrackerAspect implements InitializingBean, BeanFactoryAware {
         }
         Object[] args = joinPoint.getArgs();
         Signature signature = joinPoint.getSignature();
-        // 只处理方法签名，不是方法的签名直接跳过
-        if (!(signature instanceof MethodSignature)) {
+        String signatureName = signature.getName();
+        if (!(signature instanceof CodeSignature)) {
             return joinPoint.proceed();
         }
-        String signatureName = signature.getName();
-        MethodSignature methodSignature = (MethodSignature) signature;
+        CodeSignature codeSignature = (CodeSignature) signature;
         // 确保 @AliasFor 注解生效
         LogLevel logLevel = AnnotationUtils.synthesizeAnnotation(logTracker, null).level();
         long endTime = 0L;
         Object result;
-        this.outputLog(logLevel, "Method[%s] begins to execute, args: %s", null, signatureName, this.toExpectedStr(this.toMap(methodSignature.getParameterNames(), args)));
+        this.outputLog(logLevel, "Method[%s] begins to execute, args: %s", null, signatureName, this.toExpectedStr(this.toMap(codeSignature.getParameterNames(), args)));
         long startTime = System.nanoTime();
         try {
             result = joinPoint.proceed();
@@ -85,17 +86,17 @@ public class LogTrackerAspect implements InitializingBean, BeanFactoryAware {
         if (Objects.isNull(obj)) {
             return null;
         }
-        if (obj instanceof String) {
-            return (String) obj;
+        if (obj instanceof CharSequence) {
+            return ((CharSequence) obj).toString();
         }
         try {
             return objectMapper.writeValueAsString(obj);
         } catch (Exception ignored) {
             // ignored exception
         }
-        Class<?> clazz = obj.getClass();
-        if (clazz.isArray()) {
-            Object[] array = (Object[]) obj;
+
+        if (ObjectUtils.isArray(obj)) {
+            Object[] array = ObjectUtils.toObjectArray(obj);
             return Arrays.toString(array);
         }
         return Objects.toString(obj);

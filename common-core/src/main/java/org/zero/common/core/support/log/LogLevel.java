@@ -1,4 +1,4 @@
-package org.zero.common.core.aop.aspect.log;
+package org.zero.common.core.support.log;
 
 /**
  * @author zero

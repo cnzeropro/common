@@ -32,6 +32,31 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
+ * Bean Path Map 工具类
+ * <table>
+ *     <caption>所需依赖</caption>
+ *     <tr>
+ *         <th>GA</th>
+ *         <th>说明</th>
+ *     </tr>
+ *     <tr>
+ *         <td>cn.hutool:hutool-core</td>
+ *         <td>借用某些工具类，如：集合、日期时间、反射工具类等等</td>
+ *     </tr>
+ *     <tr>
+ *         <td>io.github.openfeign:feign-core</td>
+ *         <td>支持 {@link Param} 注解</td>
+ *     </tr>
+ *     <tr>
+ *         <td>org.springframework:spring-core</td>
+ *         <td>借用工具类</td>
+ *     </tr>
+ *     <tr>
+ *         <td>org.springframework:spring-context</td>
+ *         <td>支持 {@link DateTimeFormat} 和 {@link NumberFormat} 注解</td>
+ *     </tr>
+ * </table>
+ *
  * @author zero
  * @since 2019/8/9
  */
