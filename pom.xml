@@ -108,6 +108,8 @@
         <jmh.version>1.37</jmh.version>
         <fastexcel.version>1.0.0</fastexcel.version>
         <guava-retrying.version>2.0.0</guava-retrying.version>
+        <juniversalchardet.version>1.0.3</juniversalchardet.version>
+        <kryo.version>5.2.1</kryo.version>
         <!-- Maven Plugins -->
         <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.8.0</maven-javadoc-plugin.version>
@@ -380,6 +382,18 @@
                 <groupId>com.lmax</groupId>
                 <artifactId>disruptor</artifactId>
                 <version>${disruptor.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.googlecode.juniversalchardet/juniversalchardet -->
+            <dependency>
+                <groupId>com.googlecode.juniversalchardet</groupId>
+                <artifactId>juniversalchardet</artifactId>
+                <version>${juniversalchardet.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.esotericsoftware/kryo -->
+            <dependency>
+                <groupId>com.esotericsoftware</groupId>
+                <artifactId>kryo</artifactId>
+                <version>${kryo.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

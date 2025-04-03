@@ -1,7 +1,7 @@
 package org.zero.common.core.support.converter;
 
 import org.zero.common.core.extension.java.collection.EnumerationIterator;
-import org.zero.common.core.util.java.reflect.ClassUtil;
+import org.zero.common.core.util.java.lang.ArrayUtil;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ public abstract class ToArray<T> implements GenericConverter<T[]> {
         }
         Class<?> sourceClass = source.getClass();
         if (sourceClass.isArray()) {
-            Object[] array = ClassUtil.getArray(source);
+            Object[] array = ArrayUtil.toArray(source);
             return this.convertArrayElement(array);
         }
         if (source instanceof Collection) {

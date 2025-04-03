@@ -1,8 +1,8 @@
 package org.zero.common.core.extension.spring.gateway;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
@@ -19,7 +19,8 @@ public class RouteToRequestUrlFilterBeanReplacer implements BeanDefinitionRegist
         if (registry.containsBeanDefinition(beanName)) {
             // 替换原有实现
             registry.removeBeanDefinition(beanName);
-            AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(MyRouteToRequestUrlFilter.class).getBeanDefinition();
+            BeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(CustomRouteToRequestUrlFilter.class)
+                    .getBeanDefinition();
             registry.registerBeanDefinition(beanName, beanDefinition);
         }
     }

@@ -1,7 +1,8 @@
-package org.zero.common.core.support.api.deduplication;
+package org.zero.common.core.support.api.deduplication.interceptor;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.zero.common.core.support.api.deduplication.annotation.Deduplication;
 
 import javax.servlet.http.HttpServletRequest;
 

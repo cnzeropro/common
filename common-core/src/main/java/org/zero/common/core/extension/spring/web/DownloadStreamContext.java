@@ -25,7 +25,7 @@ public class DownloadStreamContext {
     /**
      * 流并不总是知道数据长度，因此默认：-1（未知）
      */
-    private long contentLength = -1;
+    private long contentLength = -1L;
     private int bufferSize = DEFAULT_BUFFER_SIZE;
     private String contentName;
     private String contentType = "application/octet-stream";

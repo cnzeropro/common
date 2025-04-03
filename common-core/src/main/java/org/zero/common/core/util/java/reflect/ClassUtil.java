@@ -345,6 +345,13 @@ public class ClassUtil {
     }
 
     /**
+     * 是否是数组类型
+     */
+    public static boolean isArrayClass(Class<?> clazz) {
+        return Objects.nonNull(clazz) && clazz.isArray();
+    }
+
+    /**
      * 将对象转换为指定类型对象
      *
      * @param obj  对象
@@ -556,35 +563,5 @@ public class ClassUtil {
         }
         // 引用类型
         return null;
-    }
-
-    /**
-     * 将指定对象转换为对象数组
-     *
-     * @param source 源对象
-     * @return 数组
-     */
-    public static Object[] getArray(Object source) {
-        if (Objects.isNull(source)) {
-            return null;
-        }
-        Class<?> clazz = source.getClass();
-        if (clazz.isArray()) {
-            Class<?> componentType = clazz.getComponentType();
-            // 处理原始类型数组（如int[]）
-            // 因为原始类型数组继承自 Object，因此无法使用 (Object[]) source 强转
-            // 使用 source instanceof int[] 判断又过于麻烦，因此原始类型数组统一处理
-            if (componentType.isPrimitive()) {
-                int length = Array.getLength(source);
-                Object[] array = new Object[length];
-                for (int i = 0; i < length; i++) {
-                    array[i] = Array.get(source, i);
-                }
-                return array;
-            }
-            // 处理对象数组（如String[]）
-            return (Object[]) source;
-        }
-        return new Object[]{source};
     }
 }

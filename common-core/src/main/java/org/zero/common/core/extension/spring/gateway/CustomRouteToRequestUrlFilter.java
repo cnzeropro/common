@@ -24,7 +24,9 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.G
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.GATEWAY_SCHEME_PREFIX_ATTR;
 
 /**
- * 解决浏览器（如：Edge）或服务器发送 GET 等请求时，对保留字符采用宽松模式（即不进行编码）造成已编码部分被双重编码问题。
+ * 自定义 {@linkplain RouteToRequestUrlFilter} 实现
+ * <p>
+ * 解决客户端（浏览器（如：Edge）、服务器等等）发送 GET 等请求时，URL 中对保留字符采用宽松模式（即不进行编码）造成已编码部分被 {@code gateway} 双重编码问题。
  * <p>
  * 如：{@code a[0].b=你好}，正常应该是 {@code a%5B0%5D.b=%E4%BD%A0%E5%A5%BD}，
  * 但是 Chrome 没有编码保留字符（{@code a[0].b=%E4%BD%A0%E5%A5%BD}），出现了半编码状态，
@@ -38,7 +40,7 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.G
  * @since 2025/2/20
  */
 @Slf4j
-public class MyRouteToRequestUrlFilter extends RouteToRequestUrlFilter {
+public class CustomRouteToRequestUrlFilter extends RouteToRequestUrlFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         Route route = exchange.getAttribute(GATEWAY_ROUTE_ATTR);

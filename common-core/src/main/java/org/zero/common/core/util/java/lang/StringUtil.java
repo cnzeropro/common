@@ -9,111 +9,90 @@ import java.util.Objects;
  * @author Zero
  * @since 2016/1/14
  */
-public class StringUtil {
-    public static boolean isNull(String str) {
-        return Objects.isNull(str);
+public class StringUtil extends CharSequenceUtil {
+
+    public static String removePrefix(String string, String prefix) {
+        return string.startsWith(prefix) ? string.substring(prefix.length()) : string;
     }
 
-    public static boolean isNotNull(String str) {
-        return !isNull(str);
+    public static String removeSuffix(String string, String suffix) {
+        return string.endsWith(suffix) ? string.substring(0, string.length() - suffix.length()) : string;
     }
 
-    public static boolean isEmpty(String str) {
-        return isNull(str) || str.isEmpty();
+    public static String firstToLower(String string) {
+        return prefixToLower(string, 1);
     }
 
-    public static boolean isNotEmpty(String str) {
-        return !isEmpty(str);
+    public static String prefixToLower(String string, int index) {
+        return string.substring(0, index).toLowerCase() + string.substring(index);
     }
 
-    public static boolean isBlank(String str) {
-        if (isNotEmpty(str)) {
-            int length = str.length();
-            for (int i = 0; i < length; i++) {
-                if (!Character.isWhitespace(str.charAt(i))) {
-                    return false;
-                }
+    public static String removePrefixAndFirstToLower(String string, String prefix) {
+        return firstToLower(removePrefix(string, prefix));
+    }
+
+    public static String removeSuffixAndFirstToLower(String string, String suffix) {
+        return firstToLower(removeSuffix(string, suffix));
+    }
+
+    public static boolean containsAny(String string, String... searchStrings) {
+        if (isNull(string) || ArrayUtil.isEmpty(searchStrings)) {
+            return false;
+        }
+
+        for (String searchString : searchStrings) {
+            if (string.contains(searchString)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean containsAll(String string, String... searchStrings) {
+        if (isNull(string) || ArrayUtil.isEmpty(searchStrings)) {
+            return false;
+        }
+
+        for (String searchString : searchStrings) {
+            if (!string.contains(searchString)) {
+                return false;
             }
         }
         return true;
     }
 
-    public static boolean isNotBlank(String str) {
-        return !isBlank(str);
-    }
-
-    public static String removePrefix(String str, String prefix) {
-        return str.startsWith(prefix) ? str.substring(prefix.length()) : str;
-    }
-
-    public static String removeSuffix(String str, String suffix) {
-        return str.endsWith(suffix) ? str.substring(0, str.length() - suffix.length()) : str;
-    }
-
-    public static String first2Lower(String str) {
-        return prefix2Lower(str, 1);
-    }
-
-    public static String prefix2Lower(String str, int index) {
-        return str.substring(0, index).toLowerCase() + str.substring(index);
-    }
-
-    public static String removePrefixAndFirst2Lower(String str, String prefix) {
-        return first2Lower(removePrefix(str, prefix));
-    }
-
-    public static String removeSuffixAndFirst2Lower(String str, String suffix) {
-        return first2Lower(removeSuffix(str, suffix));
-    }
-
-    public static boolean containsAny(String str, String... testStrs) {
-        return isNotNull(getContainsStr(str, testStrs));
-    }
-
-    public static String getContainsStr(String str, String... testStrs) {
-        if (isEmpty(str) || ArrayUtil.isEmpty(testStrs)) {
-            return null;
-        }
-        for (String checkStr : testStrs) {
-            if (isNotNull(str) && str.contains(checkStr)) {
-                return checkStr;
-            }
-        }
-        return null;
-    }
-
-    public static List<String> split(String str, String delimiter) {
-        if (Objects.isNull(str)) {
+    public static List<String> split(String string, String delimiter) {
+        if (Objects.isNull(string)) {
             return Collections.emptyList();
         }
         if (Objects.isNull(delimiter)) {
-            return Collections.singletonList(str);
+            return Collections.singletonList(string);
         }
 
         List<String> result = new ArrayList<>();
         if (delimiter.isEmpty()) {
-            for (int i = 0; i < str.length(); i++) {
-                String charStr = str.substring(i, i + 1);
+            for (int i = 0; i < string.length(); i++) {
+                String charStr = string.substring(i, i + 1);
                 result.add(charStr);
             }
         } else {
             int delimiterLength = delimiter.length();
             int fromIndex = 0;
             int findIndex;
-            while ((findIndex = str.indexOf(delimiter, fromIndex)) != -1) {
-                String subStr = str.substring(fromIndex, findIndex);
+            while ((findIndex = string.indexOf(delimiter, fromIndex)) != -1) {
+                String subStr = string.substring(fromIndex, findIndex);
                 result.add(subStr);
                 fromIndex = findIndex + delimiterLength;
             }
-            if (!str.isEmpty() && fromIndex <= str.length()) {
-                String subStr = str.substring(fromIndex);
+            if (!string.isEmpty() && fromIndex <= string.length()) {
+                String subStr = string.substring(fromIndex);
                 result.add(subStr);
             }
         }
         return result;
     }
 
-    private StringUtil() throws IllegalAccessException {
-        throw new IllegalAccessException("Utility class");
+    protected StringUtil() {
+        throw new UnsupportedOperationException();
     }
 }

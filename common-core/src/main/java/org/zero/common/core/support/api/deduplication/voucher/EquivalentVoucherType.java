@@ -1,4 +1,4 @@
-package org.zero.common.core.support.api.deduplication;
+package org.zero.common.core.support.api.deduplication.voucher;
 
 /**
  * @author Zero (cnzeropro@163.com)

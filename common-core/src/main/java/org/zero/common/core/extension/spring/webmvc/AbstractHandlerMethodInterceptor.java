@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
+ * 仅支持 {@link HandlerMethod} 的拦截器
+ *
  * @author Zero (cnzeropro@163.com)
  * @since 2024/9/4
  */

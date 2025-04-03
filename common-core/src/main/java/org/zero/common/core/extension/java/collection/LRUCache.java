@@ -1,5 +1,7 @@
 package org.zero.common.core.extension.java.collection;
 
+import lombok.EqualsAndHashCode;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -8,6 +10,7 @@ import java.util.Map;
  * @author Zero (cnzeropro@163.com)
  * @since 2024/10/15
  */
+@EqualsAndHashCode(callSuper = true)
 public class LRUCache<K, V> extends LinkedHashMap<K, V> {
     /**
      * 默认最大缓存数量，1 * 2^16 = 65536

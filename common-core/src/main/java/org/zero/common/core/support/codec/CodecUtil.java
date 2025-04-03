@@ -20,7 +20,8 @@ import org.zero.common.core.support.codec.strategy.StrategyContext;
 import org.zero.common.core.support.codec.supplier.KeyContext;
 import org.zero.common.core.support.codec.supplier.KeySupplier;
 import org.zero.common.core.support.codec.supplier.NonKeySupplier;
-import org.zero.common.core.util.java.reflect.ReflectUtil;
+import org.zero.common.core.util.java.reflect.ExecutableUtil;
+import org.zero.common.core.util.java.reflect.MemberUtil;
 import org.zero.common.data.exception.CommonException;
 
 import java.lang.reflect.Executable;
@@ -103,7 +104,7 @@ public class CodecUtil {
     }
 
     protected static CodecStrategy getCodecStrategy(Executable executable, CodecContext codecContext) {
-        String name = String.format("%s|%s", ReflectUtil.getFullName(executable), codecContext.getCipherMode());
+        String name = String.format("%s|%s", ExecutableUtil.getFullName(executable), codecContext.getCipherMode());
         return CACHE.mapAndSetIfAbsent(name, n -> createCodecStrategy(codecContext));
     }
 
@@ -145,7 +146,7 @@ public class CodecUtil {
                 .orElseGet(() -> new byte[0]);
         KeySupplier keyProvider = encryptionOpt.<Class<? extends KeySupplier>>map(Encryption::keyProvider)
                 .or(() -> configOpt.map(CodecProperties.CodecConfiguration::getKeySupplier))
-                .<KeySupplier>map(ReflectUtil::getInstance)
+                .<KeySupplier>map(MemberUtil::getInstance)
                 .orElse(NonKeySupplier.INSTANCE);
         StringMode stringMode = encryptionOpt.map(Encryption::stringMode)
                 .or(() -> Opt.ofNullable(config.getStringMode()))
@@ -175,7 +176,7 @@ public class CodecUtil {
                 .orElseGet(() -> new byte[0]);
         KeySupplier keyProvider = decryptionOpt.<Class<? extends KeySupplier>>map(Decryption::keyProvider)
                 .or(() -> configOpt.map(CodecProperties.CodecConfiguration::getKeySupplier))
-                .<KeySupplier>map(ReflectUtil::getInstance)
+                .<KeySupplier>map(MemberUtil::getInstance)
                 .orElse(NonKeySupplier.INSTANCE);
         StringMode stringMode = decryptionOpt.map(Decryption::stringMode)
                 .or(() -> Opt.ofNullable(config.getStringMode()))

@@ -1,4 +1,7 @@
-package org.zero.common.core.support.api.deduplication;
+package org.zero.common.core.support.api.debouncing.annotation;
+
+import org.zero.common.core.support.api.debouncing.provider.DebouncingMessageProvider;
+import org.zero.common.core.support.api.debouncing.provider.DefaultDebouncingMessageProvider;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -9,7 +12,7 @@ import java.lang.annotation.Target;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 接口防重
+ * 接口防抖
  *
  * @author zero
  */
@@ -17,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 @Documented
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Deduplication {
+public @interface Debouncing {
     /**
      * 是否启用。默认：true
      */
@@ -39,12 +42,7 @@ public @interface Deduplication {
     TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
 
     /**
-     * 等效凭证类型。默认：AUTO
+     * 提示消息供给者
      */
-    EquivalentVoucherType[] equivalentVoucherTypes() default {EquivalentVoucherType.AUTO};
-
-    /**
-     * 提示消息
-     */
-    String message() default "重复提交";
+    Class<? extends DebouncingMessageProvider> messageProvider() default DefaultDebouncingMessageProvider.class;
 }

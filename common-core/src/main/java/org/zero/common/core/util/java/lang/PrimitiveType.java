@@ -29,15 +29,6 @@ public enum PrimitiveType {
     private final Class<?> wrappedClass;
     private final Object defaultValue;
 
-    public static Optional<PrimitiveType> getOptByPrimitiveClass(Class<?> primitiveClass) {
-        for (PrimitiveType primitiveType : values()) {
-            if (primitiveType.primitiveClass == primitiveClass) {
-                return Optional.of(primitiveType);
-            }
-        }
-        return Optional.empty();
-    }
-
     public static Class<?> wrap(Class<?> clazz) {
         if (null == clazz || !clazz.isPrimitive()) {
             return clazz;
@@ -60,5 +51,23 @@ public enum PrimitiveType {
             }
         }
         return clazz;
+    }
+
+    public static Optional<PrimitiveType> getOptByPrimitiveClass(Class<?> primitiveClass) {
+        for (PrimitiveType primitiveType : values()) {
+            if (primitiveType.primitiveClass == primitiveClass) {
+                return Optional.of(primitiveType);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public static Optional<PrimitiveType> getOptByWrappedClass(Class<?> wrappedClass) {
+        for (PrimitiveType primitiveType : values()) {
+            if (primitiveType.wrappedClass == wrappedClass) {
+                return Optional.of(primitiveType);
+            }
+        }
+        return Optional.empty();
     }
 }

@@ -14,11 +14,13 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static org.zero.common.core.util.java.reflect.MemberUtil.ACCESSIBLE_COMPARATOR;
+
 /**
  * @author Zero (cnzeropro@163.com)
  * @since 2025/3/11
  */
-public class MethodUtil extends ReflectUtil {
+public class MethodUtil {
     public static final String SETTER_METHOD_PREFIX = "set";
     public static final String GETTER_METHOD_PREFIX = "get";
     public static final String BOOL_GETTER_METHOD_PREFIX = "is";
@@ -306,7 +308,7 @@ public class MethodUtil extends ReflectUtil {
             obj = null;
         }
         if (!Modifier.isPublic(mod)) {
-            setAccessible(method);
+            AccessibleObjectUtil.setAccessible(method);
         }
         try {
             Object invoked = method.invoke(obj, args);
@@ -318,7 +320,7 @@ public class MethodUtil extends ReflectUtil {
             }
             throw AnyThrow.throwUnchecked(e);
         } finally {
-            setInaccessible(method);
+            AccessibleObjectUtil.setInaccessible(method);
         }
     }
 
@@ -504,6 +506,6 @@ public class MethodUtil extends ReflectUtil {
      * @return 是否为构建方法
      */
     public static boolean isBuilderMethod(Method method) {
-        return Modifier.isStatic(method.getModifiers()) && method.getReturnType().equals(method.getDeclaringClass());
+        return Modifier.isStatic(method.getModifiers()) && ClassUtil.isAssignable(method.getReturnType(), method.getDeclaringClass());
     }
 }

@@ -1,7 +1,10 @@
 package org.zero.common.core.util.java.lang;
 
-import java.nio.ByteBuffer;
+import org.zero.common.core.util.java.reflect.ClassUtil;
+
+import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * @author Zero (cnzeropro@163.com)
@@ -93,32 +96,6 @@ public class ArrayUtil {
             pos += a.length;
         }
         return result;
-    }
-
-    /**
-     * 合并两个 byte 数组（方式1）
-     * <p>
-     * 此处只做代码留存
-     */
-    protected static byte[] merge1(byte[] array1, byte[] array2) {
-        int length1 = array1.length;
-        int length2 = array2.length;
-        byte[] result = new byte[length1 + length2];
-        System.arraycopy(array1, 0, result, 0, length1);
-        System.arraycopy(array2, 0, result, length1, length2);
-        return result;
-    }
-
-    /**
-     * 合并两个 byte 数组（方式2）
-     * <p>
-     * 此处只做代码留存
-     */
-    protected static byte[] merge2(byte[] array1, byte[] array2) {
-        ByteBuffer buffer = ByteBuffer.allocate(array1.length + array2.length);
-        buffer.put(array1);
-        buffer.put(array2);
-        return buffer.array();
     }
 
     /**
@@ -260,7 +237,44 @@ public class ArrayUtil {
         return result;
     }
 
-    private ArrayUtil() {
+    public static boolean isArray(Object source) {
+        return ObjectUtil.nonNull(source) && ClassUtil.isArrayClass(source.getClass());
+    }
+
+    /**
+     * 将指定对象转换为对象数组
+     *
+     * @param source 源对象
+     * @return 数组
+     */
+    public static Object[] toArray(Object source) {
+        if (Objects.isNull(source)) {
+            return new Object[0];
+        }
+        Class<?> clazz = source.getClass();
+        if (clazz.isArray()) {
+            Class<?> componentType = clazz.getComponentType();
+            // 处理原始类型数组（如int[]）
+            // 因为原始类型数组继承自 Object，因此无法使用 (Object[]) source 强转
+            // 使用 source instanceof int[]、 source instanceof double[] 等等一个一个判断又过于麻烦，因此原始类型数组统一处理
+            if (componentType.isPrimitive()) {
+                int length = Array.getLength(source);
+                // 获取原始类型的包装类型
+                Class<?> wrappedType = PrimitiveType.wrap(componentType);
+                // 创建包装类型数组（如果不使用包装类创建数组，此处无法使用 Object[] 强转）
+                Object[] array = (Object[]) Array.newInstance(wrappedType, length);
+                for (int i = 0; i < length; i++) {
+                    array[i] = Array.get(source, i);
+                }
+                return array;
+            }
+            // 处理对象数组（如String[]）
+            return (Object[]) source;
+        }
+        return new Object[]{source};
+    }
+
+    protected ArrayUtil() {
         throw new UnsupportedOperationException();
     }
 }

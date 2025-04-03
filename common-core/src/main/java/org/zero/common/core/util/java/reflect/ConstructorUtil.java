@@ -1,6 +1,7 @@
 package org.zero.common.core.util.java.reflect;
 
 import lombok.experimental.UtilityClass;
+import org.zero.common.core.exception.AnyThrow;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -12,12 +13,14 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static org.zero.common.core.util.java.reflect.MemberUtil.ACCESSIBLE_COMPARATOR;
+
 /**
  * @author Zero (cnzeropro@163.com)
  * @since 2025/3/11
  */
 @UtilityClass
-public class ConstructorUtil extends ReflectUtil {
+public class ConstructorUtil {
     /**
      * 获取所有构造器
      *
@@ -165,7 +168,20 @@ public class ConstructorUtil extends ReflectUtil {
      * @return 实例
      */
     public static <T> T newInstance(final Constructor<T> constructor, final Object... args) {
-        return newInstanceOpt(constructor, args).orElse(null);
+        return newInstance(constructor, false, args);
+    }
+
+    /**
+     * 创建实例
+     *
+     * @param constructor      构造器
+     * @param quietIfException 是否安静处理（不抛出异常）
+     * @param args             参数
+     * @param <T>              实例类型
+     * @return 实例
+     */
+    public static <T> T newInstance(final Constructor<T> constructor, final boolean quietIfException, final Object... args) {
+        return newInstanceOpt(constructor, quietIfException, args).orElse(null);
     }
 
     /**
@@ -177,19 +193,35 @@ public class ConstructorUtil extends ReflectUtil {
      * @return 实例 {@link Optional}
      */
     public static <T> Optional<T> newInstanceOpt(final Constructor<T> constructor, final Object... args) {
+        return newInstanceOpt(constructor, true, args);
+    }
+
+    /**
+     * 创建实例 {@link Optional}
+     *
+     * @param constructor      构造器
+     * @param quietIfException 是否安静处理（不抛出异常）
+     * @param args             参数
+     * @param <T>              实例类型
+     * @return 实例 {@link Optional}
+     */
+    public static <T> Optional<T> newInstanceOpt(final Constructor<T> constructor, final boolean quietIfException, final Object... args) {
         if (Objects.isNull(constructor)) {
             return Optional.empty();
         }
         if (!Modifier.isPublic(constructor.getModifiers())) {
-            setAccessible(constructor);
+            AccessibleObjectUtil.setAccessible(constructor);
         }
         try {
             T object = constructor.newInstance(args);
             return Optional.of(object);
-        } catch (Exception ignored) {
-            return Optional.empty();
+        } catch (Exception e) {
+            if (quietIfException) {
+                return Optional.empty();
+            }
+            throw AnyThrow.throwUnchecked(e);
         } finally {
-            setInaccessible(constructor);
+            AccessibleObjectUtil.setInaccessible(constructor);
         }
     }
 
@@ -202,7 +234,20 @@ public class ConstructorUtil extends ReflectUtil {
      * @return 实例
      */
     public static <T> T newInstance(final Class<T> clazz, final Object... args) {
-        return newInstanceOpt(clazz, args).orElse(null);
+        return newInstance(clazz, false, args);
+    }
+
+    /**
+     * 创建实例
+     *
+     * @param clazz            目标类
+     * @param quietIfException 是否安静处理（不抛出异常）
+     * @param args             参数
+     * @param <T>              实例类型
+     * @return 实例
+     */
+    public static <T> T newInstance(final Class<T> clazz, final boolean quietIfException, final Object... args) {
+        return newInstanceOpt(clazz, quietIfException, args).orElse(null);
     }
 
     /**
@@ -214,6 +259,19 @@ public class ConstructorUtil extends ReflectUtil {
      * @return 实例 {@link Optional}
      */
     public static <T> Optional<T> newInstanceOpt(final Class<T> clazz, final Object... args) {
+        return newInstanceOpt(clazz, true, args);
+    }
+
+    /**
+     * 创建实例 {@link Optional}
+     *
+     * @param clazz            目标类
+     * @param quietIfException 是否安静处理（不抛出异常）
+     * @param args             参数
+     * @param <T>              实例类型
+     * @return 实例 {@link Optional}
+     */
+    public static <T> Optional<T> newInstanceOpt(final Class<T> clazz, final boolean quietIfException, final Object... args) {
         Class<?>[] parameterTypes = Arrays.stream(args)
                 .map(o -> {
                     if (Objects.isNull(o)) {
@@ -222,7 +280,7 @@ public class ConstructorUtil extends ReflectUtil {
                     return o.getClass();
                 })
                 .toArray(Class[]::new);
-        return getConstructorOptByParam(clazz, parameterTypes).flatMap(constructor -> newInstanceOpt(constructor, args))
+        return getConstructorOptByParam(clazz, parameterTypes).map(constructor -> newInstance(constructor, quietIfException, args))
                 .filter(clazz::isInstance)
                 .map(clazz::cast);
     }

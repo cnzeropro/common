@@ -1,6 +1,7 @@
 package org.zero.common.core.util.java.reflect;
 
 import lombok.experimental.UtilityClass;
+import org.zero.common.core.exception.AnyThrow;
 import org.zero.common.core.util.java.lang.StringUtil;
 
 import java.lang.annotation.Annotation;
@@ -24,7 +25,7 @@ import static org.zero.common.core.util.java.reflect.MethodUtil.GETTER_METHOD_PR
  * @since 2025/3/11
  */
 @UtilityClass
-public class FieldUtil extends ReflectUtil {
+public class FieldUtil {
     /**
      * 获取所有字段
      *
@@ -180,22 +181,42 @@ public class FieldUtil extends ReflectUtil {
     }
 
     public static Object getStaticFieldValue(final Field field) {
-        return getStaticFieldValue(field, Object.class);
+        return getStaticFieldValue(field, false);
+    }
+
+    public static Object getStaticFieldValue(final Field field, final boolean quietIfException) {
+        return getStaticFieldValue(field, Object.class, quietIfException);
     }
 
     public static <T> T getStaticFieldValue(final Field field, final Type type) {
-        return getFieldValue(field, null, type);
+        return getStaticFieldValue(field, type, false);
+    }
+
+    public static <T> T getStaticFieldValue(final Field field, final Type type, final boolean quietIfException) {
+        return getFieldValue(field, null, type, quietIfException);
     }
 
     public static Object getFieldValue(final Field field, final Object target) {
-        return getFieldValue(field, target, Object.class);
+        return getFieldValue(field, target, false);
+    }
+
+    public static Object getFieldValue(final Field field, final Object target, final boolean quietIfException) {
+        return getFieldValue(field, target, Object.class, quietIfException);
     }
 
     public static <T> T getFieldValue(final Field field, final Object target, final Type type) {
-        return FieldUtil.<T>getFieldValueOpt(field, target, type).orElse(null);
+        return getFieldValue(field, target, type, false);
+    }
+
+    public static <T> T getFieldValue(final Field field, final Object target, final Type type, final boolean quietIfException) {
+        return FieldUtil.<T>getFieldValueOpt(field, target, type, quietIfException).orElse(null);
     }
 
     public static <T> Optional<T> getFieldValueOpt(final Field field, final Object target, final Type type) {
+        return getFieldValueOpt(field, target, type, true);
+    }
+
+    public static <T> Optional<T> getFieldValueOpt(final Field field, final Object target, final Type type, final boolean quietIfException) {
         if (Objects.isNull(field)) {
             return Optional.empty();
         }
@@ -205,56 +226,86 @@ public class FieldUtil extends ReflectUtil {
             obj = null;
         }
         if (!Modifier.isPublic(mod)) {
-            setAccessible(field);
+            AccessibleObjectUtil.setAccessible(field);
         }
         try {
             Object got = field.get(obj);
             T result = ClassUtil.cast(got, type);
             return Optional.ofNullable(result);
-        } catch (Exception ignored) {
-            return Optional.empty();
+        } catch (Exception e) {
+            if (quietIfException) {
+                return Optional.empty();
+            }
+            throw AnyThrow.throwUnchecked(e);
         } finally {
-            setInaccessible(field);
+            AccessibleObjectUtil.setInaccessible(field);
         }
     }
 
     public static <T, R> Optional<R> getStaticFieldValueOpt(final Class<T> clazz, final String fieldName, final Type type) {
-        return getFieldValueOpt(clazz, false, null, fieldName, type);
+        return getStaticFieldValueOpt(clazz, fieldName, type, true);
+    }
+
+    public static <T, R> Optional<R> getStaticFieldValueOpt(final Class<T> clazz, final String fieldName, final Type type, final boolean quietIfException) {
+        return getFieldValueOpt(clazz, false, null, fieldName, type, quietIfException);
     }
 
     public static <T, R> Optional<R> getFieldValueOpt(final Class<T> clazz, final boolean withSuperClassFields, final T target, String fieldName, final Type type) {
-        return getFieldOptByName(Objects.isNull(clazz) ? target.getClass() : clazz, Objects.nonNull(target) && withSuperClassFields, fieldName).flatMap(field -> getFieldValueOpt(field, target, type));
+        return getFieldValueOpt(clazz, withSuperClassFields, target, fieldName, type, true);
+    }
+
+    public static <T, R> Optional<R> getFieldValueOpt(final Class<T> clazz, final boolean withSuperClassFields, final T target, String fieldName, final Type type, final boolean quietIfException) {
+        return getFieldOptByName(Objects.isNull(clazz) ? target.getClass() : clazz, Objects.nonNull(target) && withSuperClassFields, fieldName).flatMap(field -> getFieldValueOpt(field, target, type, quietIfException));
     }
 
     public static boolean setStaticFieldValue(final Field field, final Object value) {
-        return setFieldValue(field, null, value);
+        return setStaticFieldValue(field, value, true);
+    }
+
+    public static boolean setStaticFieldValue(final Field field, final Object value, final boolean quietIfException) {
+        return setFieldValue(field, null, value, quietIfException);
     }
 
     public static boolean setFieldValue(final Field field, final Object target, final Object value) {
+        return setFieldValue(field, target, value, true);
+    }
+
+    public static boolean setFieldValue(final Field field, final Object target, final Object value, final boolean quietIfException) {
         int mod = field.getModifiers();
         Object obj = target;
         if (Modifier.isStatic(mod)) {
             obj = null;
         }
         if (!Modifier.isPublic(mod)) {
-            setAccessible(field);
+            AccessibleObjectUtil.setAccessible(field);
         }
         try {
             field.set(obj, value);
             return true;
-        } catch (Exception ignored) {
-            return false;
+        } catch (Exception e) {
+            if (quietIfException) {
+                return false;
+            }
+            throw AnyThrow.throwUnchecked(e);
         } finally {
-            setInaccessible(field);
+            AccessibleObjectUtil.setInaccessible(field);
         }
     }
 
     public static <T> boolean setStaticFieldValue(final Class<T> clazz, String fieldName, final Object value) {
-        return setFieldValue(clazz, false, null, fieldName, value);
+        return setStaticFieldValue(clazz, fieldName, value, true);
+    }
+
+    public static <T> boolean setStaticFieldValue(final Class<T> clazz, String fieldName, final Object value, final boolean quietIfException) {
+        return setFieldValue(clazz, false, null, fieldName, value, quietIfException);
     }
 
     public static <T> boolean setFieldValue(final Class<T> clazz, final boolean withSuperClassFields, final T target, String fieldName, final Object value) {
-        return getFieldOptByName(Objects.isNull(clazz) ? target.getClass() : clazz, Objects.nonNull(target) && withSuperClassFields, fieldName).map(field -> setFieldValue(field, target, value)).orElse(Boolean.FALSE);
+        return setFieldValue(clazz, withSuperClassFields, target, fieldName, value, true);
+    }
+
+    public static <T> boolean setFieldValue(final Class<T> clazz, final boolean withSuperClassFields, final T target, String fieldName, final Object value, final boolean quietIfException) {
+        return getFieldOptByName(Objects.isNull(clazz) ? target.getClass() : clazz, Objects.nonNull(target) && withSuperClassFields, fieldName).map(field -> setFieldValue(field, target, value, quietIfException)).orElse(Boolean.FALSE);
     }
 
     /**
@@ -277,10 +328,10 @@ public class FieldUtil extends ReflectUtil {
     public static String getFieldNameFromGetterMethod(final Method getterMethod) {
         String methodName = getterMethod.getName();
         if (methodName.startsWith(GETTER_METHOD_PREFIX)) {
-            return StringUtil.removePrefixAndFirst2Lower(methodName, GETTER_METHOD_PREFIX);
+            return StringUtil.removePrefixAndFirstToLower(methodName, GETTER_METHOD_PREFIX);
         }
         if (methodName.startsWith(BOOL_GETTER_METHOD_PREFIX)) {
-            return StringUtil.removePrefixAndFirst2Lower(methodName, BOOL_GETTER_METHOD_PREFIX);
+            return StringUtil.removePrefixAndFirstToLower(methodName, BOOL_GETTER_METHOD_PREFIX);
         }
         return methodName;
     }

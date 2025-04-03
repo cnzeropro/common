@@ -1,7 +1,6 @@
-package org.zero.common.core.support.api.deduplication;
+package org.zero.common.core.support.api.deduplication.interceptor;
 
 import lombok.SneakyThrows;
-import org.aspectj.lang.JoinPoint;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.FileCopyUtils;
@@ -9,8 +8,8 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.SerializationUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
-import org.zero.common.core.util.spring.web.RequestUtil;
-import org.zero.common.data.exception.CommonException;
+import org.zero.common.core.support.api.deduplication.annotation.Deduplication;
+import org.zero.common.core.support.api.deduplication.voucher.EquivalentVoucherType;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -23,21 +22,23 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Zero (cnzeropro@163.com)
- * @since 2024/9/25
+ * @since 2024/9/23
  */
-public abstract class BaseRedisDeduplicationAspect extends BaseDeduplicationAspect {
+
+public abstract class BaseRedisDeduplicationInterceptor extends BaseDeduplicationInterceptor {
     /**
      * 缓存 key 的前缀
      */
-    public static final String KEY_PREFIX = "sys:deduplication";
+    public static final String KEY_PREFIX = "sys:api:deduplication";
 
     @Override
-    protected String getDefaultKey(JoinPoint joinPoint, Deduplication deduplication) {
-        String mark = this.getMark();
-        String equivalentVoucher = this.getEquivalentVoucher(joinPoint, deduplication);
+    protected String getDefaultKey(HttpServletRequest request, Deduplication deduplication) {
+        String mark = this.getMark(request);
+        String equivalentVoucher = this.getEquivalentVoucher(request, deduplication);
         if (StringUtils.hasText(mark)) {
             return String.format("%s:%s:%s", KEY_PREFIX, mark, equivalentVoucher);
         }
@@ -49,14 +50,14 @@ public abstract class BaseRedisDeduplicationAspect extends BaseDeduplicationAspe
      * <p>
      * 建议重写，可返回 token、用户名、客户端 ip 等等
      */
-    protected String getMark() {
+    protected String getMark(HttpServletRequest request) {
         return null;
     }
 
     /**
      * 获取防抖等效凭证
      */
-    protected String getEquivalentVoucher(JoinPoint joinPoint, Deduplication deduplication) {
+    protected String getEquivalentVoucher(HttpServletRequest request, Deduplication deduplication) {
         EquivalentVoucherType[] equivalentVoucherTypes = deduplication.equivalentVoucherTypes();
         if (ObjectUtils.isEmpty(equivalentVoucherTypes)) {
             return null;
@@ -65,58 +66,48 @@ public abstract class BaseRedisDeduplicationAspect extends BaseDeduplicationAspe
             return null;
         }
         return Arrays.stream(equivalentVoucherTypes)
-                .map(equivalentVoucherType -> this.getEquivalentVoucher(joinPoint, equivalentVoucherType))
-                // 序列化
+                .map(equivalentVoucherType -> this.getEquivalentVoucher(request, equivalentVoucherType))
                 .map(this::serialize)
-                // md5
                 .map(DigestUtils::md5DigestAsHex)
                 .collect(Collectors.joining("-"));
     }
 
     @SneakyThrows
-    private Object getEquivalentVoucher(JoinPoint joinPoint, EquivalentVoucherType equivalentVoucherType) {
-        if (equivalentVoucherType == EquivalentVoucherType.NONE) {
-            return null;
+    private Object getEquivalentVoucher(HttpServletRequest request, EquivalentVoucherType equivalentVoucherType) {
+        switch (equivalentVoucherType) {
+            case AUTO:
+                return Stream.of(EquivalentVoucherType.REQUEST_METHOD, EquivalentVoucherType.REQUEST_URI, EquivalentVoucherType.REQUEST_PARAMS, EquivalentVoucherType.REQUEST_BODY)
+                        .map(type -> this.getEquivalentVoucher(request, type))
+                        .collect(Collectors.toList());
+            case CUSTOM:
+                return this.getCustomEquivalentVoucher(request);
+            case REQUEST_METHOD:
+                return request.getMethod();
+            case REQUEST_URI:
+                return request.getRequestURI();
+            case REQUEST_PARAMS:
+                return request.getParameterMap();
+            case REQUEST_BODY:
+                try {
+                    return request.getInputStream();
+                } catch (IllegalStateException ignored) {
+                    return request.getReader();
+                }
+            case REQUEST_HEADERS:
+                Enumeration<String> headerNames = request.getHeaderNames();
+                HttpHeaders headers = new HttpHeaders();
+                while (headerNames.hasMoreElements()) {
+                    String headerName = headerNames.nextElement();
+                    headers.add(headerName, request.getHeader(headerName));
+                }
+                return headers;
+            case REQUEST_COOKIES:
+                Cookie[] cookies = request.getCookies();
+                return Arrays.stream(cookies)
+                        .collect(Collectors.toMap(Cookie::getName, Cookie::getValue));
+            default:
+                return null;
         }
-        if (equivalentVoucherType == EquivalentVoucherType.AUTO) {
-            return joinPoint.getArgs();
-        }
-        if (equivalentVoucherType == EquivalentVoucherType.CUSTOM) {
-            return this.getCustomEquivalentVoucher(joinPoint);
-        }
-        HttpServletRequest request = RequestUtil.getHttpServletRequestOpt()
-                .orElseThrow(() -> new CommonException("HttpServletRequest is null"));
-        if (equivalentVoucherType == EquivalentVoucherType.REQUEST_METHOD) {
-            return request.getMethod();
-        }
-        if (equivalentVoucherType == EquivalentVoucherType.REQUEST_URI) {
-            return request.getRequestURI();
-        }
-        if (equivalentVoucherType == EquivalentVoucherType.REQUEST_PARAMS) {
-            return request.getParameterMap();
-        }
-        if (equivalentVoucherType == EquivalentVoucherType.REQUEST_BODY) {
-            try {
-                return request.getInputStream();
-            } catch (IllegalStateException ignored) {
-                return request.getReader();
-            }
-        }
-        if (equivalentVoucherType == EquivalentVoucherType.REQUEST_HEADERS) {
-            Enumeration<String> headerNames = request.getHeaderNames();
-            HttpHeaders headers = new HttpHeaders();
-            while (headerNames.hasMoreElements()) {
-                String headerName = headerNames.nextElement();
-                headers.add(headerName, request.getHeader(headerName));
-            }
-            return headers;
-        }
-        if (equivalentVoucherType == EquivalentVoucherType.REQUEST_COOKIES) {
-            Cookie[] cookies = request.getCookies();
-            return Arrays.stream(cookies)
-                    .collect(Collectors.toMap(Cookie::getName, Cookie::getValue));
-        }
-        return null;
     }
 
     /**
@@ -124,7 +115,7 @@ public abstract class BaseRedisDeduplicationAspect extends BaseDeduplicationAspe
      * <p>
      * 如果指定 {@link EquivalentVoucherType} 为 CUSTOM，需要重写
      */
-    protected Object getCustomEquivalentVoucher(JoinPoint joinPoint) {
+    protected Object getCustomEquivalentVoucher(HttpServletRequest request) {
         return null;
     }
 

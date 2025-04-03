@@ -1,7 +1,9 @@
-package org.zero.common.core.support.api.debouncing;
+package org.zero.common.core.support.api.debouncing.interceptor;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.web.method.HandlerMethod;
+import org.zero.common.core.support.api.debouncing.annotation.Debouncing;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -10,20 +12,20 @@ import javax.servlet.http.HttpServletRequest;
  * @since 2024/9/23
  */
 @RequiredArgsConstructor
-public class RedisTemplateDebouncingInterceptor extends BaseRedisDebouncingInterceptor {
+public class RedisTemplateDebouncingInterceptor extends BaseDebouncingInterceptor {
     @SuppressWarnings("rawtypes")
     protected final RedisTemplate redisTemplate;
 
     @Override
     @SuppressWarnings("unchecked")
-    public boolean needPrevent(HttpServletRequest request, Debouncing debouncing) {
-        String key = this.getKey(request, debouncing);
+    public boolean isPermit(HttpServletRequest request, HandlerMethod handlerMethod, Debouncing debouncing) {
+        String key = this.getKey(request, handlerMethod, debouncing);
         Boolean hasKey = redisTemplate.hasKey(key);
         if (Boolean.TRUE.equals(hasKey)) {
-            return true;
+            return false;
         }
-        Object value = this.getValue(request, debouncing);
+        Object value = this.getValue(request, handlerMethod, debouncing);
         redisTemplate.boundValueOps(key).set(value, debouncing.interval(), debouncing.timeUnit());
-        return false;
+        return true;
     }
 }

@@ -277,6 +277,16 @@
             <artifactId>redisson</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>com.googlecode.juniversalchardet</groupId>
+            <artifactId>juniversalchardet</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>kryo</artifactId>
+            <optional>true</optional>
+        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>

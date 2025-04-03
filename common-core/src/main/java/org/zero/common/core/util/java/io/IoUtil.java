@@ -3,10 +3,12 @@ package org.zero.common.core.util.java.io;
 import lombok.SneakyThrows;
 import org.zero.common.core.extension.java.io.NullOutputStream;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 
 /**
  * @author Zero (cnzeropro@163.com)
@@ -78,6 +80,22 @@ public class IoUtil {
      */
     public static long copy(final InputStream in, final OutputStream out) {
         return copy(in, out, DEFAULT_BUFFER_SIZE);
+    }
+
+    public static byte[] readAll(InputStream in) {
+        return readAll(in, false);
+    }
+
+    @SneakyThrows
+    public static byte[] readAll(InputStream in, boolean closeIn) {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            copy(in, out, closeIn);
+            return out.toByteArray();
+        }
+    }
+
+    public static String readAll(Reader reader, boolean close) {
+
     }
 
     /**

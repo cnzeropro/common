@@ -1,8 +1,6 @@
 package org.zero.common.core.util.java.reflect;
 
-import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -16,10 +14,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * @author zero
- * @since 2021/4/30
+ * @author Zero (cnzeropro@163.com)
+ * @since 2025/4/1
  */
-public class ReflectUtil {
+public class MemberUtil {
     // 访问权限比较器（按访问权限从高到低排序：public → protected → default → private）
     public static final Comparator<Member> ACCESSIBLE_COMPARATOR = Comparator.comparingInt(member -> {
         int mod = member.getModifiers();
@@ -30,45 +28,26 @@ public class ReflectUtil {
     });
 
     /**
-     * 禁止 Java 的默认访问权限检查机制
-     */
-    public static <T extends AccessibleObject> T setAccessible(final T accessibleObject) {
-        if (Objects.nonNull(accessibleObject) && !accessibleObject.isAccessible()) {
-            accessibleObject.setAccessible(true);
-        }
-        return accessibleObject;
-    }
-
-    /**
-     * 恢复 Java 的默认访问权限检查机制
-     */
-    public static <T extends AccessibleObject> T setInaccessible(final T accessibleObject) {
-        if (Objects.nonNull(accessibleObject) && accessibleObject.isAccessible()) {
-            accessibleObject.setAccessible(false);
-        }
-        return accessibleObject;
-    }
-
-    /**
-     * 获取方法或者构造器全限定名
+     * 获取实例
      *
-     * @param executable 方法或构造器
-     * @return 全限定名
+     * @param clazz 类对象
+     * @param <T>   类型
+     * @return 实例
      */
-    public static String getFullName(Executable executable) {
-        // 类的全限定名
-        String className = executable.getDeclaringClass().getName();
-        // 方法名
-        String executableName = executable.getName();
-        // 参数类型列表（全限定名）
-        String params = Arrays.stream(executable.getParameterTypes())
-                .map(Class::getName)
-                .collect(Collectors.joining(", "));
-        return String.format("%s.%s(%s)", className, executableName, params);
+    public static <T> T getInstance(Class<T> clazz) {
+        return getInstance(clazz, false);
     }
 
-    public static <T> T getInstance(Class<T> clazz) {
-        return getInstanceOpt(clazz).orElse(null);
+    /**
+     * 获取实例
+     *
+     * @param clazz            类对象
+     * @param quietIfException 是否安静处理（不抛出异常）
+     * @param <T>              类型
+     * @return 实例
+     */
+    public static <T> T getInstance(Class<T> clazz, boolean quietIfException) {
+        return getInstanceOpt(clazz, quietIfException).orElse(null);
     }
 
     /**
@@ -79,11 +58,23 @@ public class ReflectUtil {
      * @return 实例 {@link Optional}
      */
     public static <T> Optional<T> getInstanceOpt(Class<T> clazz) {
+        return getInstanceOpt(clazz, true);
+    }
+
+    /**
+     * 获取实例 {@link Optional}
+     *
+     * @param clazz            类对象
+     * @param quietIfException 是否安静处理（不抛出异常）
+     * @param <T>              类型
+     * @return 实例 {@link Optional}
+     */
+    public static <T> Optional<T> getInstanceOpt(Class<T> clazz, boolean quietIfException) {
         List<Member> members = new ArrayList<>();
         // 从静态构造方法获取
         List<Field> fields = FieldUtil.getStaticFields(clazz, false)
                 .stream()
-                .filter(field -> Objects.equals(field.getType(), clazz))
+                .filter(field -> ClassUtil.isAssignable(field.getType(), clazz))
                 .collect(Collectors.toList());
         members.addAll(fields);
         // 从静态方法获取
@@ -107,19 +98,19 @@ public class ReflectUtil {
         for (Member member : members) {
             Object obj = null;
             if (member instanceof Field) {
-                obj = FieldUtil.getStaticFieldValue((Field) member);
+                obj = FieldUtil.getStaticFieldValue((Field) member, quietIfException);
             } else if (member instanceof Method) {
                 Method method = (Method) member;
                 Object[] parameters = Arrays.stream(method.getParameterTypes())
                         .map(ClassUtil::getDefaultValue)
                         .toArray();
-                obj = MethodUtil.invokeStatic(method, parameters);
+                obj = MethodUtil.invokeStatic(method, quietIfException, parameters);
             } else if (member instanceof Constructor) {
                 Constructor<?> constructor = (Constructor<?>) member;
                 Object[] parameters = Arrays.stream(constructor.getParameterTypes())
                         .map(ClassUtil::getDefaultValue)
                         .toArray();
-                obj = ConstructorUtil.newInstance(constructor, parameters);
+                obj = ConstructorUtil.newInstance(constructor, quietIfException, parameters);
             }
             if (Objects.nonNull(obj)) {
                 T instance = ClassUtil.cast(obj, clazz);
@@ -127,9 +118,5 @@ public class ReflectUtil {
             }
         }
         return Optional.empty();
-    }
-
-    protected ReflectUtil() {
-        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
 }
