@@ -17,7 +17,7 @@ public abstract class BaseTextCaptchaCreator<T extends BaseTextCaptchaCreator<T>
     protected String[] texts;
 
     public  T createTexts(){
-        throw new IllegalStateException("Method not implemented");
+        throw new UnsupportedOperationException("Method not implemented");
     }
 
     @Override

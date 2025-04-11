@@ -95,6 +95,7 @@ public class DecryptionRequestBodyAdvice extends RequestBodyAdviceAdapter implem
             charset = Optional.of(inputMessage.getHeaders())
                     .map(HttpHeaders::getContentType)
                     .map(MediaType::getCharset)
+                    // org.apache.coyote.Constants.DEFAULT_BODY_CHARSET
                     .orElse(StandardCharsets.ISO_8859_1);
         }
         InputStream in = inputMessage.getBody();

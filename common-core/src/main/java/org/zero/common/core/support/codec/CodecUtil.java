@@ -9,7 +9,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.CipherMode;
 import cn.hutool.crypto.KeyUtil;
-import lombok.experimental.UtilityClass;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.zero.common.core.support.cache.Cache;
 import org.zero.common.core.support.cache.MapCache;
 import org.zero.common.core.support.codec.decryption.Decryption;
@@ -29,7 +29,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -39,12 +38,11 @@ import java.util.stream.Collectors;
  * @author Zero (cnzeropro@163.com)
  * @since 2025/3/24
  */
-@UtilityClass
 public class CodecUtil {
     public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
     public static final String DEFAULT_ALGORITHM_SEPARATOR = "/";
 
-    private static final Cache<String, CodecStrategy> CACHE = MapCache.of(HashMap::new);
+    protected static final Cache<String, CodecStrategy> CACHE = MapCache.of(ConcurrentReferenceHashMap::new);
 
     public static byte[] encrypt(byte[] data, Executable executable, Encryption encryption, CodecProperties.CodecConfiguration config) {
         CodecContext codecContext = toCodecContext(encryption, config);
@@ -259,5 +257,9 @@ public class CodecUtil {
             config = configMap.get(executableName);
         }
         return config;
+    }
+
+    protected CodecUtil() {
+        throw new UnsupportedOperationException();
     }
 }

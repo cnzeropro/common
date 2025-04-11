@@ -78,7 +78,7 @@ public abstract class BaseCaptchaCreator<T extends BaseCaptchaCreator<T>> {
      */
     protected BufferedImage bufferedImage;
     /**
-     * 图片Base64字符串
+     * 图片 Base64 字符串
      */
     protected String imgBase64;
 
@@ -91,7 +91,7 @@ public abstract class BaseCaptchaCreator<T extends BaseCaptchaCreator<T>> {
     }
 
     public T createImg(int width, int height, int line, int point) {
-        throw new IllegalStateException("Method not implemented");
+        throw new UnsupportedOperationException("Method not implemented");
     }
 
     public T createBase64() {

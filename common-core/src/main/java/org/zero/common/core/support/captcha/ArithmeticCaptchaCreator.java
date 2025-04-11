@@ -6,7 +6,7 @@ public class ArithmeticCaptchaCreator extends BaseTextCaptchaCreator<ArithmeticC
      */
     protected static final int NUM_BOUND = 50;
 
-    public static ArithmeticCaptchaCreator creator() {
+    public static ArithmeticCaptchaCreator create() {
         return new ArithmeticCaptchaCreator();
     }
 

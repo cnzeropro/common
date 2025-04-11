@@ -1,6 +1,7 @@
 package org.zero.common.core.support.xss;
 
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.zero.common.core.support.xss.processor.XssMode;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -11,7 +12,7 @@ import java.io.IOException;
 /**
  * XSS 过滤器
  * <p>
- * 支持配置项：{@code sys.web.xss.mode}，参见：{@link Mode}
+ * 支持配置项：{@code sys.web.xss.mode}，参见：{@link XssMode}
  *
  * @author zero
  * @since 2022/2/23
@@ -19,7 +20,7 @@ import java.io.IOException;
 public class XssFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        Mode mode = this.getEnvironment().getProperty("sys.web.xss.mode", Mode.class, Mode.FILTER);
-        filterChain.doFilter(new XssHttpServletRequestWrapper(request, mode), response);
+        XssMode xssMode = this.getEnvironment().getProperty("sys.web.xss.mode", XssMode.class, XssMode.FILTER);
+        filterChain.doFilter(new XssHttpServletRequestWrapper(request, xssMode), response);
     }
 }

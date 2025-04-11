@@ -1,7 +1,7 @@
 package org.zero.common.core.support.xss;
 
 import org.junit.jupiter.api.Test;
-import org.zero.common.core.support.xss.XssChecker;
+import org.zero.common.core.support.xss.processor.XssChecker;
 
 /**
  * @author Zero (cnzeropro@163.com)

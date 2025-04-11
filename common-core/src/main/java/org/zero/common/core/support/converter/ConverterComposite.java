@@ -52,10 +52,12 @@ public class ConverterComposite {
                 .filter(clazz -> !clazz.isInterface())
                 .filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()))
                 .map(clazz -> {
-                    Optional<GenericConverter<?>> converterOpt = FieldUtil.getFilteredFields(clazz, field -> Objects.equals(field.getType(), clazz))
+                    Optional<GenericConverter<?>> converterOpt = FieldUtil.getStaticFields(clazz)
                             .stream()
+                            .filter(field -> ClassUtil.isAssignable(field.getType(), clazz))
                             .findFirst()
                             .map(field -> FieldUtil.getStaticFieldValue(field, GenericConverter.class));
+
                     if (converterOpt.isPresent()) {
                         return converterOpt.get();
                     }

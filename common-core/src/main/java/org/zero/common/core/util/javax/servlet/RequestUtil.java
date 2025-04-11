@@ -92,9 +92,19 @@ public class RequestUtil {
     }
 
     @SneakyThrows
-    public static byte[] getStringBody(HttpServletRequest request) {
+    public static char[] getCharBody(HttpServletRequest request) {
         BufferedReader reader = request.getReader();
-        return IoUtil.readAll(inputStream, true);
+        return IoUtil.readAll(reader, true);
+    }
+
+    public static int[] getCodePointBody(HttpServletRequest request) {
+        String body = getStringBody(request);
+        return body.codePoints().toArray();
+    }
+
+    public static String getStringBody(HttpServletRequest request) {
+        char[] body = getCharBody(request);
+        return new String(body);
     }
 
     protected RequestUtil() {

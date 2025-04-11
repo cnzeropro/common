@@ -6,6 +6,8 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.CharsetUtil;
+import org.zero.common.core.support.xss.processor.Type;
+import org.zero.common.core.support.xss.processor.XssProcessor;
 
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
@@ -24,47 +26,47 @@ import java.util.Map;
  * @since 2022/2/23
  */
 public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
-    protected final Mode mode;
+    protected final XssProcessor processor;
 
-    public XssHttpServletRequestWrapper(HttpServletRequest request, Mode mode) {
+    public XssHttpServletRequestWrapper(HttpServletRequest request, XssProcessor processor) {
         super(request);
-        this.mode = mode;
+        this.processor = processor;
     }
 
     @Override
     public String getRequestURI() {
         String requestURI = super.getRequestURI();
-        return this.mode.apply(requestURI);
+        return this.processor.process(requestURI, Type.URI);
     }
 
     @Override
     public StringBuffer getRequestURL() {
         StringBuffer requestURL = super.getRequestURL();
-        return new StringBuffer(this.mode.apply(requestURL.toString()));
+        return new StringBuffer(this.processor.process(requestURL.toString(), Type.URL));
     }
 
     @Override
     public String getHeader(String name) {
         String header = super.getHeader(name);
-        return this.mode.apply(header);
+        return this.processor.process(header, Type.HEADER);
     }
 
     @Override
     public Enumeration<String> getHeaders(String name) {
         Enumeration<String> headers = super.getHeaders(name);
-        return new IteratorEnumeration<>(IterUtil.trans(IterUtil.asIterator(headers), this.mode::apply));
+        return new IteratorEnumeration<>(IterUtil.trans(IterUtil.asIterator(headers), header -> this.processor.process(header, Type.HEADER)));
     }
 
     @Override
     public String getParameter(String name) {
         String parameter = super.getParameter(name);
-        return this.mode.apply(parameter);
+        return this.processor.process(parameter, Type.PARAM);
     }
 
     @Override
     public String[] getParameterValues(String name) {
         String[] parameterValues = super.getParameterValues(name);
-        return ArrayUtil.map(parameterValues, String.class, this.mode::apply);
+        return ArrayUtil.map(parameterValues, String.class, parameter -> this.processor.process(parameter, Type.PARAM));
     }
 
     @Override
@@ -78,7 +80,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
             @Override
             public String[] getValue() {
-                return ArrayUtil.map(e.getValue(), String.class, XssHttpServletRequestWrapper.this.mode::apply);
+                return ArrayUtil.map(e.getValue(), String.class, parameter -> XssHttpServletRequestWrapper.this.processor.process(parameter, Type.PARAM));
             }
 
             @Override
@@ -94,7 +96,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     @Override
     public String getQueryString() {
         String queryString = super.getQueryString();
-        return this.mode.apply(queryString);
+        return this.processor.process(queryString, Type.QUERY_STRING);
     }
 
     /**
@@ -105,7 +107,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
         String characterEncoding = super.getCharacterEncoding();
         ServletInputStream inputStream = super.getInputStream();
         Charset charset = CharsetUtil.charset(characterEncoding);
-        String result = this.mode.apply(IoUtil.read(inputStream, charset));
+        String result = this.processor.process(IoUtil.read(inputStream, charset), Type.BODY_INPUT_STREAM);
         final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(result.getBytes(characterEncoding));
         return new ServletInputStream() {
             @Override
@@ -139,7 +141,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     public BufferedReader getReader() throws IOException {
         BufferedReader reader = super.getReader();
         String input = IoUtil.read(reader);
-        String result = this.mode.apply(input);
+        String result = this.processor.process(input, Type.BODY_READER);
         return new BufferedReader(new StringReader(result));
     }
 }

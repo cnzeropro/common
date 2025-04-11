@@ -85,7 +85,6 @@ public class ResultResponseBodyAdvice implements ResponseBodyAdvice<Object>, Ord
                 body instanceof ResponseEntity) {
             return body;
         }
-
         return Result.ok(body);
     }
 

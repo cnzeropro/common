@@ -43,4 +43,8 @@ public class CodecStrategyFactory {
                     .orElseThrow(() -> new CommonException("Cannot instantiate: " + clazz));
         }
     }
+
+    protected CodecStrategyFactory () {
+        throw new UnsupportedOperationException();
+    }
 }
