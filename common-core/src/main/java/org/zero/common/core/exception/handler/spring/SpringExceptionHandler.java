@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.zero.common.core.exception.ThrowableMessageProvider;
 import org.zero.common.data.model.view.Result;
 
 import java.util.List;
@@ -24,7 +25,11 @@ import java.util.stream.Stream;
 @Slf4j
 @RestControllerAdvice
 @ConditionalOnWebApplication
-public class SpringExceptionHandler {
+public class SpringExceptionHandler extends AbstractThrowableHandler {
+    public SpringExceptionHandler(ThrowableMessageProvider throwableMessageProvider) {
+        super(throwableMessageProvider);
+    }
+
     /* *************************************************** Spring 异常 *************************************************** */
     @ExceptionHandler(org.springframework.validation.BindException.class)
     public Result<Void> bindException(org.springframework.validation.BindException e) {
@@ -34,6 +39,6 @@ public class SpringExceptionHandler {
                 .map(ObjectError::getDefaultMessage)
                 .collect(Collectors.joining(" | ", "[", "]"));
         log.error(String.format("Data binding exception: %s", errorMsg), e);
-        return Result.fail(HttpStatus.BAD_REQUEST.value(), String.format("数据绑定异常：%s", errorMsg));
+        return this.handleThrowable(HttpStatus.BAD_REQUEST, e, new Object[]{errorMsg});
     }
 }

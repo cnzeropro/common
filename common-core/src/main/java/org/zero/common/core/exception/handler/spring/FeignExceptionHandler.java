@@ -7,8 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.zero.common.core.exception.ThrowableMessageProvider;
 import org.zero.common.data.model.view.Result;
 
+import java.util.Collections;
 import java.util.Optional;
 
 /**
@@ -22,19 +24,23 @@ import java.util.Optional;
 @Slf4j
 @RestControllerAdvice
 @ConditionalOnWebApplication
-public class FeignExceptionHandler {
+public class FeignExceptionHandler extends AbstractThrowableHandler {
+    public FeignExceptionHandler(ThrowableMessageProvider throwableMessageProvider) {
+        super(throwableMessageProvider);
+    }
+
     /* *************************************************** Feign异常 *************************************************** */
 
     @ExceptionHandler(feign.codec.EncodeException.class)
     public Result<Void> encodeException(feign.codec.EncodeException e) {
         log.error("Feign encode exception", e);
-        return Result.fail("编码参数异常");
+        return this.handleThrowable(e);
     }
 
     @ExceptionHandler(feign.codec.DecodeException.class)
     public Result<Void> decodeException(feign.codec.DecodeException e) {
         log.error("Feign decode exception", e);
-        return Result.fail("解码响应异常");
+        return this.handleThrowable(e);
     }
 
     @ExceptionHandler(feign.FeignException.class)
@@ -45,6 +51,6 @@ public class FeignExceptionHandler {
                 .map(RequestTemplate::feignTarget)
                 .map(Target::name)
                 .orElse("unknown");
-        return Result.fail(e.status(), String.format("微服务[%s]调用失败", feignServiceName));
+        return this.handleThrowable(e.status(), e, Collections.singletonList(feignServiceName));
     }
 }

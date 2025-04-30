@@ -29,7 +29,7 @@ public final class Result<T> implements BaseResult<T> {
     /**
      * 用户提示信息
      */
-    private String message;
+    private CharSequence message;
     /**
      * 错误信息
      */
@@ -58,11 +58,11 @@ public final class Result<T> implements BaseResult<T> {
         return ok(OK_MSG, data);
     }
 
-    public static <T> Result<T> ok(String message) {
+    public static <T> Result<T> ok(CharSequence message) {
         return ok(message, null);
     }
 
-    public static <T> Result<T> ok(String message, T data) {
+    public static <T> Result<T> ok(CharSequence message, T data) {
         return of(OK_CODE, message, BaseSysError.DefaultSysError.OK, data);
     }
 
@@ -71,7 +71,7 @@ public final class Result<T> implements BaseResult<T> {
         return error((T) null);
     }
 
-    public static <T> Result<T> error(String message) {
+    public static <T> Result<T> error(CharSequence message) {
         return error(message, (T) null);
     }
 
@@ -83,11 +83,11 @@ public final class Result<T> implements BaseResult<T> {
         return error(ERROR_MSG, data);
     }
 
-    public static <T> Result<T> error(String message, BaseSysError error) {
+    public static <T> Result<T> error(CharSequence message, BaseSysError error) {
         return error(message, error, null);
     }
 
-    public static <T> Result<T> error(String message, T data) {
+    public static <T> Result<T> error(CharSequence message, T data) {
         return error(message, BaseSysError.DefaultSysError.ERROR, data);
     }
 
@@ -95,7 +95,7 @@ public final class Result<T> implements BaseResult<T> {
         return error(ERROR_MSG, error, data);
     }
 
-    public static <T> Result<T> error(String message, BaseSysError error, T data) {
+    public static <T> Result<T> error(CharSequence message, BaseSysError error, T data) {
         return of(ERROR_CODE, message, error, data);
     }
 
@@ -104,29 +104,29 @@ public final class Result<T> implements BaseResult<T> {
         return fail(FAIL_MSG);
     }
 
-    public static <T> Result<T> fail(String message) {
+    public static <T> Result<T> fail(CharSequence message) {
         return fail(FAIL_CODE, message);
     }
 
-    public static <T> Result<T> fail(String message, BaseSysError error) {
+    public static <T> Result<T> fail(CharSequence message, BaseSysError error) {
         return fail(FAIL_CODE, message, error);
     }
 
-    public static <T> Result<T> fail(int code, String message) {
+    public static <T> Result<T> fail(int code, CharSequence message) {
         return fail(code, message, BaseSysError.DefaultSysError.ERROR);
     }
 
-    public static <T> Result<T> fail(int code, String message, BaseSysError error) {
+    public static <T> Result<T> fail(int code, CharSequence message, BaseSysError error) {
         return of(code, message, error, null);
     }
 
     /* ******************************************************** 通用构造 ******************************************************** */
 
-    public static <T> Result<T> of(int code, String message, BaseSysError error, T data) {
+    public static <T> Result<T> of(int code, CharSequence message, BaseSysError error, T data) {
         return of(code, message, error, LocalDateTime.now(), data);
     }
 
-    public static <T> Result<T> of(int code, String message, BaseSysError error, LocalDateTime time, T data) {
+    public static <T> Result<T> of(int code, CharSequence message, BaseSysError error, LocalDateTime time, T data) {
         boolean success = OK_CODE == code;
         if (Objects.nonNull(error)) {
             success = success && error.isOk();
@@ -134,11 +134,11 @@ public final class Result<T> implements BaseResult<T> {
         return of(code, message, error, success, time, data);
     }
 
-    public static <T> Result<T> of(int code, String message, BaseSysError error, boolean success, T data) {
+    public static <T> Result<T> of(int code, CharSequence message, BaseSysError error, boolean success, T data) {
         return of(code, message, error, success, LocalDateTime.now(), data);
     }
 
-    public static <T> Result<T> of(int code, String message, BaseSysError error, boolean success, LocalDateTime time, T data) {
+    public static <T> Result<T> of(int code, CharSequence message, BaseSysError error, boolean success, LocalDateTime time, T data) {
         return Result.<T>builder()
                 .code(code)
                 .message(message)

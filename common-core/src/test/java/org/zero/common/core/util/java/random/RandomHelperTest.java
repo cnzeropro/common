@@ -1,6 +1,7 @@
 package org.zero.common.core.util.java.random;
 
 import org.junit.jupiter.api.Test;
+import org.zero.common.core.util.java.util.RandomHelper;
 
 /**
  * @author Zero (cnzeropro@qq.com)

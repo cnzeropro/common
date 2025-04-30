@@ -103,7 +103,7 @@ public class CodecUtil {
 
     protected static CodecStrategy getCodecStrategy(Executable executable, CodecContext codecContext) {
         String name = String.format("%s|%s", ExecutableUtil.getFullName(executable), codecContext.getCipherMode());
-        return CACHE.mapAndSetIfAbsent(name, n -> createCodecStrategy(codecContext));
+        return CACHE.mapAndPutIfAbsent(name, n -> createCodecStrategy(codecContext));
     }
 
     protected static CodecStrategy createCodecStrategy(CodecContext codecContext) {

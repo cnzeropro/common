@@ -9,11 +9,15 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.zero.common.core.support.log.LogLevel;
-import org.zero.common.core.support.log.LogTracker;
-import org.zero.common.core.extension.spring.webmvc.DynamicBean;
-import org.zero.common.core.extension.spring.webmvc.DynamicBeanParam;
-import org.zero.common.core.extension.spring.webmvc.JsonObjectParam;
+import org.zero.common.core.extension.common.query.converter.StringToFieldConverter;
+import org.zero.common.core.extension.common.query.converter.StringToOperatorConverter;
+import org.zero.common.core.extension.spring.web.method.support.JsonObjectArgumentResolvers;
+import org.zero.common.core.extension.spring.web.method.support.JsonObjectParam;
+import org.zero.common.core.support.bean.dynamic.DynamicBean;
+import org.zero.common.core.support.bean.dynamic.DynamicBeanArgumentResolver;
+import org.zero.common.core.support.bean.dynamic.DynamicBeanParam;
+import org.zero.common.core.support.log.tracker.LogLevel;
+import org.zero.common.core.support.log.tracker.LogTracker;
 import org.zero.common.data.model.query.BaseQO;
 import org.zero.common.data.model.query.PageQO;
 import org.zero.common.data.model.view.Result;
@@ -31,8 +35,8 @@ import java.util.List;
 @RequestMapping("query")
 public class QueryController {
     /**
-     * @see org.zero.common.core.support.common.query.converter.StringToFieldConverter
-     * @see org.zero.common.core.support.common.query.converter.StringToOperatorConverter
+     * @see StringToFieldConverter
+     * @see StringToOperatorConverter
      */
     @LogTracker(LogLevel.INFO)
     @GetMapping("q1")
@@ -41,7 +45,7 @@ public class QueryController {
     }
 
     /**
-     * @see org.zero.common.core.extension.spring.webmvc.DynamicBeanArgumentResolver
+     * @see DynamicBeanArgumentResolver
      */
     @GetMapping("q2")
     public Result<DynamicBean> q2(@DynamicBeanParam DynamicBean param) {
@@ -55,7 +59,7 @@ public class QueryController {
     }
 
     /**
-     * @see org.zero.common.core.extension.spring.webmvc.JsonObjectArgumentResolvers.HutoolJsonArgumentResolver
+     * @see JsonObjectArgumentResolvers.HutoolJsonArgumentResolver
      */
     @GetMapping("q3")
     public Result<JSONObject> q3(@JsonObjectParam JSONObject param) {
@@ -65,7 +69,7 @@ public class QueryController {
     }
 
     /**
-     * @see org.zero.common.core.extension.spring.webmvc.JsonObjectArgumentResolvers.JacksonArgumentResolver
+     * @see JsonObjectArgumentResolvers.JacksonArgumentResolver
      */
     @GetMapping("q4")
     public Result<ObjectNode> q4(@JsonObjectParam ObjectNode param) {

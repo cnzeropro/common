@@ -20,8 +20,7 @@ public abstract class BaseIdempotentAspect {
      */
     public static final String KEY_PREFIX = "sys:idempotent";
 
-    @Before("@within(idempotent) || " +
-            "@annotation(idempotent)")
+    @Before("@annotation(idempotent) || @within(idempotent)")
     public void before(JoinPoint joinPoint, Idempotent idempotent) {
         if (idempotent.value()) {
             if (!this.isPermit(joinPoint, idempotent)) {
@@ -59,8 +58,7 @@ public abstract class BaseIdempotentAspect {
                 .orElse(DefaultMessageProvider.MESSAGE);
     }
 
-    @After("@within(idempotent) || " +
-            "@annotation(idempotent)")
+    @After("@annotation(idempotent) || @within(idempotent)")
     public void after(JoinPoint joinPoint, Idempotent idempotent) {
         this.afterInternal(joinPoint, idempotent);
     }

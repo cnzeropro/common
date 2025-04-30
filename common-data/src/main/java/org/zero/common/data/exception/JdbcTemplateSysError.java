@@ -3,12 +3,11 @@ package org.zero.common.data.exception;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
-import java.text.MessageFormat;
 import java.util.Locale;
-import java.util.Objects;
 
 /**
  * 使用前请先使用 {@link #setJdbcTemplate(JdbcTemplate)} 注册 {@link JdbcTemplate}，
@@ -30,18 +29,30 @@ public class JdbcTemplateSysError extends BaseSysError.DefaultSysError {
         return of(code, locale, args);
     }
 
+    public static JdbcTemplateSysError of(String code, String defaultMessage, Object... args) {
+        return of(code, defaultMessage, locale, args);
+    }
+
     public static JdbcTemplateSysError of(String code, Locale locale, Object... args) {
-        String message;
+        return of(code, null, locale, args);
+    }
+
+    public static JdbcTemplateSysError of(String code, String defaultMessage, Locale locale, Object... args) {
+        String message = null;
         try {
-            message = jdbcTemplate.queryForObject(querySql, String.class, code);
-            if (Objects.nonNull(message) && !ObjectUtils.isEmpty(args)) {
-                // message = MessageFormat.format(message, args);
-                MessageFormat messageFormat = new MessageFormat(message, locale);
-                message = messageFormat.format(args);
-            }
+            String messageTemplate = jdbcTemplate.queryForObject(querySql, String.class, code);
+            message = formatMessage(messageTemplate, locale, args);
+        } catch (EmptyResultDataAccessException ignored) {
+            // do nothing
         } catch (Exception e) {
             log.warn(String.format("Failed to query message with the code[%s] in SQL[%s]", code, querySql), e);
-            message = e.getMessage();
+            if (!StringUtils.hasText(defaultMessage)) {
+                message = e.getMessage();
+            }
+        } finally {
+            if (!StringUtils.hasText(defaultMessage)) {
+                message = formatMessage(defaultMessage, locale, args);
+            }
         }
         return new JdbcTemplateSysError(code, message);
     }

@@ -7,6 +7,8 @@ import cn.hutool.core.map.MapBuilder;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import org.junit.jupiter.api.Test;
+import org.zero.common.core.util.hutool.core.lang.tree.TreeUtil;
+import org.zero.common.core.util.hutool.poi.excel.ExcelUtil;
 import org.zero.common.data.exception.UtilException;
 
 import java.util.List;
@@ -49,7 +51,7 @@ class ExcelUtilTest {
                 .orElseThrow(() -> new UtilException("Data header is empty"));
 
         // 通过表头获取树节点列表
-        List<TreeNode<String>> treeNodes = TreeUtil.toTreeNodeList(keys, ".");
+        List<TreeNode<String>> treeNodes = TreeUtil.toTreeNodes(keys, ".");
 
         // 调整顺序
         // 注意：表头顺序调整后，需要保证和数据顺序相同，否则表头与数据不匹配

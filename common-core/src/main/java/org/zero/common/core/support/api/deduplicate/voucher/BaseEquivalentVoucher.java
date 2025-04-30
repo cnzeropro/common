@@ -3,6 +3,7 @@ package org.zero.common.core.support.api.deduplicate.voucher;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Output;
 import lombok.Cleanup;
+import lombok.SneakyThrows;
 import org.springframework.util.DigestUtils;
 import org.zero.common.core.support.api.deduplicate.annotation.Deduplicate;
 
@@ -37,6 +38,7 @@ public interface BaseEquivalentVoucher extends EquivalentVoucher {
      * @param source 凭证
      * @return 序列化后的凭证
      */
+    @SneakyThrows
     default byte[] serialize(Object source) {
         if (Objects.isNull(source)) {
             return new byte[0];

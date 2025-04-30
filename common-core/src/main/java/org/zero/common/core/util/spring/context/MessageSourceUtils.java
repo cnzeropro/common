@@ -5,14 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.util.StringUtils;
-import org.zero.common.core.util.spring.SpringUtils;
+import org.zero.common.core.support.context.spring.SpringUtils;
 
 import java.util.Locale;
 import java.util.Objects;
 
 /**
- * 相关参见：
- * MessageSource: {@link org.springframework.boot.autoconfigure.context.MessageSourceAutoConfiguration}
+ * 相关参见：<br>
+ * MessageSource: {@link org.springframework.boot.autoconfigure.context.MessageSourceAutoConfiguration}<br>
  * LocaleResolver: {@link org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration.EnableWebMvcConfiguration#localeResolver()}
  *
  * @author zero

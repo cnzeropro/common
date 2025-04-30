@@ -1,7 +1,7 @@
 package org.zero.common.core.util.java;
 
 import org.junit.jupiter.api.Test;
-import org.zero.common.core.extension.java.PropertiesEnhancer;
+import org.zero.common.core.extension.java.util.PropertiesEnhancer;
 
 /**
  * @author zero

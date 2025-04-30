@@ -20,7 +20,7 @@ public interface BaseResult<T> extends org.zero.common.data.model.transfer.BaseR
 
     int getCode();
 
-    String getMessage();
+    CharSequence getMessage();
 
     BaseSysError getError();
 

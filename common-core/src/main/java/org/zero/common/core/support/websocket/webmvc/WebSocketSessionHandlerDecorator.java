@@ -5,14 +5,14 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
-import org.zero.common.core.support.websocket.WebSocketSessionManager;
+import org.zero.common.core.support.websocket.BaseWebSocketSessionManager;
 
 /**
  * @author Zero (cnzeropro@163.com)
  * @since 2025/4/11
  */
 public class WebSocketSessionHandlerDecorator extends WebSocketHandlerDecorator {
-    private final WebSocketSessionManager<WebSocketSession> sessionManager;
+    private final BaseWebSocketSessionManager<WebSocketSession> sessionManager;
     /**
      * 发送时间限制，单位：ms
      */
@@ -28,13 +28,13 @@ public class WebSocketSessionHandlerDecorator extends WebSocketHandlerDecorator 
 
 
     public WebSocketSessionHandlerDecorator(WebSocketHandler delegate,
-                                            WebSocketSessionManager<WebSocketSession> sessionManager) {
+                                            BaseWebSocketSessionManager<WebSocketSession> sessionManager) {
         super(delegate);
         this.sessionManager = sessionManager;
     }
 
     public WebSocketSessionHandlerDecorator(WebSocketHandler delegate,
-                                            WebSocketSessionManager<WebSocketSession> sessionManager,
+                                            BaseWebSocketSessionManager<WebSocketSession> sessionManager,
                                             int sendTimeLimit,
                                             int bufferSizeLimit,
                                             ConcurrentWebSocketSessionDecorator.OverflowStrategy overflowStrategy) {
@@ -50,12 +50,12 @@ public class WebSocketSessionHandlerDecorator extends WebSocketHandlerDecorator 
         // session 支持并发，参考 https://blog.csdn.net/abu935009066/article/details/131218149
         session = new ConcurrentWebSocketSessionDecorator(session, sendTimeLimit, bufferSizeLimit, overflowStrategy);
         // 添加到 SessionManager 中
-        sessionManager.set(session.getId(), session);
+        sessionManager.add(session);
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
-        sessionManager.remove(session.getId());
+        sessionManager.delete(session);
     }
 }
 

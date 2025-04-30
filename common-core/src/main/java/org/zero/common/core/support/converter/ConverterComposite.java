@@ -1,6 +1,6 @@
 package org.zero.common.core.support.converter;
 
-import org.zero.common.core.extension.java.TypeReference;
+import org.zero.common.core.extension.java.lang.reflect.TypeReference;
 import org.zero.common.core.util.java.reflect.ClassUtil;
 import org.zero.common.core.util.java.reflect.ConstructorUtil;
 import org.zero.common.core.util.java.reflect.FieldUtil;

@@ -1,21 +1,25 @@
 package org.zero.common.core.util.java.reflect;
 
 import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.java.Log;
 import org.zero.common.core.util.java.lang.ArrayUtil;
+import org.zero.common.core.util.java.lang.CharSequenceUtil;
+import org.zero.common.data.constant.StringPool;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.logging.Level;
 
 /**
  * @author Zero (cnzeropro@163.com)
  * @since 2025/3/12
  */
-@Slf4j
+@Log
 @UtilityClass
 public class ClassLoaderUtil {
     /**
@@ -27,6 +31,12 @@ public class ClassLoaderUtil {
             ClassLoader.getSystemClassLoader(),
     };
 
+    public static ClassLoader getDefault() {
+        return Arrays.stream(DEFAULT_CLASS_LOADERS)
+                .filter(Objects::nonNull)
+                .findFirst().orElse(null);
+    }
+
     /**
      * 加载类
      * <p>
@@ -36,7 +46,7 @@ public class ClassLoaderUtil {
      * @param className 类名
      * @return 类对象，未成功时为 {@link Optional#EMPTY}
      */
-    public static Optional<Class<?>> loadClassOpt(String className) {
+    public static Optional<Class<?>> loadClassOpt(CharSequence className) {
         return loadClassOpt(className, DEFAULT_CLASS_LOADERS);
     }
 
@@ -49,8 +59,19 @@ public class ClassLoaderUtil {
      * @param classLoaders 类加载器
      * @return 类对象，未成功时为 {@link Optional#EMPTY}
      */
-    public static Optional<Class<?>> loadClassOpt(String className, ClassLoader... classLoaders) {
+    public static Optional<Class<?>> loadClassOpt(CharSequence className, ClassLoader... classLoaders) {
         return loadClassOpt(className, true, classLoaders);
+    }
+
+    /**
+     * 加载类
+     *
+     * @param className  类名
+     * @param initialize 是否初始化类（执行静态代码块和静态变量赋值）
+     * @return 类对象，未成功时为 {@link Optional#EMPTY}
+     */
+    public static Optional<Class<?>> loadClassOpt(CharSequence className, boolean initialize) {
+        return loadClassOpt(className, initialize, DEFAULT_CLASS_LOADERS);
     }
 
     /**
@@ -61,10 +82,10 @@ public class ClassLoaderUtil {
      * @param classLoaders 类加载器
      * @return 类对象，未成功时为 {@link Optional#EMPTY}
      */
-    public static Optional<Class<?>> loadClassOpt(String className, boolean initialize, ClassLoader... classLoaders) {
+    public static Optional<Class<?>> loadClassOpt(CharSequence className, boolean initialize, ClassLoader... classLoaders) {
         return Optional.of(Collections.singleton(className))
                 .map(classNames -> loadClass(classNames, initialize, classLoaders))
-                .map(map -> map.get(className));
+                .map(map -> map.get(Objects.toString(className, null)));
     }
 
     /**
@@ -76,7 +97,7 @@ public class ClassLoaderUtil {
      * @param classNames 类名
      * @return 类对象 {@link Map}，未成功时 {@code value} 为 {@code null}
      */
-    public static Map<String, Class<?>> loadClass(String... classNames) {
+    public static Map<String, Class<?>> loadClass(CharSequence... classNames) {
         return loadClass(Arrays.asList(classNames), DEFAULT_CLASS_LOADERS);
     }
 
@@ -89,8 +110,19 @@ public class ClassLoaderUtil {
      * @param classLoaders 类加载器
      * @return 类对象 {@link Map}，未成功时 {@code value} 为 {@code null}
      */
-    public static Map<String, Class<?>> loadClass(Collection<String> classNames, ClassLoader... classLoaders) {
+    public static <S extends CharSequence> Map<String, Class<?>> loadClass(Collection<S> classNames, ClassLoader... classLoaders) {
         return loadClass(classNames, true, classLoaders);
+    }
+
+    /**
+     * 加载类
+     *
+     * @param classNames 类名
+     * @param initialize 是否初始化类（执行静态代码块和静态变量赋值）
+     * @return 类对象 {@link Map}，未成功时 {@code value} 为 {@code null}
+     */
+    public static <S extends CharSequence> Map<String, Class<?>> loadClass(Collection<S> classNames, boolean initialize) {
+        return loadClass(classNames, initialize, DEFAULT_CLASS_LOADERS);
     }
 
     /**
@@ -101,23 +133,27 @@ public class ClassLoaderUtil {
      * @param classLoaders 类加载器
      * @return 类对象 {@link Map}，未成功时 {@code value} 为 {@code null}
      */
-    public static Map<String, Class<?>> loadClass(Collection<String> classNames, boolean initialize, ClassLoader... classLoaders) {
+    public static <S extends CharSequence> Map<String, Class<?>> loadClass(Collection<S> classNames, boolean initialize, ClassLoader... classLoaders) {
         if (ArrayUtil.isEmpty(classLoaders)) {
             classLoaders = DEFAULT_CLASS_LOADERS;
         }
         Map<String, Class<?>> classMap = new LinkedHashMap<>(classNames.size());
-        for (String className : classNames) {
+        for (CharSequence className : classNames) {
             Class<?> clazz = null;
-            for (ClassLoader classLoader : classLoaders) {
-                try {
-                    String name = className.replace('/', '.');
-                    clazz = Class.forName(name, initialize, classLoader);
-                    break;
-                } catch (Throwable throwable) {
-                    log.debug(String.format("Load class[%s] error, skipped", className), throwable);
+            if (CharSequenceUtil.nonBlank(className)) {
+                String name = className.toString();
+                if (name.contains(StringPool.SLASH)) {
+                    name = name.replace(StringPool.SLASH, StringPool.DOT);
+                }
+                for (ClassLoader classLoader : classLoaders) {
+                    try {
+                        clazz = Class.forName(name, initialize, classLoader);
+                    } catch (Throwable throwable) {
+                        log.log(Level.WARNING, String.format("Load class[%s] error, skipped", className), throwable);
+                    }
                 }
             }
-            classMap.put(className, clazz);
+            classMap.put(Objects.toString(className, null), clazz);
         }
         return classMap;
     }

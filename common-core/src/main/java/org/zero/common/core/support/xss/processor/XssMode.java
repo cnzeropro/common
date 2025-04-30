@@ -10,7 +10,7 @@ public enum XssMode implements XssProcessor {
      */
     CHECK {
         @Override
-        public String process(String value, Type type) {
+        public String process(String value, UnitType unitType) {
             XssChecker.checkOrElseThrow(value);
             return value;
         }
@@ -20,7 +20,7 @@ public enum XssMode implements XssProcessor {
      */
     ESCAPE {
         @Override
-        public String process(String value, Type type) {
+        public String process(String value, UnitType unitType) {
             // cn.hutool.core.util.EscapeUtil.escapeHtml4(value);
             return org.apache.commons.text.StringEscapeUtils.escapeHtml4(value);
         }
@@ -30,7 +30,7 @@ public enum XssMode implements XssProcessor {
      */
     FILTER {
         @Override
-        public String process(String value, Type type) {
+        public String process(String value, UnitType unitType) {
             return cn.hutool.http.HtmlUtil.filter(value);
         }
     },

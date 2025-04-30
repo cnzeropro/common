@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpResponse;
-import org.zero.common.core.util.jackson.JacksonUtils;
+import org.zero.common.core.util.jackson.databind.JacksonUtils;
 import org.zero.common.data.model.view.Result;
 
 /**

@@ -24,8 +24,7 @@ public abstract class BaseDebounceAspect {
      */
     public static final String KEY_PREFIX = "sys:debounce";
 
-    @Before("@within(debounce) || " +
-            "@annotation(debounce)")
+    @Before("@annotation(debounce) || @within(debounce)")
     public void before(JoinPoint joinPoint, Debounce debounce) {
         if (debounce.value()) {
             if (!this.isPermit(joinPoint, debounce)) {
@@ -97,8 +96,7 @@ public abstract class BaseDebounceAspect {
                 .orElse(DefaultMessageProvider.MESSAGE);
     }
 
-    @After("@within(debounce) || " +
-            "@annotation(debounce)")
+    @After("@annotation(debounce) || @within(debounce)")
     public void after(JoinPoint joinPoint, Debounce debounce) {
         this.afterInternal(joinPoint, debounce);
     }

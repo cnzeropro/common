@@ -8,12 +8,12 @@ import feign.Param;
 import feign.QueryMap;
 import feign.Request;
 import feign.RequestLine;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.PostConstruct;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  * @see feign.Contract.Default
  * @since 2024/3/8
  */
-public class CustomSpringMvcContract extends SpringMvcContract implements EnvironmentAware {
+public class CustomSpringMvcContract extends SpringMvcContract implements EnvironmentAware, InitializingBean {
     protected final List<GuardedAnnotationProcessor> classAnnotationProcessors = new ArrayList<>();
     protected final List<GuardedAnnotationProcessor> methodAnnotationProcessors = new ArrayList<>();
     protected final Map<Class<Annotation>, ParameterAnnotationProcessor<Annotation>> parameterAnnotationProcessors = new HashMap<>();
@@ -75,12 +75,16 @@ public class CustomSpringMvcContract extends SpringMvcContract implements Enviro
         this.environment = environment;
     }
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        this.init();
+    }
+
     /* ***************************************** Copy from feign.Contract.Default ***************************************** */
 
     protected static final Pattern REQUEST_LINE_PATTERN = Pattern.compile("^([A-Z]+)[ ]*(.*)$");
 
-    @PostConstruct
-    public void init() {
+    protected void init() {
         this.registerClassAnnotation(Headers.class, (header, data) -> {
             final String[] headersOnType = header.value();
             feign.Util.checkState(headersOnType.length > 0, "Headers annotation was empty on type %s.", data.configKey());

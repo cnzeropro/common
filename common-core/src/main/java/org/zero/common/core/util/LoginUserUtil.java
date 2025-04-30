@@ -1,9 +1,9 @@
 package org.zero.common.core.util;
 
-import lombok.experimental.UtilityClass;
-import org.zero.common.core.exception.AnyThrow;
-import org.zero.common.core.util.shiro.ShiroUtil;
-import org.zero.common.core.util.spring.security.SpringSecurityUtil;
+import org.zero.common.core.util.apache.shiro.ShiroUtil;
+import org.zero.common.core.util.java.lang.ThrowableUtil;
+import org.zero.common.core.util.spring.security.SecurityUtil;
+import org.zero.common.data.model.security.LoginUser;
 
 import java.io.Serializable;
 import java.util.Optional;
@@ -12,16 +12,23 @@ import java.util.Optional;
  * @author Zero (cnzeropro@163.com)
  * @since 2024/9/25
  */
-@UtilityClass
 public class LoginUserUtil {
-    public static Optional<Serializable> getIdOpt() {
-        // attempt to obtain from shiro
-        Optional<Serializable> userIdOpt = AnyThrow.ignoreOpt(ShiroUtil::getUserId);
-        if (userIdOpt.isPresent()) {
-            return userIdOpt;
-        }
+    public static Optional<LoginUser> getOpt() {
         // attempt to obtain from spring security
-        return AnyThrow.ignoreOpt(SpringSecurityUtil::getUserId);
+        Optional<LoginUser> userOpt = ThrowableUtil.ignoreOpt(SecurityUtil::getUser);
+        if (userOpt.isPresent()) {
+            return userOpt;
+        }
+        // attempt to obtain from shiro
+        return ThrowableUtil.ignoreOpt(ShiroUtil::getUser);
+    }
+
+    public static LoginUser get() {
+        return getOpt().orElse(null);
+    }
+
+    public static Optional<Serializable> getIdOpt() {
+        return getOpt().map(LoginUser::getId);
     }
 
     public static Serializable getId() {
@@ -29,16 +36,14 @@ public class LoginUserUtil {
     }
 
     public static Optional<String> getNameOpt() {
-        // attempt to obtain from shiro
-        Optional<String> usernameOpt = AnyThrow.ignoreOpt(ShiroUtil::getUsername);
-        if (usernameOpt.isPresent()) {
-            return usernameOpt;
-        }
-        // attempt to obtain from spring security
-        return AnyThrow.ignoreOpt(SpringSecurityUtil::getUsername);
+        return getOpt().map(LoginUser::getName);
     }
 
     public static String getName() {
         return getNameOpt().orElse(null);
+    }
+
+    protected LoginUserUtil() {
+        throw new UnsupportedOperationException();
     }
 }

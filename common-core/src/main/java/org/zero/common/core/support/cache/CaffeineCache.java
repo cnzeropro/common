@@ -21,12 +21,12 @@ public class CaffeineCache<K, V> implements Cache<K, V> {
     protected final com.github.benmanes.caffeine.cache.Cache<K, V> cache;
 
     @Override
-    public void set(K key, V value) {
+    public void put(K key, V value) {
         cache.put(key, value);
     }
 
     @Override
-    public void setAll(Map<? extends K, ? extends V> map) {
+    public void putAll(Map<? extends K, ? extends V> map) {
         cache.putAll(map);
     }
 
@@ -66,14 +66,9 @@ public class CaffeineCache<K, V> implements Cache<K, V> {
     }
 
     @Override
-    public long size() {
+    public Number size() {
         cache.cleanUp();
         return cache.estimatedSize();
-    }
-
-    @Override
-    public Duration ttl(K key) {
-        throw new UnsupportedOperationException();
     }
 
     public static <K, V> CaffeineCache<K, V> of(Caffeine<Object, Object> caffeine) {

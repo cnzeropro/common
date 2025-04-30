@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.zero.common.core.exception.ThrowableMessageProvider;
 import org.zero.common.data.model.view.Result;
 
 import javax.validation.ConstraintViolation;
@@ -24,7 +25,12 @@ import java.util.stream.Stream;
 @Slf4j
 @RestControllerAdvice
 @ConditionalOnWebApplication
-public class JavaxExceptionHandler {
+public class JavaxExceptionHandler extends AbstractThrowableHandler {
+
+    public JavaxExceptionHandler(ThrowableMessageProvider throwableMessageProvider) {
+        super(throwableMessageProvider);
+    }
+
     /* *************************************************** Javax 异常 *************************************************** */
     @ExceptionHandler(javax.validation.ConstraintViolationException.class)
     public Result<Void> constraintViolationException(javax.validation.ConstraintViolationException e) {
@@ -33,7 +39,7 @@ public class JavaxExceptionHandler {
                 .orElseGet(Stream::empty)
                 .map(ConstraintViolation::getMessage)
                 .collect(Collectors.joining(" | ", "[", "]"));
-        log.error(String.format("Parameter validation failed: %s", errorMsg), e);
-        return Result.fail(HttpStatus.BAD_REQUEST.value(), String.format("参数效验失败：%s", errorMsg));
+        log.error(String.format("Parameter validation not pass: %s", errorMsg), e);
+        return this.handleThrowable(HttpStatus.BAD_REQUEST, e, new Object[]{errorMsg});
     }
 }

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * @author Zero (cnzeropro@163.com)
@@ -13,13 +13,13 @@ import java.util.List;
 class ReflectUtilTest {
     @Test
     void getAllDeclaredFields() {
-        List<Field> allDeclaredFields = FieldUtil.getAllFields(SubTestClass.class);
+        Collection<Field> allDeclaredFields = FieldUtil.getAllFields(SubTestClass.class);
         System.out.println(allDeclaredFields);
     }
 
     @Test
     void getAllDeclaredMethods() {
-        List<Method> allDeclaredMethods = MethodUtil.getAllMethods(SubTestClass.class);
+        Collection<Method> allDeclaredMethods = MethodUtil.getAllMethods(SubTestClass.class);
         System.out.println(allDeclaredMethods);
     }
 

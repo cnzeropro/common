@@ -2,6 +2,7 @@ package org.zero.common.core.util.java.lang;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.zero.common.data.constant.ConstantPool;
 
 import java.util.Optional;
 
@@ -13,14 +14,14 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public enum PrimitiveType {
     /* ********************************************* 基本数据类型 ********************************************* */
-    BYTE(byte.class, Byte.class, (byte) 0),
-    SHORT(short.class, Short.class, (short) 0),
-    INT(int.class, Integer.class, 0),
-    LONG(long.class, Long.class, 0L),
-    FLOAT(float.class, Float.class, 0.0F),
-    DOUBLE(double.class, Double.class, 0.0D),
-    CHAR(char.class, Character.class, '\u0000'),
-    BOOLEAN(boolean.class, Boolean.class, false),
+    BYTE(byte.class, Byte.class, ConstantPool.BYTE_ZERO),
+    SHORT(short.class, Short.class, ConstantPool.SHORT_ZERO),
+    INT(int.class, Integer.class, ConstantPool.INT_ZERO),
+    LONG(long.class, Long.class, ConstantPool.LONG_ZERO),
+    FLOAT(float.class, Float.class, ConstantPool.FLOAT_ZERO),
+    DOUBLE(double.class, Double.class, ConstantPool.DOUBLE_ZERO),
+    CHAR(char.class, Character.class, ConstantPool.CHAR_ZERO),
+    BOOLEAN(boolean.class, Boolean.class, ConstantPool.BOOLEAN_FALSE),
     /* ********************************************* 特殊类型 ********************************************* */
     VOID(void.class, Void.class, null),
     ;

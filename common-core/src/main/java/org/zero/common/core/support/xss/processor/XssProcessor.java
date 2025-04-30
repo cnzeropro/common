@@ -5,5 +5,5 @@ package org.zero.common.core.support.xss.processor;
  * @since 2025/4/10
  */
 public interface XssProcessor {
-    String process(String value, Type type);
+    String process(String value, UnitType unitType);
 }

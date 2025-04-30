@@ -1,17 +1,20 @@
 package org.zero.common.core.util.java.reflect;
 
 import lombok.experimental.UtilityClass;
+import lombok.extern.java.Log;
 import org.zero.common.data.exception.UtilException;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Objects;
+import java.util.logging.Level;
 
 /**
  * @author Zero (cnzeropro@163.com)
  * @since 2025/3/10
  */
+@Log
 @UtilityClass
 public class LambdaUtil {
     public static LambdaMeta extract(Object lambda) {
@@ -32,6 +35,7 @@ public class LambdaUtil {
             Object invoked = MethodUtil.invoke(method, lambda);
             return new ReflectLambdaMeta((java.lang.invoke.SerializedLambda) invoked, lambdaClass.getClassLoader());
         } catch (Throwable e) {
+            log.log(Level.FINE, "Failed to extract lambda meta with reflect", e);
             // 3. 反射失败使用序列化的方式读取
             return new ShadowLambdaMeta((Serializable) lambda);
         }

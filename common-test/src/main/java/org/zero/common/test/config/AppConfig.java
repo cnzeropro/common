@@ -1,12 +1,12 @@
 package org.zero.common.test.config;
 
 import org.springframework.context.annotation.Configuration;
-import org.zero.common.core.support.log.EnableLogTracker;
-import org.zero.common.core.extension.java.TypeReference;
-import org.zero.common.core.extension.java.reflect.ParameterizedTypeImpl;
+import org.zero.common.core.extension.java.lang.reflect.ParameterizedTypeImpl;
+import org.zero.common.core.extension.java.lang.reflect.TypeReference;
+import org.zero.common.core.support.context.spring.EnableSpringUtils;
 import org.zero.common.core.support.converter.ConverterComposite;
 import org.zero.common.core.support.converter.ToList;
-import org.zero.common.core.util.spring.EnableSpringUtils;
+import org.zero.common.core.support.log.tracker.EnableLogTracker;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;

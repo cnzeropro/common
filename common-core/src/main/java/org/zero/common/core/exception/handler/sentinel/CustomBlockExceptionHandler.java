@@ -3,7 +3,7 @@ package org.zero.common.core.exception.handler.sentinel;
 import com.alibaba.csp.sentinel.adapter.spring.webmvc.callback.BlockExceptionHandler;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import lombok.extern.slf4j.Slf4j;
-import org.zero.common.core.util.jackson.JacksonUtils;
+import org.zero.common.core.util.jackson.databind.JacksonUtils;
 import org.zero.common.core.util.javax.servlet.ResponseUtil;
 import org.zero.common.data.model.view.Result;
 

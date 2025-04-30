@@ -1,7 +1,7 @@
 package org.zero.common.core.support.converter;
 
 import org.junit.jupiter.api.Test;
-import org.zero.common.core.extension.java.TypeReference;
+import org.zero.common.core.extension.java.lang.reflect.TypeReference;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -1,8 +1,7 @@
 package org.zero.common.core.util.java.reflect;
 
-import lombok.experimental.UtilityClass;
-import org.zero.common.core.exception.AnyThrow;
 import org.zero.common.core.util.java.lang.StringUtil;
+import org.zero.common.core.util.java.lang.ThrowableUtil;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -11,7 +10,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -24,7 +23,6 @@ import static org.zero.common.core.util.java.reflect.MethodUtil.GETTER_METHOD_PR
  * @author Zero (cnzeropro@163.com)
  * @since 2025/3/11
  */
-@UtilityClass
 public class FieldUtil {
     /**
      * 获取所有字段
@@ -32,7 +30,7 @@ public class FieldUtil {
      * @param clazz 目标类
      * @return 字段
      */
-    public static List<Field> getAllFields(final Class<?> clazz) {
+    public static Collection<Field> getAllFields(final Class<?> clazz) {
         return getFields(clazz, true);
     }
 
@@ -42,7 +40,7 @@ public class FieldUtil {
      * @param clazz 目标类
      * @return 字段
      */
-    public static List<Field> getFields(final Class<?> clazz) {
+    public static Collection<Field> getFields(final Class<?> clazz) {
         return getFields(clazz, false);
     }
 
@@ -53,8 +51,8 @@ public class FieldUtil {
      * @param withSuperClassFields 是否获取父类的字段
      * @return 字段
      */
-    public static List<Field> getFields(final Class<?> clazz, final boolean withSuperClassFields) {
-        List<Field> allFields = new ArrayList<>();
+    public static Collection<Field> getFields(final Class<?> clazz, final boolean withSuperClassFields) {
+        Collection<Field> allFields = new ArrayList<>();
         Class<?> searchType = clazz;
         while (Objects.nonNull(searchType)) {
             Field[] declaredFields = searchType.getDeclaredFields();
@@ -70,7 +68,7 @@ public class FieldUtil {
      * @param clazz 目标类
      * @return 公共字段
      */
-    public static List<Field> getPublicFields(final Class<?> clazz) {
+    public static Collection<Field> getPublicFields(final Class<?> clazz) {
         return new ArrayList<>(Arrays.asList(clazz.getFields()));
     }
 
@@ -83,7 +81,7 @@ public class FieldUtil {
      * @param filter 过滤器
      * @return 字段
      */
-    public static List<Field> getFilteredFields(final Class<?> clazz, final Predicate<Field> filter) {
+    public static Collection<Field> getFilteredFields(final Class<?> clazz, final Predicate<Field> filter) {
         return getFilteredFields(clazz, true, filter);
     }
 
@@ -95,8 +93,8 @@ public class FieldUtil {
      * @param filter               过滤器
      * @return 字段
      */
-    public static List<Field> getFilteredFields(final Class<?> clazz, final boolean withSuperClassFields, final Predicate<Field> filter) {
-        List<Field> declaredFields = getFields(clazz, withSuperClassFields);
+    public static Collection<Field> getFilteredFields(final Class<?> clazz, final boolean withSuperClassFields, final Predicate<Field> filter) {
+        Collection<Field> declaredFields = getFields(clazz, withSuperClassFields);
         if (Objects.isNull(filter)) {
             return declaredFields;
         }
@@ -113,7 +111,7 @@ public class FieldUtil {
      * @param targetClass 目标类
      * @return 静态字段
      */
-    public static List<Field> getStaticFields(final Class<?> targetClass) {
+    public static Collection<Field> getStaticFields(final Class<?> targetClass) {
         return getStaticFields(targetClass, true);
     }
 
@@ -124,7 +122,7 @@ public class FieldUtil {
      * @param withSuperClassFields 是否获取父类的字段
      * @return 静态字段
      */
-    public static List<Field> getStaticFields(final Class<?> targetClass, final boolean withSuperClassFields) {
+    public static Collection<Field> getStaticFields(final Class<?> targetClass, final boolean withSuperClassFields) {
         return getFilteredFields(targetClass, withSuperClassFields, field -> Modifier.isStatic(field.getModifiers()));
     }
 
@@ -137,7 +135,7 @@ public class FieldUtil {
      * @param annotationClass 注解类型
      * @return 字段
      */
-    public static List<Field> getAnnotatedFields(final Class<?> targetClass, final Class<? extends Annotation> annotationClass) {
+    public static Collection<Field> getAnnotatedFields(final Class<?> targetClass, final Class<? extends Annotation> annotationClass) {
         return getAnnotatedFields(targetClass, true, annotationClass);
     }
 
@@ -149,7 +147,7 @@ public class FieldUtil {
      * @param annotationClass      注解类型
      * @return 字段
      */
-    public static List<Field> getAnnotatedFields(final Class<?> targetClass, final boolean withSuperClassFields, final Class<? extends Annotation> annotationClass) {
+    public static Collection<Field> getAnnotatedFields(final Class<?> targetClass, final boolean withSuperClassFields, final Class<? extends Annotation> annotationClass) {
         return getFilteredFields(targetClass, withSuperClassFields, field -> field.isAnnotationPresent(annotationClass));
     }
 
@@ -162,7 +160,7 @@ public class FieldUtil {
      * @param fieldName 字段名称
      * @return 字段 {@link Optional}
      */
-    public static Optional<Field> getFieldOptByName(final Class<?> clazz, final String fieldName) {
+    public static Optional<Field> getFieldOptByName(final Class<?> clazz, final CharSequence fieldName) {
         return getFieldOptByName(clazz, true, fieldName);
     }
 
@@ -174,8 +172,8 @@ public class FieldUtil {
      * @param fieldName            字段名称
      * @return 字段 {@link Optional}
      */
-    public static Optional<Field> getFieldOptByName(final Class<?> clazz, final boolean withSuperClassFields, final String fieldName) {
-        List<Field> filteredFields = getFilteredFields(clazz, withSuperClassFields, field -> Objects.equals(field.getName(), fieldName));
+    public static Optional<Field> getFieldOptByName(final Class<?> clazz, final boolean withSuperClassFields, final CharSequence fieldName) {
+        Collection<Field> filteredFields = getFilteredFields(clazz, withSuperClassFields, field -> Objects.equals(fieldName, field.getName()));
         return filteredFields.stream()
                 .findFirst();
     }
@@ -236,25 +234,25 @@ public class FieldUtil {
             if (quietIfException) {
                 return Optional.empty();
             }
-            throw AnyThrow.throwUnchecked(e);
+            throw ThrowableUtil.throwUnchecked(e);
         } finally {
             AccessibleObjectUtil.setInaccessible(field);
         }
     }
 
-    public static <T, R> Optional<R> getStaticFieldValueOpt(final Class<T> clazz, final String fieldName, final Type type) {
+    public static <T, R> Optional<R> getStaticFieldValueOpt(final Class<T> clazz, final CharSequence fieldName, final Type type) {
         return getStaticFieldValueOpt(clazz, fieldName, type, true);
     }
 
-    public static <T, R> Optional<R> getStaticFieldValueOpt(final Class<T> clazz, final String fieldName, final Type type, final boolean quietIfException) {
+    public static <T, R> Optional<R> getStaticFieldValueOpt(final Class<T> clazz, final CharSequence fieldName, final Type type, final boolean quietIfException) {
         return getFieldValueOpt(clazz, false, null, fieldName, type, quietIfException);
     }
 
-    public static <T, R> Optional<R> getFieldValueOpt(final Class<T> clazz, final boolean withSuperClassFields, final T target, String fieldName, final Type type) {
+    public static <T, R> Optional<R> getFieldValueOpt(final Class<T> clazz, final boolean withSuperClassFields, final T target, CharSequence fieldName, final Type type) {
         return getFieldValueOpt(clazz, withSuperClassFields, target, fieldName, type, true);
     }
 
-    public static <T, R> Optional<R> getFieldValueOpt(final Class<T> clazz, final boolean withSuperClassFields, final T target, String fieldName, final Type type, final boolean quietIfException) {
+    public static <T, R> Optional<R> getFieldValueOpt(final Class<T> clazz, final boolean withSuperClassFields, final T target, CharSequence fieldName, final Type type, final boolean quietIfException) {
         return getFieldOptByName(Objects.isNull(clazz) ? target.getClass() : clazz, Objects.nonNull(target) && withSuperClassFields, fieldName).flatMap(field -> getFieldValueOpt(field, target, type, quietIfException));
     }
 
@@ -286,25 +284,25 @@ public class FieldUtil {
             if (quietIfException) {
                 return false;
             }
-            throw AnyThrow.throwUnchecked(e);
+            throw ThrowableUtil.throwUnchecked(e);
         } finally {
             AccessibleObjectUtil.setInaccessible(field);
         }
     }
 
-    public static <T> boolean setStaticFieldValue(final Class<T> clazz, String fieldName, final Object value) {
+    public static <T> boolean setStaticFieldValue(final Class<T> clazz, CharSequence fieldName, final Object value) {
         return setStaticFieldValue(clazz, fieldName, value, true);
     }
 
-    public static <T> boolean setStaticFieldValue(final Class<T> clazz, String fieldName, final Object value, final boolean quietIfException) {
+    public static <T> boolean setStaticFieldValue(final Class<T> clazz, CharSequence fieldName, final Object value, final boolean quietIfException) {
         return setFieldValue(clazz, false, null, fieldName, value, quietIfException);
     }
 
-    public static <T> boolean setFieldValue(final Class<T> clazz, final boolean withSuperClassFields, final T target, String fieldName, final Object value) {
+    public static <T> boolean setFieldValue(final Class<T> clazz, final boolean withSuperClassFields, final T target, CharSequence fieldName, final Object value) {
         return setFieldValue(clazz, withSuperClassFields, target, fieldName, value, true);
     }
 
-    public static <T> boolean setFieldValue(final Class<T> clazz, final boolean withSuperClassFields, final T target, String fieldName, final Object value, final boolean quietIfException) {
+    public static <T> boolean setFieldValue(final Class<T> clazz, final boolean withSuperClassFields, final T target, CharSequence fieldName, final Object value, final boolean quietIfException) {
         return getFieldOptByName(Objects.isNull(clazz) ? target.getClass() : clazz, Objects.nonNull(target) && withSuperClassFields, fieldName).map(field -> setFieldValue(field, target, value, quietIfException)).orElse(Boolean.FALSE);
     }
 
@@ -315,7 +313,7 @@ public class FieldUtil {
      * @return 字段名
      */
     public static Optional<Field> getFieldOptFromGetterMethod(final Method getterMethod) {
-        String fieldName = getFieldNameFromGetterMethod(getterMethod);
+        CharSequence fieldName = getFieldNameFromGetterMethod(getterMethod);
         return getFieldOptByName(getterMethod.getDeclaringClass(), fieldName);
     }
 
@@ -328,14 +326,13 @@ public class FieldUtil {
     public static String getFieldNameFromGetterMethod(final Method getterMethod) {
         String methodName = getterMethod.getName();
         if (methodName.startsWith(GETTER_METHOD_PREFIX)) {
-            return StringUtil.removePrefixAndFirstToLower(methodName, GETTER_METHOD_PREFIX);
+            return StringUtil.removePrefixAndFirstToLower(methodName, GETTER_METHOD_PREFIX, false);
         }
         if (methodName.startsWith(BOOL_GETTER_METHOD_PREFIX)) {
-            return StringUtil.removePrefixAndFirstToLower(methodName, BOOL_GETTER_METHOD_PREFIX);
+            return StringUtil.removePrefixAndFirstToLower(methodName, BOOL_GETTER_METHOD_PREFIX, false);
         }
         return methodName;
     }
-
 
     /**
      * 是否为父类引用字段
@@ -347,5 +344,22 @@ public class FieldUtil {
      */
     public static boolean isOuterClassField(Field field) {
         return "this$0".equals(field.getName());
+    }
+
+    /**
+     * @see MemberUtil#getInstanceOpt(Class, boolean, Object...)
+     */
+    protected static <T> Collection<Field> getInstanceFields(Class<T> clazz) {
+        return getStaticFields(clazz, false).stream()
+                .filter(field -> ClassUtil.isAssignable(field.getType(), clazz))
+                .collect(Collectors.toList());
+    }
+
+    protected FieldUtil() {
+        throw new UnsupportedOperationException();
+    }
+
+    public static boolean has(Class<?> clazz, CharSequence fieldName) {
+        return getFieldOptByName(clazz, fieldName).isPresent();
     }
 }

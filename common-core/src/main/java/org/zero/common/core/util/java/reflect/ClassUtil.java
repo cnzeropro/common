@@ -1,10 +1,11 @@
 package org.zero.common.core.util.java.reflect;
 
 import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
-import org.zero.common.core.exception.AnyThrow;
-import org.zero.common.core.extension.java.TypeReference;
+import org.zero.common.core.extension.java.lang.reflect.TypeReference;
+import org.zero.common.core.util.java.lang.IfUtil;
 import org.zero.common.core.util.java.lang.PrimitiveType;
+import org.zero.common.core.util.java.lang.ThrowableUtil;
+import org.zero.common.core.util.java.net.UrlUtil;
 
 import java.io.File;
 import java.io.Serializable;
@@ -27,10 +28,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -42,7 +43,6 @@ import java.util.stream.Stream;
  * @author zero
  * @since 2023/7/17
  */
-@Slf4j
 @UtilityClass
 public class ClassUtil {
     public static final String CLASS_FILE_SUFFIX = ".class";
@@ -113,7 +113,7 @@ public class ClassUtil {
      */
     public static Collection<String> getClassNames(String packageName) {
         String packageFileName = packageName.replace(PACKAGE_SEPARATOR, CLASS_FILE_SEPARATOR);
-        Enumeration<URL> urls = AnyThrow.sneakyThrow(Thread.currentThread().getContextClassLoader(),
+        Enumeration<URL> urls = ThrowableUtil.sneakyThrow(Thread.currentThread().getContextClassLoader(),
                 classLoader -> classLoader.getResources(packageFileName));
         return Collections.list(urls)
                 .stream()
@@ -128,17 +128,17 @@ public class ClassUtil {
 
     public static Collection<String> getClassNamesByUrl(URL url, String packageName, boolean withSubordinateClass, boolean withInnerClass) {
         String protocol = url.getProtocol();
-        if ("file".equals(protocol)) {
-            return Optional.ofNullable(AnyThrow.sneakyThrow(url, URL::toURI))
+        if (UrlUtil.FILE_URL_PREFIX.equalsIgnoreCase(protocol)) {
+            return Optional.ofNullable(ThrowableUtil.sneakyThrow(url, URL::toURI))
                     .map(File::new)
                     .map(file -> getClassNamesByFile(file, packageName, withSubordinateClass, withInnerClass))
                     .orElseGet(LinkedHashSet::new);
         }
-        if ("jar".equals(protocol)) {
-            return Optional.ofNullable(AnyThrow.sneakyThrow(url, URL::openConnection))
+        if (UrlUtil.URL_PREFIX_JAR.equalsIgnoreCase(protocol)) {
+            return Optional.ofNullable(ThrowableUtil.sneakyThrow(url, URL::openConnection))
                     .filter(JarURLConnection.class::isInstance)
                     .map(JarURLConnection.class::cast)
-                    .map(AnyThrow.sneakyThrow(JarURLConnection::getJarFile))
+                    .map(ThrowableUtil.sneakyThrow(JarURLConnection::getJarFile))
                     .map(jarFile -> getClassNamesByJar(jarFile, packageName, withSubordinateClass, withInnerClass))
                     .orElseGet(LinkedHashSet::new);
         }
@@ -207,9 +207,9 @@ public class ClassUtil {
     /**
      * 是否是指定正则匹配的类
      */
-    public static boolean isClassWithRegexp(Class<?> clazz, String... regexps) {
+    public static boolean isClassWithRegex(Class<?> clazz, String... regexps) {
         return Optional.ofNullable(clazz)
-                .map(Class::getName)
+                .map(Class::getCanonicalName)
                 .map(name -> {
                     for (String regexp : regexps) {
                         if (Pattern.matches(regexp, name)) {
@@ -226,7 +226,7 @@ public class ClassUtil {
      */
     public static boolean isClassWithPrefix(Class<?> clazz, String... prefixes) {
         return Optional.ofNullable(clazz)
-                .map(Class::getName)
+                .map(Class::getCanonicalName)
                 .map(name -> {
                     for (String prefix : prefixes) {
                         if (name.startsWith(prefix)) {
@@ -258,6 +258,21 @@ public class ClassUtil {
 
     /**
      * 是否是 Bean 类型
+     * <p>
+     * 不是所有人都能严格按照 Java Bean 规范来定义 Bean，因此此处只做基本的判断（是否满足传入的正则表达式）。
+     *
+     * @param clazz   待验证的类
+     * @param regexps Bean 类判别的正则表达式
+     * @return 是否是 Bean 类型
+     * @see org.zero.common.core.util.hutool.core.bean.BeanUtil#DEFAULT_REGEX
+     */
+
+    public static boolean isBeanClass(Class<?> clazz, String... regexps) {
+        return IfUtil.test(clazz, regexps, (BiPredicate<Class<?>, String[]>) ClassUtil::isClassWithRegex, Objects.nonNull(clazz));
+    }
+
+    /**
+     * 是否是严格的 Java 规范定义 Bean 类型
      */
     public static boolean isJavaStrictBeanClass(Class<?> clazz) {
         // null 验证
@@ -283,20 +298,22 @@ public class ClassUtil {
         if (isDateTimeClass(clazz)) {
             return false;
         }
-        // 类名验证
+        // 类名验证（排除 Java 官方包）
         if (isClassWithPrefix(clazz, "java", "javax", "jdk", "sun", "com.sun", "jakarta")) {
             return false;
         }
         // 继承验证（必须实现自 Serializable）
-        if (!(Serializable.class.isAssignableFrom(clazz))) {
+        if (!Serializable.class.isAssignableFrom(clazz)) {
             return false;
         }
-        // 构造函数验证（必须存在无参构造函数）
-        if (!ConstructorUtil.getConstructorOptByParam(clazz).isPresent()) {
+        // 构造函数验证（必须存在公共无参构造函数）
+        if (!ConstructorUtil.getConstructorOptByParam(clazz)
+                .filter(constructor -> Modifier.isPublic(constructor.getModifiers()))
+                .isPresent()) {
             return false;
         }
         // 字段验证
-        List<Field> fields = FieldUtil.getFilteredFields(clazz, field -> {
+        Collection<Field> fields = FieldUtil.getFilteredFields(clazz, field -> {
             int mod = field.getModifiers();
             // 不是父类引用字段
             return !FieldUtil.isOuterClassField(field) &&
@@ -321,6 +338,7 @@ public class ClassUtil {
                         .map(MethodUtil::getSetterMethodNameByField)
                         .allMatch(name -> Objects.nonNull(methodMap.get(name)));
     }
+
 
     /**
      * 是否是数字类型
@@ -563,5 +581,9 @@ public class ClassUtil {
         }
         // 引用类型
         return null;
+    }
+
+    public static boolean has(CharSequence className) {
+        return ClassLoaderUtil.loadClassOpt(className, false).isPresent();
     }
 }

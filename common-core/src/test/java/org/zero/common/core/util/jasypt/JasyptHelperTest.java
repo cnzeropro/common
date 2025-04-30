@@ -1,6 +1,7 @@
 package org.zero.common.core.util.jasypt;
 
 import org.junit.jupiter.api.Test;
+import org.zero.common.core.util.jasypt.encryption.JasyptHelper;
 
 /**
  * @author Zero (cnzeropro@qq.com)

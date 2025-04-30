@@ -27,8 +27,7 @@ public abstract class BaseDeduplicateAspect {
      */
     public static final String KEY_PREFIX = "sys:deduplicate";
 
-    @Before("@within(deduplicate) || " +
-            "@annotation(deduplicate)")
+    @Before("@annotation(deduplicate) || @within(deduplicate)")
     public void before(JoinPoint joinPoint, Deduplicate deduplicate) {
         if (deduplicate.value()) {
             if (!this.isPermit(joinPoint, deduplicate)) {
@@ -108,8 +107,7 @@ public abstract class BaseDeduplicateAspect {
     }
 
 
-    @After("@within(deduplicate) || " +
-            "@annotation(deduplicate)")
+    @After("@annotation(deduplicate) || @within(deduplicate)")
     public void after(JoinPoint joinPoint, Deduplicate deduplicate) {
         this.afterInternal(joinPoint, deduplicate);
     }

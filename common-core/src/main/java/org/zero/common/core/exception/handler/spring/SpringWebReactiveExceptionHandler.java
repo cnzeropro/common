@@ -6,7 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.zero.common.core.exception.ThrowableMessageProvider;
 import org.zero.common.data.model.view.Result;
+
+import java.util.Collections;
 
 /**
  * 异常处理器
@@ -19,12 +22,16 @@ import org.zero.common.data.model.view.Result;
 @Slf4j
 @RestControllerAdvice
 @ConditionalOnWebApplication
-public class SpringWebReactiveExceptionHandler {
+public class SpringWebReactiveExceptionHandler extends AbstractThrowableHandler {
+    public SpringWebReactiveExceptionHandler(ThrowableMessageProvider throwableMessageProvider) {
+        super(throwableMessageProvider);
+    }
+
     /* *************************************************** Web MVC 异常 *************************************************** */
     @ExceptionHandler(org.springframework.web.reactive.function.UnsupportedMediaTypeException.class)
     public Result<Void> unsupportedMediaTypeException(org.springframework.web.reactive.function.UnsupportedMediaTypeException e) {
         MediaType contentType = e.getContentType();
         log.error(String.format("The media type[%s] is not supported, only supported: %s", contentType, e.getSupportedMediaTypes()), e);
-        return Result.fail(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value(), String.format("媒体类型（MediaType）不支持：%s", contentType));
+        return this.handleThrowable(HttpStatus.UNSUPPORTED_MEDIA_TYPE, e, Collections.singletonList(contentType));
     }
 }

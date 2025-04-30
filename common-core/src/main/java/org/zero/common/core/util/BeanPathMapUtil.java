@@ -15,8 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.NumberFormat;
+import org.zero.common.core.support.context.spring.SpringUtils;
+import org.zero.common.core.util.hutool.core.bean.BeanUtil;
 import org.zero.common.core.util.java.reflect.ClassUtil;
-import org.zero.common.core.util.spring.SpringUtils;
 import org.zero.common.data.exception.UtilException;
 
 import java.lang.reflect.Field;
@@ -30,6 +31,9 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import static org.zero.common.core.util.hutool.core.bean.BeanUtil.DEFAULT_REGEX;
+import static org.zero.common.core.util.hutool.core.bean.BeanUtil.DEFAULT_REGEX_TEMPLATE;
 
 /**
  * Bean Path Map 工具类
@@ -63,16 +67,10 @@ import java.util.Objects;
 @Slf4j
 @UtilityClass
 public class BeanPathMapUtil {
-    public static final String DEFAULT_PREFIX = "";
-    public static final String[] DEFAULT_PACKAGE_LEVEL_NAMES = {"model", "entity", "domain", "pojo"};
     /**
-     * 限制匹配的层级数量，防止因过多层级导致性能问题
-     * <p>
-     * 此处限制 0 - 10
+     * 默认 Bean Path 前缀
      */
-    // public static final String DEFAULT_REGEX_TEMPLATE = "^(?:\\w+\\.){0,10}(%s)(?:\\.\\w+){0,10}$";
-    public static final String DEFAULT_REGEX_TEMPLATE = "^(\\w+\\.)*(%s)(\\.\\w+)*$";
-    public static final String DEFAULT_REGEX = String.format(DEFAULT_REGEX_TEMPLATE, ArrayUtil.join(DEFAULT_PACKAGE_LEVEL_NAMES, "|"));
+    public static final String DEFAULT_PREFIX = "";
 
     public Map<String, Object> toMap(Object... objs) {
         return toMap(true, objs);
@@ -210,8 +208,8 @@ public class BeanPathMapUtil {
 
         Class<?> clazz = obj.getClass();
 
-        // 指定的 bean
-        if (ClassUtil.isClassWithRegexp(clazz, regex)) {
+        // 指定的 Bean
+        if (BeanUtil.isBean(obj, regex)) {
             Field[] fields = ReflectUtil.getFields(clazz);
             for (Field field : fields) {
                 Map<String, Object> map = toMapWithField(prefix, regex, obj, field, ignoreNull);

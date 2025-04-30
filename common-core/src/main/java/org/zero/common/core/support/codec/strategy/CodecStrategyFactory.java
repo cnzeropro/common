@@ -17,14 +17,14 @@ public class CodecStrategyFactory {
     protected static final Cache<String, Class<? extends CodecStrategy>> CACHE = MapCache.of(CaseInsensitiveMap::new);
 
     static {
-        CACHE.set("AES", AESCodec.class);
-        CACHE.set("DESede", DESedeCodec.class);
-        CACHE.set("DES", DESCodec.class);
-        CACHE.set("SM4", SM4Codec.class);
+        CACHE.put("AES", AESCodec.class);
+        CACHE.put("DESede", DESedeCodec.class);
+        CACHE.put("DES", DESCodec.class);
+        CACHE.put("SM4", SM4Codec.class);
     }
 
     public static synchronized void add(String algorithm, Class<? extends CodecStrategy> clazz) {
-        CACHE.set(algorithm, clazz);
+        CACHE.put(algorithm, clazz);
     }
 
     public static CodecStrategy get(String algorithm, StrategyContext context) {

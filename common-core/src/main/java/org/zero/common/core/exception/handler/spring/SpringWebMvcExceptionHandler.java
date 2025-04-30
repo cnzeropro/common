@@ -5,7 +5,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.zero.common.core.exception.ThrowableMessageProvider;
 import org.zero.common.data.model.view.Result;
+
+import java.util.Collections;
 
 /**
  * 异常处理器
@@ -18,18 +21,22 @@ import org.zero.common.data.model.view.Result;
 @Slf4j
 @RestControllerAdvice
 @ConditionalOnWebApplication
-public class SpringWebMvcExceptionHandler {
+public class SpringWebMvcExceptionHandler extends AbstractThrowableHandler {
+    public SpringWebMvcExceptionHandler(ThrowableMessageProvider throwableMessageProvider) {
+        super(throwableMessageProvider);
+    }
+
     /* *************************************************** Web MVC 异常 *************************************************** */
     @ExceptionHandler(org.springframework.web.servlet.ModelAndViewDefiningException.class)
     public Result<Void> modelAndViewDefiningException(org.springframework.web.servlet.ModelAndViewDefiningException e) {
         log.error("Model and view definition exception", e);
-        return Result.fail("模型、视图定义错误");
+        return this.handleThrowable(e);
     }
 
     @ExceptionHandler(org.springframework.web.servlet.NoHandlerFoundException.class)
     public Result<Void> noHandlerFoundException(org.springframework.web.servlet.NoHandlerFoundException e) {
         String requestURL = e.getRequestURL();
         log.error(String.format("The request did not find the resource: %s", requestURL), e);
-        return Result.fail(HttpStatus.NOT_FOUND.value(), String.format("请求资源未找到，请检查URL：%s", requestURL));
+        return this.handleThrowable(HttpStatus.NOT_FOUND, e, Collections.singletonList(requestURL));
     }
 }

@@ -3,6 +3,7 @@ package org.zero.common.core.extension.java;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
+import org.zero.common.core.extension.java.lang.reflect.TypeReference;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;

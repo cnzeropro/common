@@ -6,12 +6,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.zero.common.core.extension.spring.webmvc.DynamicBeanArgumentResolver;
-import org.zero.common.core.extension.spring.webmvc.JsonObjectArgumentResolvers;
-import org.zero.common.core.support.common.query.converter.StringArrayToFieldArrayConverter;
-import org.zero.common.core.support.common.query.converter.StringToFieldArrayConverter;
-import org.zero.common.core.support.common.query.converter.StringToFieldConverter;
-import org.zero.common.core.support.common.query.converter.StringToOperatorConverter;
+import org.zero.common.core.extension.spring.web.method.support.JsonObjectArgumentResolvers;
+import org.zero.common.core.support.bean.dynamic.DynamicBeanArgumentResolver;
+import org.zero.common.core.extension.common.query.converter.StringArrayToFieldArrayConverter;
+import org.zero.common.core.extension.common.query.converter.StringToFieldArrayConverter;
+import org.zero.common.core.extension.common.query.converter.StringToFieldConverter;
+import org.zero.common.core.extension.common.query.converter.StringToOperatorConverter;
 
 import java.util.List;
 

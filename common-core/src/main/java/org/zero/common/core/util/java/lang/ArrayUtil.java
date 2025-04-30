@@ -1,18 +1,117 @@
 package org.zero.common.core.util.java.lang;
 
+import org.zero.common.core.extension.java.util.function.ToBoolFunction;
+import org.zero.common.core.extension.java.util.function.ToByteFunction;
 import org.zero.common.core.util.java.reflect.ClassUtil;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author Zero (cnzeropro@163.com)
  * @since 2024/9/11
  */
 public class ArrayUtil {
+    /**
+     * Java 虚拟机最大数组长度
+     */
+    public static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 2;
+    /**
+     * The maximum size of array to allocate (unless necessary).
+     * Some VMs reserve some header words in an array.
+     * Attempts to allocate larger arrays may result in
+     * OutOfMemoryError: Requested array size exceeds VM limit
+     */
+    public static final int SAFE_MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+    /**
+     * 空数组
+     */
+    public static final Object[] EMPTY = {};
+
     public static boolean isEmpty(Object[] array) {
         return array == null || array.length == 0;
+    }
+
+    public static boolean nonEmpty(Object[] array) {
+        return !isEmpty(array);
+    }
+
+    public static boolean isArray(Object source) {
+        return ObjectUtil.nonNull(source) && ClassUtil.isArrayClass(source.getClass());
+    }
+
+    /**
+     * 将指定对象转换为对象数组
+     *
+     * @param source 源对象
+     * @return 数组
+     */
+    public static Object[] toArray(Object source) {
+        if (Objects.isNull(source)) {
+            return EMPTY;
+        }
+        Class<?> clazz = source.getClass();
+        if (clazz.isArray()) {
+            Class<?> componentType = clazz.getComponentType();
+            // 处理原始类型数组（如int[]）
+            // 因为原始类型数组继承自 Object，因此无法使用 (Object[]) source 强转
+            // 使用 source instanceof int[]、 source instanceof double[] 等等一个一个判断又过于麻烦，因此原始类型数组统一处理
+            if (componentType.isPrimitive()) {
+                int length = Array.getLength(source);
+                // 获取原始类型的包装类型
+                Class<?> wrappedType = PrimitiveType.wrap(componentType);
+                // 创建包装类型数组（如果不使用包装类创建数组，此处无法使用 Object[] 强转）
+                Object[] array = (Object[]) Array.newInstance(wrappedType, length);
+                for (int i = 0; i < length; i++) {
+                    array[i] = Array.get(source, i);
+                }
+                return array;
+            }
+            // 处理对象数组（如String[]）
+            return (Object[]) source;
+        }
+        return new Object[]{source};
+    }
+
+    public static <T> T[] toArray(Collection<T> collection, Class<T> componentType) {
+        return collection.toArray(create(componentType, 0));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T[] create(Class<T> componentType, int length) {
+        return (T[]) Array.newInstance(componentType, length);
+    }
+
+    public static <T> T[] of(Class<T> componentType, T t) {
+        T[] array = create(componentType, 1);
+        Array.set(array, 0, t);
+        return array;
+    }
+
+    public static <T> T[] of(Class<T> componentType, T t1, T t2) {
+        T[] array = create(componentType, 2);
+        Array.set(array, 0, t1);
+        Array.set(array, 1, t2);
+        return array;
+    }
+
+    public static <T> T[] of(Class<T> componentType, T t1, T t2, T t3) {
+        T[] array = create(componentType, 3);
+        Array.set(array, 0, t1);
+        Array.set(array, 1, t2);
+        Array.set(array, 2, t3);
+        return array;
+    }
+
+    @SafeVarargs
+    public static <T> T[] of(Class<T> componentType, T... ts) {
+        T[] array = create(componentType, ts.length);
+        System.arraycopy(ts, 0, array, 0, ts.length);
+        return array;
     }
 
     /**
@@ -237,41 +336,69 @@ public class ArrayUtil {
         return result;
     }
 
-    public static boolean isArray(Object source) {
-        return ObjectUtil.nonNull(source) && ClassUtil.isArrayClass(source.getClass());
+    public static <T> byte[] map(T[] array, ToByteFunction<T> function) {
+        if (isEmpty(array)) {
+            return new byte[0];
+        }
+        byte[] result = new byte[array.length];
+        for (int i = 0; i < array.length; i++) {
+            result[i] = function.applyAsByte(array[i]);
+        }
+        return result;
+    }
+
+    public static <T> boolean[] map(T[] array, ToBoolFunction<T> function) {
+        if (isEmpty(array)) {
+            return new boolean[0];
+        }
+        boolean[] result = new boolean[array.length];
+        for (int i = 0; i < array.length; i++) {
+            result[i] = function.applyAsBool(array[i]);
+        }
+        return result;
     }
 
     /**
-     * 将指定对象转换为对象数组
+     * 数组映射
+     * <p>
+     * <b>注意：映射函数必须要处理原始元素为 null 也返回有值（不为 null）的情况</b>
      *
-     * @param source 源对象
-     * @return 数组
+     * @param array    原始数组
+     * @param function 映射函数
+     * @param <T>      原始数组元素类型
+     * @param <R>      映射后的数组元素类型
+     * @return 映射后的数组
      */
-    public static Object[] toArray(Object source) {
-        if (Objects.isNull(source)) {
-            return new Object[0];
+    public static <T, R> R[] map(T[] array, Function<T, R> function) {
+        @SuppressWarnings("unchecked")
+        Class<R> clazz = (Class<R>) function.apply(null).getClass();
+        return map(array, function, clazz);
+    }
+
+    /**
+     * 数组映射
+     *
+     * @param array    原始数组
+     * @param function 映射函数
+     * @param <T>      原始数组元素类型
+     * @param <R>      映射后的数组元素类型
+     * @return 映射后的数组
+     */
+    @SuppressWarnings("unchecked")
+    public static <T, R> R[] map(T[] array, Function<T, R> function, Class<R> clazz) {
+        if (isEmpty(array)) {
+            return create(clazz, 0);
         }
-        Class<?> clazz = source.getClass();
-        if (clazz.isArray()) {
-            Class<?> componentType = clazz.getComponentType();
-            // 处理原始类型数组（如int[]）
-            // 因为原始类型数组继承自 Object，因此无法使用 (Object[]) source 强转
-            // 使用 source instanceof int[]、 source instanceof double[] 等等一个一个判断又过于麻烦，因此原始类型数组统一处理
-            if (componentType.isPrimitive()) {
-                int length = Array.getLength(source);
-                // 获取原始类型的包装类型
-                Class<?> wrappedType = PrimitiveType.wrap(componentType);
-                // 创建包装类型数组（如果不使用包装类创建数组，此处无法使用 Object[] 强转）
-                Object[] array = (Object[]) Array.newInstance(wrappedType, length);
-                for (int i = 0; i < length; i++) {
-                    array[i] = Array.get(source, i);
-                }
-                return array;
-            }
-            // 处理对象数组（如String[]）
-            return (Object[]) source;
-        }
-        return new Object[]{source};
+        return Arrays.stream(array)
+                .map(function)
+                .toArray(size -> (R[]) Array.newInstance(clazz, size));
+    }
+
+    public static <T> String join(T[] array, CharSequence delimiter) {
+        return Arrays.stream(array)
+                .filter(Objects::nonNull)
+                .map(Objects::toString)
+                .collect(Collectors.joining(delimiter));
     }
 
     protected ArrayUtil() {

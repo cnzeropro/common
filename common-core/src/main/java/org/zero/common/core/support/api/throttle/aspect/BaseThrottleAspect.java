@@ -22,8 +22,7 @@ public abstract class BaseThrottleAspect {
      */
     public static final String KEY_PREFIX = "sys:throttle";
 
-    @Before("@within(throttle) || " +
-            "@annotation(throttle)")
+    @Before("@annotation(throttle) || @within(throttle)")
     public void before(JoinPoint joinPoint, Throttle throttle) {
         if (throttle.value()) {
             if (!this.isPermit(joinPoint, throttle)) {
@@ -87,8 +86,7 @@ public abstract class BaseThrottleAspect {
                 .orElse(DefaultMessageProvider.MESSAGE);
     }
 
-    @After("@within(throttle) || " +
-            "@annotation(throttle)")
+    @After("@annotation(throttle) || @within(throttle)")
     public void after(JoinPoint joinPoint, Throttle throttle) {
         this.afterInternal(joinPoint, throttle);
     }

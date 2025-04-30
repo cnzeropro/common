@@ -4,6 +4,7 @@ import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.map.MapUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.zero.common.core.util.hutool.core.bean.BeanPath;
 
 import java.math.BigDecimal;
 import java.util.Date;

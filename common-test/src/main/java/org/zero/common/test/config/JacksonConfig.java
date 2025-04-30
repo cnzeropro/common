@@ -7,17 +7,17 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.zero.common.core.extension.jackson.JSONNullJsonComponent;
 import org.zero.common.core.extension.jackson.JavaTimeJackson2ObjectMapperBuilderCustomizer;
 import org.zero.common.core.extension.jackson.JsonJavaTimeProperties;
-import org.zero.common.core.extension.jackson.NumberJsonComponent;
+import org.zero.common.core.extension.jackson.databind.NumberJsonComponent;
+import org.zero.common.core.extension.jackson.databind.ser.JSONNullSerializer;
 import org.zero.common.data.exception.BaseSysError;
 
 /**
  * @author Zero (cnzeropro@163.com)
  * @since 2025/1/8
  */
-@Import({JSONNullJsonComponent.class, NumberJsonComponent.class})
+@Import({JSONNullSerializer.class, NumberJsonComponent.class})
 @EnableConfigurationProperties(JsonJavaTimeProperties.class)
 @Configuration(proxyBeanMethods = false)
 @RequiredArgsConstructor

@@ -1,7 +1,7 @@
 package org.zero.common.core.support.api.deduplicate.voucher;
 
 import org.zero.common.core.support.api.deduplicate.annotation.Deduplicate;
-import org.zero.common.core.util.spring.web.RequestUtil;
+import org.zero.common.core.util.spring.web.context.request.RequestUtil;
 
 /**
  * @author Zero (cnzeropro@163.com)

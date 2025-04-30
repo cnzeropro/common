@@ -15,7 +15,7 @@ import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
 import org.quartz.impl.StdSchedulerFactory;
-import org.zero.common.core.util.spring.SpringUtils;
+import org.zero.common.core.support.context.spring.SpringUtils;
 
 import java.util.Date;
 import java.util.Objects;

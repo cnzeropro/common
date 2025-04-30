@@ -1,6 +1,7 @@
 package org.zero.common.core.util.mybatisplus;
 
 import org.junit.jupiter.api.Test;
+import org.zero.common.core.util.mybatisplus.annotation.MpEnumUtil;
 import org.zero.common.data.enumeration.Gender;
 import org.zero.common.data.enumeration.Status;
 

@@ -3,7 +3,11 @@ package org.zero.common.core.extension.feign;
 import feign.QueryMapEncoder;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import org.zero.common.core.support.bean.query.QueryBean;
+import org.zero.common.core.support.bean.query.QueryBeanEncoder;
+import org.zero.common.core.support.bean.query.QueryBeanParameterProcessor;
 import org.zero.common.core.util.BeanPathMapUtil;
+import org.zero.common.core.util.hutool.core.bean.BeanUtil;
 
 import java.util.Map;
 
@@ -15,18 +19,18 @@ import java.util.Map;
  * <p>
  * 但是两者会产生一些问题，比如不支持嵌套对象，日期时间格式化支持不足等等。因此自定义 {@link QueryMapEncoder}。
  * <p>
- * 但是还存在一个关键性致命问题：无法使用多个对象。
+ * 但是还存在一个关键性致命问题：无法使用多个对象。要解决该问题，参见：
+ * {@link QueryBeanEncoder}、
+ * {@link QueryBean}、
+ * {@link QueryBeanParameterProcessor}。
  *
  * @author zero
- * @see org.springframework.cloud.openfeign.SpringQueryMap
- * @see feign.querymap.FieldQueryMapEncoder
- * @see feign.querymap.BeanQueryMapEncoder
  * @since 2021/2/14
  */
 @NoArgsConstructor
 @AllArgsConstructor
 public class CustomQueryMapEncoder implements QueryMapEncoder {
-    protected String[] beanBasePackages = BeanPathMapUtil.DEFAULT_PACKAGE_LEVEL_NAMES;
+    protected String[] beanBasePackages = BeanUtil.DEFAULT_PACKAGE_LEVEL_NAMES;
 
     @Override
     public Map<String, Object> encode(Object object) {

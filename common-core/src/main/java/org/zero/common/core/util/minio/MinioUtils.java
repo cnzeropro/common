@@ -73,7 +73,7 @@ import io.minio.messages.VersioningConfiguration;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.zero.common.core.util.spring.SpringUtils;
+import org.zero.common.core.support.context.spring.SpringUtils;
 
 import java.io.IOException;
 import java.io.OutputStream;

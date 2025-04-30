@@ -1,52 +1,48 @@
 package org.zero.common.core.util.alibaba.ttl;
 
 import com.alibaba.ttl.TransmittableThreadLocal;
-import lombok.experimental.UtilityClass;
+import org.zero.common.core.util.java.reflect.ClassUtil;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * @author Zero (cnzeropro@qq.com)
  * @since 2019/12/23
  */
-@UtilityClass
 public class TransmittableHolder {
-    private static final TransmittableThreadLocal<Map<String, Object>> holder = TransmittableThreadLocal.withInitial(HashMap::new);
+    protected static final TransmittableThreadLocal<Map<String, Object>> holder = TransmittableThreadLocal.withInitial(HashMap::new);
 
     public static void setVal(String key, Object val) {
-        getMap().put(key, val);
+        getContext().put(key, val);
     }
 
     public static Object getVal(String key) {
-        return getMap().get(key);
+        return getContext().get(key);
     }
 
-    public static <T> T getVal(String key, Class<T> type) {
-        return type.cast(getVal(key));
+    public static <T> T getVal(String key, Type type) {
+        Object val = getVal(key);
+        return ClassUtil.cast(val, type);
     }
 
     public static void remove(String... keys) {
-        if (Objects.isNull(keys) || keys.length == 0) {
-            removeAll();
-            return;
-        }
-
+        Map<String, Object> map = getContext();
         for (String key : keys) {
-            removeOne(key);
+            map.remove(key);
         }
     }
 
-    public static void removeOne(String key) {
-        getMap().remove(key);
+    public static void clear() {
+        getContext().clear();
     }
 
-    public static void removeAll() {
-        getMap().clear();
+    public static void setContext(Map<String, Object> context) {
+        holder.set(context);
     }
 
-    private static Map<String, Object> getMap() {
+    protected static Map<String, Object> getContext() {
         return holder.get();
     }
 }

@@ -3,6 +3,7 @@ package org.zero.common.core.util.java.lang;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * @author Zero (cnzeropro@163.com)
@@ -25,7 +26,7 @@ public class ObjectUtil {
             return CharSequenceUtil.isEmpty((CharSequence) object);
         }
         if (ArrayUtil.isArray(object)) {
-            return ArrayUtil.toArray(object).length == 0;
+            return ArrayUtil.isEmpty(ArrayUtil.toArray(object));
         }
         if (object instanceof Collection) {
             return !((Collection<?>) object).isEmpty();
@@ -46,6 +47,14 @@ public class ObjectUtil {
 
     public static <T> T defaultIfEmpty(final T object, final T defaultValue) {
         return isEmpty(object) ? defaultValue : object;
+    }
+
+    public static <T, R> R mapIfNonNull(final T object, final Function<T, R> mapper) {
+        return nonNull(object) ? mapper.apply(object) : null;
+    }
+
+    public static <T, R> R mapIfNonEmpty(final T object, final Function<T, R> mapper) {
+        return nonEmpty(object) ? mapper.apply(object) : null;
     }
 
     protected ObjectUtil() {

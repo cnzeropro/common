@@ -1,6 +1,7 @@
 package org.zero.common.core.util.java.math;
 
 import org.junit.jupiter.api.Test;
+import org.zero.common.core.util.java.lang.CombinatoricsUtil;
 
 import java.util.Set;
 import java.util.TreeSet;

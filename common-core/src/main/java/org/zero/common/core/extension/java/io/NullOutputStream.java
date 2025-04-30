@@ -1,6 +1,5 @@
 package org.zero.common.core.extension.java.io;
 
-import java.io.IOException;
 import java.io.OutputStream;
 
 /**
@@ -16,11 +15,10 @@ public class NullOutputStream extends OutputStream {
      * Does nothing - output to {@code /dev/null}.
      *
      * @param b The bytes to write
-     * @throws IOException never
      */
     @Override
-    public void write(final byte[] b) throws IOException {
-        // To /dev/null
+    public void write(final byte[] b) {
+        // to /dev/null
     }
 
     /**
@@ -32,7 +30,7 @@ public class NullOutputStream extends OutputStream {
      */
     @Override
     public void write(final byte[] b, final int off, final int len) {
-        // To /dev/null
+        // to /dev/null
     }
 
     /**
@@ -42,6 +40,16 @@ public class NullOutputStream extends OutputStream {
      */
     @Override
     public void write(final int b) {
-        // To /dev/null
+        // to /dev/null
+    }
+
+    @Override
+    public void flush() {
+        // do nothing
+    }
+
+    @Override
+    public void close() {
+        // do nothing
     }
 }

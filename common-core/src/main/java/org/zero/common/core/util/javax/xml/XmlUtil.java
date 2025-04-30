@@ -29,6 +29,36 @@ import java.io.InputStream;
  */
 @UtilityClass
 public class XmlUtil {
+    /**
+     * 字符串常量：XML 不间断空格转义 {@code "&nbsp;" -> " "}
+     */
+    public static final String NBSP = "&nbsp;";
+
+    /**
+     * 字符串常量：XML And 符转义 {@code "&amp;" -> "&"}
+     */
+    public static final String AMP = "&amp;";
+
+    /**
+     * 字符串常量：XML 双引号转义 {@code "&quot;" -> "\""}
+     */
+    public static final String QUOTE = "&quot;";
+
+    /**
+     * 字符串常量：XML 单引号转义 {@code "&apos" -> "'"}
+     */
+    public static final String APOS = "&apos;";
+
+    /**
+     * 字符串常量：XML 小于号转义 {@code "&lt;" -> "<"}
+     */
+    public static final String LT = "&lt;";
+
+    /**
+     * 字符串常量：XML 大于号转义 {@code "&gt;" -> ">"}
+     */
+    public static final String GT = "&gt;";
+
     public static Document domRead(InputStream in) throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         // to be compliant, completely disable DOCTYPE declaration:

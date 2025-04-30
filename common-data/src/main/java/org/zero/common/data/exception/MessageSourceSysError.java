@@ -2,13 +2,14 @@ package org.zero.common.data.exception;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.MessageSourceAccessor;
+import org.springframework.util.StringUtils;
 
 import java.util.Locale;
+import java.util.Objects;
 
 /**
- * 使用前请先使用 {@link #setMessageSource(MessageSource)} 注册 {@link MessageSource}
+ * 使用前请先使用 {@link #setMessageSourceAccessor} 注册 {@link MessageSourceAccessor}
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2024/11/18
@@ -16,21 +17,37 @@ import java.util.Locale;
 @Slf4j
 public class MessageSourceSysError extends BaseSysError.DefaultSysError {
     @Setter
-    protected static MessageSource messageSource;
-    @Setter
-    protected static Locale locale = LocaleContextHolder.getLocale();
+    protected static MessageSourceAccessor messageSourceAccessor;
 
     public static MessageSourceSysError of(String code, Object... args) {
-        return of(code, locale, args);
+        return of(code, (String) null, args);
+    }
+
+    public static MessageSourceSysError of(String code, String defaultMessage, Object... args) {
+        return of(code, defaultMessage, null, args);
     }
 
     public static MessageSourceSysError of(String code, Locale locale, Object... args) {
-        String message;
+        return of(code, null, locale, args);
+    }
+
+    public static MessageSourceSysError of(String code, String defaultMessage, Locale locale, Object... args) {
+        String message = null;
         try {
-            message = messageSource.getMessage(code, args, locale);
+            if (Objects.isNull(locale)) {
+                message = messageSourceAccessor.getMessage(code, args);
+            } else {
+                message = messageSourceAccessor.getMessage(code, args, locale);
+            }
         } catch (Exception e) {
-            log.warn(String.format("Failed to get message with the code[%s] in MessageSource", code), e);
-            message = e.getMessage();
+            log.warn(java.lang.String.format("Failed to get message with the code[%s]", code), e);
+            if (!StringUtils.hasText(defaultMessage)) {
+                message = e.getMessage();
+            }
+        } finally {
+            if (!StringUtils.hasText(message)) {
+                message = formatMessage(defaultMessage, locale, args);
+            }
         }
         return new MessageSourceSysError(code, message);
     }

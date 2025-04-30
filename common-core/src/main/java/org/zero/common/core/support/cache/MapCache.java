@@ -20,27 +20,27 @@ public class MapCache<K, V> implements Cache<K, V> {
     protected final Map<K, V> cache;
 
     @Override
-    public void set(K key, V value) {
+    public void put(K key, V value) {
         cache.put(key, value);
     }
 
     @Override
-    public V setIfAbsent(K key, V value) {
+    public V putIfAbsent(K key, V value) {
         return cache.putIfAbsent(key, value);
     }
 
     @Override
-    public V mapAndSet(K key, BiFunction<? super K, ? super V, ? extends V> reMapper) {
+    public V mapAndPut(K key, BiFunction<? super K, ? super V, ? extends V> reMapper) {
         return cache.compute(key, reMapper);
     }
 
     @Override
-    public V mapAndSetIfAbsent(K key, Function<? super K, ? extends V> mapper) {
+    public V mapAndPutIfAbsent(K key, Function<? super K, ? extends V> mapper) {
         return cache.computeIfAbsent(key, mapper);
     }
 
     @Override
-    public V mapAndSetIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> reMapper) {
+    public V mapAndPutIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> reMapper) {
         return cache.computeIfPresent(key, reMapper);
     }
 
@@ -50,7 +50,7 @@ public class MapCache<K, V> implements Cache<K, V> {
     }
 
     @Override
-    public void setAll(Map<? extends K, ? extends V> map) {
+    public void putAll(Map<? extends K, ? extends V> map) {
         cache.putAll(map);
     }
 
@@ -90,7 +90,7 @@ public class MapCache<K, V> implements Cache<K, V> {
     }
 
     @Override
-    public long size() {
+    public Number size() {
         return cache.size();
     }
 

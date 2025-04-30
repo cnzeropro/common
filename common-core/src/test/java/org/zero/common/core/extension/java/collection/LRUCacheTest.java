@@ -1,6 +1,7 @@
 package org.zero.common.core.extension.java.collection;
 
 import org.junit.jupiter.api.Test;
+import org.zero.common.core.extension.java.util.LRUCache;
 
 import java.util.Map;
 

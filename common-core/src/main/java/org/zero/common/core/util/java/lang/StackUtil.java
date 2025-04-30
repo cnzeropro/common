@@ -18,4 +18,8 @@ public class StackUtil {
     public static StackTraceElement getInvokeStackTrace(){
         return getCurrentStackTrace()[3];
     }
+
+    protected StackUtil(){
+        throw new UnsupportedOperationException();
+    }
 }

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.zero.common.core.exception.ThrowableMessageProvider;
 import org.zero.common.data.model.view.Result;
 
 /**
@@ -17,24 +18,28 @@ import org.zero.common.data.model.view.Result;
 @Slf4j
 @RestControllerAdvice
 @ConditionalOnWebApplication
-public class SpringDataRedisExceptionHandler {
+public class SpringDataRedisExceptionHandler extends AbstractThrowableHandler {
+    public SpringDataRedisExceptionHandler(ThrowableMessageProvider throwableMessageProvider) {
+        super(throwableMessageProvider);
+    }
+
     /* *************************************************** Redis 异常 *************************************************** */
 
     @ExceptionHandler(org.springframework.data.redis.connection.PoolException.class)
     public Result<Void> poolException(org.springframework.data.redis.connection.PoolException e) {
         log.error("Redis connection pool exception", e);
-        return Result.fail("Redis连接池错误");
+        return this.handleThrowable(e);
     }
 
     @ExceptionHandler(org.springframework.data.redis.RedisSystemException.class)
     public Result<Void> redisSystemException(org.springframework.data.redis.RedisSystemException e) {
         log.error("Redis system exception", e);
-        return Result.fail("Redis系统错误");
+        return this.handleThrowable(e);
     }
 
     @ExceptionHandler(org.springframework.data.redis.RedisConnectionFailureException.class)
     public Result<Void> redisConnectionFailureException(org.springframework.data.redis.RedisConnectionFailureException e) {
         log.error("Redis connection failed", e);
-        return Result.fail("Redis连接失败");
+        return this.handleThrowable(e);
     }
 }

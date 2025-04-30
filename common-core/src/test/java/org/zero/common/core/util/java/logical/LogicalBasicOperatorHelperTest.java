@@ -2,6 +2,7 @@ package org.zero.common.core.util.java.logical;
 
 import cn.hutool.core.date.DateTime;
 import org.junit.jupiter.api.Test;
+import org.zero.common.core.util.java.lang.LogicalOperatorHelper;
 
 /**
  * @author Zero (cnzeropro@qq.com)
@@ -10,7 +11,7 @@ import org.junit.jupiter.api.Test;
 class LogicalBasicOperatorHelperTest {
     @Test
     void result() {
-        boolean result = LogicalOperatorHelper.init(DateTime::isAM, DateTime.now())
+        boolean result = LogicalOperatorHelper.init(DateTime.now(), DateTime::isAM)
                 .or(t -> t > 100, 34, 776)
                 .negate()
                 .result();
