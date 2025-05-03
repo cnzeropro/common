@@ -8,7 +8,6 @@ import cn.hutool.json.JSONUtil;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.zero.common.core.extension.jackson.databind.NumberJsonComponent;
-import org.zero.common.core.extension.jackson.databind.ser.JSONNullJsonComponent;
 import org.zero.common.data.model.view.Result;
 
 import java.io.Serializable;
@@ -22,7 +21,7 @@ import java.util.Map;
 @RequestMapping("/jackson")
 public class JacksonController {
     /**
-     * @see JSONNullJsonComponent
+     * @see org.zero.common.core.extension.jackson.databind.ser.JSONNullSerializer
      */
     @RequestMapping("/null")
     public Result<JSON> jsonNullType() {

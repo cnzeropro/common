@@ -1,9 +1,18 @@
 package org.zero.common.core.util.java.lang;
 
+import org.zero.common.core.extension.java.util.function.ToBoolFunction;
+import org.zero.common.core.extension.java.util.function.ToByteFunction;
+import org.zero.common.core.extension.java.util.function.ToCharFunction;
+import org.zero.common.core.extension.java.util.function.ToFloatFunction;
+import org.zero.common.core.extension.java.util.function.ToShortFunction;
+import org.zero.common.data.constant.ConstantPool;
 import org.zero.common.data.constant.StringPool;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.ToDoubleFunction;
+import java.util.function.ToIntFunction;
+import java.util.function.ToLongFunction;
 
 /**
  * @author Zero (cnzeropro@163.com)
@@ -31,39 +40,15 @@ public class CharSequenceUtil {
             int length = charSequence.length();
             for (int i = 0; i < length; i++) {
                 if (!Character.isWhitespace(charSequence.charAt(i))) {
-                    return false;
+                    return ConstantPool.BOOLEAN_FALSE;
                 }
             }
         }
-        return true;
+        return ConstantPool.BOOLEAN_TRUE;
     }
 
     public static boolean nonBlank(CharSequence charSequence) {
         return !isBlank(charSequence);
-    }
-
-    public static <T extends CharSequence> T defaultIfNull(final T charSequence, final T defaultCharSequence) {
-        return isNull(charSequence) ? defaultCharSequence : charSequence;
-    }
-
-    public static <T extends CharSequence> T defaultIfEmpty(final T charSequence, final T defaultCharSequence) {
-        return isEmpty(charSequence) ? defaultCharSequence : charSequence;
-    }
-
-    public static <T extends CharSequence> T defaultIfBlank(final T charSequence, final T defaultCharSequence) {
-        return isBlank(charSequence) ? defaultCharSequence : charSequence;
-    }
-
-    public static <T extends CharSequence, R> R mapIfNonNull(final T charSequence, Function<T, R> mapper) {
-        return nonNull(charSequence) ? mapper.apply(charSequence) : null;
-    }
-
-    public static <T extends CharSequence, R> R mapIfNonEmpty(final T charSequence, Function<T, R> mapper) {
-        return nonEmpty(charSequence) ? mapper.apply(charSequence) : null;
-    }
-
-    public static <T extends CharSequence, R> R mapIfNonBlank(final T charSequence, Function<T, R> mapper) {
-        return nonBlank(charSequence) ? mapper.apply(charSequence) : null;
     }
 
     public static CharSequence sub(CharSequence charSequence, int fromIndexInclude, int toIndexExclude) {
@@ -102,6 +87,130 @@ public class CharSequenceUtil {
         return charSequence.subSequence(fromIndexInclude, toIndexExclude);
     }
 
+    public static <T extends CharSequence> T defaultIfNull(final T charSequence, final T defaultCharSequence) {
+        return isNull(charSequence) ? defaultCharSequence : charSequence;
+    }
+
+    public static <T extends CharSequence> T defaultIfEmpty(final T charSequence, final T defaultCharSequence) {
+        return isEmpty(charSequence) ? defaultCharSequence : charSequence;
+    }
+
+    public static <T extends CharSequence> T defaultIfBlank(final T charSequence, final T defaultCharSequence) {
+        return isBlank(charSequence) ? defaultCharSequence : charSequence;
+    }
+
+    /* ************************************************ mapIfNonNull ************************************************ */
+    public static <T extends CharSequence, R> R mapIfNonNull(final T charSequence, Function<T, R> mapper) {
+        return nonNull(charSequence) ? mapper.apply(charSequence) : null;
+    }
+
+    public static <T extends CharSequence> byte mapIfNonNull(final T charSequence, ToByteFunction<T> mapper) {
+        return nonNull(charSequence) ? mapper.applyAsByte(charSequence) : ConstantPool.BYTE_ZERO;
+    }
+
+    public static <T extends CharSequence> short mapIfNonNull(final T charSequence, ToShortFunction<T> mapper) {
+        return nonNull(charSequence) ? mapper.applyAsShort(charSequence) : ConstantPool.SHORT_ZERO;
+    }
+
+    public static <T extends CharSequence> int mapIfNonNull(final T charSequence, ToIntFunction<T> mapper) {
+        return nonNull(charSequence) ? mapper.applyAsInt(charSequence) : ConstantPool.INT_ZERO;
+    }
+
+    public static <T extends CharSequence> long mapIfNonNull(final T charSequence, ToLongFunction<T> mapper) {
+        return nonNull(charSequence) ? mapper.applyAsLong(charSequence) : ConstantPool.LONG_ZERO;
+    }
+
+    public static <T extends CharSequence> float mapIfNonNull(final T charSequence, ToFloatFunction<T> mapper) {
+        return nonNull(charSequence) ? mapper.applyAsFloat(charSequence) : ConstantPool.FLOAT_ZERO;
+    }
+
+    public static <T extends CharSequence> double mapIfNonNull(final T charSequence, ToDoubleFunction<T> mapper) {
+        return nonNull(charSequence) ? mapper.applyAsDouble(charSequence) : ConstantPool.DOUBLE_ZERO;
+    }
+
+    public static <T extends CharSequence> char mapIfNonNull(final T charSequence, ToCharFunction<T> mapper) {
+        return nonNull(charSequence) ? mapper.applyAsChar(charSequence) : ConstantPool.CHAR_ZERO;
+    }
+
+    public static <T extends CharSequence> boolean mapIfNonNull(final T charSequence, ToBoolFunction<T> mapper) {
+        return nonNull(charSequence) ? mapper.applyAsBool(charSequence) : ConstantPool.BOOLEAN_FALSE;
+    }
+
+    /* ************************************************ mapIfNonEmpty ************************************************ */
+    public static <T extends CharSequence, R> R mapIfNonEmpty(final T charSequence, Function<T, R> mapper) {
+        return nonEmpty(charSequence) ? mapper.apply(charSequence) : null;
+    }
+
+    public static <T extends CharSequence> byte mapIfNonEmpty(final T charSequence, ToByteFunction<T> mapper) {
+        return nonEmpty(charSequence) ? mapper.applyAsByte(charSequence) : ConstantPool.BYTE_ZERO;
+    }
+
+    public static <T extends CharSequence> short mapIfNonEmpty(final T charSequence, ToShortFunction<T> mapper) {
+        return nonEmpty(charSequence) ? mapper.applyAsShort(charSequence) : ConstantPool.SHORT_ZERO;
+    }
+
+    public static <T extends CharSequence> int mapIfNonEmpty(final T charSequence, ToIntFunction<T> mapper) {
+        return nonEmpty(charSequence) ? mapper.applyAsInt(charSequence) : ConstantPool.INT_ZERO;
+    }
+
+    public static <T extends CharSequence> long mapIfNonEmpty(final T charSequence, ToLongFunction<T> mapper) {
+        return nonEmpty(charSequence) ? mapper.applyAsLong(charSequence) : ConstantPool.LONG_ZERO;
+    }
+
+    public static <T extends CharSequence> float mapIfNonEmpty(final T charSequence, ToFloatFunction<T> mapper) {
+        return nonEmpty(charSequence) ? mapper.applyAsFloat(charSequence) : ConstantPool.FLOAT_ZERO;
+    }
+
+    public static <T extends CharSequence> double mapIfNonEmpty(final T charSequence, ToDoubleFunction<T> mapper) {
+        return nonEmpty(charSequence) ? mapper.applyAsDouble(charSequence) : ConstantPool.DOUBLE_ZERO;
+    }
+
+    public static <T extends CharSequence> char mapIfNonEmpty(final T charSequence, ToCharFunction<T> mapper) {
+        return nonEmpty(charSequence) ? mapper.applyAsChar(charSequence) : ConstantPool.CHAR_ZERO;
+    }
+
+    public static <T extends CharSequence> boolean mapIfNonEmpty(final T charSequence, ToBoolFunction<T> mapper) {
+        return nonEmpty(charSequence) ? mapper.applyAsBool(charSequence) : ConstantPool.BOOLEAN_FALSE;
+    }
+
+    /* ************************************************ mapIfNonBlank ************************************************ */
+    public static <T extends CharSequence, R> R mapIfNonBlank(final T charSequence, Function<T, R> mapper) {
+        return nonBlank(charSequence) ? mapper.apply(charSequence) : null;
+    }
+
+    public static <T extends CharSequence> byte mapIfNonBlank(final T charSequence, ToByteFunction<T> mapper) {
+        return nonBlank(charSequence) ? mapper.applyAsByte(charSequence) : ConstantPool.BYTE_ZERO;
+    }
+
+    public static <T extends CharSequence> short mapIfNonBlank(final T charSequence, ToShortFunction<T> mapper) {
+        return nonBlank(charSequence) ? mapper.applyAsShort(charSequence) : ConstantPool.SHORT_ZERO;
+    }
+
+    public static <T extends CharSequence> int mapIfNonBlank(final T charSequence, ToIntFunction<T> mapper) {
+        return nonBlank(charSequence) ? mapper.applyAsInt(charSequence) : ConstantPool.INT_ZERO;
+    }
+
+    public static <T extends CharSequence> long mapIfNonBlank(final T charSequence, ToLongFunction<T> mapper) {
+        return nonBlank(charSequence) ? mapper.applyAsLong(charSequence) : ConstantPool.LONG_ZERO;
+    }
+
+    public static <T extends CharSequence> float mapIfNonBlank(final T charSequence, ToFloatFunction<T> mapper) {
+        return nonBlank(charSequence) ? mapper.applyAsFloat(charSequence) : ConstantPool.FLOAT_ZERO;
+    }
+
+    public static <T extends CharSequence> double mapIfNonBlank(final T charSequence, ToDoubleFunction<T> mapper) {
+        return nonBlank(charSequence) ? mapper.applyAsDouble(charSequence) : ConstantPool.DOUBLE_ZERO;
+    }
+
+    public static <T extends CharSequence> char mapIfNonBlank(final T charSequence, ToCharFunction<T> mapper) {
+        return nonBlank(charSequence) ? mapper.applyAsChar(charSequence) : ConstantPool.CHAR_ZERO;
+    }
+
+    public static <T extends CharSequence> boolean mapIfNonBlank(final T charSequence, ToBoolFunction<T> mapper) {
+        return nonBlank(charSequence) ? mapper.applyAsBool(charSequence) : ConstantPool.BOOLEAN_FALSE;
+    }
+
+    /* ************************************************ trim ************************************************ */
     public static CharSequence trimStart(CharSequence charSequence) {
         return trim(charSequence, TrimMode.START);
     }

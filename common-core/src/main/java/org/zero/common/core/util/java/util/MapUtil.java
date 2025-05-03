@@ -38,6 +38,11 @@ public class MapUtil {
     public static final float DEFAULT_LOAD_FACTOR = 0.75f;
 
     /**
+     * 默认容量
+     */
+    public static final int DEFAULT_CAPACITY = (int) (DEFAULT_INITIAL_CAPACITY * DEFAULT_LOAD_FACTOR); // 12
+
+    /**
      * The bin count threshold for using a tree rather than list for a
      * bin.  Bins are converted to trees when adding an element to a
      * bin with at least this many nodes. The value must be greater
@@ -233,7 +238,7 @@ public class MapUtil {
     }
 
     public static <K, V> Map<K, V> create(boolean isLinked) {
-        return create(isLinked, (int) (DEFAULT_INITIAL_CAPACITY * DEFAULT_LOAD_FACTOR));
+        return create(isLinked, DEFAULT_CAPACITY);
     }
 
     public static <K, V> Map<K, V> create(boolean isLinked, int size) {

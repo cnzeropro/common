@@ -8,6 +8,7 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -16,6 +17,10 @@ import java.util.stream.Collectors;
  * @since 2024/9/11
  */
 public class ArrayUtil {
+    /**
+     * 数组中元素未找到的下标，值为 -1
+     */
+    public static final int INDEX_NOT_FOUND = -1;
     /**
      * Java 虚拟机最大数组长度
      */
@@ -399,6 +404,17 @@ public class ArrayUtil {
                 .filter(Objects::nonNull)
                 .map(Objects::toString)
                 .collect(Collectors.joining(delimiter));
+    }
+
+    public static <T> T get(T[] array, int index) {
+        return getOpt(array, index).orElse(null);
+    }
+
+    public static <T> Optional<T> getOpt(T[] array, int index) {
+        if (isEmpty(array)) {
+            return Optional.empty();
+        }
+        return index > INDEX_NOT_FOUND && index < array.length ? Optional.ofNullable(array[index]) : Optional.empty();
     }
 
     protected ArrayUtil() {

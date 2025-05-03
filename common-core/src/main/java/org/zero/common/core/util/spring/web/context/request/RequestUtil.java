@@ -34,7 +34,7 @@ public class RequestUtil {
     /**
      * protocol://host[:port]/path?query#fragment
      * <p>
-     * 示例：http://127.0.0.1:8080/demo/test?a=bbb
+     * 示例：http://127.0.0.1:8080/demo/test?a=bbb <br>
      * 结果：http://127.0.0.1:8080/demo
      */
     public static String getDomain() {
@@ -46,7 +46,7 @@ public class RequestUtil {
     /**
      * protocol://host[:port]/path?query#fragment
      * <p>
-     * 示例：http://127.0.0.1:8080/demo/test?a=bbb
+     * 示例：http://127.0.0.1:8080/demo/test?a=bbb <br>
      * 结果：http://127.0.0.1:8080
      */
     public static String getServerDomain() {

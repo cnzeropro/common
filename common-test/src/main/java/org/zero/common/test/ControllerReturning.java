@@ -88,9 +88,9 @@ public class ControllerReturning {
     /**
      * @see org.springframework.web.servlet.mvc.method.annotation.ViewNameMethodReturnValueHandler
      */
-    @RequestMapping("/charSequence")
+    @RequestMapping("/void")
     public void v() {
-        return "charSequence";
+
     }
 
     /**

@@ -14,33 +14,54 @@ import java.util.function.Supplier;
  * @since 2025/1/21
  */
 public class ThrowableUtil {
-    public static <E extends RuntimeException> E throwUnchecked(Throwable t) {
-        Objects.requireNonNull(t, "Throwable must not be null");
-        return ThrowableUtil.throwAny(t);
+    public static <E extends RuntimeException> E throwUnchecked(Throwable throwable) {
+        Objects.requireNonNull(throwable, "Throwable must not be null");
+        return ThrowableUtil.throwAny(throwable);
     }
 
     @SuppressWarnings("unchecked")
-    private static <E extends Throwable> E throwAny(Throwable t) throws E {
-        throw (E) t;
+    protected static <E extends Throwable> E throwAny(Throwable throwable) throws E {
+        throw (E) throwable;
     }
 
+    /* ******************************************** sneakyThrow ******************************************** */
+    /* -------------------------------------------- Function -------------------------------------------- */
     @FunctionalInterface
     public interface ThrowThrowableFunction<T, R> {
         R apply(T t) throws Throwable;
     }
 
     public static <T, R> Function<T, R> sneakyThrow(ThrowThrowableFunction<T, R> function) {
-        return o -> sneakyThrow(o, function);
+        return t -> sneakyThrow(t, function);
     }
 
-    public static <T, R> R sneakyThrow(T o, ThrowThrowableFunction<T, R> function) {
+    public static <T, R> R sneakyThrow(T t, ThrowThrowableFunction<T, R> function) {
         try {
-            return function.apply(o);
-        } catch (Throwable t) {
-            throw throwUnchecked(t);
+            return function.apply(t);
+        } catch (Throwable throwable) {
+            throw throwUnchecked(throwable);
         }
     }
 
+    /* -------------------------------------------- BiFunction -------------------------------------------- */
+    @FunctionalInterface
+    public interface ThrowThrowableBiFunction<T, U, R> {
+        R apply(T t, U u) throws Throwable;
+    }
+
+    public static <T, U, R> BiFunction<T, U, R> sneakyThrow(ThrowThrowableBiFunction<T, U, R> function) {
+        return (t, u) -> sneakyThrow(t, u, function);
+    }
+
+    public static <T, U, R> R sneakyThrow(T t, U u, ThrowThrowableBiFunction<T, U, R> function) {
+        try {
+            return function.apply(t, u);
+        } catch (Throwable throwable) {
+            throw throwUnchecked(throwable);
+        }
+    }
+
+    /* -------------------------------------------- Supplier -------------------------------------------- */
     @FunctionalInterface
     public interface ThrowThrowableSupplier<T> {
         T get() throws Throwable;
@@ -50,42 +71,45 @@ public class ThrowableUtil {
         return () -> {
             try {
                 return supplier.get();
-            } catch (Throwable t) {
-                throw throwUnchecked(t);
+            } catch (Throwable throwable) {
+                throw throwUnchecked(throwable);
             }
         };
     }
 
+    /* -------------------------------------------- Consumer -------------------------------------------- */
     @FunctionalInterface
     public interface ThrowThrowableConsumer<T> {
         void accept(T t) throws Throwable;
     }
 
     public static <T> Consumer<T> sneakyThrow(ThrowThrowableConsumer<T> consumer) {
-        return o -> {
+        return t -> {
             try {
-                consumer.accept(o);
-            } catch (Throwable t) {
-                throw throwUnchecked(t);
+                consumer.accept(t);
+            } catch (Throwable throwable) {
+                throw throwUnchecked(throwable);
             }
         };
     }
 
+    /* -------------------------------------------- Predicate -------------------------------------------- */
     @FunctionalInterface
     public interface ThrowThrowablePredicate<T> {
         boolean test(T t) throws Throwable;
     }
 
     public static <T> Predicate<T> sneakyThrow(ThrowThrowablePredicate<T> predicate) {
-        return o -> {
+        return t -> {
             try {
-                return predicate.test(o);
-            } catch (Throwable t) {
-                throw throwUnchecked(t);
+                return predicate.test(t);
+            } catch (Throwable throwable) {
+                throw throwUnchecked(throwable);
             }
         };
     }
 
+    /* -------------------------------------------- Runnable -------------------------------------------- */
     @FunctionalInterface
     public interface ThrowThrowableRunnable {
         void run() throws Throwable;
@@ -95,12 +119,13 @@ public class ThrowableUtil {
         return () -> {
             try {
                 runnable.run();
-            } catch (Throwable t) {
-                throw throwUnchecked(t);
+            } catch (Throwable throwable) {
+                throw throwUnchecked(throwable);
             }
         };
     }
 
+    /* -------------------------------------------- Callable -------------------------------------------- */
     @FunctionalInterface
     public interface ThrowThrowableCallable<T> {
         T call() throws Throwable;
@@ -110,21 +135,19 @@ public class ThrowableUtil {
         return () -> {
             try {
                 return callable.call();
-            } catch (Throwable t) {
-                throw throwUnchecked(t);
+            } catch (Throwable throwable) {
+                throw throwUnchecked(throwable);
             }
         };
     }
 
-    public static <T> T ignore(Supplier<T> supplier) {
-        return ignoreOpt(supplier).orElse(null);
+    /* ******************************************** ignore ******************************************** */
+    /* -------------------------------------------- Supplier -------------------------------------------- */
+    public static <T> T ignore(ThrowThrowableSupplier<T> supplier) {
+        return ignore(supplier, (T) null);
     }
 
-    public static <T> Optional<T> ignoreOpt(Supplier<T> supplier) {
-        return Optional.ofNullable(ignore(supplier, (T) null));
-    }
-
-    public static <T> T ignore(Supplier<T> supplier, T exceptionDefault) {
+    public static <T> T ignore(ThrowThrowableSupplier<T> supplier, T exceptionDefault) {
         try {
             return supplier.get();
         } catch (Throwable ignored) {
@@ -132,36 +155,82 @@ public class ThrowableUtil {
         }
     }
 
-    public static <T, R> R ignore(T o, Function<T, R> function) {
-        return ThrowableUtil.ignoreOpt(o, function).orElse(null);
+    public static <T> Optional<T> ignoreOpt(ThrowThrowableSupplier<T> supplier) {
+        return Optional.ofNullable(ignore(supplier));
     }
 
-    public static <T, R> Optional<R> ignoreOpt(T o, Function<T, R> function) {
-        return Optional.ofNullable(ignore(o, function, null));
+    /* -------------------------------------------- Predicate -------------------------------------------- */
+    public static <T> boolean ignore(T obj, ThrowThrowablePredicate<T> predicate) {
+        return ignore(obj, predicate, false);
     }
 
-    public static <T, R> R ignore(T o, Function<T, R> function, R exceptionDefault) {
+    public static <T> boolean ignore(T obj, ThrowThrowablePredicate<T> predicate, boolean exceptionDefault) {
         try {
-            return function.apply(o);
+            return predicate.test(obj);
         } catch (Throwable ignored) {
             return exceptionDefault;
+        }
+    }
+
+    /* -------------------------------------------- Function -------------------------------------------- */
+    public static <T, R> R ignore(T obj, ThrowThrowableFunction<T, R> function) {
+        return ignore(obj, function, (R) null);
+    }
+
+    public static <T, R> R ignore(T obj, ThrowThrowableFunction<T, R> function, R exceptionDefault) {
+        try {
+            return function.apply(obj);
+        } catch (Throwable ignored) {
+            return exceptionDefault;
+        }
+    }
+
+    public static <T, R> Optional<R> ignoreOpt(T obj, ThrowThrowableFunction<T, R> function) {
+        return Optional.ofNullable(ignore(obj, function));
+    }
+
+    /* ******************************************** tryThrowNew ******************************************** */
+    public static <T extends Throwable> void tryThrowNew(Runnable snippet, Supplier<? extends T> exceptionSupplier) {
+        try {
+            snippet.run();
+        } catch (Throwable ignored) {
+            T t = exceptionSupplier.get();
+            throw throwUnchecked(t);
         }
     }
 
     public static <T extends Throwable> void tryThrowNew(Runnable snippet, Function<Throwable, ? extends T> exceptionMapper) {
         try {
             snippet.run();
-        } catch (Throwable e) {
-            T t = exceptionMapper.apply(e);
+        } catch (Throwable throwable) {
+            T t = exceptionMapper.apply(throwable);
             throw throwUnchecked(t);
         }
     }
 
-    public static <T extends Throwable> void tryThrowNew(Runnable snippet, BiFunction<String, Throwable, ? extends T> exceptionMapper, String message) {
+    public static <T extends Throwable> void tryThrowNew(Runnable snippet, BiFunction<CharSequence, Throwable, ? extends T> exceptionMapper) {
         try {
             snippet.run();
-        } catch (Throwable e) {
-            T t = exceptionMapper.apply(CharSequenceUtil.defaultIfNull(message, e.getMessage()), e);
+        } catch (Throwable throwable) {
+            T t = exceptionMapper.apply(throwable.getMessage(), throwable);
+            throw throwUnchecked(t);
+        }
+    }
+
+    public static <T extends Throwable> void tryThrowNew(Runnable snippet, BiFunction<CharSequence, Throwable, ? extends T> exceptionMapper, CharSequence message) {
+        try {
+            snippet.run();
+        } catch (Throwable throwable) {
+            T t = exceptionMapper.apply(message, throwable);
+            throw throwUnchecked(t);
+        }
+    }
+
+    public static <V, T extends Throwable> V tryThrowNew(Callable<V> snippet, Supplier<? extends T> exceptionSupplier) {
+        try {
+            return snippet.call();
+        } catch (Throwable ignored) {
+            T t = exceptionSupplier.get();
             throw throwUnchecked(t);
         }
     }
@@ -169,17 +238,26 @@ public class ThrowableUtil {
     public static <V, T extends Throwable> V tryThrowNew(Callable<V> snippet, Function<Throwable, ? extends T> exceptionMapper) {
         try {
             return snippet.call();
-        } catch (Throwable e) {
-            T t = exceptionMapper.apply(e);
+        } catch (Throwable throwable) {
+            T t = exceptionMapper.apply(throwable);
             throw throwUnchecked(t);
         }
     }
 
-    public static <V, T extends Throwable> V tryThrowNew(Callable<V> snippet, BiFunction<String, Throwable, ? extends T> exceptionMapper, String message) {
+    public static <V, T extends Throwable> V tryThrowNew(Callable<V> snippet, BiFunction<CharSequence, Throwable, ? extends T> exceptionMapper) {
         try {
             return snippet.call();
-        } catch (Throwable e) {
-            T t = exceptionMapper.apply(CharSequenceUtil.defaultIfNull(message, e.getMessage()), e);
+        } catch (Throwable throwable) {
+            T t = exceptionMapper.apply(throwable.getMessage(), throwable);
+            throw throwUnchecked(t);
+        }
+    }
+
+    public static <V, T extends Throwable> V tryThrowNew(Callable<V> snippet, BiFunction<CharSequence, Throwable, ? extends T> exceptionMapper, CharSequence message) {
+        try {
+            return snippet.call();
+        } catch (Throwable throwable) {
+            T t = exceptionMapper.apply(message, throwable);
             throw throwUnchecked(t);
         }
     }

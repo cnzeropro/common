@@ -13,11 +13,13 @@ import java.util.Objects;
  * @since 2021/8/10 9:15
  */
 public class JndiDataSourceHelper {
-    /**
-     * name like: {@code java:comp/env/jdbc/test}
-     */
     private final DataSource dataSource;
 
+    /**
+     * 构造
+     *
+     * @param name jndi name, like: {@code java:comp/env/jdbc/test}
+     */
     @SneakyThrows
     public JndiDataSourceHelper(String name) {
         Context context = new InitialContext();

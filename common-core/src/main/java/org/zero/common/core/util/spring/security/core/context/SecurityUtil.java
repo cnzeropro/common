@@ -1,4 +1,4 @@
-package org.zero.common.core.util.spring.security;
+package org.zero.common.core.util.spring.security.core.context;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;

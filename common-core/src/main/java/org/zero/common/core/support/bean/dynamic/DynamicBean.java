@@ -6,6 +6,7 @@ import org.zero.common.core.support.converter.ConverterComposite;
 import org.zero.common.core.util.java.reflect.ClassUtil;
 import org.zero.common.core.util.java.reflect.FieldUtil;
 import org.zero.common.core.util.java.util.MapUtil;
+import org.zero.common.data.constant.ConstantPool;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -23,11 +24,11 @@ import java.util.function.Function;
 public class DynamicBean extends LinkedHashMap<CharSequence, Object> {
     /* ***************************************************** creater ***************************************************** */
     public DynamicBean() {
-        this(12);
+        this(MapUtil.DEFAULT_CAPACITY);
     }
 
-    protected DynamicBean(int numMappings) {
-        super(MapUtil.calculateCapacity(numMappings));
+    protected DynamicBean(int size) {
+        super(MapUtil.calculateCapacity(size));
     }
 
     public static DynamicBean create() {
@@ -85,35 +86,35 @@ public class DynamicBean extends LinkedHashMap<CharSequence, Object> {
     }
 
     public byte getByte(CharSequence name) {
-        return get(name, Byte.class, (byte) 0);
+        return get(name, Byte.class, ConstantPool.BYTE_ZERO);
     }
 
     public short getShort(CharSequence name) {
-        return get(name, Short.class, (short) 0);
+        return get(name, Short.class, ConstantPool.SHORT_ZERO);
     }
 
     public int getInt(CharSequence name) {
-        return get(name, Integer.class, 0);
+        return get(name, Integer.class, ConstantPool.INT_ZERO);
     }
 
     public long getLong(CharSequence name) {
-        return get(name, Long.class, 0L);
+        return get(name, Long.class, ConstantPool.LONG_ZERO);
     }
 
     public float getFloat(CharSequence name) {
-        return get(name, Float.class, 0.0F);
+        return get(name, Float.class, ConstantPool.FLOAT_ZERO);
     }
 
     public double getDouble(CharSequence name) {
-        return get(name, Double.class, 0.0D);
+        return get(name, Double.class, ConstantPool.DOUBLE_ZERO);
     }
 
     public char getChar(CharSequence name) {
-        return get(name, Character.class, '\u0000');
+        return get(name, Character.class, ConstantPool.CHAR_ZERO);
     }
 
     public boolean getBoolean(CharSequence name) {
-        return get(name, Boolean.class, false);
+        return get(name, Boolean.class, ConstantPool.BOOLEAN_FALSE);
     }
 
     public String getString(CharSequence name) {

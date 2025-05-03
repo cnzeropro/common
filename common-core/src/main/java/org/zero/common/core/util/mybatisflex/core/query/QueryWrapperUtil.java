@@ -509,7 +509,7 @@ public class QueryWrapperUtil {
                         HashMap::new));
     }
 
-    protected QueryWrapperUtil() throws IllegalAccessException {
-        throw new IllegalAccessException();
+    protected QueryWrapperUtil() {
+        throw new UnsupportedOperationException();
     }
 }

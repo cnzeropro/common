@@ -2,7 +2,7 @@ package org.zero.common.core.util;
 
 import org.zero.common.core.util.apache.shiro.ShiroUtil;
 import org.zero.common.core.util.java.lang.ThrowableUtil;
-import org.zero.common.core.util.spring.security.SecurityUtil;
+import org.zero.common.core.util.spring.security.core.context.SecurityUtil;
 import org.zero.common.data.model.security.LoginUser;
 
 import java.io.Serializable;

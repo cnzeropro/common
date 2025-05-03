@@ -13,7 +13,7 @@ import java.util.function.Predicate;
  * @since 2016/1/14
  */
 public class StringUtil extends CharSequenceUtil implements StringPool {
-    public static final int INDEX_NOT_FOUND = -1;
+    public static final int INDEX_NOT_FOUND = ArrayUtil.INDEX_NOT_FOUND;
 
     public static boolean equals(String str1, String str2, boolean ignoreCase) {
         if (isNull(str1)) {
@@ -134,7 +134,8 @@ public class StringUtil extends CharSequenceUtil implements StringPool {
         if (isNull(string)) {
             return null;
         }
-        return CharSequenceUtil.trim(string, mode, predicate).toString();
+        CharSequence charSequence = CharSequenceUtil.trim(string, mode, predicate);
+        return toString(charSequence);
     }
 
     public static String removePrefix(String string, String prefix, boolean ignoreCase) {
@@ -238,6 +239,14 @@ public class StringUtil extends CharSequenceUtil implements StringPool {
             }
         }
         return result;
+    }
+
+    public static String toString(Object obj) {
+        return toString(obj, null);
+    }
+
+    public static String toString(Object obj, String defaultValue) {
+        return Objects.isNull(obj) ? defaultValue : obj.toString();
     }
 
     protected StringUtil() {

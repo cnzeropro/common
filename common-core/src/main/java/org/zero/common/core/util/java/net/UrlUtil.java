@@ -117,7 +117,7 @@ public class UrlUtil {
             return null;
         }
         Set<ClassLoader> classLoaders = SetUtil.<ClassLoader>of(true, classLoader);
-        Collections.addAll(classLoaders, ClassLoaderUtil.DEFAULT_CLASS_LOADERS);
+        Collections.addAll(classLoaders, ClassLoaderUtil.CLASS_LOADERS);
         for (ClassLoader cl : classLoaders) {
             if (Objects.nonNull(cl)) {
                 URL url = cl.getResource(path);
@@ -139,7 +139,7 @@ public class UrlUtil {
             return Collections.emptyList();
         }
         Set<ClassLoader> classLoaders = SetUtil.<ClassLoader>of(true, classLoader);
-        Collections.addAll(classLoaders, ClassLoaderUtil.DEFAULT_CLASS_LOADERS);
+        Collections.addAll(classLoaders, ClassLoaderUtil.CLASS_LOADERS);
         return classLoaders.stream()
                 .filter(Objects::nonNull)
                 .<Enumeration<URL>>map(cl -> {

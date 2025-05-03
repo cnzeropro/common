@@ -1,7 +1,7 @@
 package org.zero.common.core.util.quartz;
 
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.java.Log;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
@@ -19,12 +19,13 @@ import org.zero.common.core.support.context.spring.SpringUtils;
 
 import java.util.Date;
 import java.util.Objects;
+import java.util.logging.Level;
 
 /**
  * @author zero
  * @since 2021/10/21
  */
-@Slf4j
+@Log
 public class QuartzUtils {
     public static boolean scheduleJob(String key, Class<? extends Job> clazz, String cron) {
         return scheduleJob(key, clazz, cron, new JobDataMap());
@@ -47,7 +48,7 @@ public class QuartzUtils {
             getScheduler().scheduleJob(trigger);
             return true;
         } catch (SchedulerException e) {
-            log.warn(String.format("schedule job error: %s", trigger.getJobKey()), e);
+            log.log(Level.WARNING, String.format("schedule job error: %s", trigger.getJobKey()), e);
             return false;
         }
     }
@@ -60,7 +61,7 @@ public class QuartzUtils {
             getScheduler().scheduleJob(jobDetail, trigger);
             return true;
         } catch (SchedulerException e) {
-            log.warn(String.format("schedule job error: %s", jobDetail.getKey()), e);
+            log.log(Level.WARNING, String.format("schedule job error: %s", jobDetail.getKey()), e);
             return false;
         }
     }
@@ -77,7 +78,7 @@ public class QuartzUtils {
             getScheduler().rescheduleJob(triggerKey, trigger);
             return true;
         } catch (SchedulerException e) {
-            log.warn(String.format("reschedule job error: %s", trigger.getJobKey()), e);
+            log.log(Level.WARNING, String.format("reschedule job error: %s", trigger.getJobKey()), e);
             return false;
         }
     }
@@ -98,7 +99,7 @@ public class QuartzUtils {
             getScheduler().triggerJob(jobKey, jobDataMap);
             return true;
         } catch (SchedulerException e) {
-            log.warn(String.format("trigger job error: %s", jobKey), e);
+            log.log(Level.WARNING, String.format("trigger job error: %s", jobKey), e);
             return false;
         }
     }
@@ -119,7 +120,7 @@ public class QuartzUtils {
             getScheduler().addJob(jobDetail, replace);
             return true;
         } catch (SchedulerException e) {
-            log.warn(String.format("add job error: %s", jobDetail.getKey()), e);
+            log.log(Level.WARNING, String.format("add job error: %s", jobDetail.getKey()), e);
             return false;
         }
     }
@@ -135,7 +136,7 @@ public class QuartzUtils {
         try {
             return getScheduler().checkExists(jobKey);
         } catch (SchedulerException e) {
-            log.warn(String.format("check job exists error: %s", jobKey), e);
+            log.log(Level.WARNING, String.format("check job exists error: %s", jobKey), e);
             return false;
         }
     }
@@ -151,7 +152,7 @@ public class QuartzUtils {
         try {
             return getScheduler().deleteJob(jobKey);
         } catch (SchedulerException e) {
-            log.warn(String.format("delete job error: %s", jobKey), e);
+            log.log(Level.WARNING, String.format("delete job error: %s", jobKey), e);
             return false;
         }
     }
@@ -170,7 +171,7 @@ public class QuartzUtils {
             getScheduler().pauseJob(jobKey);
             return true;
         } catch (SchedulerException e) {
-            log.warn(String.format("pause job error: %s", jobKey), e);
+            log.log(Level.WARNING, String.format("pause job error: %s", jobKey), e);
             return false;
         }
     }
@@ -189,7 +190,7 @@ public class QuartzUtils {
             getScheduler().resumeJob(jobKey);
             return true;
         } catch (SchedulerException e) {
-            log.warn(String.format("resume job error: %s", jobKey), e);
+            log.log(Level.WARNING, String.format("resume job error: %s", jobKey), e);
             return false;
         }
     }
@@ -206,7 +207,7 @@ public class QuartzUtils {
             getScheduler().standby();
             return getScheduler().interrupt(jobKey);
         } catch (SchedulerException e) {
-            log.warn(String.format("interrupt job error: %s", jobKey), e);
+            log.log(Level.WARNING, String.format("interrupt job error: %s", jobKey), e);
             return false;
         }
     }
