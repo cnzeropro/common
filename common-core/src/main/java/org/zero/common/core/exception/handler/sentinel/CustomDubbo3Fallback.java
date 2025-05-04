@@ -7,6 +7,8 @@ import org.apache.dubbo.rpc.AppResponse;
 import org.apache.dubbo.rpc.AsyncRpcResult;
 import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Invoker;
+import org.zero.common.core.exception.ThrowableMessageProvider;
+import org.zero.common.core.exception.handler.ThrowableHandler;
 import org.zero.common.data.model.view.Result;
 
 /**
@@ -18,14 +20,17 @@ import org.zero.common.data.model.view.Result;
  * @since 2024/8/29
  */
 @Slf4j
-public class CustomDubbo3Fallback implements DubboFallback {
+public class CustomDubbo3Fallback extends ThrowableHandler implements DubboFallback {
+    public CustomDubbo3Fallback(ThrowableMessageProvider throwableMessageProvider) {
+        super(throwableMessageProvider);
+    }
 
     @Override
     public org.apache.dubbo.rpc.Result handle(Invoker<?> invoker, Invocation invocation, BlockException ex) {
-        log.warn("Sentinel block exception", ex);
+        log.error("Sentinel block exception", ex);
         AppResponse appResponse = new AppResponse(invocation);
         appResponse.setException(ex);
-        Result<Void> result = SentinelExceptionUtil.exception2Result(ex);
+        Result<Void> result = this.handleThrowable(ex);
         appResponse.setValue(result);
         return AsyncRpcResult.newDefaultAsyncResult(appResponse, invocation);
     }

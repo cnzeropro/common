@@ -15,5 +15,7 @@ public class GlobalControllerAdvice {
      */
     @InitBinder
     public void initBinder(WebDataBinder binder) {
+        // 所有控制器中禁止绑定 version、deleted 字段
+        binder.setDisallowedFields("version", "deleted");
     }
 }

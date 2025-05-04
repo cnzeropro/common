@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.zero.common.core.exception.ThrowableMessageProvider;
+import org.zero.common.core.exception.handler.ThrowableHandler;
 import org.zero.common.data.model.view.Result;
 
 import java.util.Collections;
@@ -22,7 +23,7 @@ import java.util.Collections;
 @Slf4j
 @RestControllerAdvice
 @ConditionalOnWebApplication
-public class SpringWebReactiveExceptionHandler extends AbstractThrowableHandler {
+public class SpringWebReactiveExceptionHandler extends ThrowableHandler {
     public SpringWebReactiveExceptionHandler(ThrowableMessageProvider throwableMessageProvider) {
         super(throwableMessageProvider);
     }

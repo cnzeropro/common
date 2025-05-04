@@ -3,6 +3,8 @@ package org.zero.common.core.exception.handler.sentinel;
 import com.alibaba.csp.sentinel.adapter.spring.webmvc.callback.BlockExceptionHandler;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import lombok.extern.slf4j.Slf4j;
+import org.zero.common.core.exception.ThrowableMessageProvider;
+import org.zero.common.core.exception.handler.ThrowableHandler;
 import org.zero.common.core.util.jackson.databind.JacksonUtils;
 import org.zero.common.core.util.javax.servlet.ResponseUtil;
 import org.zero.common.data.model.view.Result;
@@ -19,11 +21,15 @@ import javax.servlet.http.HttpServletResponse;
  * @since 2022/7/16
  */
 @Slf4j
-public class CustomBlockExceptionHandler implements BlockExceptionHandler {
+public class CustomBlockExceptionHandler extends ThrowableHandler implements BlockExceptionHandler {
+    public CustomBlockExceptionHandler(ThrowableMessageProvider throwableMessageProvider) {
+        super(throwableMessageProvider);
+    }
+
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, BlockException e) {
-        log.warn("Sentinel block exception", e);
-        Result<Void> result = SentinelExceptionUtil.exception2Result(e);
+        log.error("Sentinel block exception", e);
+        Result<Void> result = this.handleThrowable(e);
         String jsonStr = JacksonUtils.toJsonStr(result);
         ResponseUtil.writeErrorJson(response, jsonStr);
     }

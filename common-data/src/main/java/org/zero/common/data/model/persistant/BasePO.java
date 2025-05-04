@@ -15,7 +15,7 @@ import java.io.Serializable;
 @SuperBuilder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class BasePO implements Serializable, Identifiable<Long> {
+public abstract class BasePO implements Identifiable<Long>, Serializable {
     private static final long serialVersionUID = 1L;
 
     private Long id;

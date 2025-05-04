@@ -1,7 +1,7 @@
 package org.zero.common.data.enumeration;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.zero.common.data.exception.BaseSysError;
 
 /**
@@ -11,8 +11,8 @@ import org.zero.common.data.exception.BaseSysError;
  * @since 2022/12/1
  */
 @Getter
-@AllArgsConstructor
-public enum SysError implements BaseSysError{
+@RequiredArgsConstructor
+public enum SysError implements BaseSysError {
     /**
      * 一切可行
      */

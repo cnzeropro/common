@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.zero.common.core.exception.ThrowableMessageProvider;
+import org.zero.common.core.exception.handler.ThrowableHandler;
 import org.zero.common.data.model.view.Result;
 
 import javax.validation.ConstraintViolation;
@@ -25,7 +26,7 @@ import java.util.stream.Stream;
 @Slf4j
 @RestControllerAdvice
 @ConditionalOnWebApplication
-public class JavaxExceptionHandler extends AbstractThrowableHandler {
+public class JavaxExceptionHandler extends ThrowableHandler {
 
     public JavaxExceptionHandler(ThrowableMessageProvider throwableMessageProvider) {
         super(throwableMessageProvider);

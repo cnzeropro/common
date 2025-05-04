@@ -7,6 +7,7 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.zero.common.core.exception.ThrowableMessageProvider;
+import org.zero.common.core.exception.handler.ThrowableHandler;
 import org.zero.common.data.model.view.Result;
 
 import java.util.List;
@@ -25,7 +26,7 @@ import java.util.stream.Stream;
 @Slf4j
 @RestControllerAdvice
 @ConditionalOnWebApplication
-public class SpringExceptionHandler extends AbstractThrowableHandler {
+public class SpringExceptionHandler extends ThrowableHandler {
     public SpringExceptionHandler(ThrowableMessageProvider throwableMessageProvider) {
         super(throwableMessageProvider);
     }

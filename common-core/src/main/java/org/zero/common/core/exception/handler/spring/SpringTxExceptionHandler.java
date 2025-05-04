@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.zero.common.core.exception.ThrowableMessageProvider;
+import org.zero.common.core.exception.handler.ThrowableHandler;
 import org.zero.common.data.model.view.Result;
 
 /**
@@ -18,7 +19,7 @@ import org.zero.common.data.model.view.Result;
 @Slf4j
 @RestControllerAdvice
 @ConditionalOnWebApplication
-public class SpringTxExceptionHandler extends AbstractThrowableHandler {
+public class SpringTxExceptionHandler extends ThrowableHandler {
     public SpringTxExceptionHandler(ThrowableMessageProvider throwableMessageProvider) {
         super(throwableMessageProvider);
     }

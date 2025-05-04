@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.zero.common.core.exception.ThrowableMessageProvider;
+import org.zero.common.core.exception.handler.ThrowableHandler;
 import org.zero.common.data.model.view.Result;
 
 import java.util.Collections;
@@ -21,7 +22,7 @@ import java.util.Collections;
 @Slf4j
 @RestControllerAdvice
 @ConditionalOnWebApplication
-public class SpringWebMvcExceptionHandler extends AbstractThrowableHandler {
+public class SpringWebMvcExceptionHandler extends ThrowableHandler {
     public SpringWebMvcExceptionHandler(ThrowableMessageProvider throwableMessageProvider) {
         super(throwableMessageProvider);
     }

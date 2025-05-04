@@ -23,11 +23,13 @@ public abstract class FullBasePO
         extends BasePO
         implements Auditable<Long, LocalDateTime, Long, LocalDateTime>,
         SoftDeletable<Boolean>,
+        Locked<Long>,
         Versioned<Long> {
     private Long createdBy;
     private LocalDateTime createdAt;
     private Long updatedBy;
     private LocalDateTime updatedAt;
     private Boolean deleted;
+    private Long lock;
     private Long version;
 }

@@ -3,6 +3,12 @@ package org.zero.common.data.model.persistant;
 import java.io.Serializable;
 
 /**
+ * 可审计接口
+ *
+ * @param <CreatedBy> 创建人
+ * @param <CreatedAt> 创建时间
+ * @param <UpdatedBy> 更新人
+ * @param <UpdatedAt> 更新时间
  * @author Zero (cnzeropro@163.com)
  * @since 2025/2/13
  */

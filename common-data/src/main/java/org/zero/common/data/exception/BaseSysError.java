@@ -37,13 +37,13 @@ public interface BaseSysError extends Serializable {
         protected final String code;
         protected final String message;
 
-        public static DefaultSysError of(String code, String message) {
-            return new DefaultSysError(code, message);
-        }
-
         protected DefaultSysError(String code, String message) {
             this.code = code;
             this.message = message;
+        }
+
+        public static DefaultSysError of(String code, String message) {
+            return new DefaultSysError(code, message);
         }
 
         protected static String formatMessage(String message, Locale locale, Object... args) {

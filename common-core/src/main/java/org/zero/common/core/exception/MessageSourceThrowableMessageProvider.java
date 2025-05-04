@@ -8,6 +8,7 @@ import java.util.Locale;
 
 /**
  * @author Zero (cnzeropro@163.com)
+ * @see org.zero.common.core.exception.ThrowableMessageSource
  * @since 2025/4/23
  */
 @Slf4j

@@ -18,8 +18,9 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 /**
- * Spring Boot 全局错误处理控制器，负责生成统一错误响应。<br>
- * 当其他异常处理机制未处理异常时，作为兜底机制触发。例如未配置 {@code @ExceptionHandler} 或未覆盖默认异常处理的场景。
+ * Spring Boot 全局错误处理控制器，负责生成统一错误响应
+ * <p>
+ * 当其他异常处理机制未处理异常时，作为兜底机制触发
  *
  * @author zero
  * @see org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController
