@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.springframework.util.StringUtils;
+import org.zero.common.core.util.java.lang.CharSequenceUtil;
 import org.zero.common.core.util.java.lang.ThrowableUtil;
 import org.zero.common.core.util.java.reflect.ConstructorUtil;
 import org.zero.common.core.util.java.reflect.MethodUtil;
@@ -97,7 +97,7 @@ public class RetryableAspect {
 
     protected Object recover(ProceedingJoinPoint joinPoint, Retryable retryable, Throwable t) throws Throwable {
         String recover = retryable.recover();
-        if (StringUtils.hasText(recover)) {
+        if (CharSequenceUtil.nonBlank(recover)) {
             Class<?> recoverClass = retryable.recoverClass();
             Object[] args = joinPoint.getArgs();
             Object target;

@@ -1,4 +1,4 @@
-package org.zero.common.core.extension.common.query.advice;
+package org.zero.common.core.extension.spring.web.bind;
 
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ControllerAdvice;

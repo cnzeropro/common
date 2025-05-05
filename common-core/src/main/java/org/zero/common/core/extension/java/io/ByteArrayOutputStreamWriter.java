@@ -1,7 +1,8 @@
 package org.zero.common.core.extension.java.io;
 
+import lombok.SneakyThrows;
+
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Formatter;
@@ -36,12 +37,9 @@ public class ByteArrayOutputStreamWriter extends ByteArrayOutputStream implement
         write(chars, 0, chars.length);
     }
 
+    @SneakyThrows
     public void write(char[] chars, int off, int len) {
-        try {
-            write(new String(chars, off, len).getBytes(charset));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        this.write(new String(chars, off, len).getBytes(charset));
     }
 
     public void write(String str) {

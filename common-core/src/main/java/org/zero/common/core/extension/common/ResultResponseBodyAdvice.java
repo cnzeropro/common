@@ -2,8 +2,8 @@ package org.zero.common.core.extension.common;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -81,8 +81,8 @@ public class ResultResponseBodyAdvice implements ResponseBodyAdvice<Object>, Ord
                                   ServerHttpRequest request,
                                   ServerHttpResponse response) {
         if (body instanceof Result ||
-                // ResponseEntity 不做处理
-                body instanceof ResponseEntity) {
+                // HttpEntity 不做处理
+                body instanceof HttpEntity) {
             return body;
         }
         return Result.ok(body);

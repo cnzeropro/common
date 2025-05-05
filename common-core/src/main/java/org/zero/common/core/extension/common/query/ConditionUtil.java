@@ -4,6 +4,7 @@ import lombok.experimental.UtilityClass;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.zero.common.core.util.java.reflect.ClassUtil;
 import org.zero.common.data.model.query.Condition;
 import org.zero.common.data.model.query.Operator;
 
@@ -63,7 +64,7 @@ public class ConditionUtil {
         }
 
         Class<?> clazz = param.getClass();
-        if (isNumClass(clazz)) {
+        if (ClassUtil.isNumClass(clazz)) {
             // 避免科学计数法的干扰
             return new BigDecimal(param.toString()).toPlainString();
         } else {
@@ -110,14 +111,5 @@ public class ConditionUtil {
                 .findFirst()
                 .map(paramMapper -> paramMapper.apply(value))
                 .orElse(value);
-    }
-
-    private static boolean isNumClass(Class<?> clazz) {
-        return Objects.nonNull(clazz) &&
-                (Number.class.isAssignableFrom(clazz) ||
-                        (clazz.isPrimitive() &&
-                                (clazz == int.class || clazz == long.class ||
-                                        clazz == short.class || clazz == byte.class ||
-                                        clazz == float.class || clazz == double.class)));
     }
 }

@@ -25,7 +25,6 @@ public enum MysqlComparisonOperator implements Operator {
      * 不等于：x != ?
      */
     NE("%s != ?"),
-
     ;
 
     private final String template;

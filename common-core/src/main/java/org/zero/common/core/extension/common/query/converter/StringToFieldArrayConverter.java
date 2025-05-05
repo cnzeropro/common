@@ -8,15 +8,15 @@ import java.util.Arrays;
 
 /**
  * @author Zero (cnzeropro@163.com)
+ * @see BaseQO.Field
  * @since 2025/1/6
  */
 public class StringToFieldArrayConverter implements Converter<String, BaseQO.Field[]> {
     @Override
     public BaseQO.Field[] convert(String source) {
-        if (!StringUtils.hasText(source)){
+        if (!StringUtils.hasText(source)) {
             return new BaseQO.Field[0];
         }
-
         return Arrays.stream(StringUtils.commaDelimitedListToStringArray(source))
                 .map(String::trim)
                 .map(BaseQO.Field::create)

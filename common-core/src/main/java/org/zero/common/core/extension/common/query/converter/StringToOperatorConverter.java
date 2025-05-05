@@ -16,9 +16,12 @@ import java.util.Optional;
 
 /**
  * @author Zero (cnzeropro@163.com)
+ * @see Operator
  * @since 2025/1/3
  */
 public class StringToOperatorConverter implements Converter<String, Operator> {
+    protected Map<String, Collection<Operator>> operatorMap = new HashMap<>();
+
     @Override
     public Operator convert(String source) {
         if (!StringUtils.hasText(source)) {
@@ -26,8 +29,6 @@ public class StringToOperatorConverter implements Converter<String, Operator> {
         }
         return this.convertInternal(source);
     }
-
-    protected Map<String, Collection<Operator>> operatorMap = new HashMap<>();
 
     /**
      * 如有需要，可重写此方法

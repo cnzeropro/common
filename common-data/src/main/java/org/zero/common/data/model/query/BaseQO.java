@@ -5,11 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * 前端列表查询参数对象
@@ -37,26 +33,21 @@ public class BaseQO implements Serializable {
     /**
      * 需求字段（SELECT x[ AS y]）
      */
-    @Valid
-    @NotEmpty
     private Field[] fields = {};
 
     /**
      * 分组字段（GROUP BY x）
      */
-    @NotNull
     private String[] groupings = {};
 
     /**
      * 过滤分组（HAVING x）
      */
-    @Valid
     private Condition[] havings = {};
 
     /**
      * 排序规则（ORDER BY x）
      */
-    @Valid
     private Collation[] collations = {};
 
     @Data
@@ -69,7 +60,6 @@ public class BaseQO implements Serializable {
         /**
          * 字段
          */
-        @NotEmpty
         private String name;
 
         /**
@@ -78,7 +68,7 @@ public class BaseQO implements Serializable {
         private String alias;
 
         public String getFieldColumn() {
-            return Objects.isNull(alias) ? name : String.format(AS_TEMPLATE, name, alias);
+            return alias == null ? name : String.format(AS_TEMPLATE, name, alias);
         }
 
         public static Field create(String name) {
@@ -94,7 +84,6 @@ public class BaseQO implements Serializable {
         /**
          * 排序字段
          */
-        @NotEmpty
         private String field;
 
         /**
@@ -111,8 +100,7 @@ public class BaseQO implements Serializable {
         }
 
         public enum Order {
-            ASC, DESC,
-            ;
+            ASC, DESC
         }
     }
 }
