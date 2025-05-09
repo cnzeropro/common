@@ -2,6 +2,7 @@ package org.zero.common.core.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.util.StringUtils;
 
@@ -38,6 +39,8 @@ public class MessageSourceMessageProvider implements ThrowableMessageProvider {
             } else {
                 message = messageSourceAccessor.getMessage(code.toString(), args, locale);
             }
+        } catch (NoSuchMessageException e) {
+            // do nothing
         } catch (Exception e) {
             log.warn(String.format("Failed to get message with the code[%s]", code), e);
             if (!StringUtils.hasText(defaultMessage)) {
@@ -45,7 +48,7 @@ public class MessageSourceMessageProvider implements ThrowableMessageProvider {
             }
         } finally {
             if (!StringUtils.hasText(message)) {
-                message = this.formatMessage(defaultMessage, locale, args);
+                message = MessageProvider.formatMessage(defaultMessage, locale, args);
             }
         }
         return message;

@@ -5,13 +5,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.zero.common.core.extension.spring.web.method.support.JsonObjectArgumentResolvers;
-import org.zero.common.core.support.bean.dynamic.DynamicBeanArgumentResolver;
+import org.springframework.web.util.UrlPathHelper;
 import org.zero.common.core.extension.common.query.converter.StringArrayToFieldArrayConverter;
 import org.zero.common.core.extension.common.query.converter.StringToFieldArrayConverter;
 import org.zero.common.core.extension.common.query.converter.StringToFieldConverter;
 import org.zero.common.core.extension.common.query.converter.StringToOperatorConverter;
+import org.zero.common.core.extension.spring.web.method.support.JsonObjectArgumentResolvers;
+import org.zero.common.core.support.bean.dynamic.DynamicBeanArgumentResolver;
 
 import java.util.List;
 
@@ -37,5 +39,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
         resolvers.add(new DynamicBeanArgumentResolver(true));
         resolvers.add(new JsonObjectArgumentResolvers.JacksonArgumentResolver(objectMapper));
         resolvers.add(new JsonObjectArgumentResolvers.HutoolJsonArgumentResolver());
+    }
+
+    @Override
+    public void configurePathMatch(PathMatchConfigurer configurer) {
+        UrlPathHelper urlPathHelper = new UrlPathHelper();
+        // 启用矩阵变量
+        urlPathHelper.setRemoveSemicolonContent(false);
+        configurer.setUrlPathHelper(urlPathHelper);
     }
 }

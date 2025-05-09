@@ -2,6 +2,7 @@ package org.zero.common.core.util.java.reflect;
 
 import lombok.experimental.UtilityClass;
 import org.zero.common.core.extension.java.lang.reflect.TypeReference;
+import org.zero.common.core.extension.java.util.function.ThrowThrowableFunction;
 import org.zero.common.core.util.java.lang.IfUtil;
 import org.zero.common.core.util.java.lang.PrimitiveType;
 import org.zero.common.core.util.java.lang.ThrowableUtil;
@@ -19,6 +20,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.net.JarURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.time.temporal.TemporalAccessor;
 import java.util.Arrays;
@@ -113,8 +115,8 @@ public class ClassUtil {
      */
     public static Collection<String> getClassNames(String packageName) {
         String packageFileName = packageName.replace(PACKAGE_SEPARATOR, CLASS_FILE_SEPARATOR);
-        Enumeration<URL> urls = ThrowableUtil.sneakyThrow(Thread.currentThread().getContextClassLoader(),
-                classLoader -> classLoader.getResources(packageFileName));
+        Enumeration<URL> urls = ThrowableUtil.sneakyThrow(ClassLoaderUtil.get(),
+                (ThrowThrowableFunction<ClassLoader, Enumeration<URL>>) classLoader -> classLoader.getResources(packageFileName));
         return Collections.list(urls)
                 .stream()
                 .map(url -> getClassNamesByUrl(url, packageName))
@@ -129,13 +131,13 @@ public class ClassUtil {
     public static Collection<String> getClassNamesByUrl(URL url, String packageName, boolean withSubordinateClass, boolean withInnerClass) {
         String protocol = url.getProtocol();
         if (UrlUtil.FILE_URL_PREFIX.equalsIgnoreCase(protocol)) {
-            return Optional.ofNullable(ThrowableUtil.sneakyThrow(url, URL::toURI))
+            return ThrowableUtil.sneakyThrowOpt(url, (ThrowThrowableFunction<URL, URI>) URL::toURI)
                     .map(File::new)
                     .map(file -> getClassNamesByFile(file, packageName, withSubordinateClass, withInnerClass))
                     .orElseGet(LinkedHashSet::new);
         }
         if (UrlUtil.URL_PREFIX_JAR.equalsIgnoreCase(protocol)) {
-            return Optional.ofNullable(ThrowableUtil.sneakyThrow(url, URL::openConnection))
+            return Optional.ofNullable(UrlUtil.openConnection(url))
                     .filter(JarURLConnection.class::isInstance)
                     .map(JarURLConnection.class::cast)
                     .map(ThrowableUtil.sneakyThrow(JarURLConnection::getJarFile))

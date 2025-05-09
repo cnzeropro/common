@@ -33,7 +33,7 @@ public interface MessageProvider {
         return code;
     }
 
-    default CharSequence formatMessage(CharSequence message, Locale locale, Object... args) {
+     static CharSequence formatMessage(CharSequence message, Locale locale, Object... args) {
         if (CharSequenceUtil.isEmpty(message)) {
             return null;
         }

@@ -15,7 +15,7 @@ import java.util.Objects;
  * Spring MVC 异常解析器
  *
  * @author zero
- * @see org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver
+ * @see org.springframework.web.servlet.HandlerExceptionResolver
  * @see org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver
  * @see org.springframework.web.servlet.handler.HandlerExceptionResolverComposite
  * @since 2024/4/12

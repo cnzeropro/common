@@ -21,7 +21,7 @@ public class JdbcTemplateSysError extends BaseSysError.DefaultSysError {
     @Setter
     protected static JdbcTemplate jdbcTemplate;
     @Setter
-    protected static String querySql = "SELECT message FROM sys_error_dict WHERE code = ?";
+    protected static String querySql = "SELECT message FROM sys_error_dict WHERE code = ? AND (locale = ? OR (locale IS NULL AND ? IS NULL))";
     @Setter
     protected static Locale locale = LocaleContextHolder.getLocale();
 
@@ -40,9 +40,9 @@ public class JdbcTemplateSysError extends BaseSysError.DefaultSysError {
     public static JdbcTemplateSysError of(String code, String defaultMessage, Locale locale, Object... args) {
         String message = null;
         try {
-            String messageTemplate = jdbcTemplate.queryForObject(querySql, String.class, code);
+            String messageTemplate = jdbcTemplate.queryForObject(querySql, String.class, code, locale, locale);
             message = formatMessage(messageTemplate, locale, args);
-        } catch (EmptyResultDataAccessException ignored) {
+        } catch (EmptyResultDataAccessException e) {
             // do nothing
         } catch (Exception e) {
             log.warn(String.format("Failed to query message with the code[%s] in SQL[%s]", code, querySql), e);
@@ -50,7 +50,7 @@ public class JdbcTemplateSysError extends BaseSysError.DefaultSysError {
                 message = e.getMessage();
             }
         } finally {
-            if (!StringUtils.hasText(defaultMessage)) {
+            if (!StringUtils.hasText(message)) {
                 message = formatMessage(defaultMessage, locale, args);
             }
         }

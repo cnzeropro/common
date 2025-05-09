@@ -78,8 +78,14 @@ public class JavaExceptionHandler extends ThrowableHandler {
         return this.handleThrowable(e);
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public Result<Void> runtimeException(RuntimeException e) {
+    @ExceptionHandler(java.lang.NullPointerException.class)
+    public Result<Void> nullPointerException(java.lang.NullPointerException e) {
+        log.error("NPE", e);
+        return this.handleThrowable(e);
+    }
+
+    @ExceptionHandler(java.lang.RuntimeException.class)
+    public Result<Void> runtimeException(java.lang.RuntimeException e) {
         log.error("Runtime exception", e);
         return this.handleThrowable(e);
     }

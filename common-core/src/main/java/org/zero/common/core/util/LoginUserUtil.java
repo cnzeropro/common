@@ -1,5 +1,6 @@
 package org.zero.common.core.util;
 
+import org.zero.common.core.extension.java.util.function.ThrowThrowableSupplier;
 import org.zero.common.core.util.apache.shiro.ShiroUtil;
 import org.zero.common.core.util.java.lang.ThrowableUtil;
 import org.zero.common.core.util.spring.security.core.context.SecurityUtil;
@@ -15,12 +16,12 @@ import java.util.Optional;
 public class LoginUserUtil {
     public static Optional<LoginUser> getOpt() {
         // attempt to obtain from spring security
-        Optional<LoginUser> userOpt = ThrowableUtil.ignoreOpt(SecurityUtil::getUser);
+        Optional<LoginUser> userOpt = ThrowableUtil.ignoreOpt((ThrowThrowableSupplier<LoginUser>) SecurityUtil::getUser);
         if (userOpt.isPresent()) {
             return userOpt;
         }
         // attempt to obtain from shiro
-        return ThrowableUtil.ignoreOpt(ShiroUtil::getUser);
+        return ThrowableUtil.ignoreOpt((ThrowThrowableSupplier<LoginUser>) ShiroUtil::getUser);
     }
 
     public static LoginUser get() {

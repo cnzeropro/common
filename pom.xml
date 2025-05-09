@@ -123,6 +123,7 @@
         <kryo.version>5.2.1</kryo.version>
         <ip2region.version>2.7.0</ip2region.version>
         <netty.version>4.1.116.Final</netty.version>
+        <querydsl.version>5.1.0</querydsl.version>
         <!-- Maven Plugins -->
         <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.8.0</maven-javadoc-plugin.version>
@@ -298,6 +299,14 @@
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
                 <version>${junit.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.querydsl/querydsl-bom -->
+            <dependency>
+                <groupId>com.querydsl</groupId>
+                <artifactId>querydsl-bom</artifactId>
+                <version>${querydsl.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

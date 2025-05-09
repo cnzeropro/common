@@ -2,6 +2,7 @@ package org.zero.common.core.util.java.reflect;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.java.Log;
+import org.zero.common.core.extension.java.util.function.ThrowThrowableSupplier;
 import org.zero.common.core.util.java.lang.ArrayUtil;
 import org.zero.common.core.util.java.lang.CharSequenceUtil;
 import org.zero.common.core.util.java.lang.ThrowableUtil;
@@ -34,7 +35,7 @@ public class ClassLoaderUtil {
             .toArray(ClassLoader[]::new);
 
     public static ClassLoader getContext() {
-        return ThrowableUtil.ignore(() -> {
+        return ThrowableUtil.ignore((ThrowThrowableSupplier<ClassLoader>) () -> {
             if (Objects.isNull(System.getSecurityManager())) {
                 return Thread.currentThread().getContextClassLoader();
             } else {
@@ -46,7 +47,7 @@ public class ClassLoaderUtil {
     }
 
     public static ClassLoader getDefault() {
-        return ThrowableUtil.ignore(() -> {
+        return ThrowableUtil.ignore((ThrowThrowableSupplier<ClassLoader>) () -> {
             if (Objects.isNull(System.getSecurityManager())) {
                 return ClassLoaderUtil.class.getClassLoader();
             } else {
@@ -58,7 +59,7 @@ public class ClassLoaderUtil {
     }
 
     public static ClassLoader getSystem() {
-        return ThrowableUtil.ignore(() -> {
+        return ThrowableUtil.ignore((ThrowThrowableSupplier<ClassLoader>) () -> {
             if (Objects.isNull(System.getSecurityManager())) {
                 return ClassLoader.getSystemClassLoader();
             } else {

@@ -1,6 +1,7 @@
 package org.zero.common.core.util.java.io;
 
 import lombok.SneakyThrows;
+import org.zero.common.core.extension.java.util.function.ThrowThrowableFunction;
 import org.zero.common.core.util.java.lang.ArrayUtil;
 import org.zero.common.core.util.java.lang.CharSequenceUtil;
 import org.zero.common.core.util.java.lang.ObjectUtil;
@@ -72,7 +73,7 @@ public class FileUtil {
 
     @SneakyThrows
     public static File from(URL url) {
-        return ObjectUtil.mapIfNonNull(url, u -> from(ThrowableUtil.sneakyThrow(u, URL::toURI)));
+        return ObjectUtil.mapIfNonNull(url, u -> from(ThrowableUtil.sneakyThrow(u, (ThrowThrowableFunction<URL, URI>) URL::toURI)));
     }
 
     public static File newFile(String... subPaths) {

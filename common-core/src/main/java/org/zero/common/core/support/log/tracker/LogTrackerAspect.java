@@ -42,8 +42,17 @@ public class LogTrackerAspect implements InitializingBean, BeanFactoryAware {
     protected BeanFactory beanFactory;
     protected ObjectMapper objectMapper;
 
-    @Before("@annotation(logTracker) || @within(logTracker)")
-    public void before(JoinPoint joinPoint, LogTracker logTracker) {
+    @Before("@annotation(logTracker)")
+    public void beforeMethodAnnotation(JoinPoint joinPoint, LogTracker logTracker) {
+        this.before(joinPoint, logTracker);
+    }
+
+    @Before("@within(logTracker)")
+    public void beforeClassAnnotation(JoinPoint joinPoint, LogTracker logTracker) {
+        this.before(joinPoint, logTracker);
+    }
+
+    protected void before(JoinPoint joinPoint, LogTracker logTracker) {
         try {
             if (!logTracker.enable()) {
                 return;
@@ -64,8 +73,17 @@ public class LogTrackerAspect implements InitializingBean, BeanFactoryAware {
         }
     }
 
-    @AfterReturning(pointcut = "@annotation(logTracker) || @within(logTracker)", returning = "result")
-    public void afterReturning(JoinPoint joinPoint, LogTracker logTracker, Object result) {
+    @AfterReturning(pointcut = "@annotation(logTracker)", returning = "result")
+    public void afterReturningMethodAnnotation(JoinPoint joinPoint, LogTracker logTracker, Object result) {
+        this.afterReturning(joinPoint, logTracker, result);
+    }
+
+    @AfterReturning(pointcut = "@within(logTracker)", returning = "result")
+    public void afterReturningClassAnnotation(JoinPoint joinPoint, LogTracker logTracker, Object result) {
+        this.afterReturning(joinPoint, logTracker, result);
+    }
+
+    protected void afterReturning(JoinPoint joinPoint, LogTracker logTracker, Object result) {
         if (!logTracker.enable()) {
             return;
         }
@@ -74,8 +92,17 @@ public class LogTrackerAspect implements InitializingBean, BeanFactoryAware {
         this.outputLog(logLevel, "Method[%s] was executed successfully, result: %s", null, joinPoint.getSignature().getName(), this.toExpectedStr(result));
     }
 
-    @AfterThrowing(pointcut = "@annotation(logTracker) || @within(logTracker)", throwing = "throwable")
-    public void afterThrowing(JoinPoint joinPoint, LogTracker logTracker, Throwable throwable) {
+    @AfterThrowing(pointcut = "@annotation(logTracker)", throwing = "throwable")
+    public void afterThrowingMethodAnnotation(JoinPoint joinPoint, LogTracker logTracker, Throwable throwable) {
+        this.afterThrowing(joinPoint, logTracker, throwable);
+    }
+
+    @AfterThrowing(pointcut = "@within(logTracker)", throwing = "throwable")
+    public void afterThrowingClassAnnotation(JoinPoint joinPoint, LogTracker logTracker, Throwable throwable) {
+        this.afterThrowing(joinPoint, logTracker, throwable);
+    }
+
+    protected void afterThrowing(JoinPoint joinPoint, LogTracker logTracker, Throwable throwable) {
         if (!logTracker.enable()) {
             return;
         }
@@ -84,8 +111,17 @@ public class LogTrackerAspect implements InitializingBean, BeanFactoryAware {
         this.outputLog(logLevel, "Method[%s] execution exception", throwable, joinPoint.getSignature().getName());
     }
 
-    @After("@annotation(logTracker) || @within(logTracker)")
-    public void after(JoinPoint joinPoint, LogTracker logTracker) {
+    @After("@annotation(logTracker)")
+    public void afterMethodAnnotation(JoinPoint joinPoint, LogTracker logTracker) {
+        this.after(joinPoint, logTracker);
+    }
+
+    @After("@within(logTracker)")
+    public void afterClassAnnotation(JoinPoint joinPoint, LogTracker logTracker) {
+        this.after(joinPoint, logTracker);
+    }
+
+    protected void after(JoinPoint joinPoint, LogTracker logTracker) {
         try {
             if (!logTracker.enable()) {
                 return;

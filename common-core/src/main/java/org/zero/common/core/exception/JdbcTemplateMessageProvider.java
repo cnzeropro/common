@@ -13,7 +13,24 @@ import java.util.Locale;
  */
 @Slf4j
 public class JdbcTemplateMessageProvider implements MessageProvider {
-    protected static final String DEFAULT_QUERY_SQL = "SELECT message FROM sys_error_dict WHERE code = ?";
+    /**
+     * 默认的查询 SQL
+     * <p>
+     * 示例：
+     * <pre>{@code
+     * SELECT message
+     * FROM sys_error_dict
+     * WHERE code = ?
+     *   AND COALESCE(locale, 'default') = COALESCE(?, 'default')
+     * }</pre>
+     * <pre>{@code
+     * SELECT message
+     * FROM sys_error_dict
+     * WHERE code = ?
+     *   AND ((? IS NOT NULL AND locale = ?) OR (? IS NULL AND locale IS NULL))
+     * }</pre>
+     */
+    protected static final String DEFAULT_QUERY_SQL = "SELECT message FROM sys_error_dict WHERE code = ? AND (locale = ? OR (locale IS NULL AND ? IS NULL))";
 
     protected final JdbcTemplate jdbcTemplate;
     protected final String querySql;
@@ -31,9 +48,9 @@ public class JdbcTemplateMessageProvider implements MessageProvider {
     public CharSequence provide(CharSequence code, CharSequence defaultMessage, Locale locale, Object... args) {
         CharSequence message = null;
         try {
-            String messageTemplate = jdbcTemplate.queryForObject(querySql, String.class, code);
-            message = formatMessage(messageTemplate, locale, args);
-        } catch (EmptyResultDataAccessException ignored) {
+            String messageTemplate = jdbcTemplate.queryForObject(querySql, String.class, code, locale, locale);
+            message = MessageProvider.formatMessage(messageTemplate, locale, args);
+        } catch (EmptyResultDataAccessException e) {
             // do nothing
         } catch (Exception e) {
             log.warn(String.format("Failed to query message with the code[%s] in SQL[%s]", code, querySql), e);
@@ -41,8 +58,8 @@ public class JdbcTemplateMessageProvider implements MessageProvider {
                 message = e.getMessage();
             }
         } finally {
-            if (!StringUtils.hasText(defaultMessage)) {
-                message = formatMessage(defaultMessage, locale, args);
+            if (!StringUtils.hasText(message)) {
+                message = MessageProvider.formatMessage(defaultMessage, locale, args);
             }
         }
         return message;

@@ -2,6 +2,7 @@ package org.zero.common.data.exception;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.util.StringUtils;
 
@@ -39,8 +40,10 @@ public class MessageSourceSysError extends BaseSysError.DefaultSysError {
             } else {
                 message = messageSourceAccessor.getMessage(code, args, locale);
             }
+        } catch (NoSuchMessageException e) {
+            // do nothing
         } catch (Exception e) {
-            log.warn(java.lang.String.format("Failed to get message with the code[%s]", code), e);
+            log.warn(String.format("Failed to get message with the code[%s]", code), e);
             if (!StringUtils.hasText(defaultMessage)) {
                 message = e.getMessage();
             }

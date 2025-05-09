@@ -25,7 +25,7 @@ public class DynamicBeanArgumentResolver implements HandlerMethodArgumentResolve
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return DynamicBean.class.equals(parameter.getParameterType()) && parameter.hasParameterAnnotation(DynamicBeanParam.class);
+        return parameter.getParameterType().isAssignableFrom(DynamicBean.class) && parameter.hasParameterAnnotation(DynamicBeanParam.class);
     }
 
     @Override
