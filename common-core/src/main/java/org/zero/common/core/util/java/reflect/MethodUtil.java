@@ -477,6 +477,53 @@ public class MethodUtil {
     }
 
     /**
+     * 判断是否为 Setter 方法
+     *
+     * @param method     方法
+     * @param ignoreCase 是否忽略大小写
+     * @return 是否为 Setter 方法
+     */
+    public static boolean isSetter(final Method method, boolean ignoreCase) {
+        if (Objects.isNull(method)) {
+            return false;
+        }
+        // 参数个数必须为 1
+        if (method.getParameterCount() != 1) {
+            return false;
+        }
+
+        String methodName = method.getName();
+        if (ignoreCase) {
+            methodName = methodName.toLowerCase();
+        }
+        return methodName.startsWith(SETTER_METHOD_PREFIX);
+    }
+
+    /**
+     * 通过字段获取其对应的 Setter 方法
+     *
+     * @param clazz 目标类
+     * @param field 字段
+     * @return Setter 方法
+     */
+    public static Optional<Method> getSetterMethodOptByField(final Class<?> clazz, Field field) {
+        return getSetterMethodOptByField(clazz, false, field);
+    }
+
+    /**
+     * 通过字段获取其对应的 Setter 方法
+     *
+     * @param clazz                 目标类
+     * @param withSuperClassMethods 是否获取父类方法
+     * @param field                 字段
+     * @return Setter 方法
+     */
+    public static Optional<Method> getSetterMethodOptByField(final Class<?> clazz, final boolean withSuperClassMethods, Field field) {
+        String methodName = getSetterMethodNameByField(field);
+        return getMethodOptByNameAndParam(clazz, withSuperClassMethods, methodName, field.getType());
+    }
+
+    /**
      * 通过字段获取其对应的 Setter 方法名
      *
      * @param field 字段
