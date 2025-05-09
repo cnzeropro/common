@@ -250,7 +250,7 @@ public class MethodUtil {
     }
 
     public static Object invokeStatic(final Method method, final boolean quietIfException, final Object... args) {
-        return invokeStatic(method, Object.class, false, args);
+        return invokeStatic(method, Object.class, quietIfException, args);
     }
 
     public static <T> T invokeStatic(final Method method, final Type type, final Object... args) {
