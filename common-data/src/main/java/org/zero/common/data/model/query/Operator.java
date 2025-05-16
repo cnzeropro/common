@@ -7,6 +7,8 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 /**
+ * SQL 操作符
+ *
  * @author Zero (cnzeropro@163.com)
  * @since 2025/1/3
  */

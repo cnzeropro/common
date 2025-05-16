@@ -15,6 +15,10 @@ public interface Schemes {
     String WSS = "wss";
     String JDBC = "jdbc";
     String REDIS = "redis";
+    /**
+     * Domain Socket Scheme
+     */
+    String UNIX = "unix";
     String FILE = "file";
     String JAR = "jar";
     String WAR = "war";

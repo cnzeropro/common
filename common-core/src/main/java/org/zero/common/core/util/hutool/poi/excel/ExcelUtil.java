@@ -5,14 +5,12 @@ import cn.hutool.core.lang.tree.Tree;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import cn.hutool.poi.excel.cell.CellUtil;
-import lombok.experimental.UtilityClass;
 import lombok.extern.java.Log;
 import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
 import org.apache.poi.hssf.usermodel.HSSFPatriarch;
 import org.apache.poi.hssf.usermodel.HSSFSimpleShape;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.ShapeTypes;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -26,11 +24,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 
+import static org.zero.common.core.util.apache.poi.ExcelUtil.MAX_COLUMN_WIDTH;
+import static org.zero.common.core.util.apache.poi.ExcelUtil.calculateCellWidth;
+
 /**
  * Excel 工具类
  **/
 @Log
-@UtilityClass
 public class ExcelUtil {
     /**
      * 写入 Excel 数据表头并绘制对角线
@@ -95,7 +95,7 @@ public class ExcelUtil {
      * @param trees  Excel 表头数据
      * @param <T>    数据类型
      */
-    private static <T> void writeHead0(ExcelWriter writer, List<Tree<T>> trees) {
+    protected static <T> void writeHead0(ExcelWriter writer, List<Tree<T>> trees) {
         if (CollUtil.isEmpty(trees)) {
             return;
         }
@@ -117,7 +117,7 @@ public class ExcelUtil {
             // 结束列
             int lastColumn = firstColumn + mergeColumn - 1;
 
-            // 绘制表头
+            // 写入表头
             if (lastRow > firstRow || lastColumn > firstColumn) {
                 // 单元格样式
                 CellStyle cellStyle = (CellStyle) node.get("cellStyle");
@@ -143,6 +143,80 @@ public class ExcelUtil {
                 writeHead0(writer, children);
                 writer.setCurrentRow(firstRow);
             }
+        }
+    }
+
+    public static <T> void writeData(ExcelWriter writer, List<List<Tree<T>>> data, int row) {
+        writeData(writer, data, row, 0);
+    }
+
+    public static <T> void writeData(ExcelWriter writer, List<List<Tree<T>>> data, int row, int column) {
+        int currentColumn = column;
+        for (List<Tree<T>> datum : data) {
+            writeDatum(writer, datum, row, currentColumn);
+            currentColumn += (int) TreeUtil.sameLevelMaxDepth(datum);
+        }
+    }
+
+    public static <T> void writeDatum(ExcelWriter writer, List<Tree<T>> trees) {
+        writeDatum(writer, trees, 0, 0);
+    }
+
+    public static <T> void writeDatum(ExcelWriter writer, List<Tree<T>> trees, int row, int column) {
+        writer.setCurrentRow(row);
+        if (column > 0) {
+            CellUtil.getOrCreateCell(writer.getOrCreateRow(row), column - 1);
+        }
+        writeDatum0(writer, trees);
+        long sumLeafNode = TreeUtil.sumLeafNode(trees);
+        writer.setCurrentRow(row + (int) sumLeafNode);
+    }
+
+    protected static <T> void writeDatum0(ExcelWriter writer, List<Tree<T>> trees) {
+        if (CollUtil.isEmpty(trees)) {
+            return;
+        }
+        for (Tree<T> node : trees) {
+            // 起始行
+            int firstRow = writer.getCurrentRow();
+            long sumLeafNode = TreeUtil.sumLeafNode(node.getChildren());
+            // 合并行
+            int mergeRow = Math.max((int) sumLeafNode, 1);
+            // 结束行
+            int lastRow = firstRow + mergeRow - 1;
+
+            // 起始列
+            int firstColumn = Math.max(writer.getColumnCount(firstRow), 0);
+            int sameLevelMaxDepth = Math.max((int) TreeUtil.sameLevelMaxDepth(trees), 1);
+            int maxDepth = (int) TreeUtil.maxDepth(node);
+            // 合并列
+            int mergeColumn = sameLevelMaxDepth - maxDepth + 1;
+            // 结束列
+            int lastColumn = firstColumn + mergeColumn - 1;
+
+            // 写入数据
+            if (lastRow > firstRow || lastColumn > firstColumn) {
+                // 单元格样式
+                CellStyle cellStyle = (CellStyle) node.get("cellStyle");
+                if (Objects.isNull(cellStyle)) {
+                    writer.merge(firstRow, lastRow, firstColumn, lastColumn, node.getName(), false);
+                } else {
+                    writer.merge(firstRow, lastRow, firstColumn, lastColumn, node.getName(), cellStyle);
+                }
+            } else {
+                writer.writeCellValue(firstColumn, firstRow, node.getName());
+                // 单元格样式
+                CellStyle cellStyle = (CellStyle) node.get("cellStyle");
+                if (Objects.nonNull(cellStyle)) {
+                    writer.setStyle(cellStyle, firstColumn, firstRow);
+                }
+            }
+
+            List<Tree<T>> children = node.getChildren();
+            if (CollUtil.isNotEmpty(children)) {
+                writeDatum0(writer, children);
+            }
+            writer.setCurrentRow(firstRow + mergeRow);
         }
     }
 
@@ -215,9 +289,9 @@ public class ExcelUtil {
             // 设置边框线宽，单位：Point
             shape.setLineWidth(1);
         } else if (drawingPatriarch instanceof SXSSFDrawing) {
-            log.log(Level.WARNING,"Not supported this sheet drawing type: {0}", SXSSFDrawing.class);
+            log.log(Level.WARNING, "Not supported this sheet drawing type: {0}", SXSSFDrawing.class);
         } else {
-            log.log(Level.WARNING,"Unknown sheet drawing type: {0}", drawingPatriarch.getClass());
+            log.log(Level.WARNING, "Unknown sheet drawing type: {0}", drawingPatriarch.getClass());
         }
 
         // 写入对角线单元格内容
@@ -226,41 +300,30 @@ public class ExcelUtil {
         }
     }
 
-    public static final int MIN_COLUMN_WIDTH = 8;
-    public static final int MAX_COLUMN_CHAR = 255;
-    public static final int MAX_COLUMN_PIXEL = 256;
-    public static final int MAX_COLUMN_WIDTH = MAX_COLUMN_CHAR * MAX_COLUMN_PIXEL;
-    public static final int EXTRA_COLUMN_WIDTH = 4;
 
     /**
      * 单元格自适应宽度
      */
-    public static void autoSizeColumnAll(ExcelWriter writer) {
+    public static void autoSizeColumn(ExcelWriter writer, int extraWidth) {
+        Sheet sheet = writer.getSheet();
         int columnCount = writer.getColumnCount();
         int physicalRowCount = writer.getPhysicalRowCount();
-        int maxWidth = MIN_COLUMN_WIDTH;
         for (int i = 0; i < columnCount; i++) {
+            int maxWidth = 0;
             for (int j = 0; j < physicalRowCount; j++) {
                 Cell cell = writer.getCell(i, j);
-                if (Objects.nonNull(cell)) {
-                    String stringCellValue = "";
-                    CellType cellType = cell.getCellType();
-                    if (CellType.STRING == cellType) {
-                        stringCellValue = cell.getStringCellValue();
-                    } else if (CellType.NUMERIC == cellType) {
-                        stringCellValue = Double.toString(cell.getNumericCellValue());
-                    } else if (CellType.BOOLEAN == cellType) {
-                        stringCellValue = Boolean.toString(cell.getBooleanCellValue());
-                    } else if (CellType.FORMULA == cellType) {
-                        stringCellValue = cell.getCellFormula();
-                    }
-                    int cellWidth = stringCellValue.getBytes().length * MAX_COLUMN_PIXEL;
-                    maxWidth = Math.max(maxWidth, cellWidth);
-                }
+                int cellWidth = calculateCellWidth(cell);
+                maxWidth = Math.max(maxWidth, cellWidth);
             }
-            maxWidth += EXTRA_COLUMN_WIDTH;
-            maxWidth = Math.max(maxWidth, MAX_COLUMN_WIDTH);
-            writer.getSheet().setColumnWidth(i, maxWidth);
+            maxWidth += extraWidth;
+            maxWidth = Math.min(maxWidth, MAX_COLUMN_WIDTH);
+            if (maxWidth > 0) {
+                sheet.setColumnWidth(i, maxWidth);
+            }
         }
+    }
+
+    protected ExcelUtil() {
+        throw new UnsupportedOperationException();
     }
 }

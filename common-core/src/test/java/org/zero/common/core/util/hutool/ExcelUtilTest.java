@@ -4,6 +4,7 @@ import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.lang.tree.Tree;
 import cn.hutool.core.lang.tree.TreeNode;
 import cn.hutool.core.map.MapBuilder;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,8 @@ import org.zero.common.data.exception.UtilException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author zero
@@ -44,13 +47,13 @@ class ExcelUtilTest {
                         .put("d.a.a", 2)
                         .build());
 
-        // 获取表头
+        // 获取原始表头
         Set<String> keys = result.stream()
                 .findFirst()
                 .map(Map::keySet)
                 .orElseThrow(() -> new UtilException("Data header is empty"));
 
-        // 通过表头获取树节点列表
+        // 创建表头树节点
         List<TreeNode<String>> treeNodes = TreeUtil.toTreeNodes(keys, ".");
 
         // 调整顺序
@@ -74,6 +77,70 @@ class ExcelUtilTest {
         ExcelUtil.writeHead(writer, trees);
         // 写入数据
         writer.write(result, false);
+        writer.flush();
+        writer.close();
+    }
+
+    @Test
+    void writeDate() {
+        // 模拟数据
+        List<Map<String, String>> result = ListUtil.of(MapBuilder.<String, String>create(true)
+                        .put("A", "a")
+                        .put("B", "a")
+                        .build(),
+                MapBuilder.<String, String>create(true)
+                        .put("A", "b.a")
+                        .put("B", "b.a")
+                        .build(),
+                MapBuilder.<String, String>create(true)
+                        .put("A", "b.b")
+                        .put("B", "b.b")
+                        .build(),
+                MapBuilder.<String, String>create(true)
+                        .put("A", "c.a.a")
+                        .put("B", "c.a.a")
+                        .build(),
+                MapBuilder.<String, String>create(true)
+                        .put("A", "c.b.a")
+                        .put("B", "c.b.a")
+                        .build(),
+                MapBuilder.<String, String>create(true)
+                        .put("A", "c.b.b")
+                        .put("B", "c.b.b")
+                        .build());
+        // 获取原始表头
+        Set<String> keys = result.stream()
+                .findFirst()
+                .map(Map::keySet)
+                .orElseThrow(() -> new UtilException("Data header is empty"));
+        // 构建表头与数据树映射
+        Map<String, List<Tree<String>>> dataMap = keys.stream()
+                .collect(Collectors.toMap(Function.identity(), key -> {
+                    List<String> values = result.stream()
+                            .map(map -> map.get(key))
+                            .collect(Collectors.toList());
+                    List<TreeNode<String>> treeNodes = TreeUtil.toTreeNodes(values, ".");
+                    return cn.hutool.core.lang.tree.TreeUtil.build(treeNodes, null);
+                }));
+        // 获取表头与合并列映射
+        Map<String, Long> headerCrossMap = MapUtil.map(dataMap, (k, v) -> TreeUtil.sameLevelMaxDepth(v));
+        System.out.println(headerCrossMap);
+        // 获取数据树
+        List<List<Tree<String>>> data = ListUtil.list(false, dataMap.values());
+        data.forEach(System.out::println);
+
+        String filename = String.format("C:\\Users\\Rongan\\Desktop\\%s.xlsx", IdUtil.fastSimpleUUID());
+        ExcelWriter writer = cn.hutool.poi.excel.ExcelUtil.getWriter(filename);
+        // 写入表头
+        int columnIndex = 0;
+        for (Map.Entry<String, Long> entry : headerCrossMap.entrySet()) {
+            String header = entry.getKey();
+            int mergeCross = entry.getValue().intValue();
+            writer.merge(0, 0, columnIndex, columnIndex + mergeCross - 1, header, true);
+            columnIndex += mergeCross;
+        }
+        // 写入数据
+        ExcelUtil.writeData(writer, data, 1);
         writer.flush();
         writer.close();
     }

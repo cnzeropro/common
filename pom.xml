@@ -85,7 +85,7 @@
         <mybatis.version>3.5.19</mybatis.version>
         <mybatis-spring.version>2.1.2</mybatis-spring.version>
         <mybatis-starter.version>2.3.2</mybatis-starter.version>
-        <mybatis-plus.version>3.5.4.1</mybatis-plus.version>
+        <mybatis-plus.version>3.5.12</mybatis-plus.version>
         <mybatis-flex.version>1.7.5</mybatis-flex.version>
         <redisson.version>3.27.2</redisson.version>
         <jasypt.version>1.9.3</jasypt.version>
@@ -407,6 +407,12 @@
             <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-annotation</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.baomidou/mybatis-plus-generator -->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-generator</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
             <!-- https://mvnrepository.com/artifact/com.mybatis-flex/mybatis-flex-core -->
