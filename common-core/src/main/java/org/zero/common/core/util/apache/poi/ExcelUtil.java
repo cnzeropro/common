@@ -69,6 +69,12 @@ public class ExcelUtil {
         }
     }
 
+    /**
+     * 计算单元格宽度
+     *
+     * @param cell 单元格
+     * @return 单元格宽度
+     */
     public static int calculateCellWidth(Cell cell) {
         if (Objects.isNull(cell)) {
             return 0;
@@ -105,4 +111,7 @@ public class ExcelUtil {
         return maxWidth;
     }
 
+    protected ExcelUtil() {
+        throw new UnsupportedOperationException();
+    }
 }

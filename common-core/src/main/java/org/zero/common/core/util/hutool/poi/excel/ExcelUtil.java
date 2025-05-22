@@ -2,9 +2,7 @@ package org.zero.common.core.util.hutool.poi.excel;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.tree.Tree;
-import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.poi.excel.ExcelWriter;
-import cn.hutool.poi.excel.cell.CellUtil;
 import lombok.extern.java.Log;
 import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
 import org.apache.poi.hssf.usermodel.HSSFPatriarch;
@@ -24,6 +22,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 
+import static org.zero.common.core.util.apache.poi.ExcelUtil.DEFAULT_COLUMN_PIXEL;
 import static org.zero.common.core.util.apache.poi.ExcelUtil.MAX_COLUMN_WIDTH;
 import static org.zero.common.core.util.apache.poi.ExcelUtil.calculateCellWidth;
 
@@ -32,95 +31,101 @@ import static org.zero.common.core.util.apache.poi.ExcelUtil.calculateCellWidth;
  **/
 @Log
 public class ExcelUtil {
+    public static final String CELL_STYLE_KEY = "cellStyle";
+    public static final String MERGED_CROSS_COLUMN_KEY = "mergedCrossColumn";
+    public static final String MERGED_CROSS_ROW_KEY = "mergedCrossRow";
+
     /**
      * 写入 Excel 数据表头并绘制对角线
      *
-     * @param writer Excel 写入器
-     * @param trees  Excel 表头数据
+     * @param writer  Excel 写入器
+     * @param headers 表头
      */
-    public static <T> void writeHeadAndDiagonalLine(ExcelWriter writer, List<Tree<T>> trees) {
-        writeHeadAndDiagonalLine(writer, trees, 1);
+    public static <T> void writeDiagonalLineAndHeader(ExcelWriter writer, List<Tree<T>> headers) {
+        writeDiagonalLineAndHeader(writer, headers, 1);
     }
 
     /**
      * 写入 Excel 数据表头并绘制对角线
      *
      * @param writer     Excel 写入器
-     * @param trees      Excel 表头数据
-     * @param passColumn 对角线覆盖的列数，从1开始
+     * @param headers    表头
+     * @param passColumn 对角线覆盖的列数，从 1 开始
      * @param <T>        数据类型
      */
-    public static <T> void writeHeadAndDiagonalLine(ExcelWriter writer, List<Tree<T>> trees, int passColumn) {
-        long maxDepth = TreeUtil.sameLevelMaxDepth(trees);
+    public static <T> void writeDiagonalLineAndHeader(ExcelWriter writer, List<Tree<T>> headers, int passColumn) {
+        long maxDepth = TreeUtil.sameLevelMaxDepth(headers);
         if (passColumn > 0) {
             writeCellDiagonalLine(writer, 0, 0, 0, 0, 0, 0, passColumn, (int) maxDepth);
         }
-        writeHead(writer, trees, 0, passColumn);
+        writeHeader(writer, headers, 0, passColumn);
     }
 
     /**
-     * 写入 Excel 数据表头
+     * 写入 Excel 表头
      *
-     * @param writer Excel 写入器
-     * @param trees  Excel 表头数据
-     * @param <T>    数据类型
+     * @param writer  写入器
+     * @param headers 表头
+     * @param <T>     表头类型
      */
-    public static <T> void writeHead(ExcelWriter writer, List<Tree<T>> trees) {
-        writeHead(writer, trees, 0, 0);
+    public static <T> void writeHeader(ExcelWriter writer, List<Tree<T>> headers) {
+        writeHeader(writer, headers, 0, 0);
     }
 
     /**
-     * 写入 Excel 数据表头
+     * 写入 Excel 表头
      *
-     * @param writer Excel 写入器
-     * @param trees  Excel 表头数据
-     * @param row    Excel 数据表头起始行，0开始
-     * @param column Excel 数据表头起始列，0开始
-     * @param <T>    数据类型
+     * @param writer  Excel 写入器
+     * @param headers 表头
+     * @param row     表头起始行，从 0 开始
+     * @param column  表头起始列，从 0 开始
+     * @param <T>     表头类型
      */
-    public static <T> void writeHead(ExcelWriter writer, List<Tree<T>> trees, int row, int column) {
-        long maxDepth = TreeUtil.sameLevelMaxDepth(trees);
+    public static <T> void writeHeader(ExcelWriter writer, List<Tree<T>> headers, int row, int column) {
+        long maxDepth = TreeUtil.sameLevelMaxDepth(headers);
         writer.setCurrentRow(row);
-        if (column > 0) {
-            CellUtil.getOrCreateCell(writer.getOrCreateRow(row), column - 1);
-        }
-        writeHead0(writer, trees);
+        writeHeader0(writer, headers, column);
         writer.setCurrentRow(row + (int) maxDepth);
     }
 
-    /**
-     * 写入 Excel 数据表头
-     *
-     * @param writer Excel 写入器
-     * @param trees  Excel 表头数据
-     * @param <T>    数据类型
-     */
-    protected static <T> void writeHead0(ExcelWriter writer, List<Tree<T>> trees) {
+    protected static <T> void writeHeader0(ExcelWriter writer, List<Tree<T>> trees, int column) {
         if (CollUtil.isEmpty(trees)) {
             return;
         }
         for (Tree<T> node : trees) {
             // 起始行
             int firstRow = writer.getCurrentRow();
-            int sameLevelMaxDepth = Math.max((int) TreeUtil.sameLevelMaxDepth(trees), 1);
-            int maxDepth = (int) TreeUtil.maxDepth(node);
             // 合并行
-            int mergeRow = sameLevelMaxDepth - maxDepth + 1;
+            long sameLevelMaxDepth = TreeUtil.sameLevelMaxDepth(trees);
+            long maxDepth = TreeUtil.maxDepth(node);
+            Long mergedCrossRow = (Long) node.get(MERGED_CROSS_ROW_KEY);
+            int mergedRow;
+            if (Objects.isNull(mergedCrossRow)) {
+                mergedRow = (int) (sameLevelMaxDepth - maxDepth);
+            } else {
+                mergedRow = mergedCrossRow.intValue() - 1;
+            }
             // 结束行
-            int lastRow = firstRow + mergeRow - 1;
+            int lastRow = firstRow + mergedRow;
 
             // 起始列
-            int firstColumn = Math.max(writer.getColumnCount(firstRow), 0);
+            int firstColumn = Math.max(writer.getColumnCount(firstRow), column);
             // 合并列
             long sumLeafNode = TreeUtil.sumLeafNode(node.getChildren());
-            int mergeColumn = Math.max((int) sumLeafNode, 1);
+            Long mergedCrossColumn = (Long) node.get(MERGED_CROSS_COLUMN_KEY);
+            int mergedColumn;
+            if (Objects.isNull(mergedCrossColumn)) {
+                mergedColumn = Math.max((int) sumLeafNode, 1) - 1;
+            } else {
+                mergedColumn = mergedCrossColumn.intValue() - 1;
+            }
             // 结束列
-            int lastColumn = firstColumn + mergeColumn - 1;
+            int lastColumn = firstColumn + mergedColumn;
 
+            // 单元格样式
+            CellStyle cellStyle = (CellStyle) node.get(CELL_STYLE_KEY);
             // 写入表头
             if (lastRow > firstRow || lastColumn > firstColumn) {
-                // 单元格样式
-                CellStyle cellStyle = (CellStyle) node.get("cellStyle");
                 if (Objects.isNull(cellStyle)) {
                     writer.merge(firstRow, lastRow, firstColumn, lastColumn, node.getName(), true);
                 } else {
@@ -128,8 +133,6 @@ public class ExcelUtil {
                 }
             } else {
                 writer.writeCellValue(firstColumn, firstRow, node.getName());
-                // 单元格样式
-                CellStyle cellStyle = (CellStyle) node.get("cellStyle");
                 if (Objects.isNull(cellStyle)) {
                     writer.setStyle(writer.getHeadCellStyle(), firstColumn, firstRow);
                 } else {
@@ -139,17 +142,45 @@ public class ExcelUtil {
 
             List<Tree<T>> children = node.getChildren();
             if (CollUtil.isNotEmpty(children)) {
-                writer.setCurrentRow(firstRow + mergeRow);
-                writeHead0(writer, children);
+                writer.setCurrentRow(lastRow + 1);
+                writeHeader0(writer, children, column);
                 writer.setCurrentRow(firstRow);
             }
         }
     }
 
+    /**
+     * 写入 Excel 数据（多行）
+     *
+     * @param writer Excel 写入器
+     * @param data   Excel 数据（多行）
+     * @param <T>    数据类型
+     */
+    public static <T> void writeData(ExcelWriter writer, List<List<Tree<T>>> data) {
+        writeData(writer, data, 0);
+    }
+
+    /**
+     * 写入 Excel 数据（多行）
+     *
+     * @param writer Excel 写入器
+     * @param data   Excel 数据（多行）
+     * @param row    Excel 数据起始行，从 0 开始
+     * @param <T>    数据类型
+     */
     public static <T> void writeData(ExcelWriter writer, List<List<Tree<T>>> data, int row) {
         writeData(writer, data, row, 0);
     }
 
+    /**
+     * 写入 Excel 数据（多行）
+     *
+     * @param writer Excel 写入器
+     * @param data   Excel 数据（多行）
+     * @param row    Excel 数据起始行，从 0 开始
+     * @param column Excel 数据起始列，从 0 开始
+     * @param <T>    数据类型
+     */
     public static <T> void writeData(ExcelWriter writer, List<List<Tree<T>>> data, int row, int column) {
         int currentColumn = column;
         for (List<Tree<T>> datum : data) {
@@ -158,46 +189,71 @@ public class ExcelUtil {
         }
     }
 
-    public static <T> void writeDatum(ExcelWriter writer, List<Tree<T>> trees) {
-        writeDatum(writer, trees, 0, 0);
+    /**
+     * 写入 Excel 数据（一行）
+     *
+     * @param writer Excel 写入器
+     * @param datum  Excel 数据（一行）
+     * @param <T>    数据类型
+     */
+    public static <T> void writeDatum(ExcelWriter writer, List<Tree<T>> datum) {
+        writeDatum(writer, datum, 0, 0);
     }
 
-    public static <T> void writeDatum(ExcelWriter writer, List<Tree<T>> trees, int row, int column) {
+    /**
+     * 写入 Excel 数据（一行）
+     *
+     * @param writer Excel 写入器
+     * @param datum  Excel 数据（一行）
+     * @param row    Excel 数据起始行，从 0 开始
+     * @param column Excel 数据起始列，从 0 开始
+     * @param <T>    数据类型
+     */
+    public static <T> void writeDatum(ExcelWriter writer, List<Tree<T>> datum, int row, int column) {
         writer.setCurrentRow(row);
-        if (column > 0) {
-            CellUtil.getOrCreateCell(writer.getOrCreateRow(row), column - 1);
-        }
-        writeDatum0(writer, trees);
-        long sumLeafNode = TreeUtil.sumLeafNode(trees);
-        writer.setCurrentRow(row + (int) sumLeafNode);
+        writeDatum0(writer, datum, column);
+        long sumLeafNode = TreeUtil.sumLeafNode(datum);
+        writer.setCurrentRow(row + (int) sumLeafNode - 1);
     }
 
-    protected static <T> void writeDatum0(ExcelWriter writer, List<Tree<T>> trees) {
+    protected static <T> void writeDatum0(ExcelWriter writer, List<Tree<T>> trees, int column) {
         if (CollUtil.isEmpty(trees)) {
             return;
         }
         for (Tree<T> node : trees) {
             // 起始行
             int firstRow = writer.getCurrentRow();
-            long sumLeafNode = TreeUtil.sumLeafNode(node.getChildren());
             // 合并行
-            int mergeRow = Math.max((int) sumLeafNode, 1);
+            long sumLeafNode = TreeUtil.sumLeafNode(node.getChildren());
+            Long mergedCrossRow = (Long) node.get(MERGED_CROSS_ROW_KEY);
+            int mergedRow;
+            if (Objects.isNull(mergedCrossRow)) {
+                mergedRow = Math.max((int) sumLeafNode, 1) - 1;
+            } else {
+                mergedRow = mergedCrossRow.intValue() - 1;
+            }
             // 结束行
-            int lastRow = firstRow + mergeRow - 1;
+            int lastRow = firstRow + mergedRow;
 
             // 起始列
-            int firstColumn = Math.max(writer.getColumnCount(firstRow), 0);
-            int sameLevelMaxDepth = Math.max((int) TreeUtil.sameLevelMaxDepth(trees), 1);
-            int maxDepth = (int) TreeUtil.maxDepth(node);
+            int firstColumn = Math.max(writer.getColumnCount(firstRow), column);
             // 合并列
-            int mergeColumn = sameLevelMaxDepth - maxDepth + 1;
+            long sameLevelMaxDepth = TreeUtil.sameLevelMaxDepth(trees);
+            long maxDepth = TreeUtil.maxDepth(node);
+            Long mergedCrossColumn = (Long) node.get(MERGED_CROSS_COLUMN_KEY);
+            int mergedColumn;
+            if (Objects.isNull(mergedCrossColumn)) {
+                mergedColumn = (int) (sameLevelMaxDepth - maxDepth);
+            } else {
+                mergedColumn = mergedCrossColumn.intValue() - 1;
+            }
             // 结束列
-            int lastColumn = firstColumn + mergeColumn - 1;
+            int lastColumn = firstColumn + mergedColumn;
 
+            // 单元格样式
+            CellStyle cellStyle = (CellStyle) node.get(CELL_STYLE_KEY);
             // 写入数据
             if (lastRow > firstRow || lastColumn > firstColumn) {
-                // 单元格样式
-                CellStyle cellStyle = (CellStyle) node.get("cellStyle");
                 if (Objects.isNull(cellStyle)) {
                     writer.merge(firstRow, lastRow, firstColumn, lastColumn, node.getName(), false);
                 } else {
@@ -205,8 +261,6 @@ public class ExcelUtil {
                 }
             } else {
                 writer.writeCellValue(firstColumn, firstRow, node.getName());
-                // 单元格样式
-                CellStyle cellStyle = (CellStyle) node.get("cellStyle");
                 if (Objects.nonNull(cellStyle)) {
                     writer.setStyle(cellStyle, firstColumn, firstRow);
                 }
@@ -214,9 +268,9 @@ public class ExcelUtil {
 
             List<Tree<T>> children = node.getChildren();
             if (CollUtil.isNotEmpty(children)) {
-                writeDatum0(writer, children);
+                writeDatum0(writer, children, column);
             }
-            writer.setCurrentRow(firstRow + mergeRow);
+            writer.setCurrentRow(lastRow + 1);
         }
     }
 
@@ -260,8 +314,8 @@ public class ExcelUtil {
                                              int dx2, int dy2,
                                              int col1, int row1,
                                              int col2, int row2,
-                                             String cellContent) {
-        writer.merge(0, row2 - 1, 0, col2 - 1, null, false);
+                                             Object cellContent) {
+        writer.merge(0, row2 - 1, 0, col2 - 1, cellContent, false);
         Sheet sheet = writer.getSheet();
         Drawing<?> drawingPatriarch = sheet.createDrawingPatriarch();
         if (drawingPatriarch instanceof XSSFDrawing) {
@@ -293,16 +347,22 @@ public class ExcelUtil {
         } else {
             log.log(Level.WARNING, "Unknown sheet drawing type: {0}", drawingPatriarch.getClass());
         }
-
-        // 写入对角线单元格内容
-        if (CharSequenceUtil.isNotBlank(cellContent)) {
-            writer.writeCellValue(0, 0, cellContent);
-        }
     }
-
 
     /**
      * 单元格自适应宽度
+     *
+     * @param writer Excel 写入器 {@link ExcelWriter}
+     */
+    public static void autoSizeColumn(ExcelWriter writer) {
+        autoSizeColumn(writer, DEFAULT_COLUMN_PIXEL);
+    }
+
+    /**
+     * 单元格自适应宽度
+     *
+     * @param writer     Excel 写入器 {@link ExcelWriter}
+     * @param extraWidth 额外宽度（Excel 单位：字符宽度的 1/256）
      */
     public static void autoSizeColumn(ExcelWriter writer, int extraWidth) {
         Sheet sheet = writer.getSheet();
