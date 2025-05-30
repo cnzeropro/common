@@ -110,7 +110,7 @@ public class ArchiveExportResponseBodyAdvice extends BaseExportResponseBodyAdvic
             Map<?, ?> map = (Map<?, ?>) body;
             return this.handleMap(archiveExport, map);
         }
-        throw new CommonException(String.format("@ArchiveExport annotation method does not support the return type: %s", body.getClass()));
+        throw new CommonException(String.format("@ArchiveExport annotation targetMethod does not support the return type: %s", body.getClass()));
     }
 
     protected FileExportEntity handleArray(ArchiveExport archiveExport, Object[] objects) {
@@ -146,7 +146,7 @@ public class ArchiveExportResponseBodyAdvice extends BaseExportResponseBodyAdvic
             Resource[] resources = (Resource[]) objects;
             return this.handleResource(archiveExport, resources);
         }
-        throw new CommonException(String.format("@ArchiveExport annotation method does not support the return type: %s[]", ArrayUtil.getComponentType(objects)));
+        throw new CommonException(String.format("@ArchiveExport annotation targetMethod does not support the return type: %s[]", ArrayUtil.getComponentType(objects)));
     }
 
     protected FileExportEntity handleCollection(ArchiveExport archiveExport, Collection<?> collection) {
@@ -182,7 +182,7 @@ public class ArchiveExportResponseBodyAdvice extends BaseExportResponseBodyAdvic
             Resource[] resources = collection.toArray(new Resource[0]);
             return this.handleResource(archiveExport, resources);
         }
-        throw new CommonException(String.format("@ArchiveExport annotation method does not support the return type: %s<%s>", collection.getClass(), IterUtil.getElementType(collection)));
+        throw new CommonException(String.format("@ArchiveExport annotation targetMethod does not support the return type: %s<%s>", collection.getClass(), IterUtil.getElementType(collection)));
     }
 
     protected FileExportEntity handleMap(ArchiveExport archiveExport, Map<?, ?> map) {
@@ -231,7 +231,7 @@ public class ArchiveExportResponseBodyAdvice extends BaseExportResponseBodyAdvic
                 .map(Object::getClass)
                 .map(Class::getName)
                 .orElse("unknown");
-        throw new CommonException(String.format("@ArchiveExport annotation method does not support the return type: %s<%s, %s>", map.getClass(), keyTypeName, valueTypeName));
+        throw new CommonException(String.format("@ArchiveExport annotation targetMethod does not support the return type: %s<%s, %s>", map.getClass(), keyTypeName, valueTypeName));
     }
 
     protected FileExportEntity handleCharSequence(ArchiveExport archiveExport, Map<?, CharSequence> charSequenceMap) {

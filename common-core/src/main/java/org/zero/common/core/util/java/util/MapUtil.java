@@ -103,6 +103,13 @@ public class MapUtil {
         return map.computeIfAbsent(key, mappingFunction);
     }
 
+    public static <K, V> Optional<Map.Entry<K, V>> getFirstEntryOpt(Map<K, V> map) {
+        if (isEmpty(map)){
+            return Optional.empty();
+        }
+        return map.entrySet().stream().findFirst();
+    }
+
     public static byte getByteValue(Map<?, ?> map, Object key) {
         return getValueOrDefault(map, key, Byte.class, (byte) 0);
     }

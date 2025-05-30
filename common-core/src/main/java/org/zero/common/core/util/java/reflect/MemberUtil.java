@@ -22,11 +22,25 @@ public class MemberUtil {
     // 访问权限比较器（按访问权限从高到低排序：public → protected → default → private）
     public static final Comparator<Member> ACCESSIBLE_COMPARATOR = Comparator.comparingInt(member -> {
         int mod = member.getModifiers();
-        return Modifier.isPublic(mod) ? 1 // public
-                : Modifier.isProtected(mod) ? 2 // protected
-                : Modifier.isPrivate(mod) ? 4 // private
-                : 3; // default
+        return Modifier.isPublic(mod) ? 0 // public
+                : Modifier.isProtected(mod) ? 1 // protected
+                : Modifier.isPrivate(mod) ? 3 // private
+                : 2; // default
     });
+
+    public static boolean isStatic(Member member) {
+        if (Objects.isNull(member)) {
+            return false;
+        }
+        return Modifier.isStatic(member.getModifiers());
+    }
+
+    public static boolean isFinal(Member member) {
+        if (Objects.isNull(member)) {
+            return false;
+        }
+        return Modifier.isFinal(member.getModifiers());
+    }
 
     /**
      * 获取实例
@@ -130,6 +144,9 @@ public class MemberUtil {
      * @return 实例 {@link Optional}
      */
     public static <T> Optional<T> getInstanceOpt(Class<T> clazz, boolean quietIfException, Object... args) {
+        if (Objects.isNull(clazz)) {
+            return Optional.empty();
+        }
         List<Member> members = new ArrayList<>();
         if (Objects.isNull(args)) {
             // 从静态构造方法获取
@@ -147,9 +164,9 @@ public class MemberUtil {
         // 先按访问权限排序，优先级：public > protected > default > private
         // 再按类型排序，优先级：Field > Method > Constructor
         // 最后按参数排序，优先级：当存在传入的参数（不为 null）时，以其为主（完全匹配 > 兼容匹配 > 参数个数匹配 > 其他情况）；不存在时，以方法参数个数为主（个数越小优先级越高）
-        Comparator<Member> comparator = ACCESSIBLE_COMPARATOR.thenComparingInt(member -> member instanceof Field ? 1
-                        : member instanceof Method ? 2
-                        : member instanceof Constructor ? 3
+        Comparator<Member> comparator = ACCESSIBLE_COMPARATOR.thenComparingInt(member -> member instanceof Field ? 0
+                        : member instanceof Method ? 1
+                        : member instanceof Constructor ? 2
                         : 4)
                 .thenComparingInt(member -> {
                     if (Objects.isNull(args)) {
@@ -159,17 +176,17 @@ public class MemberUtil {
                     }
                     if (member instanceof Executable) {
                         Executable executable = (Executable) member;
-                        Class<?>[] paramTypes = executable.getParameterTypes();
-                        if (Arrays.equals(paramTypes, parameterTypes)) {
+                        if (ExecutableUtil.ExactParameterTypePredicate.of(parameterTypes).test(executable)) {
+                            return 0;
+                        }
+                        if (ExecutableUtil.AvailableParameterTypePredicate.of(parameterTypes).test(executable)) {
                             return 1;
                         }
-                        if (ExecutableUtil.ParameterTypePredicate.of(parameterTypes).test(executable)) {
+                        Class<?>[] paramTypes = executable.getParameterTypes();
+                        if (paramTypes.length == parameterTypes.length) {
                             return 2;
                         }
-                        if (paramTypes.length == parameterTypes.length) {
-                            return 3;
-                        }
-                        return 4;
+                        return 3;
                     }
                     return Integer.MAX_VALUE;
                 });
@@ -183,7 +200,7 @@ public class MemberUtil {
             } else if (member instanceof Method) {
                 Method method = (Method) member;
                 Object[] parameters;
-                if (Objects.nonNull(args) && ExecutableUtil.ParameterTypePredicate.of(parameterTypes).test(method)) {
+                if (Objects.nonNull(args) && ExecutableUtil.AvailableParameterTypePredicate.of(parameterTypes).test(method)) {
                     parameters = args;
                 } else {
                     parameters = Arrays.stream(method.getParameterTypes())
@@ -194,7 +211,7 @@ public class MemberUtil {
             } else if (member instanceof Constructor) {
                 Constructor<?> constructor = (Constructor<?>) member;
                 Object[] parameters;
-                if (Objects.nonNull(args) && ExecutableUtil.ParameterTypePredicate.of(parameterTypes).test(constructor)) {
+                if (Objects.nonNull(args) && ExecutableUtil.AvailableParameterTypePredicate.of(parameterTypes).test(constructor)) {
                     parameters = args;
                 } else {
                     parameters = Arrays.stream(constructor.getParameterTypes())
@@ -210,5 +227,4 @@ public class MemberUtil {
         }
         return Optional.empty();
     }
-
 }

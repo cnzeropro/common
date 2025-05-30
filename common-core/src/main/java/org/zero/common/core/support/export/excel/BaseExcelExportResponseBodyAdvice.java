@@ -83,7 +83,7 @@ public abstract class BaseExcelExportResponseBodyAdvice extends BaseTabularDataE
             return FileExportEntity.of(excelExport.filename(), fastByteArrayOutputStream, excelExport.fileType());
         }
 
-        throw new CommonException(String.format("@ExcelExport annotation method does not support the return type: %s", body.getClass()));
+        throw new CommonException(String.format("@ExcelExport annotation targetMethod does not support the return type: %s", body.getClass()));
     }
 
     /* ********************************************************* Collection Handler ********************************************************* */

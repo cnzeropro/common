@@ -1,6 +1,6 @@
 package org.zero.common.core.support.xss.annotation;
 
-import org.zero.common.core.support.log.handler.processor.LogProcessor;
+import org.zero.common.core.support.aware.perceptor.Perceptor;
 import org.zero.common.core.support.xss.processor.XssMode;
 import org.zero.common.core.support.xss.processor.XssProcessor;
 
@@ -26,7 +26,7 @@ public @interface XssHandler {
     /**
      * 日志处理器
      *
-     * @see LogProcessor
+     * @see Perceptor
      */
     Class<? extends XssProcessor> processor() default XssMode.class;
 }

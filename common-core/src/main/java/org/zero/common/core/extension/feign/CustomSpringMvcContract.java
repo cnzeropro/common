@@ -96,10 +96,10 @@ public class CustomSpringMvcContract extends SpringMvcContract implements Enviro
         });
         this.registerMethodAnnotation(RequestLine.class, (ann, data) -> {
             final String requestLine = ann.value();
-            feign.Util.checkState(feign.Util.emptyToNull(requestLine) != null, "RequestLine annotation was empty on method %s.", data.configKey());
+            feign.Util.checkState(feign.Util.emptyToNull(requestLine) != null, "RequestLine annotation was empty on targetMethod %s.", data.configKey());
             final Matcher requestLineMatcher = REQUEST_LINE_PATTERN.matcher(requestLine);
             if (!requestLineMatcher.find()) {
-                throw new IllegalStateException(String.format("RequestLine annotation didn't start with an HTTP verb on method %s", data.configKey()));
+                throw new IllegalStateException(String.format("RequestLine annotation didn't start with an HTTP verb on targetMethod %s", data.configKey()));
             } else {
                 String method = requestLineMatcher.group(1);
                 String resolvedMethod = this.resolve(method);
@@ -113,7 +113,7 @@ public class CustomSpringMvcContract extends SpringMvcContract implements Enviro
         });
         this.registerMethodAnnotation(Body.class, (ann, data) -> {
             final String body = ann.value();
-            feign.Util.checkState(feign.Util.emptyToNull(body) != null, "Body annotation was empty on method %s.", data.configKey());
+            feign.Util.checkState(feign.Util.emptyToNull(body) != null, "Body annotation was empty on targetMethod %s.", data.configKey());
             String resolvedBody = this.resolve(body);
             if (resolvedBody.indexOf('{') == -1) {
                 data.template().body(resolvedBody);
@@ -123,7 +123,7 @@ public class CustomSpringMvcContract extends SpringMvcContract implements Enviro
         });
         this.registerMethodAnnotation(Headers.class, (header, data) -> {
             final String[] headersOnMethod = header.value();
-            feign.Util.checkState(headersOnMethod.length > 0, "Headers annotation was empty on method %s.", data.configKey());
+            feign.Util.checkState(headersOnMethod.length > 0, "Headers annotation was empty on targetMethod %s.", data.configKey());
             String[] resolvedHeadersOnMethod = Arrays.stream(headersOnMethod).map(this::resolve).toArray(String[]::new);
             data.template().headers(toMap(resolvedHeadersOnMethod));
         });

@@ -81,7 +81,7 @@ public abstract class BaseCsvResponseBodyAdvice extends BaseTabularDataExportRes
             return FileExportEntity.of(csvExport.filename(), fastByteArrayOutputStream, csvExport.fileType());
         }
 
-        throw new CommonException(String.format("@CsvExport annotation method does not support the return type: %s", body.getClass()));
+        throw new CommonException(String.format("@CsvExport annotation targetMethod does not support the return type: %s", body.getClass()));
     }
 
     /* ********************************************************* Collection Handler ********************************************************* */

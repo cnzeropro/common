@@ -29,7 +29,7 @@ public @interface Retryable {
     Class<? extends Throwable>[] includes() default {Throwable.class};
 
     /**
-     * @return the name of recover method
+     * @return the name of recover targetMethod
      */
     String recover() default "";
 

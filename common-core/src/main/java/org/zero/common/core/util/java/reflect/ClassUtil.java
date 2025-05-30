@@ -269,14 +269,14 @@ public class ClassUtil {
      * @see org.zero.common.core.util.hutool.core.bean.BeanUtil#DEFAULT_REGEX
      */
 
-    public static boolean isBeanClass(Class<?> clazz, String... regexps) {
+    public static boolean isBean(Class<?> clazz, String... regexps) {
         return IfUtil.test(clazz, regexps, (BiPredicate<Class<?>, String[]>) ClassUtil::isClassWithRegex, Objects.nonNull(clazz));
     }
 
     /**
      * 是否是严格的 Java 规范定义 Bean 类型
      */
-    public static boolean isJavaStrictBeanClass(Class<?> clazz) {
+    public static boolean isJavaStrictBean(Class<?> clazz) {
         // null 验证
         if (Objects.isNull(clazz)) {
             return false;
@@ -294,10 +294,10 @@ public class ClassUtil {
         if (clazz.isEnum()) {
             return false;
         }
-        if (isNumClass(clazz)) {
+        if (isNumber(clazz)) {
             return false;
         }
-        if (isDateTimeClass(clazz)) {
+        if (isDateTime(clazz)) {
             return false;
         }
         // 类名验证（排除 Java 官方包）
@@ -345,7 +345,7 @@ public class ClassUtil {
     /**
      * 是否是数字类型
      */
-    public static boolean isNumClass(Class<?> clazz) {
+    public static boolean isNumber(Class<?> clazz) {
         return Objects.nonNull(clazz) &&
                 (Number.class.isAssignableFrom(clazz) ||
                         (clazz.isPrimitive() &&
@@ -357,7 +357,7 @@ public class ClassUtil {
     /**
      * 是否是日期时间类型
      */
-    public static boolean isDateTimeClass(Class<?> clazz) {
+    public static boolean isDateTime(Class<?> clazz) {
         return Objects.nonNull(clazz) &&
                 (Date.class.isAssignableFrom(clazz) ||
                         Calendar.class.isAssignableFrom(clazz) ||
@@ -367,7 +367,7 @@ public class ClassUtil {
     /**
      * 是否是数组类型
      */
-    public static boolean isArrayClass(Class<?> clazz) {
+    public static boolean isArray(Class<?> clazz) {
         return Objects.nonNull(clazz) && clazz.isArray();
     }
 

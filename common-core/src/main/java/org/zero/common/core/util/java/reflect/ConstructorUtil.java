@@ -128,11 +128,10 @@ public class ConstructorUtil {
      * @return 构造器 {@link Optional}
      */
     public static Optional<Constructor<?>> getConstructorOptByParam(final Class<?> clazz, final boolean withSuperClassConstructors, final Class<?>... parameterTypes) {
-        Collection<Constructor<?>> filteredConstructors = getFilteredConstructors(clazz, withSuperClassConstructors, ExecutableUtil.ParameterTypePredicate.of(parameterTypes));
+        Collection<Constructor<?>> filteredConstructors = getFilteredConstructors(clazz, withSuperClassConstructors, ExecutableUtil.AvailableParameterTypePredicate.of(parameterTypes));
         // 优先匹配参数类型完全匹配的构造器
         for (Constructor<?> constructor : filteredConstructors) {
-            Class<?>[] paramTypes = constructor.getParameterTypes();
-            if (Arrays.equals(paramTypes, parameterTypes)) {
+            if (ExecutableUtil.ExactParameterTypePredicate.of(parameterTypes).test(constructor)) {
                 return Optional.of(constructor);
             }
         }
@@ -267,7 +266,7 @@ public class ConstructorUtil {
     protected static <T> Collection<Constructor<T>> getInstanceConstructors(Class<T> clazz, Class<?>... parameterTypes) {
         Stream<Constructor<?>> constructorStream = getConstructors(clazz, false).stream();
         if (Objects.nonNull(parameterTypes)) {
-            constructorStream = constructorStream.filter(ExecutableUtil.ParameterTypePredicate.of(parameterTypes));
+            constructorStream = constructorStream.filter(ExecutableUtil.AvailableParameterTypePredicate.of(parameterTypes));
         }
         return (Collection<Constructor<T>>) (Object) constructorStream.collect(Collectors.toList());
     }

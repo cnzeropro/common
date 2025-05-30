@@ -28,7 +28,7 @@ public class BaseExceptionHandler extends ThrowableHandler {
     /* *************************************************** 系统自定义异常 *************************************************** */
     @ExceptionHandler(org.zero.common.data.exception.UtilException.class)
     public Result<Void> utilException(org.zero.common.data.exception.UtilException e) {
-        log.error("Util method called error", e);
+        log.error("Util targetMethod called error", e);
         return this.handleThrowable(e);
     }
 

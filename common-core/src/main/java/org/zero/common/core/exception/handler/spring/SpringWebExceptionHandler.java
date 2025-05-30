@@ -131,7 +131,7 @@ public class SpringWebExceptionHandler extends ThrowableHandler {
     @ExceptionHandler(org.springframework.web.HttpRequestMethodNotSupportedException.class)
     public Result<Void> httpRequestMethodNotSupportedException(org.springframework.web.HttpRequestMethodNotSupportedException e) {
         String method = e.getMethod();
-        log.error(String.format("The request method[%s] is not supported, only supported: %s", method, Arrays.toString(e.getSupportedMethods())), e);
+        log.error(String.format("The request targetMethod[%s] is not supported, only supported: %s", method, Arrays.toString(e.getSupportedMethods())), e);
         return this.handleThrowable(HttpStatus.METHOD_NOT_ALLOWED, e, Collections.singletonList(method));
     }
 

@@ -47,14 +47,14 @@ public class BeanUtil extends cn.hutool.core.bean.BeanUtil {
         if (Objects.isNull(obj)) {
             return false;
         }
-        return ClassUtil.isBeanClass(obj.getClass(), regexps);
+        return ClassUtil.isBean(obj.getClass(), regexps);
     }
 
     public static boolean isJavaStrictBean(Object obj) {
         if (Objects.isNull(obj)) {
             return false;
         }
-        return ClassUtil.isJavaStrictBeanClass(obj.getClass());
+        return ClassUtil.isJavaStrictBean(obj.getClass());
     }
 
     public static boolean setValue(Object obj, CharSequence expression, Object value) {

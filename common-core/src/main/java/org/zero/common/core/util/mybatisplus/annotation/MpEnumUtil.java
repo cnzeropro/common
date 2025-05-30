@@ -49,14 +49,14 @@ public class MpEnumUtil {
             // 此处可使用自定义父类和注解，但因为 Mp 已经提供，所以无需重复造轮子
             if (IEnum.class.isAssignableFrom(clazz)) {
                 return MethodUtil.getMethodOptByNameAndParam(clazz, "getValue")
-                        .orElseThrow(() -> new UtilException(String.format("No getValue() method found in %s", clazz)));
+                        .orElseThrow(() -> new UtilException(String.format("No getValue() targetMethod found in %s", clazz)));
             } else {
                 Field field = FieldUtil.getAnnotatedFields(clazz, EnumValue.class)
                         .stream()
                         .findFirst()
                         .orElseThrow(() -> new UtilException(String.format("No field with @EnumValue annotation found in %s", clazz)));
                 return MethodUtil.getGetterMethodOptByField(clazz, field)
-                        .orElseThrow(() -> new UtilException(String.format("No needed method found in %s", clazz)));
+                        .orElseThrow(() -> new UtilException(String.format("No needed targetMethod found in %s", clazz)));
             }
         });
     }

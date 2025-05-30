@@ -14,16 +14,15 @@ public class ExecutableUtil {
     /**
      * 获取参数类型
      * <p>
-     * 当参数列表为 null 时，返回的类型列表也为 null（注意 NPE）。<br>
      * 当参数列表中参数为 null 时，其类型也为 null（注意 NPE）。
      *
      * @param args 参数列表
      * @return 参数类型列表
-     * @see ParameterTypePredicate
+     * @see AvailableParameterTypePredicate
      */
     public static Class<?>[] getParameterTypes(Object... args) {
         if (Objects.isNull(args)) {
-            return null;
+            return new Class[0];
         }
         return Arrays.stream(args)
                 .map(o -> {
@@ -53,15 +52,48 @@ public class ExecutableUtil {
         return String.format("%s.%s(%s)", className, executableName, params);
     }
 
-    public static class ParameterTypePredicate implements Predicate<Executable> {
-        final Class<?>[] parameterTypes;
+    public static class ExactParameterTypePredicate implements Predicate<Executable> {
+        protected final Class<?>[] parameterTypes;
 
-        ParameterTypePredicate(Class<?>[] parameterTypes) {
+        protected ExactParameterTypePredicate(Class<?>... parameterTypes) {
             this.parameterTypes = parameterTypes;
         }
 
-        public static ParameterTypePredicate of(Class<?>... parameterTypes) {
-            return new ParameterTypePredicate(parameterTypes);
+        public static ExactParameterTypePredicate of(Class<?>... parameterTypes) {
+            return new ExactParameterTypePredicate(parameterTypes);
+        }
+
+        @Override
+        public boolean test(Executable executable) {
+            Class<?>[] paramTypes = executable.getParameterTypes();
+            if (paramTypes.length != parameterTypes.length) {
+                return false;
+            }
+            // 此处不使用 Arrays.equals 方法，否则无法做到 null 处理
+            for (int i = 0; i < paramTypes.length; i++) {
+                Class<?> paramType = paramTypes[i];
+                Class<?> parameterType = parameterTypes[i];
+                // 不为 null 时进行判断处理，否则跳过该次匹配
+                if (Objects.nonNull(parameterType)) {
+                    // 判断参数类型是否相等
+                    if (!Objects.equals(paramType, parameterType)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+    }
+
+    public static class AvailableParameterTypePredicate implements Predicate<Executable> {
+        protected final Class<?>[] parameterTypes;
+
+        protected AvailableParameterTypePredicate(Class<?>... parameterTypes) {
+            this.parameterTypes = parameterTypes;
+        }
+
+        public static AvailableParameterTypePredicate of(Class<?>... parameterTypes) {
+            return new AvailableParameterTypePredicate(parameterTypes);
         }
 
         @Override

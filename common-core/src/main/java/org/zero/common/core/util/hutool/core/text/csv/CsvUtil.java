@@ -39,7 +39,7 @@ public class CsvUtil {
         Collection<?> list = ListUtil.toList(data);
         if (CollUtil.allMatch(list, o -> ClassUtil.isAssignable(Map.class, o.getClass()))) {
             writer.writeBeans(list);
-        } else if (CollUtil.allMatch(list, o -> ClassUtil.isJavaStrictBeanClass(o.getClass()))) {
+        } else if (CollUtil.allMatch(list, o -> ClassUtil.isJavaStrictBean(o.getClass()))) {
             writer.writeBeans(list);
         } else {
             writer.write(list);

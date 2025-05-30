@@ -113,7 +113,7 @@ public class EnumUtil {
         }
 
         // 数字类型比较
-        if (ClassUtil.isNumClass(fieldVal.getClass()) && ClassUtil.isNumClass(val.getClass())) {
+        if (ClassUtil.isNumber(fieldVal.getClass()) && ClassUtil.isNumber(val.getClass())) {
             BigDecimal numObj = new BigDecimal(String.valueOf(fieldVal));
             BigDecimal numVal = new BigDecimal(String.valueOf(val));
             // numObj.equals(numVal);

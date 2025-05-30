@@ -21,7 +21,7 @@ public class StaticMDCBinder {
     }
 
     /**
-     * Currently this method always returns an instance of
+     * Currently this targetMethod always returns an instance of
      * {@link StaticMDCBinder}.
      */
     public MDCAdapter getMDCA() {

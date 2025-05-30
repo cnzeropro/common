@@ -1,12 +1,14 @@
 package org.zero.common.test.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.zero.common.core.extension.java.lang.reflect.ParameterizedTypeImpl;
 import org.zero.common.core.extension.java.lang.reflect.TypeReference;
 import org.zero.common.core.support.context.spring.EnableSpringUtils;
 import org.zero.common.core.support.converter.ConverterComposite;
 import org.zero.common.core.support.converter.ToList;
-import org.zero.common.core.support.log.tracker.EnableLogTracker;
+import org.zero.common.core.support.fallback.FallbackAspect;
+import org.zero.common.core.support.log.EnableLogTracker;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -19,6 +21,11 @@ import java.util.ArrayList;
 @EnableSpringUtils
 @Configuration(proxyBeanMethods = false)
 public class AppConfig {
+    @Bean
+    FallbackAspect fallbackAspect() {
+        return new FallbackAspect();
+    }
+
     @PostConstruct
     public void init() {
         this.converterInit();

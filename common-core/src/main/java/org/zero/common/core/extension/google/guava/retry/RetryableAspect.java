@@ -125,7 +125,7 @@ public class RetryableAspect {
             if (recoverMethodOpt.isPresent()) {
                 return MethodUtil.invoke(recoverMethodOpt.get(), target);
             }
-            throw new CommonException(String.format("no such method like %s in %s", recover, targetClass.getCanonicalName()));
+            throw new CommonException(String.format("no such targetMethod like %s in %s", recover, targetClass.getCanonicalName()));
         }
         throw t;
     }

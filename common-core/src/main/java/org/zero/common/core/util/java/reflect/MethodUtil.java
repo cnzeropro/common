@@ -223,12 +223,11 @@ public class MethodUtil {
      */
     public static Optional<Method> getMethodOptByNameAndParam(final Class<?> clazz, final boolean withSuperClassMethods, final CharSequence methodName, final Class<?>... parameterTypes) {
         Collection<Method> filteredMethods = getMethodsByName(clazz, withSuperClassMethods, methodName).stream()
-                .filter(ExecutableUtil.ParameterTypePredicate.of(parameterTypes))
+                .filter(ExecutableUtil.AvailableParameterTypePredicate.of(parameterTypes))
                 .collect(Collectors.toList());
         // 优先匹配参数类型完全匹配的方法
         for (Method method : filteredMethods) {
-            Class<?>[] paramTypes = method.getParameterTypes();
-            if (Arrays.equals(paramTypes, parameterTypes)) {
+            if (ExecutableUtil.ExactParameterTypePredicate.of(parameterTypes).test(method)) {
                 return Optional.of(method);
             }
         }
@@ -339,7 +338,7 @@ public class MethodUtil {
 
     public static <T, R> Optional<R> invokeOpt(final Class<T> clazz, final boolean withSuperClassMethods, final T target, CharSequence methodName, final Type type, boolean quietIfException, final Object... args) {
         Class<?>[] parameterTypes = ExecutableUtil.getParameterTypes(args);
-        // 当 clazz 为 null 时，默认使用 target 的类对象
+        // 当 targetClass 为 null 时，默认使用 target 的类对象
         // 当 target 是 null 时，默认其为静态方法，而静态方法不能被重写，因此不需要获取父类的方法
         return getMethodOptByNameAndParam(Objects.isNull(clazz) ? target.getClass() : clazz, Objects.nonNull(target) && withSuperClassMethods, methodName, parameterTypes).flatMap(method -> invokeOpt(method, target, type, quietIfException, args));
     }
@@ -555,7 +554,7 @@ public class MethodUtil {
         Stream<Method> methodStream = getStaticMethods(clazz, false).stream()
                 .filter(MethodUtil::isBuilderMethod);
         if (Objects.nonNull(parameterTypes)) {
-            methodStream = methodStream.filter(ExecutableUtil.ParameterTypePredicate.of(parameterTypes));
+            methodStream = methodStream.filter(ExecutableUtil.AvailableParameterTypePredicate.of(parameterTypes));
         }
         return methodStream.collect(Collectors.toList());
     }

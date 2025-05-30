@@ -1,6 +1,5 @@
 package org.zero.common.test.config;
 
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.zero.common.core.support.codec.decryption.DecryptionRequestBodyAdvice;
 import org.zero.common.core.support.codec.encryption.EncryptionResponseBodyAdvice;
@@ -10,6 +9,6 @@ import org.zero.common.core.support.codec.encryption.EncryptionResponseBodyAdvic
  * @since 2025/3/26
  */
 @Import({EncryptionResponseBodyAdvice.class, DecryptionRequestBodyAdvice.class})
-@Configuration(proxyBeanMethods = false)
+// @Configuration(proxyBeanMethods = false)
 public class CodecConfig {
 }

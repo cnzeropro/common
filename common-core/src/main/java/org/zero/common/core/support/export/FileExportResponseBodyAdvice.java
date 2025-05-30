@@ -71,7 +71,7 @@ public class FileExportResponseBodyAdvice extends BaseExportResponseBodyAdvice {
             InputStream inputStream = (InputStream) body;
             return this.handleStream(fileExport, inputStream);
         }
-        throw new CommonException(String.format("@FileExport annotation method does not support the return type: %s", body.getClass()));
+        throw new CommonException(String.format("@FileExport annotation targetMethod does not support the return type: %s", body.getClass()));
     }
 
     protected FileExportEntity handleCharSequence(FileExport fileExport, CharSequence charSequence) {

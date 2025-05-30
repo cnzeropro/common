@@ -64,7 +64,7 @@ public class ConditionUtil {
         }
 
         Class<?> clazz = param.getClass();
-        if (ClassUtil.isNumClass(clazz)) {
+        if (ClassUtil.isNumber(clazz)) {
             // 避免科学计数法的干扰
             return new BigDecimal(param.toString()).toPlainString();
         } else {

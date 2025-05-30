@@ -3,6 +3,7 @@ package org.zero.common.core.util.java.lang;
 import org.zero.common.core.extension.java.util.function.ToBoolFunction;
 import org.zero.common.core.extension.java.util.function.ToByteFunction;
 import org.zero.common.core.util.java.reflect.ClassUtil;
+import org.zero.common.core.util.java.util.CollectionUtil;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -37,16 +38,23 @@ public class ArrayUtil {
      */
     public static final Object[] EMPTY = {};
 
+    public static boolean isArray(Object source) {
+        return ObjectUtil.nonNull(source) && ClassUtil.isArray(source.getClass());
+    }
+
+    public static int length(Object array) {
+        if (Objects.isNull(array)) {
+            return 0;
+        }
+        return Array.getLength(array);
+    }
+
     public static boolean isEmpty(Object[] array) {
         return array == null || array.length == 0;
     }
 
     public static boolean nonEmpty(Object[] array) {
         return !isEmpty(array);
-    }
-
-    public static boolean isArray(Object source) {
-        return ObjectUtil.nonNull(source) && ClassUtil.isArrayClass(source.getClass());
     }
 
     /**
@@ -83,11 +91,15 @@ public class ArrayUtil {
     }
 
     public static <T> T[] toArray(Collection<T> collection, Class<T> componentType) {
-        return collection.toArray(create(componentType, 0));
+        T[] array = create(componentType, 0);
+        if (CollectionUtil.isEmpty(collection)) {
+            return array;
+        }
+        return collection.toArray(array);
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T[] create(Class<T> componentType, int length) {
+    public static <T> T[] create(Class<?> componentType, int length) {
         return (T[]) Array.newInstance(componentType, length);
     }
 
@@ -339,6 +351,44 @@ public class ArrayUtil {
             pos += a.length;
         }
         return result;
+    }
+
+    /**
+     * 获取子数组
+     *
+     * @param array 数组
+     * @param start 开始位置（包括）
+     * @param end   结束位置（不包括）
+     * @param <T>   数组元素类型
+     * @return 新的数组
+     * @see Arrays#copyOfRange(Object[], int, int)
+     */
+    public static <T> T[] sub(T[] array, int start, int end) {
+        if (isEmpty(array)) {
+            return array;
+        }
+        int length = length(array);
+        if (start < 0) {
+            start += length;
+        }
+        if (end < 0) {
+            end += length;
+        }
+        if (start == length) {
+            return create(array.getClass().getComponentType(), 0);
+        }
+        if (start > end) {
+            int tmp = start;
+            start = end;
+            end = tmp;
+        }
+        if (end > length) {
+            if (start >= length) {
+                return create(array.getClass().getComponentType(), 0);
+            }
+            end = length;
+        }
+        return Arrays.copyOfRange(array, start, end);
     }
 
     public static <T> byte[] map(T[] array, ToByteFunction<T> function) {

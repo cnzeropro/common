@@ -246,7 +246,7 @@ public class BeanPathMapUtil {
         }
 
         // 数字
-        if (ClassUtil.isNumClass(clazz)) {
+        if (ClassUtil.isNumber(clazz)) {
             String str = formatNum(null, obj);
             result.put(prefix, str);
             return result;
@@ -285,7 +285,7 @@ public class BeanPathMapUtil {
         Object[] objects = ArrayUtil.cast(componentType, arrayObj);
 
         // 数字类型
-        if (ClassUtil.isNumClass(componentType)) {
+        if (ClassUtil.isNumber(componentType)) {
             String joined = ArrayUtil.join(objects, ",", obj -> formatNum(null, obj));
             result.put(prefix, joined);
             return result;
@@ -333,7 +333,7 @@ public class BeanPathMapUtil {
             return result;
         }
         // 数字类型
-        if (ClassUtil.isNumClass(fieldValue.getClass())) {
+        if (ClassUtil.isNumber(fieldValue.getClass())) {
             String str = formatNum(field, fieldValue);
             result.put(key, str);
             return result;

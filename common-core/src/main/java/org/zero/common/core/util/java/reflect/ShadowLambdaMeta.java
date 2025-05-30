@@ -80,11 +80,11 @@ public class ShadowLambdaMeta implements LambdaMeta {
          */
         private String functionalInterfaceClass;
         /**
-         * The functional interface method name.
+         * The functional interface targetMethod name.
          */
         private String functionalInterfaceMethodName;
         /**
-         * The functional interface method signature.
+         * The functional interface targetMethod signature.
          */
         private String functionalInterfaceMethodSignature;
         /**
@@ -92,19 +92,19 @@ public class ShadowLambdaMeta implements LambdaMeta {
          */
         private String implClass;
         /**
-         * The implementation method name.
+         * The implementation targetMethod name.
          */
         private String implMethodName;
         /**
-         * The implementation method signature.
+         * The implementation targetMethod signature.
          */
         private String implMethodSignature;
         /**
-         * The implementation method kind.
+         * The implementation targetMethod kind.
          */
         private int implMethodKind;
         /**
-         * The instantiated method type.
+         * The instantiated targetMethod type.
          */
         private String instantiatedMethodType;
         /**
