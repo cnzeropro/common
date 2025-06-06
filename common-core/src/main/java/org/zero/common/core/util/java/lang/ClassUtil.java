@@ -1,12 +1,13 @@
-package org.zero.common.core.util.java.reflect;
+package org.zero.common.core.util.java.lang;
 
 import lombok.experimental.UtilityClass;
 import org.zero.common.core.extension.java.lang.reflect.TypeReference;
+import org.zero.common.core.extension.java.net.Schemes;
 import org.zero.common.core.extension.java.util.function.ThrowThrowableFunction;
-import org.zero.common.core.util.java.lang.IfUtil;
-import org.zero.common.core.util.java.lang.PrimitiveType;
-import org.zero.common.core.util.java.lang.ThrowableUtil;
 import org.zero.common.core.util.java.net.UrlUtil;
+import org.zero.common.core.util.java.reflect.ConstructorUtil;
+import org.zero.common.core.util.java.reflect.FieldUtil;
+import org.zero.common.core.util.java.reflect.MethodUtil;
 
 import java.io.File;
 import java.io.Serializable;
@@ -29,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -130,13 +132,13 @@ public class ClassUtil {
 
     public static Collection<String> getClassNamesByUrl(URL url, String packageName, boolean withSubordinateClass, boolean withInnerClass) {
         String protocol = url.getProtocol();
-        if (UrlUtil.FILE_URL_PREFIX.equalsIgnoreCase(protocol)) {
+        if (Schemes.FILE.equalsIgnoreCase(protocol)) {
             return ThrowableUtil.sneakyThrowOpt(url, (ThrowThrowableFunction<URL, URI>) URL::toURI)
                     .map(File::new)
                     .map(file -> getClassNamesByFile(file, packageName, withSubordinateClass, withInnerClass))
                     .orElseGet(LinkedHashSet::new);
         }
-        if (UrlUtil.URL_PREFIX_JAR.equalsIgnoreCase(protocol)) {
+        if (Schemes.JAR.equalsIgnoreCase(protocol)) {
             return Optional.ofNullable(UrlUtil.openConnection(url))
                     .filter(JarURLConnection.class::isInstance)
                     .map(JarURLConnection.class::cast)
@@ -369,6 +371,14 @@ public class ClassUtil {
      */
     public static boolean isArray(Class<?> clazz) {
         return Objects.nonNull(clazz) && clazz.isArray();
+    }
+
+    public static boolean isMultivariable(Class<?> clazz) {
+        return Objects.nonNull(clazz) &&
+                (isArray(clazz) ||
+                        Iterable.class.isAssignableFrom(clazz) ||
+                        Iterator.class.isAssignableFrom(clazz) ||
+                        Enumeration.class.isAssignableFrom(clazz));
     }
 
     /**

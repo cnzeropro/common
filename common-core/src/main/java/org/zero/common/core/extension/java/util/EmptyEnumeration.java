@@ -8,7 +8,7 @@ import java.util.NoSuchElementException;
  * @since 2025/4/27
  */
 public class EmptyEnumeration<E> implements Enumeration<E> {
-    static final EmptyEnumeration<Object> INSTANCE = new EmptyEnumeration<>();
+    static final EmptyEnumeration<?> INSTANCE = new EmptyEnumeration<>();
 
     @SuppressWarnings("unchecked")
     public static <T> Enumeration<T> getInstance() {

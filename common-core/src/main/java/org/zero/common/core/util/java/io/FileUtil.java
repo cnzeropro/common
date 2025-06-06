@@ -8,7 +8,7 @@ import org.zero.common.core.util.java.lang.ObjectUtil;
 import org.zero.common.core.util.java.lang.StringUtil;
 import org.zero.common.core.util.java.lang.ThrowableUtil;
 import org.zero.common.core.util.java.net.UrlUtil;
-import org.zero.common.core.util.java.reflect.ClassUtil;
+import org.zero.common.core.util.java.lang.ClassUtil;
 import org.zero.common.core.util.java.util.CollectionUtil;
 import org.zero.common.data.constant.CharPool;
 import org.zero.common.data.constant.StringPool;

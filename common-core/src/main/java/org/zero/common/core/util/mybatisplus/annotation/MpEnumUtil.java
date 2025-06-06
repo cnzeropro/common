@@ -48,8 +48,8 @@ public class MpEnumUtil {
         return METHOD_CACHE.mapAndPutIfAbsent(enumClass, clazz -> {
             // 此处可使用自定义父类和注解，但因为 Mp 已经提供，所以无需重复造轮子
             if (IEnum.class.isAssignableFrom(clazz)) {
-                return MethodUtil.getMethodOptByNameAndParam(clazz, "getValue")
-                        .orElseThrow(() -> new UtilException(String.format("No getValue() targetMethod found in %s", clazz)));
+                return MethodUtil.getMethodOptByNameAndParam(clazz, "getPropertyValue")
+                        .orElseThrow(() -> new UtilException(String.format("No getPropertyValue() targetMethod found in %s", clazz)));
             } else {
                 Field field = FieldUtil.getAnnotatedFields(clazz, EnumValue.class)
                         .stream()

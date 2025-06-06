@@ -17,7 +17,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.NumberFormat;
 import org.zero.common.core.support.context.spring.SpringUtils;
 import org.zero.common.core.util.hutool.core.bean.BeanUtil;
-import org.zero.common.core.util.java.reflect.ClassUtil;
+import org.zero.common.core.util.java.lang.ClassUtil;
 import org.zero.common.data.exception.UtilException;
 
 import java.lang.reflect.Field;

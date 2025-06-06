@@ -8,7 +8,7 @@ import java.util.NoSuchElementException;
  * @since 2025/4/27
  */
 public class EmptyIterator<T> implements Iterator<T> {
-    public static final Iterator<Object> INSTANCE = new EmptyIterator<>();
+    public static final Iterator<?> INSTANCE = new EmptyIterator<>();
 
     @SuppressWarnings("unchecked")
     public static <T> Iterator<T> getInstance() {

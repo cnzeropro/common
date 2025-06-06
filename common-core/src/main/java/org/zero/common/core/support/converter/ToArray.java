@@ -36,7 +36,7 @@ public abstract class ToArray<T> implements GenericConverter<T[]> {
         }
         Class<?> sourceClass = source.getClass();
         if (sourceClass.isArray()) {
-            Object[] array = ArrayUtil.toArray(source);
+            Object[] array = ArrayUtil.of(source);
             return this.convertArrayElement(array);
         }
         if (source instanceof Collection) {

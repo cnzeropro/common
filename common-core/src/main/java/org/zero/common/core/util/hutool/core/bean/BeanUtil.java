@@ -1,7 +1,7 @@
 package org.zero.common.core.util.hutool.core.bean;
 
 import cn.hutool.core.util.ArrayUtil;
-import org.zero.common.core.util.java.reflect.ClassUtil;
+import org.zero.common.core.util.java.lang.ClassUtil;
 
 import java.util.Objects;
 

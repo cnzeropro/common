@@ -1,6 +1,6 @@
-package org.zero.common.core.extension.java.util;
+package org.zero.common.core.extension.java.lang;
 
-import org.jetbrains.annotations.NotNull;
+import org.zero.common.core.extension.java.util.EmptyIterator;
 
 import java.util.Iterator;
 
@@ -9,14 +9,13 @@ import java.util.Iterator;
  * @since 2025/4/27
  */
 public class EmptyIterable<T> implements Iterable<T> {
-    public static final EmptyIterable<Object> INSTANCE = new EmptyIterable<>();
+    public static final EmptyIterable<?> INSTANCE = new EmptyIterable<>();
 
     @SuppressWarnings("unchecked")
     public static <T> EmptyIterable<T> getInstance() {
         return (EmptyIterable<T>) INSTANCE;
     }
 
-    @NotNull
     @Override
     public Iterator<T> iterator() {
         return EmptyIterator.getInstance();

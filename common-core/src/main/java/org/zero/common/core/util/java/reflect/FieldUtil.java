@@ -1,5 +1,6 @@
 package org.zero.common.core.util.java.reflect;
 
+import org.zero.common.core.util.java.lang.ClassUtil;
 import org.zero.common.core.util.java.lang.StringUtil;
 import org.zero.common.core.util.java.lang.ThrowableUtil;
 
@@ -151,6 +152,11 @@ public class FieldUtil {
         return getFilteredFields(targetClass, withSuperClassFields, field -> field.isAnnotationPresent(annotationClass));
     }
 
+    public static Field getFieldByName(final Class<?> clazz, final CharSequence fieldName) {
+        return FieldUtil.getFieldOptByName(clazz, fieldName).orElse(null);
+    }
+
+
     /**
      * 通过字段名获取字段 {@link Optional}
      * <p>
@@ -162,6 +168,10 @@ public class FieldUtil {
      */
     public static Optional<Field> getFieldOptByName(final Class<?> clazz, final CharSequence fieldName) {
         return getFieldOptByName(clazz, true, fieldName);
+    }
+
+    public static Field getFieldByName(final Class<?> clazz, final boolean withSuperClassFields, final CharSequence fieldName) {
+        return getFieldOptByName(clazz, withSuperClassFields, fieldName).orElse(null);
     }
 
     /**

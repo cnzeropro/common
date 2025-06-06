@@ -13,7 +13,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.StringUtils;
 import org.zero.common.core.extension.spring.aop.BaseAspect;
 import org.zero.common.core.util.java.lang.ArrayUtil;
-import org.zero.common.core.util.java.reflect.ClassUtil;
+import org.zero.common.core.util.java.lang.ClassUtil;
 import org.zero.common.core.util.java.reflect.ExecutableUtil;
 import org.zero.common.core.util.java.reflect.MemberUtil;
 import org.zero.common.core.util.java.reflect.MethodUtil;

@@ -1,10 +1,15 @@
 package org.zero.common.core.util.java.reflect;
 
+import org.zero.common.core.util.java.lang.ClassUtil;
+import org.zero.common.data.constant.StringPool;
+
 import java.lang.reflect.Executable;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * @author Zero (cnzeropro@163.com)
@@ -35,21 +40,112 @@ public class ExecutableUtil {
     }
 
     /**
-     * 获取方法或者构造器全限定名
-     *
-     * @param executable 方法或构造器
-     * @return 全限定名
+     * 方法或者构造器全限定名（The fully qualified name of method）构造器
      */
-    public static String getFullName(Executable executable) {
-        // 类的全限定名
-        String className = executable.getDeclaringClass().getName();
-        // 方法名
-        String executableName = executable.getName();
-        // 参数类型列表（全限定名）
-        String params = Arrays.stream(executable.getParameterTypes())
-                .map(Class::getName)
-                .collect(Collectors.joining(", "));
-        return String.format("%s.%s(%s)", className, executableName, params);
+    public static class FQNBuilder {
+        public static final String VAR_ARGS_SUFFIX = StringPool.ELLIPSIS;
+
+        protected final Executable executable;
+        protected String classMethodSeparator = StringPool.POUND;
+        protected String parameterSeparator = StringPool.COMMA;
+        protected boolean withReturnType;
+        protected boolean dealVarArgs = true;
+        protected boolean withModifier;
+
+        protected FQNBuilder(Executable executable) {
+            this.executable = executable;
+        }
+
+        public static FQNBuilder of(Executable executable) {
+            return new FQNBuilder(executable);
+        }
+
+        public FQNBuilder classMethodSeparator(String classMethodSeparator) {
+            this.classMethodSeparator = classMethodSeparator;
+            return this;
+        }
+
+        public FQNBuilder parameterSeparator(String parameterSeparator) {
+            this.parameterSeparator = parameterSeparator;
+            return this;
+        }
+
+        public FQNBuilder withReturnType() {
+            return this.withReturnType(true);
+        }
+
+        public FQNBuilder withReturnType(boolean withReturnType) {
+            this.withReturnType = withReturnType;
+            return this;
+        }
+
+        public FQNBuilder dealVarArgs() {
+            return this.dealVarArgs(true);
+        }
+
+        public FQNBuilder dealVarArgs(boolean dealVarArgs) {
+            this.dealVarArgs = dealVarArgs;
+            return this;
+        }
+
+        public FQNBuilder withModifier() {
+            return this.withModifier(true);
+        }
+
+        public FQNBuilder withModifier(boolean withModifier) {
+            this.withModifier = withModifier;
+            return this;
+        }
+
+        public String build() {
+            // 修饰符
+            String modifier = null;
+            if (withModifier) {
+                modifier = Modifier.toString(executable.getModifiers());
+            }
+            // 返回类型
+            String returnTypeName = null;
+            if (withReturnType) {
+                if (executable instanceof Method) {
+                    returnTypeName = ((Method) executable).getReturnType().getName();
+                }
+            }
+            // 类的全限定名
+            String className = executable.getDeclaringClass().getName();
+            // 方法名
+            String executableName = executable.getName();
+            // 参数类型列表（全限定名）
+            boolean varArgs = executable.isVarArgs();
+            Class<?>[] parameterTypes = executable.getParameterTypes();
+            int length = parameterTypes.length;
+            StringJoiner stringJoiner = new StringJoiner(parameterSeparator, "(", ")");
+            for (int i = 0; i < length; i++) {
+                Class<?> parameterType = parameterTypes[i];
+                if (varArgs && i == length - 1) {
+                    if (dealVarArgs) {
+                        Class<?> componentType = parameterTypes[i].getComponentType();
+                        stringJoiner.add(componentType.getName() + VAR_ARGS_SUFFIX);
+                    } else {
+                        stringJoiner.add(parameterType.getName());
+                    }
+                } else {
+                    stringJoiner.add(parameterType.getName());
+                }
+            }
+            // 拼接
+            StringBuilder stringBuilder = new StringBuilder();
+            if (Objects.isNull(modifier)) {
+                stringBuilder.append(modifier).append(StringPool.SPACE);
+            }
+            if (Objects.isNull(returnTypeName)) {
+                stringBuilder.append(returnTypeName).append(StringPool.SPACE);
+            }
+            stringBuilder.append(className)
+                    .append(classMethodSeparator)
+                    .append(executableName)
+                    .append(stringJoiner);
+            return stringBuilder.toString();
+        }
     }
 
     public static class ExactParameterTypePredicate implements Predicate<Executable> {

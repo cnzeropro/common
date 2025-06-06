@@ -4,7 +4,7 @@ import lombok.experimental.UtilityClass;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.zero.common.core.util.java.reflect.ClassUtil;
+import org.zero.common.core.util.java.lang.ClassUtil;
 import org.zero.common.data.model.query.Condition;
 import org.zero.common.data.model.query.Operator;
 

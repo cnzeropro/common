@@ -11,7 +11,7 @@ import cn.hutool.core.util.ObjectUtil;
 import lombok.Cleanup;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
-import org.zero.common.core.util.java.reflect.ClassUtil;
+import org.zero.common.core.util.java.lang.ClassUtil;
 
 import java.util.Collection;
 import java.util.Collections;

@@ -35,7 +35,7 @@ public abstract class ToCollection<T> implements GenericConverter<Collection<T>>
         }
         Class<?> sourceClass = source.getClass();
         if (sourceClass.isArray()) {
-            Object[] array = ArrayUtil.toArray(source);
+            Object[] array = ArrayUtil.of(source);
             Iterable<?> iterable = Arrays.asList(array);
             return this.convertFromIterable(iterable);
         }

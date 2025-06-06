@@ -3,7 +3,7 @@ package org.zero.common.core.support.bean.dynamic;
 import org.zero.common.core.extension.java.lang.reflect.GenericArrayTypeImpl;
 import org.zero.common.core.extension.java.lang.reflect.ParameterizedTypeImpl;
 import org.zero.common.core.support.converter.ConverterComposite;
-import org.zero.common.core.util.java.reflect.ClassUtil;
+import org.zero.common.core.util.java.lang.ClassUtil;
 import org.zero.common.core.util.java.reflect.FieldUtil;
 import org.zero.common.core.util.java.util.MapUtil;
 import org.zero.common.data.constant.ConstantPool;

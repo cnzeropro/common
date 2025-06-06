@@ -1,7 +1,7 @@
 package org.zero.common.core.util.alibaba.ttl;
 
 import com.alibaba.ttl.TransmittableThreadLocal;
-import org.zero.common.core.util.java.reflect.ClassUtil;
+import org.zero.common.core.util.java.lang.ClassUtil;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;

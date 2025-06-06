@@ -1,7 +1,7 @@
 package org.zero.common.core.support.converter;
 
 import org.zero.common.core.extension.java.lang.reflect.TypeReference;
-import org.zero.common.core.util.java.reflect.ClassUtil;
+import org.zero.common.core.util.java.lang.ClassUtil;
 import org.zero.common.core.util.java.reflect.ConstructorUtil;
 import org.zero.common.core.util.java.reflect.FieldUtil;
 import org.zero.common.core.util.java.reflect.MethodUtil;
@@ -57,7 +57,6 @@ public class ConverterComposite {
                             .filter(field -> ClassUtil.isAssignable(field.getType(), clazz))
                             .findFirst()
                             .map(field -> FieldUtil.getStaticFieldValue(field, GenericConverter.class));
-
                     if (converterOpt.isPresent()) {
                         return converterOpt.get();
                     }

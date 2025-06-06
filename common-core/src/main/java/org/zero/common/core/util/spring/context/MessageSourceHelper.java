@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.ResourceBundleMessageSource;
-import org.zero.common.core.util.java.reflect.ClassLoaderUtil;
+import org.zero.common.core.util.java.lang.ClassLoaderUtil;
 
 import java.nio.charset.StandardCharsets;
 

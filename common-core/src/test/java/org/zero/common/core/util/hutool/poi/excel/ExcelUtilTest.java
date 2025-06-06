@@ -2,7 +2,6 @@ package org.zero.common.core.util.hutool.poi.excel;
 
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.lang.tree.Tree;
-import cn.hutool.core.lang.tree.TreeNode;
 import cn.hutool.core.map.MapBuilder;
 import cn.hutool.core.stream.CollectorUtil;
 import cn.hutool.core.util.IdUtil;
@@ -10,6 +9,7 @@ import cn.hutool.poi.excel.ExcelWriter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.zero.common.core.util.hutool.core.lang.tree.TreeNode;
 import org.zero.common.core.util.hutool.core.lang.tree.TreeUtil;
 import org.zero.common.data.exception.UtilException;
 
@@ -52,7 +52,7 @@ class ExcelUtilTest {
         // });
 
         // 构建树
-        List<Tree<CharSequence>> headers = cn.hutool.core.lang.tree.TreeUtil.build(treeNodes, TreeUtil.DEFAULT_ROOT_ID);
+        List<Tree<CharSequence>> headers = TreeUtil.build(treeNodes, TreeUtil.DEFAULT_ROOT_ID);
         System.out.println("headers: ");
         headers.forEach(System.out::println);
 

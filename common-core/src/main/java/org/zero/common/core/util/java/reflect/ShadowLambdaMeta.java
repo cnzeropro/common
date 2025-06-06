@@ -2,6 +2,7 @@ package org.zero.common.core.util.java.reflect;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
+import org.zero.common.core.util.java.lang.ClassLoaderUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

@@ -8,18 +8,25 @@ public class StackUtil {
     /**
      * 获取当前调用栈
      */
-    public static StackTraceElement[] getCurrentStackTrace(){
+    public static StackTraceElement[] getCurrentStackTrace() {
         return Thread.currentThread().getStackTrace();
     }
 
     /**
      * 获取执行该方法的上层调用栈
+     * <pre>
+     * Stack 0 -> {@link java.lang.Thread#getStackTrace()}
+     * Stack 1 -> {@link #getCurrentStackTrace()}
+     * Stack 2 -> {@link #getInvokeStackTrace()}
+     * // xxx 表示具体的调用方法
+     * Stack 3 -> xxx
+     * </pre>
      */
-    public static StackTraceElement getInvokeStackTrace(){
+    public static StackTraceElement getInvokeStackTrace() {
         return getCurrentStackTrace()[3];
     }
 
-    protected StackUtil(){
+    protected StackUtil() {
         throw new UnsupportedOperationException();
     }
 }

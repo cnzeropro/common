@@ -45,7 +45,6 @@ public abstract class BaseTimer<T extends BaseTimer<T>> implements AutoCloseable
     }
 
     protected BaseTimer() {
-
         this.name = createName();
         this.startTime = System.nanoTime();
     }
@@ -53,30 +52,38 @@ public abstract class BaseTimer<T extends BaseTimer<T>> implements AutoCloseable
     /**
      * 创建名称
      * <pre>
-     * Stack 1 -> getStackTrace
-     * Stack 2 -> getCurrentStackTrace
-     * Stack 3 -> createName
-     * Stack 4 -> BaseTimer.<init>
-     * // xxx 表示 BaseTimer 的子类
-     * Stack 5 -> xxx.<init>
-     * // xxx 表示具体方法
-     * Stack 6 -> xxx
+     * Stack 0 -> {@link java.lang.Thread#getStackTrace()}
+     * Stack 1 -> {@link StackUtil#getCurrentStackTrace()}
+     * Stack 2 -> {@link #createName()}
+     * // BaseTimer 的类构造器
+     * Stack n -> &lt;init&gt;
+     * // BaseTimer 的子类构造器
+     * Stack n+1 -> &lt;init&gt;
+     * // BaseTimer 的孙类构造器
+     * Stack n+2 -> &lt;init&gt;
+     * ......
+     * // xxx 表示具体派生类的静态工厂方法，如：start
+     * Stack 3 -> xxx
+     * // xxx 表示上层调用的具体方法
+     * Stack 4 -> xxx
      * </pre>
      *
      * @return 名称
      */
     protected String createName() {
         int i = 0;
+        String methodName = null;
         for (StackTraceElement stackTraceElement : StackUtil.getCurrentStackTrace()) {
-            String methodName = stackTraceElement.getMethodName();
-            if (!methodName.contains("<init>")) {
+            String stackMethodName = stackTraceElement.getMethodName();
+            if (i > 3) {
+                methodName = stackMethodName;
+                break;
+            }
+            if (!"<init>".equals(stackMethodName)) {
                 i++;
             }
-            if (i > 4) {
-                return methodName;
-            }
         }
-        return null;
+        return String.format("Method[%s]", methodName);
     }
 
     protected BaseTimer(String name) {

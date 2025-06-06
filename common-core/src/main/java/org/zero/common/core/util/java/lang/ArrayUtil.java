@@ -2,12 +2,15 @@ package org.zero.common.core.util.java.lang;
 
 import org.zero.common.core.extension.java.util.function.ToBoolFunction;
 import org.zero.common.core.extension.java.util.function.ToByteFunction;
-import org.zero.common.core.util.java.reflect.ClassUtil;
 import org.zero.common.core.util.java.util.CollectionUtil;
+import org.zero.common.core.util.java.util.ListUtil;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -38,59 +41,79 @@ public class ArrayUtil {
      */
     public static final Object[] EMPTY = {};
 
-    public static boolean isArray(Object source) {
-        return ObjectUtil.nonNull(source) && ClassUtil.isArray(source.getClass());
+    public static boolean isArray(Object object) {
+        return ObjectUtil.nonNull(object) && ClassUtil.isArray(object.getClass());
     }
 
-    public static int length(Object array) {
-        if (Objects.isNull(array)) {
+    public static int length(Object object) {
+        if (ObjectUtil.isNull(object)) {
             return 0;
         }
-        return Array.getLength(array);
+        if (isArray(object)) {
+            return Array.getLength(object);
+        }
+        return 0;
+    }
+
+    public static Class<?> getComponentType(Object object) {
+        return ObjectUtil.nonNull(object) ? object.getClass().getComponentType() : null;
     }
 
     public static boolean isEmpty(Object[] array) {
-        return array == null || array.length == 0;
+        return ObjectUtil.isNull(array) || array.length == 0;
     }
 
     public static boolean nonEmpty(Object[] array) {
         return !isEmpty(array);
     }
 
-    /**
-     * 将指定对象转换为对象数组
-     *
-     * @param source 源对象
-     * @return 数组
-     */
-    public static Object[] toArray(Object source) {
-        if (Objects.isNull(source)) {
-            return EMPTY;
+    @SuppressWarnings("unchecked")
+    public static <T> T[] create(Class<?> componentType, int length) {
+        return (T[]) Array.newInstance(componentType, length);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T[] of(Object object, Class<T> componentType) {
+        if (Objects.isNull(object)) {
+            return create(componentType, 0);
         }
-        Class<?> clazz = source.getClass();
-        if (clazz.isArray()) {
-            Class<?> componentType = clazz.getComponentType();
+        if (isArray(object)) {
+            Class<?> rawComponentType = getComponentType(object);
             // 处理原始类型数组（如int[]）
-            // 因为原始类型数组继承自 Object，因此无法使用 (Object[]) source 强转
-            // 使用 source instanceof int[]、 source instanceof double[] 等等一个一个判断又过于麻烦，因此原始类型数组统一处理
-            if (componentType.isPrimitive()) {
-                int length = Array.getLength(source);
-                // 获取原始类型的包装类型
-                Class<?> wrappedType = PrimitiveType.wrap(componentType);
-                // 创建包装类型数组（如果不使用包装类创建数组，此处无法使用 Object[] 强转）
-                Object[] array = (Object[]) Array.newInstance(wrappedType, length);
+            // 因为原始类型数组继承自 Object，因此无法使用 (Object[]) object 强转
+            // 使用 object instanceof int[]、 object instanceof double[] 等等一个一个判断又过于麻烦，因此原始类型数组统一处理
+            if (rawComponentType.isPrimitive()) {
+                int length = Array.getLength(object);
+                Class<?> wrappedComponentType = PrimitiveType.wrap(componentType);
+                T[] array = create(wrappedComponentType, length);
                 for (int i = 0; i < length; i++) {
-                    array[i] = Array.get(source, i);
+                    array[i] = (T) Array.get(object, i);
                 }
                 return array;
             }
             // 处理对象数组（如String[]）
-            return (Object[]) source;
+            return (T[]) object;
         }
-        return new Object[]{source};
+        if (object instanceof Collection) {
+            return of((Collection<T>) object, componentType);
+        }
+        if (object instanceof Iterator) {
+            return of((Iterator<T>) object, componentType);
+        }
+        if (object instanceof Iterable) {
+            return of((Iterable<T>) object, componentType);
+        }
+        if (object instanceof Enumeration) {
+            return of((Enumeration<T>) object, componentType);
+        }
+        return of(componentType, (T) object);
     }
 
-    public static <T> T[] toArray(Collection<T> collection, Class<T> componentType) {
+    public static Object[] of(Object object) {
+        return of(object, Object.class);
+    }
+
+    public static <T> T[] of(Collection<T> collection, Class<T> componentType) {
         T[] array = create(componentType, 0);
         if (CollectionUtil.isEmpty(collection)) {
             return array;
@@ -98,9 +121,38 @@ public class ArrayUtil {
         return collection.toArray(array);
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> T[] create(Class<?> componentType, int length) {
-        return (T[]) Array.newInstance(componentType, length);
+    public static Object[] of(Collection<?> collection) {
+        return CollectionUtil.isEmpty(collection) ? EMPTY : collection.toArray();
+    }
+
+    public static <T> T[] of(Iterable<T> iterable, Class<T> componentType) {
+        List<T> list = ListUtil.of(iterable);
+        return of(list, componentType);
+    }
+
+    public static Object[] of(Iterable<?> iterable) {
+        List<?> list = ListUtil.of(iterable);
+        return of(list);
+    }
+
+    public static <T> T[] of(Iterator<T> iterator, Class<T> componentType) {
+        List<T> list = ListUtil.of(iterator);
+        return of(list, componentType);
+    }
+
+    public static Object[] of(Iterator<?> iterator) {
+        List<?> list = ListUtil.of(iterator);
+        return of(list);
+    }
+
+    public static <T> T[] of(Enumeration<T> enumeration, Class<T> componentType) {
+        List<T> list = ListUtil.of(enumeration);
+        return of(list, componentType);
+    }
+
+    public static Object[] of(Enumeration<?> enumeration) {
+        List<?> list = ListUtil.of(enumeration);
+        return of(list);
     }
 
     public static <T> T[] of(Class<T> componentType, T t) {
@@ -353,44 +405,6 @@ public class ArrayUtil {
         return result;
     }
 
-    /**
-     * 获取子数组
-     *
-     * @param array 数组
-     * @param start 开始位置（包括）
-     * @param end   结束位置（不包括）
-     * @param <T>   数组元素类型
-     * @return 新的数组
-     * @see Arrays#copyOfRange(Object[], int, int)
-     */
-    public static <T> T[] sub(T[] array, int start, int end) {
-        if (isEmpty(array)) {
-            return array;
-        }
-        int length = length(array);
-        if (start < 0) {
-            start += length;
-        }
-        if (end < 0) {
-            end += length;
-        }
-        if (start == length) {
-            return create(array.getClass().getComponentType(), 0);
-        }
-        if (start > end) {
-            int tmp = start;
-            start = end;
-            end = tmp;
-        }
-        if (end > length) {
-            if (start >= length) {
-                return create(array.getClass().getComponentType(), 0);
-            }
-            end = length;
-        }
-        return Arrays.copyOfRange(array, start, end);
-    }
-
     public static <T> byte[] map(T[] array, ToByteFunction<T> function) {
         if (isEmpty(array)) {
             return new byte[0];
@@ -440,13 +454,13 @@ public class ArrayUtil {
      * @return 映射后的数组
      */
     @SuppressWarnings("unchecked")
-    public static <T, R> R[] map(T[] array, Function<T, R> function, Class<R> clazz) {
+    public static <T, R> R[] map(T[] array, Function<T, R> function, Class<R> componentType) {
         if (isEmpty(array)) {
-            return create(clazz, 0);
+            return create(componentType, 0);
         }
         return Arrays.stream(array)
                 .map(function)
-                .toArray(size -> (R[]) Array.newInstance(clazz, size));
+                .toArray(size -> (R[]) Array.newInstance(componentType, size));
     }
 
     public static <T> String join(T[] array, CharSequence delimiter) {
@@ -454,6 +468,44 @@ public class ArrayUtil {
                 .filter(Objects::nonNull)
                 .map(Objects::toString)
                 .collect(Collectors.joining(delimiter));
+    }
+
+    /**
+     * 获取子数组
+     *
+     * @param array 数组
+     * @param start 开始位置（包括）
+     * @param end   结束位置（不包括）
+     * @param <T>   数组元素类型
+     * @return 新的数组
+     * @see Arrays#copyOfRange(Object[], int, int)
+     */
+    public static <T> T[] sub(T[] array, int start, int end) {
+        if (isEmpty(array)) {
+            return array;
+        }
+        int length = length(array);
+        if (start < 0) {
+            start += length;
+        }
+        if (end < 0) {
+            end += length;
+        }
+        if (start == length) {
+            return create(array.getClass().getComponentType(), 0);
+        }
+        if (start > end) {
+            int tmp = start;
+            start = end;
+            end = tmp;
+        }
+        if (end > length) {
+            if (start >= length) {
+                return create(array.getClass().getComponentType(), 0);
+            }
+            end = length;
+        }
+        return Arrays.copyOfRange(array, start, end);
     }
 
     public static <T> T get(T[] array, int index) {

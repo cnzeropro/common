@@ -4,12 +4,9 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.IterUtil;
 import cn.hutool.core.lang.tree.Tree;
 import cn.hutool.core.lang.tree.TreeBuilder;
-import cn.hutool.core.lang.tree.TreeNode;
 import cn.hutool.core.lang.tree.TreeNodeConfig;
-import cn.hutool.core.lang.tree.parser.DefaultNodeParser;
 import cn.hutool.core.lang.tree.parser.NodeParser;
 import cn.hutool.core.text.CharSequenceUtil;
-import lombok.experimental.UtilityClass;
 import org.zero.common.core.extension.java.util.function.TriFunction;
 import org.zero.common.data.constant.StringPool;
 
@@ -27,7 +24,6 @@ import static org.zero.common.core.util.hutool.poi.excel.ExcelUtil.MERGED_CROSS_
 /**
  * 树型结构数据工具类
  **/
-@UtilityClass
 public class TreeUtil {
     /**
      * 获取指定树同级节点的最大深度
@@ -105,18 +101,26 @@ public class TreeUtil {
         return sumMergedCross;
     }
 
-    public static final NodeParser<TreeNode<CharSequence>, CharSequence> DEFAULT_NODE_PARSER = new DefaultNodeParser<>();
-
-    public static List<Tree<CharSequence>> build(List<TreeNode<CharSequence>> list, CharSequence rootId) {
-        return build(list, rootId, TreeNodeConfig.DEFAULT_CONFIG, DEFAULT_NODE_PARSER);
+    public static <T> Tree<T> buildSingle(List<TreeNode<T>> list, T rootId) {
+        return buildSingle(list, rootId, TreeNodeConfig.DEFAULT_CONFIG, new DefaultNodeParser<>());
     }
 
-    public static List<Tree<CharSequence>> build(List<TreeNode<CharSequence>> list, CharSequence rootId, TreeNodeConfig treeNodeConfig, NodeParser<TreeNode<CharSequence>, CharSequence> nodeParser) {
-        Map<TreeNode<CharSequence>, Integer> countMap = CollUtil.countMap(list);
+    public static <T> Tree<T> buildSingle(List<TreeNode<T>> list, T rootId, TreeNodeConfig treeNodeConfig, NodeParser<TreeNode<T>, T> nodeParser) {
+        return TreeBuilder.of(rootId, treeNodeConfig)
+                .append(list, nodeParser)
+                .build();
+    }
+
+    public static <T> List<Tree<T>> build(List<TreeNode<T>> list, T rootId) {
+        return build(list, rootId, TreeNodeConfig.DEFAULT_CONFIG, new DefaultNodeParser<>());
+    }
+
+    public static <T> List<Tree<T>> build(List<TreeNode<T>> list, T rootId, TreeNodeConfig treeNodeConfig, NodeParser<TreeNode<T>, T> nodeParser) {
+        Map<TreeNode<T>, Integer> countMap = CollUtil.countMap(list);
         if (CollUtil.anyMatch(countMap.values(), count -> count > 1)) {
             return CollUtil.map(list,
                     treeNode -> {
-                        Tree<CharSequence> tree = new Tree<>(treeNodeConfig);
+                        Tree<T> tree = new Tree<>(treeNodeConfig);
                         nodeParser.parse(treeNode, tree);
                         return tree;
                     },
@@ -180,7 +184,7 @@ public class TreeUtil {
         return build(treeNodes, rootId);
     }
 
-    public static final TriFunction<CharSequence, CharSequence, String, TreeNode<CharSequence>> DEFAULT_NODE_MAPPER = (id, parentId, name) -> new TreeNode<>(id, parentId, name, null);
+    public static final TriFunction<CharSequence, CharSequence, String, TreeNode<CharSequence>> DEFAULT_NODE_MAPPER = TreeNode::of;
 
     /**
      * 将数据列表转换为树节点列表
@@ -269,5 +273,9 @@ public class TreeUtil {
                         })
                         .distinct())
                 .collect(Collectors.toList());
+    }
+
+    protected TreeUtil() {
+        throw new UnsupportedOperationException();
     }
 }
