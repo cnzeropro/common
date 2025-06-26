@@ -9,7 +9,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.zero.common.core.support.xss.config.XssProperties;
 import org.zero.common.core.support.xss.processor.XssMode;
 import org.zero.common.core.support.xss.processor.XssProcessor;
-import org.zero.common.core.util.java.reflect.MemberUtil;
+import org.zero.common.core.util.java.lang.reflect.MemberUtil;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;

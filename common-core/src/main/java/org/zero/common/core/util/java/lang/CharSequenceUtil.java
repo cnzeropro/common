@@ -51,6 +51,10 @@ public class CharSequenceUtil {
         return !isBlank(charSequence);
     }
 
+    public static CharSequence sub(CharSequence charSequence, int fromIndexInclude) {
+        return sub(charSequence, fromIndexInclude, charSequence.length());
+    }
+
     public static CharSequence sub(CharSequence charSequence, int fromIndexInclude, int toIndexExclude) {
         if (isEmpty(charSequence)) {
             return charSequence;
@@ -85,6 +89,26 @@ public class CharSequenceUtil {
             return StringPool.EMPTY;
         }
         return charSequence.subSequence(fromIndexInclude, toIndexExclude);
+    }
+
+    public static boolean contentEquals(CharSequence charSequence, CharSequence otherCharSequence) {
+        if (nonNull(charSequence) && nonNull(otherCharSequence)) {
+            if (charSequence instanceof String) {
+                return ((String) charSequence).contentEquals(otherCharSequence);
+            }
+            if (otherCharSequence instanceof String) {
+                return ((String) otherCharSequence).contentEquals(charSequence);
+            }
+            return charSequence.toString().contentEquals(otherCharSequence);
+        }
+        return isNull(charSequence) && isNull(otherCharSequence);
+    }
+
+    public static boolean contentEqualsIgnoreCase(CharSequence charSequence, CharSequence otherCharSequence) {
+        if (nonNull(charSequence) && nonNull(otherCharSequence)) {
+            return charSequence.toString().equalsIgnoreCase(otherCharSequence.toString());
+        }
+        return isNull(charSequence) && isNull(otherCharSequence);
     }
 
     public static <T extends CharSequence> T defaultIfNull(final T charSequence, final T defaultCharSequence) {

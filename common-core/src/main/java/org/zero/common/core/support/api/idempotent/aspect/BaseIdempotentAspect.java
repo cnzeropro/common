@@ -6,7 +6,7 @@ import org.aspectj.lang.annotation.Before;
 import org.zero.common.core.support.api.idempotent.annotation.Idempotent;
 import org.zero.common.core.support.api.idempotent.exception.IdempotentException;
 import org.zero.common.core.support.api.idempotent.provider.DefaultMessageProvider;
-import org.zero.common.core.util.java.reflect.MemberUtil;
+import org.zero.common.core.util.java.lang.reflect.MemberUtil;
 
 /**
  * 幂等切面

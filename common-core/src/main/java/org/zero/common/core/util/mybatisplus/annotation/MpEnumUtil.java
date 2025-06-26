@@ -6,8 +6,8 @@ import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.zero.common.core.support.cache.Cache;
 import org.zero.common.core.support.cache.GuavaCache;
-import org.zero.common.core.util.java.reflect.FieldUtil;
-import org.zero.common.core.util.java.reflect.MethodUtil;
+import org.zero.common.core.util.java.lang.reflect.FieldUtil;
+import org.zero.common.core.util.java.lang.reflect.MethodUtil;
 import org.zero.common.data.exception.UtilException;
 
 import java.lang.reflect.Field;
@@ -48,14 +48,17 @@ public class MpEnumUtil {
         return METHOD_CACHE.mapAndPutIfAbsent(enumClass, clazz -> {
             // 此处可使用自定义父类和注解，但因为 Mp 已经提供，所以无需重复造轮子
             if (IEnum.class.isAssignableFrom(clazz)) {
-                return MethodUtil.getMethodOptByNameAndParam(clazz, "getPropertyValue")
-                        .orElseThrow(() -> new UtilException(String.format("No getPropertyValue() targetMethod found in %s", clazz)));
+                return MethodUtil.getOptByNameAndParam(clazz, true, "getValue")
+                        .orElseThrow(() -> new UtilException(String.format("No getValue() method found in %s", clazz)));
             } else {
-                Field field = FieldUtil.getAnnotatedFields(clazz, EnumValue.class)
+                Field field = FieldUtil.listAnnotated(clazz, EnumValue.class)
                         .stream()
                         .findFirst()
                         .orElseThrow(() -> new UtilException(String.format("No field with @EnumValue annotation found in %s", clazz)));
-                return MethodUtil.getGetterMethodOptByField(clazz, field)
+                return MethodUtil.GetterOrSetterQuerier.create(MethodUtil.GetterOrSetterQuerier.Mode.GETTER)
+                        .targetClass(clazz)
+                        .field(field)
+                        .queryOpt()
                         .orElseThrow(() -> new UtilException(String.format("No needed targetMethod found in %s", clazz)));
             }
         });

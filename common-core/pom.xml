@@ -12,10 +12,13 @@
     <artifactId>common-core</artifactId>
     <version>1.0.0</version>
 
-    <packaging>jar</packaging>
-
     <name>common-core</name>
     <description>Common Core</description>
+
+    <modules>
+        <module>java8-adapter</module>
+        <module>java9-adapter</module>
+    </modules>
 
     <dependencies>
         <dependency>
@@ -345,11 +348,16 @@
         <dependency>
             <groupId>com.esotericsoftware</groupId>
             <artifactId>kryo</artifactId>
-            <optional>true</optional>
+            <optional>true</optional>s
         </dependency>
         <dependency>
             <groupId>org.lionsoul</groupId>
             <artifactId>ip2region</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jol</groupId>
+            <artifactId>jol-core</artifactId>
             <optional>true</optional>
         </dependency>
 
@@ -367,6 +375,10 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>

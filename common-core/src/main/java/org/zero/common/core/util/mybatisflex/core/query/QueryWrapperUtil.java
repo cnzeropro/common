@@ -9,8 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.zero.common.core.support.cache.Cache;
 import org.zero.common.core.support.cache.GuavaCache;
-import org.zero.common.core.util.java.reflect.FieldUtil;
-import org.zero.common.core.util.java.reflect.MethodUtil;
+import org.zero.common.core.util.java.lang.reflect.FieldUtil;
+import org.zero.common.core.util.java.lang.reflect.MethodUtil;
 import org.zero.common.data.exception.UtilException;
 
 import java.lang.reflect.Method;
@@ -473,10 +473,10 @@ public class QueryWrapperUtil {
         }
         Class<?> entityClass = entity.getClass();
         Map<String, Collection<Method>> methodMap = METHOD_CACHE.mapAndPutIfAbsent(entityClass,
-                c -> MethodUtil.getPublicMethods(c)
+                c -> MethodUtil.listPublic(c)
                         .stream()
                         .filter(method -> MethodUtil.isGetter(method, false))
-                        .collect(Collectors.groupingBy(FieldUtil::getFieldNameFromGetterMethod,
+                        .collect(Collectors.groupingBy(FieldUtil::getNameFromGetterMethod,
                                 ConcurrentHashMap::new,
                                 Collectors.toCollection(ArrayList::new))));
         Map<String, Object> fieldValueMap = new HashMap<>();

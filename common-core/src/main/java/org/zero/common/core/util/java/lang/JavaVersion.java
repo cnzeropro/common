@@ -1,8 +1,8 @@
 package org.zero.common.core.util.java.lang;
 
 import lombok.Getter;
-import org.zero.common.core.util.java.reflect.FieldUtil;
-import org.zero.common.core.util.java.reflect.MethodUtil;
+import org.zero.common.core.util.java.lang.reflect.FieldUtil;
+import org.zero.common.core.util.java.lang.reflect.MethodUtil;
 
 import java.util.Arrays;
 import java.util.Comparator;

@@ -4,10 +4,10 @@ import lombok.experimental.UtilityClass;
 import org.zero.common.core.extension.java.lang.reflect.TypeReference;
 import org.zero.common.core.extension.java.net.Schemes;
 import org.zero.common.core.extension.java.util.function.ThrowThrowableFunction;
+import org.zero.common.core.util.java.lang.reflect.ConstructorUtil;
+import org.zero.common.core.util.java.lang.reflect.FieldUtil;
+import org.zero.common.core.util.java.lang.reflect.MethodUtil;
 import org.zero.common.core.util.java.net.UrlUtil;
-import org.zero.common.core.util.java.reflect.ConstructorUtil;
-import org.zero.common.core.util.java.reflect.FieldUtil;
-import org.zero.common.core.util.java.reflect.MethodUtil;
 
 import java.io.File;
 import java.io.Serializable;
@@ -311,13 +311,13 @@ public class ClassUtil {
             return false;
         }
         // 构造函数验证（必须存在公共无参构造函数）
-        if (!ConstructorUtil.getConstructorOptByParam(clazz)
+        if (!ConstructorUtil.getOptByParam(clazz)
                 .filter(constructor -> Modifier.isPublic(constructor.getModifiers()))
                 .isPresent()) {
             return false;
         }
         // 字段验证
-        Collection<Field> fields = FieldUtil.getFilteredFields(clazz, field -> {
+        Collection<Field> fields = FieldUtil.listFiltered(clazz, field -> {
             int mod = field.getModifiers();
             // 不是父类引用字段
             return !FieldUtil.isOuterClassField(field) &&
@@ -332,15 +332,16 @@ public class ClassUtil {
             return false;
         }
         // 方法验证（必须存在 Public 的 getter 和 setter 方法）
-        Map<String, Method> methodMap = MethodUtil.getPublicMethods(clazz)
+        Map<String, Method> methodMap = MethodUtil.listPublic(clazz)
                 .stream()
                 .collect(Collectors.toMap(Method::getName, Function.identity()));
-        return fields.stream()
-                .map(MethodUtil::getSetterMethodNameByField)
-                .allMatch(name -> Objects.nonNull(methodMap.get(name))) &&
-                fields.stream()
-                        .map(MethodUtil::getSetterMethodNameByField)
-                        .allMatch(name -> Objects.nonNull(methodMap.get(name)));
+        boolean hasGetter = fields.stream()
+                .map(MethodUtil::getGetterNameByField)
+                .allMatch(name -> Objects.nonNull(methodMap.get(name)));
+        boolean hasSetter = fields.stream()
+                .map(MethodUtil::getSetterNameByField)
+                .allMatch(name -> Objects.nonNull(methodMap.get(name)));
+        return hasGetter && hasSetter;
     }
 
 

@@ -20,8 +20,8 @@ import org.zero.common.core.support.codec.strategy.StrategyContext;
 import org.zero.common.core.support.codec.supplier.KeyContext;
 import org.zero.common.core.support.codec.supplier.KeySupplier;
 import org.zero.common.core.support.codec.supplier.NonKeySupplier;
-import org.zero.common.core.util.java.reflect.ExecutableUtil;
-import org.zero.common.core.util.java.reflect.MemberUtil;
+import org.zero.common.core.util.java.lang.reflect.ExecutableUtil;
+import org.zero.common.core.util.java.lang.reflect.MemberUtil;
 import org.zero.common.data.exception.CommonException;
 
 import java.lang.reflect.Executable;

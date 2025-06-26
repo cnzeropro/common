@@ -4,7 +4,7 @@ import cn.hutool.core.map.CaseInsensitiveMap;
 import cn.hutool.core.util.ReflectUtil;
 import org.zero.common.core.support.cache.Cache;
 import org.zero.common.core.support.cache.MapCache;
-import org.zero.common.core.util.java.reflect.MethodUtil;
+import org.zero.common.core.util.java.lang.reflect.MethodUtil;
 import org.zero.common.data.exception.CommonException;
 
 import java.util.Objects;
@@ -35,7 +35,7 @@ public class CodecStrategyFactory {
         try {
             return ReflectUtil.newInstance(clazz, context);
         } catch (Exception ignored) {
-            return MethodUtil.getPublicMethods(clazz)
+            return MethodUtil.listPublic(clazz)
                     .stream()
                     .filter(MethodUtil::isBuilderMethod)
                     .findFirst()

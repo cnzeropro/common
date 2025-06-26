@@ -8,7 +8,7 @@ import org.springframework.util.StringUtils;
 import org.zero.common.core.support.api.throttle.annotation.Throttle;
 import org.zero.common.core.support.api.throttle.exception.ThrottleException;
 import org.zero.common.core.support.api.throttle.provider.DefaultMessageProvider;
-import org.zero.common.core.util.java.reflect.MemberUtil;
+import org.zero.common.core.util.java.lang.reflect.MemberUtil;
 
 /**
  * 限流切面

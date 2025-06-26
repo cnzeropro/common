@@ -8,7 +8,7 @@ import org.springframework.util.StringUtils;
 import org.zero.common.core.support.api.debounce.annotation.Debounce;
 import org.zero.common.core.support.api.debounce.exception.DebounceException;
 import org.zero.common.core.support.api.debounce.provider.DefaultMessageProvider;
-import org.zero.common.core.util.java.reflect.MemberUtil;
+import org.zero.common.core.util.java.lang.reflect.MemberUtil;
 
 import java.time.LocalDateTime;
 

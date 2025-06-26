@@ -7,7 +7,7 @@ import org.zero.common.core.extension.spring.web.servlet.interceptor.AbstractHan
 import org.zero.common.core.support.api.debounce.annotation.Debounce;
 import org.zero.common.core.support.api.debounce.provider.DefaultMessageProvider;
 import org.zero.common.core.util.jackson.databind.JacksonUtils;
-import org.zero.common.core.util.java.reflect.MemberUtil;
+import org.zero.common.core.util.java.lang.reflect.MemberUtil;
 import org.zero.common.core.util.javax.servlet.ResponseUtil;
 import org.zero.common.data.model.view.Result;
 

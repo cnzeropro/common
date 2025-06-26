@@ -81,35 +81,35 @@ public interface StringPool {
     /**
      * 花括号（左）：{@code "{"}
      */
-    String CURLY_START = "{";
+    String CURLY_LEFT = "{";
     /**
      * 花括号（右）：<code>"}"</code>
      */
-    String CURLY_END = "}";
+    String CURLY_RIGHT = "}";
     /**
      * 方括号（左）：{@code "["}
      */
-    String SQUARE_START = "[";
+    String SQUARE_LEFT = "[";
     /**
      * 方括号（右）：{@code "]"}
      */
-    String SQUARE_END = "]";
+    String SQUARE_RIGHT = "]";
     /**
      * 圆括号（左）：{@code "("}
      */
-    String ROUND_START = "(";
+    String ROUND_LEFT = "(";
     /**
      * 圆括号（右）：{@code ")"}
      */
-    String ROUND_END = ")";
+    String ROUND_RIGHT = ")";
     /**
      * 尖括号（左）：{@code "<"}
      */
-    String ANGLE_START = "<";
+    String ANGLE_LEFT = "<";
     /**
      * 尖括号（右）：{@code ">"}
      */
-    String ANGLE_END = ">";
+    String ANGLE_RIGHT = ">";
 
     /* ********************************************************** 货币符号 ********************************************************** */
     /**
@@ -169,11 +169,11 @@ public interface StringPool {
     /**
      * 小于号：{@code "<"}
      */
-    String LESS_THAN = ANGLE_START;
+    String LESS_THAN = ANGLE_LEFT;
     /**
      * 大于号：{@code ">"}
      */
-    String GREATER_THAN = ANGLE_END;
+    String GREATER_THAN = ANGLE_RIGHT;
     /**
      * 百分号：{@code "%"}
      */
@@ -182,6 +182,22 @@ public interface StringPool {
      * 千分号：{@code "‰"}
      */
     String PER_MILLE = "‰";
+    /**
+     * 万分号：{@code "‱"}
+     */
+    String PER_MYRIAD = "‱";
+    /**
+     * 平方根：{@code "√"}
+     */
+    String SQUARE_ROOT = "√";
+    /**
+     * 角度：{@code "°"}
+     */
+    String ANGLE = "°";
+    /**
+     * 圆周率：{@code "π"}
+     */
+    String PI = "π";
     /**
      * 无穷号：{@code "∞"}
      */

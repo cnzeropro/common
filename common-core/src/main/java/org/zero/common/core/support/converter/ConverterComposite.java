@@ -2,9 +2,9 @@ package org.zero.common.core.support.converter;
 
 import org.zero.common.core.extension.java.lang.reflect.TypeReference;
 import org.zero.common.core.util.java.lang.ClassUtil;
-import org.zero.common.core.util.java.reflect.ConstructorUtil;
-import org.zero.common.core.util.java.reflect.FieldUtil;
-import org.zero.common.core.util.java.reflect.MethodUtil;
+import org.zero.common.core.util.java.lang.reflect.ConstructorUtil;
+import org.zero.common.core.util.java.lang.reflect.FieldUtil;
+import org.zero.common.core.util.java.lang.reflect.MethodUtil;
 import org.zero.common.data.model.util.Ordered;
 
 import java.lang.reflect.Constructor;
@@ -52,15 +52,15 @@ public class ConverterComposite {
                 .filter(clazz -> !clazz.isInterface())
                 .filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()))
                 .map(clazz -> {
-                    Optional<GenericConverter<?>> converterOpt = FieldUtil.getStaticFields(clazz)
+                    Optional<GenericConverter<?>> converterOpt = FieldUtil.listStatic(clazz)
                             .stream()
                             .filter(field -> ClassUtil.isAssignable(field.getType(), clazz))
                             .findFirst()
-                            .map(field -> FieldUtil.getStaticFieldValue(field, GenericConverter.class));
+                            .map(field -> FieldUtil.getStaticValue(field, GenericConverter.class));
                     if (converterOpt.isPresent()) {
                         return converterOpt.get();
                     }
-                    Optional<Constructor<?>> constructorOpt = ConstructorUtil.getConstructorOptByParam(clazz, ConverterComposite.class);
+                    Optional<Constructor<?>> constructorOpt = ConstructorUtil.getOptByParam(clazz, ConverterComposite.class);
                     if (constructorOpt.isPresent()) {
                         return ConstructorUtil.newInstance(constructorOpt.get(), this);
                     }
@@ -79,7 +79,7 @@ public class ConverterComposite {
     }
 
     public ConverterComposite addConverter(GenericConverter<?> converter) {
-        MethodUtil.getMethodsByName(converter.getClass(), false, "convert")
+        MethodUtil.listByName(converter.getClass(), false, "convert")
                 .stream()
                 // 当子类继承带有泛型的父类或接口时，编译器会生成桥接方法来保持类型安全
                 // 因此此处 convert 方法可能存在多个

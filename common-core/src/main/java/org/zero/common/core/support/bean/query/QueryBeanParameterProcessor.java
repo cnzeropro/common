@@ -39,7 +39,7 @@ public class QueryBeanParameterProcessor implements AnnotatedParameterProcessor 
         // data.alwaysEncodeBody(true);
         // 因为 feign.MethodMetadata.alwaysEncodeBody(boolean) 方法目前是包私有（package-private）的，所以只能通过反射调用
         Method alwaysEncodeBodyMethod = ReflectionUtils.findMethod(data.getClass(), "alwaysEncodeBody", boolean.class);
-        Assert.notNull(alwaysEncodeBodyMethod, "MethodMetadata.alwaysEncodeBody targetMethod not found");
+        Assert.notNull(alwaysEncodeBodyMethod, "Method[feign.MethodMetadata#alwaysEncodeBody(boolean)] not found");
         ReflectionUtils.makeAccessible(alwaysEncodeBodyMethod);
         ReflectionUtils.invokeMethod(alwaysEncodeBodyMethod, data, true);
         // 必须返回 true，详情参见 feign.Contract.BaseContract#parseAndValidateMetadata(java.lang.Class<?>, java.lang.reflect.Method) 方法

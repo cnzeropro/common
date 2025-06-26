@@ -5,7 +5,7 @@ import lombok.SneakyThrows;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.zero.common.core.util.java.reflect.FieldUtil;
+import org.zero.common.core.util.java.lang.reflect.FieldUtil;
 
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
@@ -122,7 +122,7 @@ public class CsvResponseBodyAdvice extends BaseCsvResponseBodyAdvice {
             String value = headerMap.keySet()
                     .stream()
                     .map(field -> {
-                        Object fieldValue = FieldUtil.getFieldValue(field, obj);
+                        Object fieldValue = FieldUtil.getValue(field, obj);
                         return convert(fieldValue, field);
                     })
                     .collect(Collectors.joining(delimiter));

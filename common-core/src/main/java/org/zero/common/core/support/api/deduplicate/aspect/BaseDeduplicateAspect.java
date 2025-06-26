@@ -7,7 +7,7 @@ import org.springframework.util.StringUtils;
 import org.zero.common.core.support.api.deduplicate.annotation.Deduplicate;
 import org.zero.common.core.support.api.deduplicate.exception.DeduplicateException;
 import org.zero.common.core.support.api.deduplicate.provider.DefaultMessageProvider;
-import org.zero.common.core.util.java.reflect.MemberUtil;
+import org.zero.common.core.util.java.lang.reflect.MemberUtil;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;

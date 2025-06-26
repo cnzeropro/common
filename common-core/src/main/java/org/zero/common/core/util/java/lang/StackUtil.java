@@ -1,5 +1,9 @@
 package org.zero.common.core.util.java.lang;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.Objects;
+
 /**
  * @author Zero (cnzeropro@163.com)
  * @since 2025/1/10
@@ -9,7 +13,12 @@ public class StackUtil {
      * 获取当前调用栈
      */
     public static StackTraceElement[] getCurrentStackTrace() {
-        return Thread.currentThread().getStackTrace();
+        Thread currentThread = Thread.currentThread();
+        if (Objects.isNull(System.getSecurityManager())) {
+            return currentThread.getStackTrace();
+        }
+        return AccessController.doPrivileged(
+                (PrivilegedAction<StackTraceElement[]>) currentThread::getStackTrace);
     }
 
     /**

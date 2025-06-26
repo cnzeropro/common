@@ -77,35 +77,35 @@ public interface CharPool {
     /**
      * 花括号（左）：{@code '{'}
      */
-    char CURLY_START = '{';
+    char CURLY_LEFT = '{';
     /**
      * 花括号（右）：<code>'}'</code>
      */
-    char CURLY_END = '}';
+    char CURLY_RIGHT = '}';
     /**
      * 方括号（左）：{@code '['}
      */
-    char SQUARE_START = '[';
+    char SQUARE_LEFT = '[';
     /**
      * 方括号（右）：{@code ']'}
      */
-    char SQUARE_END = ']';
+    char SQUARE_RIGHT = ']';
     /**
      * 圆括号（左）：{@code '('}
      */
-    char ROUND_START = '(';
+    char ROUND_LEFT = '(';
     /**
      * 圆括号（右）：{@code ')'}
      */
-    char ROUND_END = ')';
+    char ROUND_RIGHT = ')';
     /**
      * 尖括号（左）：{@code '<'}
      */
-    char ANGLE_START = '<';
+    char ANGLE_LEFT = '<';
     /**
      * 尖括号（右）：{@code '>'}
      */
-    char ANGLE_END = '>';
+    char ANGLE_RIGHT = '>';
 
     /* ********************************************************** 货币符号 ********************************************************** */
     /**
@@ -161,11 +161,11 @@ public interface CharPool {
     /**
      * 小于号：{@code '<'}
      */
-    char LESS_THAN = ANGLE_START;
+    char LESS_THAN = ANGLE_LEFT;
     /**
      * 大于号：{@code '>'}
      */
-    char GREATER_THAN = ANGLE_END;
+    char GREATER_THAN = ANGLE_RIGHT;
     /**
      * 百分号：{@code '%'}
      */

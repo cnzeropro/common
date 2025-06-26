@@ -2,8 +2,8 @@ package org.zero.common.core.extension.java.lang;
 
 import org.zero.common.core.extension.java.util.function.ThrowThrowableSupplier;
 import org.zero.common.core.util.java.lang.ThrowableUtil;
-import org.zero.common.core.util.java.reflect.FieldUtil;
-import org.zero.common.core.util.java.reflect.MethodUtil;
+import org.zero.common.core.util.java.lang.reflect.FieldUtil;
+import org.zero.common.core.util.java.lang.reflect.MethodUtil;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -66,14 +66,14 @@ public abstract class BaseBuilder<B extends BaseBuilder<B, A>, A> {
         if (Objects.isNull(enclosingClass)) {
             throw new RuntimeException(String.format("%s must have enclosing class", clazz));
         }
-        Collection<Field> fields = FieldUtil.getFields(clazz, false);
+        Collection<Field> fields = FieldUtil.list(clazz, false);
         return ThrowableUtil.tryReturnNew((ThrowThrowableSupplier<A>) () -> {
                     Class<?>[] parameterTypes = fields.stream()
                             .map(Field::getType)
                             .toArray(Class[]::new);
                     Constructor<?> constructor = enclosingClass.getConstructor(parameterTypes);
                     Object[] initArgs = fields.stream()
-                            .map(field -> FieldUtil.getFieldValue(field, this))
+                            .map(field -> FieldUtil.getValue(field, this))
                             .toArray(Object[]::new);
                     // 使用全参构造器
                     return (A) constructor.newInstance(initArgs);
@@ -83,8 +83,11 @@ public abstract class BaseBuilder<B extends BaseBuilder<B, A>, A> {
                             A obj = (A) constructor.newInstance();
                             // 使用 setter 方法
                             fields.forEach(field -> {
-                                Object fieldValue = FieldUtil.getFieldValue(field, this);
-                                MethodUtil.getSetterMethodOptByField(enclosingClass, field)
+                                Object fieldValue = FieldUtil.getValue(field, this);
+                                MethodUtil.GetterOrSetterQuerier.create(MethodUtil.GetterOrSetterQuerier.Mode.SETTER)
+                                        .targetClass(enclosingClass)
+                                        .field(field)
+                                        .queryOpt()
                                         .ifPresent(method -> MethodUtil.invoke(method, obj, fieldValue));
                             });
                             return obj;

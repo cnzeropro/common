@@ -14,9 +14,9 @@ import org.springframework.util.StringUtils;
 import org.zero.common.core.extension.spring.aop.BaseAspect;
 import org.zero.common.core.util.java.lang.ArrayUtil;
 import org.zero.common.core.util.java.lang.ClassUtil;
-import org.zero.common.core.util.java.reflect.ExecutableUtil;
-import org.zero.common.core.util.java.reflect.MemberUtil;
-import org.zero.common.core.util.java.reflect.MethodUtil;
+import org.zero.common.core.util.java.lang.reflect.ExecutableUtil;
+import org.zero.common.core.util.java.lang.reflect.MemberUtil;
+import org.zero.common.core.util.java.lang.reflect.MethodUtil;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -93,7 +93,7 @@ public class FallbackAspect extends BaseAspect {
     protected Optional<FallbackMethod> getFallbackMethod(Class<?> clazz, String targetMethodName,
                                                          Method signatureMethod, Class<?> signatureReturnType, Class<?>[] signatureParameterTypes, Object[] args,
                                                          Throwable throwable) {
-        return MethodUtil.getMethodsByName(clazz, false, targetMethodName)
+        return MethodUtil.listByName(clazz, false, targetMethodName)
                 .stream()
                 // 排除签名（切点）方法
                 .filter(method -> !Objects.equals(method, signatureMethod))

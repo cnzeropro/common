@@ -7,7 +7,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.zero.common.core.support.aware.annotation.Aware;
 import org.zero.common.core.support.aware.perceptor.DefaultPerceptor;
 import org.zero.common.core.support.aware.perceptor.Perceptor;
-import org.zero.common.core.util.java.reflect.MemberUtil;
+import org.zero.common.core.util.java.lang.reflect.MemberUtil;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;

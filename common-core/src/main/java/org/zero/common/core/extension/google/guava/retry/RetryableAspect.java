@@ -12,8 +12,8 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.zero.common.core.util.java.lang.CharSequenceUtil;
 import org.zero.common.core.util.java.lang.ThrowableUtil;
-import org.zero.common.core.util.java.reflect.ConstructorUtil;
-import org.zero.common.core.util.java.reflect.MethodUtil;
+import org.zero.common.core.util.java.lang.reflect.ConstructorUtil;
+import org.zero.common.core.util.java.lang.reflect.MethodUtil;
 import org.zero.common.data.exception.CommonException;
 
 import java.lang.reflect.Method;
@@ -117,11 +117,11 @@ public class RetryableAspect {
                     })
                     .toArray(Class[]::new);
             Class<?> targetClass = target.getClass();
-            Optional<Method> recoverMethodOpt = MethodUtil.getMethodOptByNameAndParam(targetClass, recover, argClasses);
+            Optional<Method> recoverMethodOpt = MethodUtil.getOptByNameAndParam(targetClass, true, recover, argClasses);
             if (recoverMethodOpt.isPresent()) {
                 return MethodUtil.invoke(recoverMethodOpt.get(), target, args);
             }
-            recoverMethodOpt = MethodUtil.getMethodOptByNameAndParam(targetClass, recover);
+            recoverMethodOpt = MethodUtil.getOptByNameAndParam(targetClass, true, recover);
             if (recoverMethodOpt.isPresent()) {
                 return MethodUtil.invoke(recoverMethodOpt.get(), target);
             }
