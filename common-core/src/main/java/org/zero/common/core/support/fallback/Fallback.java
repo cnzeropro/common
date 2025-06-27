@@ -41,6 +41,6 @@ public @interface Fallback {
     /**
      * 降级处理方法，同 {@link #targetMethod()}
      */
-    @AliasFor("method")
+    @AliasFor("targetMethod")
     String value() default "";
 }

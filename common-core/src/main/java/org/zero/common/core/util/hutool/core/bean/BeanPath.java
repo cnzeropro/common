@@ -28,11 +28,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * 与 hutool 提供的 {@linkplain cn.hutool.core.bean.BeanPath BeanPath} 工具不同的是，该工具做了一些扩展并支持 {@link Map} key 为数字的情况。
+ * 与 Hutool 提供的 {@linkplain cn.hutool.core.bean.BeanPath BeanPath} 工具不同的是，该工具做了一些扩展并支持 {@link Map} key 为数字的情况。
  * 另外对数组的值设置，只支持有额外空间的数组，否则认为其空间不足不予设置。
  *
  * @author Zero (cnzeropro@163.com)
  * @see cn.hutool.core.bean.BeanPath
+ * @see org.springframework.beans.BeanWrapper
  * @since 2025/3/18
  */
 @RequiredArgsConstructor(staticName = "of")

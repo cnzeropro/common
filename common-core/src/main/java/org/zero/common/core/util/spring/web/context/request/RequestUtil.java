@@ -2,8 +2,11 @@ package org.zero.common.core.util.spring.web.context.request;
 
 import lombok.experimental.UtilityClass;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.RequestPath;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.util.ServletRequestPathUtils;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -15,6 +18,21 @@ import java.util.Optional;
  */
 @UtilityClass
 public class RequestUtil {
+    public static Optional<RequestAttributes> getRequestAttributesOpt() {
+        return Optional.ofNullable(RequestContextHolder.getRequestAttributes());
+    }
+
+    public static ServletRequest getServletRequest() {
+        return getServletRequestOpt().orElse(null);
+    }
+
+    public static Optional<ServletRequest> getServletRequestOpt() {
+        return getRequestAttributesOpt()
+                .filter(ServletRequestAttributes.class::isInstance)
+                .map(ServletRequestAttributes.class::cast)
+                .map(ServletRequestAttributes::getRequest);
+    }
+
     /**
      * 获取当前 HttpServletRequest
      */
@@ -26,7 +44,8 @@ public class RequestUtil {
      * 获取当前 HttpServletRequest
      */
     public static Optional<HttpServletRequest> getHttpServletRequestOpt() {
-        return Optional.ofNullable(RequestContextHolder.getRequestAttributes())
+        return getRequestAttributesOpt()
+                .filter(ServletRequestAttributes.class::isInstance)
                 .map(ServletRequestAttributes.class::cast)
                 .map(ServletRequestAttributes::getRequest);
     }
@@ -76,5 +95,13 @@ public class RequestUtil {
                 .map(RequestUtil::getContentType)
                 .map(MediaType::valueOf)
                 .orElse(null);
+    }
+
+    public static Optional<RequestPath> getRequestPathOpt() {
+        return getServletRequestOpt().map(ServletRequestPathUtils::getParsedRequestPath);
+    }
+
+    public static RequestPath getRequestPath() {
+        return getRequestPathOpt().orElse(null);
     }
 }

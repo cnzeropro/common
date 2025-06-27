@@ -15,11 +15,6 @@
     <name>common-core</name>
     <description>Common Core</description>
 
-    <modules>
-        <module>java8-adapter</module>
-        <module>java9-adapter</module>
-    </modules>
-
     <dependencies>
         <dependency>
             <groupId>org.zero</groupId>
@@ -126,6 +121,11 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
             <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.plugin</groupId>
+            <artifactId>spring-plugin-metadata</artifactId>
         </dependency>
 
         <dependency>
@@ -348,7 +348,7 @@
         <dependency>
             <groupId>com.esotericsoftware</groupId>
             <artifactId>kryo</artifactId>
-            <optional>true</optional>s
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.lionsoul</groupId>

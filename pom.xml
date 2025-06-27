@@ -51,6 +51,7 @@
         <spring-security.version>5.7.11</spring-security.version>
         <spring-session.version>2021.2.3</spring-session.version>
         <spring-ws.version>3.1.7</spring-ws.version>
+        <spring-plugin.version>2.0.0.RELEASE</spring-plugin.version>
         <!-- Apache -->
         <commons-text.version>1.11.0</commons-text.version>
         <commons-compress.version>1.26.1</commons-compress.version>
@@ -315,6 +316,19 @@
                 <scope>import</scope>
             </dependency>
 
+            <!-- ################################### Spring ################################### -->
+            <!-- https://mvnrepository.com/artifact/org.springframework.plugin/spring-plugin-core -->
+            <dependency>
+                <groupId>org.springframework.plugin</groupId>
+                <artifactId>spring-plugin-core</artifactId>
+                <version>${spring-plugin.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.springframework.plugin/spring-plugin-metadata -->
+            <dependency>
+                <groupId>org.springframework.plugin</groupId>
+                <artifactId>spring-plugin-metadata</artifactId>
+                <version>${spring-plugin.version}</version>
+            </dependency>
             <!-- ################################### Javax ################################### -->
             <!-- https://mvnrepository.com/artifact/javax.servlet/servlet-api -->
             <dependency>
@@ -329,6 +343,13 @@
                 <artifactId>javax.servlet-api</artifactId>
                 <!-- no longer maintained -->
                 <version>4.0.1</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/javax.inject/javax.inject -->
+            <dependency>
+                <groupId>javax.inject</groupId>
+                <artifactId>javax.inject</artifactId>
+                <!-- no longer maintained -->
+                <version>1</version>
             </dependency>
             <!-- ################################### Apache ################################### -->
             <!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml -->
