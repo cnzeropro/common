@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
  * @author Zero (cnzeropro@163.com)
  * @since 2025/5/26
  */
-@Conditional(AnnotateConditional.CustomCondition.class)
+@Conditional(ConditionalAnnotation.CustomCondition.class)
 @Component
-class AnnotateConditional {
+class ConditionalAnnotation {
     static class CustomCondition extends SpringBootCondition {
          static final ConditionMessage.Builder message = ConditionMessage.forCondition("Monitor");
 

@@ -13,12 +13,12 @@ import java.io.PrintWriter;
  * @author Zero (cnzeropro@163.com)
  * @since 2025/5/23
  */
-@WebServlet("/api/web-servlet")
-class AnnotateWebServlet extends ImplementServlet {
+@WebServlet("/api/web-servlet-annotation")
+class WebServletAnnotation extends ImplementServlet {
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try (PrintWriter writer = resp.getWriter()) {
-            writer.println("hello world");
+            writer.println(this.getClass().getName());
             writer.flush();
         }
     }

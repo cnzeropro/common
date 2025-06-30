@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
  * @since 2025/5/23
  */
 @Configuration
-class AnnotateConfiguration {
+class ConfigurationAnnotation {
     /**
      * 使用此注解注册的 bean，一般是三方库包的类
      */

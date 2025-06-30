@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Spring Boot 3 开启此配置：{@code management.observations.annotations.enabled=true}
  *
  * @author Zero (cnzeropro@163.com)
- * @see Config#countedAspect(MeterRegistry)
+ * @see TestConfig#countedAspect(MeterRegistry)
  * @see http://127.0.0.1/actuator/metrics/test.exec.count
  * @since 2025/5/26
  */

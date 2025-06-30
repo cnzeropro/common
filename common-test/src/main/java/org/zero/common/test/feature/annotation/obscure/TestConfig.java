@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
  * @since 2025/5/26
  */
 @Configuration(proxyBeanMethods = false)
-public class Config {
+public class TestConfig {
     @Bean
     public TimedAspect timedAspect(MeterRegistry meterRegistry) {
         return new TimedAspect(meterRegistry);

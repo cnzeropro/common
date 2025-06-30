@@ -17,7 +17,7 @@ import org.springframework.web.servlet.handler.SimpleServletHandlerAdapter;
  * @since 2025/5/23
  */
 @Configuration(proxyBeanMethods = false)
-class Config implements WebMvcConfigurer {
+class TestConfig implements WebMvcConfigurer {
 
     /**
      * 注册静态资源以定义接口

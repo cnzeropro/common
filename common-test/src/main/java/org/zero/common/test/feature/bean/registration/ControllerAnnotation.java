@@ -10,5 +10,5 @@ import org.springframework.stereotype.Controller;
  * @since 2025/5/23
  */
 @Controller
-class AnnotateController {
+class ControllerAnnotation {
 }

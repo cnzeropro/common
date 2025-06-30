@@ -21,7 +21,7 @@ class ImplementController implements Controller {
     @Override
     public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
         try (PrintWriter writer = response.getWriter()) {
-            writer.println("hello world");
+            writer.println(this.getClass().getName());
             writer.flush();
         }
         return null;

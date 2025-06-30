@@ -9,5 +9,5 @@ import org.springframework.stereotype.Service;
  * @since 2025/5/23
  */
 @Service
-class AnnotateService {
+class ServiceAnnotation {
 }

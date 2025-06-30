@@ -14,7 +14,7 @@
 //  * @since 2025/5/23
 //  */
 // @HttpExchange("api")
-// interface AnnotateHttpExchange {
-//     @GetExchange("annotate-http-exchange")
+// interface HttpExchangeAnnotation {
+//     @GetExchange("http-exchange-annotation")
 //     ResponseEntity<String> query();
 // }

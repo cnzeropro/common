@@ -13,5 +13,5 @@ import org.springframework.stereotype.Component;
  */
 @Profile("dev")
 @Component
-class AnnotateProfile {
+class ProfileAnnotation {
 }

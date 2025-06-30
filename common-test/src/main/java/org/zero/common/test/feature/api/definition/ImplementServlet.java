@@ -16,7 +16,7 @@ import java.io.PrintWriter;
  * 2、默认情况下，此时还不能访问，需要注入 {@linkplain org.springframework.web.servlet.handler.SimpleServletHandlerAdapter SimpleServletHandlerAdapter}
  *
  * @author Zero (cnzeropro@163.com)
- * @see Config#simpleServletHandlerAdapter()
+ * @see TestConfig#simpleServletHandlerAdapter()
  * @since 2025/5/23
  */
 @Component("/api/servlet")
@@ -24,7 +24,7 @@ class ImplementServlet extends javax.servlet.http.HttpServlet {
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try (PrintWriter writer = resp.getWriter()) {
-            writer.println("hello world");
+            writer.println(this.getClass().getName());
             writer.flush();
         }
     }

@@ -22,7 +22,7 @@ class ImplementHttpRequestHandler implements HttpRequestHandler {
     @Override
     public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try (PrintWriter writer = response.getWriter()) {
-            writer.println("hello world");
+            writer.println(this.getClass().getName());
             writer.flush();
         }
     }

@@ -9,12 +9,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import static org.zero.common.test.feature.api.definition.Config.HTTP_REQUEST_HANDLER_SERVLET_NAME;
+import static org.zero.common.test.feature.api.definition.TestConfig.HTTP_REQUEST_HANDLER_SERVLET_NAME;
 
 /**
  * 注册 {@linkplain org.springframework.web.context.support.HttpRequestHandlerServlet HttpRequestHandlerServlet} 定义接口
  * <p>
- * 注册 {@linkplain org.springframework.web.context.support.HttpRequestHandlerServlet HttpRequestHandlerServlet} 方式参见：{@linkplain Config#servletRegistrationBean()}
+ * 注册 {@linkplain org.springframework.web.context.support.HttpRequestHandlerServlet HttpRequestHandlerServlet} 方式参见：{@linkplain TestConfig#servletRegistrationBean()}
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2025/5/23
@@ -24,7 +24,7 @@ class ImplementHttpRequestHandlerAndUseHttpRequestHandlerServlet implements Http
     @Override
     public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try (PrintWriter writer = response.getWriter()) {
-            writer.println("hello world");
+            writer.println(this.getClass().getName());
             writer.flush();
         }
     }

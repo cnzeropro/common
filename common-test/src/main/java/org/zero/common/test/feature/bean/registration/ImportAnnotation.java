@@ -34,9 +34,9 @@ import org.springframework.core.type.AnnotationMetadata;
  *     </tr>
  * </table>
  */
-@Import({AnnotateImport.Bean.class, AnnotateImport.BeanImportSelector.class, AnnotateImport.BeanImportBeanDefinitionRegistrar.class})
+@Import({ImportAnnotation.Bean.class, ImportAnnotation.BeanImportSelector.class, ImportAnnotation.BeanImportBeanDefinitionRegistrar.class})
 @Configuration(proxyBeanMethods = false)
-class AnnotateImport {
+class ImportAnnotation {
 
     static class Bean {
     }

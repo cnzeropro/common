@@ -6,9 +6,9 @@
 //  * @author Zero (cnzeropro@163.com)
 //  * @since 2025/5/23
 //  */
-// class AnnotateHttpExchangeImpl implements AnnotateHttpExchange {
+// class HttpExchangeAnnotationImpl implements HttpExchangeAnnotation {
 //     @Override
 //     public ResponseEntity<String> query() {
-//         return ResponseEntity.ok("hello world");
+//         return ResponseEntity.ok(this.getClass().getName());
 //     }
 // }

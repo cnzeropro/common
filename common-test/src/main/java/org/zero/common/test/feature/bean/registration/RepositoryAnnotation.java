@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
  * @since 2025/5/23
  */
 @Repository
-class AnnotateRepository {
+class RepositoryAnnotation {
 }

@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("api")
-class AnnotateController {
-    @GetMapping("annotate-controller")
+class ControllerAnnotation {
+    @GetMapping("controller-annotation")
     ResponseEntity<String> query() {
-        return ResponseEntity.ok("hello world");
+        return ResponseEntity.ok(this.getClass().getName());
     }
 }

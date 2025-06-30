@@ -9,5 +9,5 @@ import org.springframework.stereotype.Component;
  * @since 2025/5/23
  */
 @Component
-class AnnotateComponent {
+class ComponentAnnotation {
 }
