@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import org.zero.common.api.extra.loki.constant.Direction;
+
+import java.math.BigInteger;
 
 /**
  * @author zero
@@ -20,7 +23,7 @@ public class LokiQueryRequest {
      * 日志排序顺序。可选：backward, forward。默认：backward
      */
     @Builder.Default
-    private String direction = "backward";
+    private Direction direction = Direction.BACKWARD;
     /**
      * 查询日志条数。默认：100
      */
@@ -35,5 +38,5 @@ public class LokiQueryRequest {
     /**
      * 查询的评估时间。Unix 纪元纳秒值。默认：当前时间
      */
-    private Long time;
+    private BigInteger time;
 }

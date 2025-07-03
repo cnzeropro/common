@@ -18,21 +18,21 @@ import java.math.BigInteger;
 @AllArgsConstructor
 @SuperBuilder(toBuilder = true)
 @Accessors(chain = true)
-public class LokiLabelsRequest implements Serializable {
+public class LokiSeriesRequest implements Serializable {
     /**
-     * 查询的开始时间戳。单位为纳秒。默认：6小时前
+     * 重复的日志流选择器参数，用于选择要返回的流。至少提供一个
+     */
+    private String[] match;
+    /**
+     * 开始时间。Unix 纪元纳秒值。
      */
     private BigInteger start;
     /**
-     * 查询的结束时间戳。单位为纳秒。默认：当前时间
+     * 结束时间。Unix 纪元纳秒值。
      */
     private BigInteger end;
     /**
      * 用于计算开始时间（start）相对于结束时间（end）的持续时间
      */
     private BigInteger since;
-    /**
-     * 日志流选择器，用于选择要匹配的流并返回标签名称
-     */
-    private String query;
 }

@@ -1,3 +1,18 @@
+api:
+  loki:
+    url: http://192.168.0.33:3100/
+feign:
+  client:
+    config:
+      loki:
+        logger-level: FULL
+logging:
+  level:
+    org:
+      zero:
+        common:
+          api: debug
+---
 server:
   port: 34567
   error:

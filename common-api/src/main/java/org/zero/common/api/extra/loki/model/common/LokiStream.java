@@ -1,15 +1,14 @@
 package org.zero.common.api.extra.loki.model.common;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
-import lombok.ToString;
 
-import java.io.Serializable;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -21,17 +20,19 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class LokiStream implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class LokiStream extends LokiResult {
     private Map<String, Object> stream;
     @Singular
-    private List<Value> values;
+    private Collection<Value> values;
 
-    @Data
+    @NoArgsConstructor(access = AccessLevel.PACKAGE)
     @EqualsAndHashCode(callSuper = true)
-    @ToString(callSuper = true)
     public static class Value extends LokiValue {
-        public Value() {
+        public Value(String epochNano, String logLine) {
             super();
+            this.add(epochNano);
+            this.add(logLine);
         }
 
         public String getEpochNano() {

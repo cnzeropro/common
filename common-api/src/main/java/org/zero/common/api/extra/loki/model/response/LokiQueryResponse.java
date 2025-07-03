@@ -4,13 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.zero.common.api.extra.loki.constant.ResultType;
+import org.zero.common.api.extra.loki.model.common.LokiResult;
 import org.zero.common.api.extra.loki.model.common.LokiStats;
 import org.zero.common.api.extra.loki.model.common.LokiStream;
 import org.zero.common.api.extra.loki.model.common.LokiVector;
 
 import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
+import java.util.Collection;
 
 /**
  * @author zero
@@ -27,11 +28,11 @@ public class LokiQueryResponse implements Serializable {
      * @see LokiVector
      * @see LokiStream
      */
-    private String resultType;
+    private ResultType resultType;
     /**
      * 查询结果
      */
-    private List<Map<String, Object>> result;
+    private Collection<? extends LokiResult> result;
     /**
      * 统计信息
      */

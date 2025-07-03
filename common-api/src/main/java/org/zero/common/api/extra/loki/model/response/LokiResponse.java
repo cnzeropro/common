@@ -16,7 +16,7 @@ import org.zero.common.data.model.transfer.BaseResult;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @Accessors(chain = true)
-public class LokiResult<T> implements BaseResult {
+public class LokiResponse<T> implements BaseResult {
     private String status;
     private T data;
 
@@ -25,7 +25,7 @@ public class LokiResult<T> implements BaseResult {
         return "success".equals(status);
     }
 
-    public static <T> LokiResult<T> error() {
-        return LokiResult.<T>builder().status("error").build();
+    public static <T> LokiResponse<T> error() {
+        return LokiResponse.<T>builder().status("error").build();
     }
 }

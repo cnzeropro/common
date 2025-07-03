@@ -9,7 +9,7 @@ import lombok.experimental.Accessors;
 import org.zero.common.api.extra.loki.model.common.LokiStream;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * @author zero
@@ -22,5 +22,5 @@ import java.util.List;
 @Accessors(chain = true)
 public class LokiPushRequest implements Serializable {
     @Singular
-    private List<LokiStream> streams;
+    private Collection<LokiStream> streams;
 }
