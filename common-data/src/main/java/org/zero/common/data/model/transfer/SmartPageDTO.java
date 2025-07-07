@@ -29,7 +29,7 @@ import static org.zero.common.data.constant.CommonConstant.DEFAULT_PAGE_SIZE;
 @Accessors(chain = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class PageDTO<T> implements Serializable {
+public class SmartPageDTO<T> implements Serializable {
     private static final long serialVersionUID = 8463126863903128798L;
 
     /**
@@ -59,7 +59,7 @@ public class PageDTO<T> implements Serializable {
     /**
      * 设置并修正当前页码
      */
-    public PageDTO<T> setCurrent(long current) {
+    public SmartPageDTO<T> setCurrent(long current) {
         if (total > 0 && total < current) {
             current = total;
         }
@@ -73,7 +73,7 @@ public class PageDTO<T> implements Serializable {
     /**
      * 设置并修正每页条数
      */
-    public PageDTO<T> setSize(long size) {
+    public SmartPageDTO<T> setSize(long size) {
         if (size <= 0) {
             size = DEFAULT_PAGE_SIZE;
         }
@@ -84,7 +84,7 @@ public class PageDTO<T> implements Serializable {
     /**
      * 设置并修正总页数
      */
-    public PageDTO<T> setTotal(long total) {
+    public SmartPageDTO<T> setTotal(long total) {
         if (recordCount > 0 && size > 0) {
             total = recordCount / size;
             if (recordCount % size != 0) {
@@ -98,30 +98,30 @@ public class PageDTO<T> implements Serializable {
     /**
      * 设置记录条数
      */
-    public PageDTO<T> setRecordCount(long recordCount) {
+    public SmartPageDTO<T> setRecordCount(long recordCount) {
         this.recordCount = recordCount;
         return setTotal(total);
     }
 
     /* ******************************************************* builder ******************************************************* */
 
-    public static <T> PageDTO<T> of() {
-        return new PageDTO<>();
+    public static <T> SmartPageDTO<T> of() {
+        return new SmartPageDTO<>();
     }
 
-    public static <T> PageDTO<T> of(long current) {
+    public static <T> SmartPageDTO<T> of(long current) {
         return of(current, DEFAULT_PAGE_SIZE);
     }
 
-    public static <T> PageDTO<T> of(long current, long size) {
+    public static <T> SmartPageDTO<T> of(long current, long size) {
         return of(current, size, 0L);
     }
 
-    public static <T> PageDTO<T> of(long current, long size, long recordCount) {
-        return new PageDTO<>(current, size, recordCount);
+    public static <T> SmartPageDTO<T> of(long current, long size, long recordCount) {
+        return new SmartPageDTO<>(current, size, recordCount);
     }
 
-    protected PageDTO(long current, long size, long recordCount) {
+    protected SmartPageDTO(long current, long size, long recordCount) {
         this();
         setCurrent(current);
         setSize(size);
@@ -130,23 +130,23 @@ public class PageDTO<T> implements Serializable {
 
     /* ******************************************************* converter ******************************************************* */
 
-    public <R> PageDTO<R> convert(Function<? super T, ? extends R> mapper) {
+    public <R> SmartPageDTO<R> convert(Function<? super T, ? extends R> mapper) {
         List<R> data = this.getRecords().stream().map(mapper).collect(Collectors.toList());
         return this.convert(data);
     }
 
-    public <R> PageDTO<R> convertNew(Function<? super T, ? extends R> mapper) {
+    public <R> SmartPageDTO<R> convertNew(Function<? super T, ? extends R> mapper) {
         List<R> data = this.getRecords().stream().map(mapper).collect(Collectors.toList());
         return this.convertNew(data);
     }
 
     @SuppressWarnings("unchecked")
-    public <R> PageDTO<R> convert(Collection<R> data) {
-        return ((PageDTO<R>) this).setRecords(data);
+    public <R> SmartPageDTO<R> convert(Collection<R> data) {
+        return ((SmartPageDTO<R>) this).setRecords(data);
     }
 
     @SuppressWarnings("unchecked")
-    public <R> PageDTO<R> convertNew(Collection<R> data) {
-        return ((PageDTO<R>) this).withRecords(data);
+    public <R> SmartPageDTO<R> convertNew(Collection<R> data) {
+        return ((SmartPageDTO<R>) this).withRecords(data);
     }
 }

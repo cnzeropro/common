@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.zero.common.data.enumeration.Gender;
 import org.zero.common.data.enumeration.Status;
 import org.zero.common.data.enumeration.SysError;
-import org.zero.common.data.model.transfer.PageDTO;
+import org.zero.common.data.model.transfer.SmartPageDTO;
 import org.zero.common.data.model.transfer.UserDTO;
 
 import java.time.LocalDateTime;
@@ -22,7 +22,7 @@ class ResultTest {
         System.out.println(okVoid);
         Result<Integer> okInt = Result.ok(10);
         System.out.println(okInt);
-        Result<PageDTO<UserDTO>> okPageStudent = Result.ok("分页查询成功", PageDTO.<UserDTO>of()
+        Result<SmartPageDTO<UserDTO>> okPageStudent = Result.ok("分页查询成功", SmartPageDTO.<UserDTO>of()
                 .setSize(20L)
                 .setCurrent(12L)
                 .setRecordCount(107L)

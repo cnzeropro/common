@@ -1,6 +1,7 @@
 package org.zero.common.data.exception;
 
 import lombok.Getter;
+import org.zero.common.data.constant.StringPool;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -17,7 +18,7 @@ public class MultiException extends BaseException {
         this(String.format("MultiException: %s",
                         Arrays.stream(throwables)
                                 .map(Throwable::toString)
-                                .collect(Collectors.joining("; "))),
+                                .collect(Collectors.joining(StringPool.SEMICOLON + StringPool.SPACE))),
                 throwables);
     }
 

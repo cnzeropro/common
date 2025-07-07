@@ -27,7 +27,7 @@ import java.util.function.Function;
  *         return new Builder();
  *     }
  *
- *     public static class Builder extends BaseBuilder<Builder, TestPojo> {
+ *     public static class Builder extends BaseBuilder<TestPojo, Builder> {
  *         private Integer id;
  *         private String name;
  *
@@ -50,7 +50,7 @@ import java.util.function.Function;
  * @author Zero (cnzeropro@163.com)
  * @since 2025/4/29
  */
-public abstract class BaseBuilder<B extends BaseBuilder<B, A>, A> {
+public abstract class BaseBuilder<A, B extends BaseBuilder<A, B>> {
     /**
      * 实例化对象
      * <p>

@@ -20,7 +20,7 @@ import java.util.Objects;
  * @author Zero (cnzeropro@163.com)
  * @since 2025/4/30
  */
-public class KeyStoreBuilder extends BaseBuilder<KeyStoreBuilder, KeyStore> {
+public class KeyStoreBuilder extends BaseBuilder<KeyStore, KeyStoreBuilder> {
     protected String type = KeyStore.getDefaultType();
     protected String providerName;
     protected Provider provider;

@@ -18,7 +18,7 @@ import java.util.Objects;
  * @author Zero (cnzeropro@163.com)
  * @since 2025/4/30
  */
-public class TrustManagerBuilder extends BaseBuilder<TrustManagerBuilder, TrustManager[]> {
+public class TrustManagerBuilder extends BaseBuilder<TrustManager[], TrustManagerBuilder> {
     protected String algorithm = TrustManagerFactory.getDefaultAlgorithm();
     protected String providerName;
     protected Provider provider;

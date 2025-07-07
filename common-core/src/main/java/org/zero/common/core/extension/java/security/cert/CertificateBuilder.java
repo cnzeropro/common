@@ -23,7 +23,7 @@ import java.util.Objects;
  * @author Zero (cnzeropro@163.com)
  * @since 2025/4/30
  */
-public class CertificateBuilder extends BaseBuilder<CertificateBuilder, Certificate[]> {
+public class CertificateBuilder extends BaseBuilder<Certificate[], CertificateBuilder> {
     protected String type = SslUtil.DEFAULT_CERTIFICATE_TYPE;
     protected String providerName;
     protected Provider provider;

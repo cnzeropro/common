@@ -95,6 +95,10 @@ public class BaseQO implements Serializable {
             return order == Order.ASC;
         }
 
+        public boolean isDesc() {
+            return order == Order.DESC;
+        }
+
         public String getOrderColumn() {
             return String.format("%s %s", field, order.name());
         }

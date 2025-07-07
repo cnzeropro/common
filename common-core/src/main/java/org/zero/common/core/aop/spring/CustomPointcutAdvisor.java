@@ -11,7 +11,7 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
  */
 public class CustomPointcutAdvisor extends DefaultPointcutAdvisor {
     public CustomPointcutAdvisor(Pointcut pointcut, Advice advice) {
-        setPointcut(pointcut);
-        setAdvice(advice);
+        this.setPointcut(pointcut);
+        this.setAdvice(advice);
     }
 }

@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
 
-import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 
 /**
@@ -22,7 +21,6 @@ public class Condition implements Serializable {
     /**
      * 条件字段
      */
-    @NotEmpty
     private String field;
     /**
      * 操作符

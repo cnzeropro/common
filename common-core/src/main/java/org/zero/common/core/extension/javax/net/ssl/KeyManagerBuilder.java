@@ -19,7 +19,7 @@ import java.util.Objects;
  * @author Zero (cnzeropro@163.com)
  * @since 2025/4/30
  */
-public class KeyManagerBuilder extends BaseBuilder<KeyManagerBuilder, KeyManager[]> {
+public class KeyManagerBuilder extends BaseBuilder<KeyManager[], KeyManagerBuilder> {
     protected String algorithm = KeyManagerFactory.getDefaultAlgorithm();
     protected String providerName;
     protected Provider provider;

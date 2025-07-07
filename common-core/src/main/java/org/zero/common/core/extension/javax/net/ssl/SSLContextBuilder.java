@@ -15,7 +15,7 @@ import java.util.Objects;
  * @author Zero (cnzeropro@163.com)
  * @since 2025/4/30
  */
-public class SSLContextBuilder extends BaseBuilder<SSLContextBuilder, SSLContext> implements SslProtocols {
+public class SSLContextBuilder extends BaseBuilder<SSLContext, SSLContextBuilder> implements SslProtocols {
     protected String protocol = TLS;
     protected String providerName;
     protected Provider provider;

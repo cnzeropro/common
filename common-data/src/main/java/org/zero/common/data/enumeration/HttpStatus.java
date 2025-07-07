@@ -5,8 +5,10 @@ import org.zero.common.data.constant.StringPool;
 
 /**
  * Enumeration of HTTP status codes.
- *
- * <p>The HTTP status code series can be retrieved via {@link #series()}.
+ * <p>
+ * The HTTP status code series can be retrieved via {@link #series()}.
+ * <p>
+ * Copy from {@link org.springframework.http.HttpStatus}
  *
  * @author Zero (cnzeropro@163.com)
  * @see Series
