@@ -9,7 +9,8 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.CipherMode;
 import cn.hutool.crypto.KeyUtil;
-import org.springframework.util.ConcurrentReferenceHashMap;
+import org.zero.common.core.extension.java.util.ReferenceLimitedMap;
+import org.zero.common.core.extension.java.util.ReferenceType;
 import org.zero.common.core.support.cache.Cache;
 import org.zero.common.core.support.cache.MapCache;
 import org.zero.common.core.support.codec.decryption.Decryption;
@@ -42,7 +43,12 @@ public class CodecUtil {
     public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
     public static final String DEFAULT_ALGORITHM_SEPARATOR = "/";
 
-    protected static final Cache<String, CodecStrategy> CACHE = MapCache.of(ConcurrentReferenceHashMap::new);
+    protected static final Cache<String, CodecStrategy> CACHE = MapCache.of(()-> ReferenceLimitedMap.<String, CodecStrategy>builder()
+            .maxCapacity(10000)
+            .accessOrder(true)
+            .lazyCleanup(false)
+            .referenceType(ReferenceType.WEAK)
+            .build());
 
     public static byte[] encrypt(byte[] data, Executable executable, Encryption encryption, CodecProperties.CodecConfiguration config) {
         CodecContext codecContext = toCodecContext(encryption, config);

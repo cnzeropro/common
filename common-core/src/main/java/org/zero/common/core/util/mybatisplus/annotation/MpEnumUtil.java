@@ -4,8 +4,10 @@ import com.baomidou.mybatisplus.annotation.EnumValue;
 import com.baomidou.mybatisplus.annotation.IEnum;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.zero.common.core.extension.java.util.ReferenceLimitedMap;
+import org.zero.common.core.extension.java.util.ReferenceType;
 import org.zero.common.core.support.cache.Cache;
-import org.zero.common.core.support.cache.GuavaCache;
+import org.zero.common.core.support.cache.MapCache;
 import org.zero.common.core.util.java.lang.reflect.FieldUtil;
 import org.zero.common.core.util.java.lang.reflect.MethodUtil;
 import org.zero.common.data.exception.UtilException;
@@ -23,7 +25,11 @@ public class MpEnumUtil {
     /**
      * 方法缓存
      */
-    private static final Cache<Class<? extends Enum<?>>, Method> METHOD_CACHE = GuavaCache.of(10_000L);
+    private static final Cache<Class<? extends Enum<?>>, Method> METHOD_CACHE = MapCache.of(() -> ReferenceLimitedMap.<Class<? extends Enum<?>>, Method>builder()
+            .maxCapacity(10000)
+            .accessOrder(true)
+            .referenceType(ReferenceType.WEAK)
+            .build());
 
     /**
      * 获取枚举对象的值

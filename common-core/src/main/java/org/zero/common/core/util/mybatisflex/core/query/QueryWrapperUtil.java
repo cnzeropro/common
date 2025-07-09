@@ -7,8 +7,10 @@ import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.core.util.StringUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.zero.common.core.extension.java.util.ReferenceLimitedMap;
+import org.zero.common.core.extension.java.util.ReferenceType;
 import org.zero.common.core.support.cache.Cache;
-import org.zero.common.core.support.cache.GuavaCache;
+import org.zero.common.core.support.cache.MapCache;
 import org.zero.common.core.util.java.lang.reflect.FieldUtil;
 import org.zero.common.core.util.java.lang.reflect.MethodUtil;
 import org.zero.common.data.exception.UtilException;
@@ -38,7 +40,11 @@ public class QueryWrapperUtil {
     /**
      * 方法缓存
      */
-    protected static final Cache<Class<?>, Map<String, Collection<Method>>> METHOD_CACHE = GuavaCache.of(10_000L);
+    protected static final Cache<Class<?>, Map<String, Collection<Method>>> METHOD_CACHE = MapCache.of(() -> ReferenceLimitedMap.<Class<?>, Map<String, Collection<Method>>>builder()
+            .maxCapacity(10000)
+            .accessOrder(true)
+            .referenceType(ReferenceType.WEAK)
+            .build());
 
     public static <E> QueryWrapper setSelect(QueryWrapper queryWrapper, Class<E> clazz, String[] fields) {
         return setSelect(queryWrapper, clazz, CollectionUtil.newArrayList(fields));
