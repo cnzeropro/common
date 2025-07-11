@@ -91,6 +91,21 @@ public class MapUtil {
     }
 
     /**
+     * 获取大于等于输入值的最小2的幂次方
+     *
+     * @see HashMap#tableSizeFor(int)
+     */
+    public static int nextPowerOfTwo(int cap) {
+        int n = cap - 1;
+        n |= n >>> 1;
+        n |= n >>> 2;
+        n |= n >>> 4;
+        n |= n >>> 8;
+        n |= n >>> 16;
+        return n < 0 ? 1 : n >= MAXIMUM_CAPACITY ? MAXIMUM_CAPACITY : n + 1;
+    }
+
+    /**
      * JDK 8 {@linkplain Map#computeIfAbsent(Object, Function) computeIfAbsent} 方法性能问题修复
      *
      * @see <a href="https://bugs.openjdk.java.net/browse/JDK-8161372">JDK-8161372</a>
@@ -104,7 +119,7 @@ public class MapUtil {
     }
 
     public static <K, V> Optional<Map.Entry<K, V>> getFirstEntryOpt(Map<K, V> map) {
-        if (isEmpty(map)){
+        if (isEmpty(map)) {
             return Optional.empty();
         }
         return map.entrySet().stream().findFirst();

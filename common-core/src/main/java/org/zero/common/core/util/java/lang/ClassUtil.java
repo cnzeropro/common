@@ -1,6 +1,8 @@
 package org.zero.common.core.util.java.lang;
 
+import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
+import lombok.extern.java.Log;
 import org.zero.common.core.extension.java.lang.reflect.TypeReference;
 import org.zero.common.core.extension.java.net.Schemes;
 import org.zero.common.core.extension.java.util.function.ThrowThrowableFunction;
@@ -23,6 +25,8 @@ import java.lang.reflect.WildcardType;
 import java.net.JarURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
+import java.security.CodeSource;
 import java.time.temporal.TemporalAccessor;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -37,8 +41,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
+import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.jar.Manifest;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -47,6 +54,7 @@ import java.util.stream.Stream;
  * @author zero
  * @since 2023/7/17
  */
+@Log
 @UtilityClass
 public class ClassUtil {
     public static final String CLASS_FILE_SUFFIX = ".class";
@@ -598,5 +606,44 @@ public class ClassUtil {
 
     public static boolean has(CharSequence className) {
         return ClassLoaderUtil.loadClassOpt(className, false).isPresent();
+    }
+
+    public static final String UNKNOWN_VERSION = "UNKNOWN";
+
+    public static String getImplementationVersion(Class<?> clazz) {
+        try {
+            String implementationVersion = clazz.getPackage().getImplementationVersion();
+            if (Objects.nonNull(implementationVersion)) {
+                return implementationVersion;
+            }
+            CodeSource codeSource = clazz.getProtectionDomain().getCodeSource();
+            if (Objects.isNull(codeSource)) {
+                return UNKNOWN_VERSION;
+            }
+            URL codeSourceLocation = codeSource.getLocation();
+            URLConnection connection = codeSourceLocation.openConnection();
+            if (connection instanceof JarURLConnection) {
+                return getImplementationVersion(((JarURLConnection) connection).getJarFile());
+            }
+            final File file = new File(codeSourceLocation.toURI());
+            if (!file.exists() || file.isDirectory()) {
+                return UNKNOWN_VERSION;
+            }
+            try (JarFile jarFile = new JarFile(file)) {
+                return getImplementationVersion(jarFile);
+            }
+        } catch (Throwable t) {
+            log.log(Level.WARNING, "Failed to implementation version from " + clazz, t);
+            return UNKNOWN_VERSION;
+        }
+    }
+
+    @SneakyThrows
+    public static String getImplementationVersion(JarFile jarFile) {
+        return Optional.ofNullable(jarFile)
+                .map(ThrowableUtil.sneakyThrow(JarFile::getManifest))
+                .map(Manifest::getMainAttributes)
+                .map(mainAttributes -> mainAttributes.getValue(Attributes.Name.IMPLEMENTATION_VERSION))
+                .orElse(UNKNOWN_VERSION);
     }
 }

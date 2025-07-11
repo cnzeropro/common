@@ -61,6 +61,7 @@
         <!-- Eclipse -->
         <jetty.version>12.0.19</jetty.version>
         <jakartaee.version>11.0.0</jakartaee.version>
+        <jakarta-xml.version>4.0.2</jakarta-xml.version>
         <!-- Alibaba -->
         <!-- The latest version supported by JDK 8 -->
         <spring-cloud-alibaba.version>2021.0.6.0</spring-cloud-alibaba.version>
@@ -316,6 +317,13 @@
                 <scope>import</scope>
             </dependency>
 
+            <!-- ################################### Java ################################### -->
+            <!-- https://mvnrepository.com/artifact/com.sun.xml.bind/jaxb-impl -->
+            <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-impl</artifactId>
+                <version>4.0.5</version>
+            </dependency>
             <!-- ################################### Spring ################################### -->
             <!-- https://mvnrepository.com/artifact/org.springframework.plugin/spring-plugin-core -->
             <dependency>
@@ -329,7 +337,7 @@
                 <artifactId>spring-plugin-metadata</artifactId>
                 <version>${spring-plugin.version}</version>
             </dependency>
-            <!-- ################################### Javax ################################### -->
+            <!-- ################################### Javax/Jakarta ################################### -->
             <!-- https://mvnrepository.com/artifact/javax.servlet/servlet-api -->
             <dependency>
                 <groupId>javax.servlet</groupId>
@@ -350,6 +358,19 @@
                 <artifactId>javax.inject</artifactId>
                 <!-- no longer maintained -->
                 <version>1</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
+            <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <!-- no longer maintained -->
+                <version>2.3.1</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/jakarta.xml.bind/jakarta.xml.bind-api -->
+            <dependency>
+                <groupId>jakarta.xml.bind</groupId>
+                <artifactId>jakarta.xml.bind-api</artifactId>
+                <version>${jakarta-xml.version}</version>
             </dependency>
             <!-- ################################### Apache ################################### -->
             <!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml -->
