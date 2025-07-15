@@ -1,8 +1,6 @@
 package org.zero.common.core.util.java.lang;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.Objects;
+import org.zero.common.core.util.java.security.SecurityUtil;
 
 /**
  * @author Zero (cnzeropro@163.com)
@@ -14,11 +12,7 @@ public class StackUtil {
      */
     public static StackTraceElement[] getCurrentStackTrace() {
         Thread currentThread = Thread.currentThread();
-        if (Objects.isNull(System.getSecurityManager())) {
-            return currentThread.getStackTrace();
-        }
-        return AccessController.doPrivileged(
-                (PrivilegedAction<StackTraceElement[]>) currentThread::getStackTrace);
+        return SecurityUtil.doPrivileged(currentThread::getStackTrace);
     }
 
     /**

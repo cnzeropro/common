@@ -7,7 +7,6 @@ import lombok.SneakyThrows;
 import org.springframework.util.DigestUtils;
 import org.zero.common.core.support.api.deduplicate.annotation.Deduplicate;
 
-import java.io.ByteArrayOutputStream;
 import java.util.Objects;
 
 /**
@@ -26,7 +25,7 @@ public interface BaseEquivalentVoucher extends EquivalentVoucher {
     /**
      * 创建唯一凭证
      *
-     * @param context       上下文。在拦截器中为 {@linkplain org.springframework.web.method.HandlerMethod HandlerMethod}，在切面中为 {@linkplain org.aspectj.lang.JoinPoint JoinPoint}
+     * @param context     上下文。在拦截器中为 {@linkplain org.springframework.web.method.HandlerMethod HandlerMethod}，在切面中为 {@linkplain org.aspectj.lang.JoinPoint JoinPoint}
      * @param deduplicate 防重注解
      * @return 唯一凭证
      */
@@ -45,12 +44,10 @@ public interface BaseEquivalentVoucher extends EquivalentVoucher {
         }
         // Kryo 线程不安全
         Kryo kryo = new Kryo();
-        @Cleanup ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        @Cleanup Output output = new Output(outputStream);
-        kryo.register(source.getClass());
+        @Cleanup Output output = new Output(4096, -1);
         kryo.writeObject(output, source);
         output.flush();
-        return outputStream.toByteArray();
+        return output.getBuffer();
     }
 
     /**

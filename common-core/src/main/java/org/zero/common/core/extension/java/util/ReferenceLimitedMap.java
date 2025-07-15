@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
+import org.zero.common.core.extension.java.lang.LoopRunnable;
+import org.zero.common.core.extension.java.util.concurrent.DefaultThreadFactory;
 
 import java.io.Serializable;
 import java.lang.ref.PhantomReference;
@@ -34,7 +36,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 线程安全的引用类型 Map，支持最大容量限制和缓存过期时间
@@ -49,7 +50,8 @@ public class ReferenceLimitedMap<K, V> extends AbstractMap<K, V> implements Seri
     public static final int DEFAULT_INITIAL_CAPACITY = 1 << 4;
     public static final float DEFAULT_LOAD_FACTOR = 0.75F;
     public static final int DEFAULT_CLEANUP_THREAD_POOL_SIZE = 2;
-    public static final Executor DEFAULT_CLEANUP_EXECUTOR = Executors.newFixedThreadPool(DEFAULT_CLEANUP_THREAD_POOL_SIZE, new CleanupThreadFactory());
+    public static final ThreadFactory DEFAULT_CLEANUP_THREAD_FACTORY = DefaultThreadFactory.builder().jobName("Cleanup").daemon(true).build();
+    public static final Executor DEFAULT_CLEANUP_EXECUTOR = Executors.newFixedThreadPool(DEFAULT_CLEANUP_THREAD_POOL_SIZE, DEFAULT_CLEANUP_THREAD_FACTORY);
 
     /**
      * 最大容量
@@ -132,8 +134,8 @@ public class ReferenceLimitedMap<K, V> extends AbstractMap<K, V> implements Seri
 
     protected void submitCleanupTask() {
         if (!lazyCleanup) {
-            cleanupExecutor.execute(new CleanupRunnable(() -> this.cleanupReclaimedEntries(true)));
-            cleanupExecutor.execute(new CleanupRunnable(() -> this.cleanupExpiredEntries(true)));
+            cleanupExecutor.execute(new LoopRunnable(() -> this.cleanupReclaimedEntries(true)));
+            cleanupExecutor.execute(new LoopRunnable(() -> this.cleanupExpiredEntries(true)));
         }
     }
 
@@ -545,28 +547,6 @@ public class ReferenceLimitedMap<K, V> extends AbstractMap<K, V> implements Seri
         }
     }
 
-    @RequiredArgsConstructor
-    protected static class CleanupRunnable implements Runnable {
-        protected final RunnableTask task;
-
-        @Override
-        public void run() {
-            Thread currentThread = Thread.currentThread();
-            while (!currentThread.isInterrupted()) {
-                try {
-                    task.run();
-                } catch (InterruptedException e) {
-                    currentThread.interrupt();
-                    break;
-                }
-            }
-        }
-
-        protected interface RunnableTask {
-            void run() throws InterruptedException;
-        }
-    }
-
     public static class Builder<K, V> {
         /**
          * 初始容量。默认：16
@@ -686,37 +666,6 @@ public class ReferenceLimitedMap<K, V> extends AbstractMap<K, V> implements Seri
 
         public ReferenceLimitedMap<K, V> build() {
             return new ReferenceLimitedMap<>(maxCapacity, order, coreMap, referenceQueue, delayQueue, lazyCleanup, cleanupExecutor, referenceType, ttl, listener);
-        }
-    }
-
-    public static class CleanupThreadFactory implements ThreadFactory {
-        protected static final AtomicInteger poolNumber = new AtomicInteger(0);
-        protected final AtomicInteger threadNumber = new AtomicInteger(1);
-        protected final ThreadGroup group;
-        protected final int priority;
-        protected final boolean daemon;
-
-        public CleanupThreadFactory() {
-            this(Thread.currentThread().getThreadGroup());
-        }
-
-        public CleanupThreadFactory(ThreadGroup group) {
-            this(group, true, Thread.NORM_PRIORITY);
-        }
-
-        protected CleanupThreadFactory(ThreadGroup group, boolean daemon, int priority) {
-            this.group = group;
-            this.priority = priority;
-            this.daemon = daemon;
-            poolNumber.getAndIncrement();
-        }
-
-        @Override
-        public Thread newThread(Runnable r) {
-            Thread t = new Thread(group, r, String.format("%s[pool-%d-thread-%d]", "Cleanup", poolNumber.get(), threadNumber.getAndIncrement()), 0);
-            t.setDaemon(daemon);
-            t.setPriority(priority);
-            return t;
         }
     }
 }

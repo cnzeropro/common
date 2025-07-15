@@ -2,11 +2,9 @@ package org.zero.common.core.util.java.lang;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.java.Log;
-import org.zero.common.core.extension.java.util.function.ThrowThrowableSupplier;
+import org.zero.common.core.util.java.security.SecurityUtil;
 import org.zero.common.data.constant.StringPool;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,39 +30,15 @@ public class ClassLoaderUtil {
             .toArray(ClassLoader[]::new);
 
     public static ClassLoader getContext() {
-        return ThrowableUtil.ignore((ThrowThrowableSupplier<ClassLoader>) () -> {
-            if (Objects.isNull(System.getSecurityManager())) {
-                return Thread.currentThread().getContextClassLoader();
-            } else {
-                // 绕开权限检查
-                return AccessController.doPrivileged(
-                        (PrivilegedAction<ClassLoader>) Thread.currentThread()::getContextClassLoader);
-            }
-        });
+        return SecurityUtil.doPrivileged(Thread.currentThread()::getContextClassLoader);
     }
 
     public static ClassLoader getDefault() {
-        return ThrowableUtil.ignore((ThrowThrowableSupplier<ClassLoader>) () -> {
-            if (Objects.isNull(System.getSecurityManager())) {
-                return ClassLoaderUtil.class.getClassLoader();
-            } else {
-                // 绕开权限检查
-                return AccessController.doPrivileged(
-                        (PrivilegedAction<ClassLoader>) ClassLoaderUtil.class::getClassLoader);
-            }
-        });
+        return SecurityUtil.doPrivileged(ClassLoaderUtil.class::getClassLoader);
     }
 
     public static ClassLoader getSystem() {
-        return ThrowableUtil.ignore((ThrowThrowableSupplier<ClassLoader>) () -> {
-            if (Objects.isNull(System.getSecurityManager())) {
-                return ClassLoader.getSystemClassLoader();
-            } else {
-                // 绕开权限检查
-                return AccessController.doPrivileged(
-                        (PrivilegedAction<ClassLoader>) ClassLoader::getSystemClassLoader);
-            }
-        });
+        return SecurityUtil.doPrivileged(ClassLoader::getSystemClassLoader);
     }
 
     public static ClassLoader get() {

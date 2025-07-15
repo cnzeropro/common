@@ -2,8 +2,10 @@ package org.zero.common.core.extension.java.lang;
 
 import org.zero.common.core.extension.java.util.function.ThrowThrowableSupplier;
 import org.zero.common.core.util.java.lang.ThrowableUtil;
+import org.zero.common.core.util.java.lang.reflect.ConstructorUtil;
 import org.zero.common.core.util.java.lang.reflect.FieldUtil;
 import org.zero.common.core.util.java.lang.reflect.MethodUtil;
+import org.zero.common.data.exception.CommonException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -64,22 +66,24 @@ public abstract class BaseBuilder<A, B extends BaseBuilder<A, B>> {
         Class<?> clazz = this.getClass();
         Class<?> enclosingClass = clazz.getEnclosingClass();
         if (Objects.isNull(enclosingClass)) {
-            throw new RuntimeException(String.format("%s must have enclosing class", clazz));
+            throw new CommonException(String.format("%s must have enclosing class", clazz));
         }
         Collection<Field> fields = FieldUtil.list(clazz, false);
+        // 先尝试使用全参构造器实例化对象，如果异常则尝试使用 setter 方法实例化对象
         return ThrowableUtil.tryReturnNew((ThrowThrowableSupplier<A>) () -> {
                     Class<?>[] parameterTypes = fields.stream()
                             .map(Field::getType)
                             .toArray(Class[]::new);
-                    Constructor<?> constructor = enclosingClass.getConstructor(parameterTypes);
+                    @SuppressWarnings("unchecked")
+                    Constructor<A> constructor = (Constructor<A>) ConstructorUtil.getOptByParam(enclosingClass, parameterTypes).orElse(null);
                     Object[] initArgs = fields.stream()
                             .map(field -> FieldUtil.getValue(field, this))
                             .toArray(Object[]::new);
                     // 使用全参构造器
-                    return (A) constructor.newInstance(initArgs);
+                    return ConstructorUtil.newInstance(constructor, initArgs);
                 },
                 (Function<Throwable, A>) ignored -> ThrowableUtil.sneakyThrow((ThrowThrowableSupplier<A>) () -> {
-                            Constructor<?> constructor = enclosingClass.getConstructor();
+                            Constructor<?> constructor = enclosingClass.getDeclaredConstructor();
                             A obj = (A) constructor.newInstance();
                             // 使用 setter 方法
                             fields.forEach(field -> {
