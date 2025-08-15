@@ -64,7 +64,7 @@ public class SocketPingClient implements PingClient {
     }
 
     @Override
-    public void init() throws Exception {
+    public void initialize() throws Exception {
         thread = new Thread(() -> {
             while (!Thread.currentThread().isInterrupted()) {
                 if (terminated) {

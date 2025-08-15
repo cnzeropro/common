@@ -6,15 +6,22 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultSingletonBeanRegistry;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.zero.common.core.extension.spring.beans.factory.EmptyObjectProvider;
+import org.zero.common.core.support.cache.Cache;
+import org.zero.common.core.support.cache.MapCache;
+import org.zero.common.core.util.java.lang.ClassUtil;
+import org.zero.common.core.util.java.lang.reflect.MethodUtil;
 import org.zero.common.data.exception.UtilException;
 
+import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -28,22 +35,37 @@ import java.util.Optional;
  * @author Zero (cnzeropro@qq.com)
  */
 public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContextAware {
+    /**
+     * 获取指定 Bean
+     */
     public static Object getBean(String name) {
         return getBeanFactory().getBean(name);
     }
 
+    /**
+     * 获取指定 Bean
+     */
     public static Object getBean(String name, Object... args) {
         return getBeanFactory().getBean(name, args);
     }
 
+    /**
+     * 获取指定 Bean
+     */
     public static <T> T getBean(Class<T> type) {
         return getBeanFactory().getBean(type);
     }
 
+    /**
+     * 获取指定 Bean
+     */
     public static <T> T getBean(String name, Class<T> type) {
         return getBeanFactory().getBean(name, type);
     }
 
+    /**
+     * 获取指定 Bean
+     */
     public static <T> T getBean(Class<T> type, Object... args) {
         return getBeanFactory().getBean(type, args);
     }
@@ -122,31 +144,47 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
     }
 
     /**
+     * 发布事件
+     */
+    public static void publishEvent(ApplicationEvent event) {
+        getApplicationContext().publishEvent(event);
+    }
+
+    /**
+     * 发布事件
+     * <p>
+     * Spring 4.2+ 事件可以不再是{@link ApplicationEvent}的子类
+     */
+    public static void publishEvent(Object event) {
+        getApplicationContext().publishEvent(event);
+    }
+
+    /**
      * 获取属性值
      */
     public static String getProperty(String key) {
-        return getProperty(key, (String) null);
+        return getEnvironmentOpt().map(env -> env.getProperty(key)).orElse(null);
     }
 
     /**
      * 获取属性值
      */
     public static String getProperty(String key, String defaultValue) {
-        return getEnvironmentOpt().map(env -> env.getProperty(key)).orElse(defaultValue);
+        return getEnvironmentOpt().map(env -> env.getProperty(key, defaultValue)).orElse(defaultValue);
     }
 
     /**
      * 获取属性值
      */
     public static <T> T getProperty(String key, Class<T> type) {
-        return getProperty(key, type, null);
+        return getEnvironmentOpt().map(env -> env.getProperty(key, type)).orElse(null);
     }
 
     /**
      * 获取属性值
      */
     public static <T> T getProperty(String key, Class<T> type, T defaultValue) {
-        return getEnvironmentOpt().map(env -> env.getProperty(key, type)).orElse(defaultValue);
+        return getEnvironmentOpt().map(env -> env.getProperty(key, type, defaultValue)).orElse(defaultValue);
     }
 
     /**
@@ -178,20 +216,26 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
         return activeProfiles.length > 0 ? activeProfiles[0] : null;
     }
 
-    /**
-     * 发布事件
-     */
-    public static void publishEvent(ApplicationEvent event) {
-        getApplicationContext().publishEvent(event);
+    protected static final Cache<String, Object> cache = MapCache.of(ConcurrentReferenceHashMap::new);
+
+    public static WebApplicationType getWebApplicationType() {
+        Object webApplicationType = cache.mapAndPutIfAbsent("webApplicationType", k -> {
+            WebApplicationType applicationType = getProperty("spring.main.web-application-type", WebApplicationType.class);
+            if (Objects.nonNull(applicationType)) {
+                return applicationType;
+            }
+            Method method = MethodUtil.getByNameAndParam(WebApplicationType.class, "deduceFromClasspath");
+            return MethodUtil.invokeStatic(method);
+        });
+        return ClassUtil.cast(webApplicationType, WebApplicationType.class);
     }
 
-    /**
-     * 发布事件
-     * <p>
-     * Spring 4.2+ 事件可以不再是{@link ApplicationEvent}的子类
-     */
-    public static void publishEvent(Object event) {
-        getApplicationContext().publishEvent(event);
+    public static boolean isReactive() {
+        return getWebApplicationType() == WebApplicationType.REACTIVE;
+    }
+
+    public static boolean isServlet() {
+        return getWebApplicationType() == WebApplicationType.SERVLET;
     }
 
     /* ******************************************* Context Getter ******************************************* */

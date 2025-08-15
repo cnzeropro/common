@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.zero.common.data.constant.CommonConstant;
 
-import javax.validation.constraints.Positive;
 import java.io.Serializable;
 
 /**
@@ -25,12 +24,10 @@ public class PageQO implements Serializable {
     /**
      * 页码
      */
-    @Positive
     private long pageNum = 1L;
 
     /**
      * 每页显示数
      */
-    @Positive
     private long pageSize = CommonConstant.DEFAULT_PAGE_SIZE;
 }

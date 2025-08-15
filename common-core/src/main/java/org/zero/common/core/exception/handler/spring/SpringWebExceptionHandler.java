@@ -42,7 +42,7 @@ public class SpringWebExceptionHandler extends ThrowableHandler {
     public ResponseEntity<Result<Void>> responseStatusException(org.springframework.web.server.ResponseStatusException e) {
         log.error(String.format("Response failed (%d)", e.getRawStatusCode()), e);
         HttpStatus httpStatus = e.getStatus();
-        Result<Void> result = this.handleThrowable(httpStatus, e, e.getReason());
+        Result<Void> result = this.handle(httpStatus, e, e.getReason());
         return ResponseEntity.status(httpStatus)
                 .body(result);
     }
@@ -52,7 +52,7 @@ public class SpringWebExceptionHandler extends ThrowableHandler {
     public ResponseEntity<Result<Void>> httpStatusCodeException(org.springframework.web.client.HttpStatusCodeException e) {
         log.error("RestTemplate request failed", e);
         HttpStatus httpStatus = e.getStatusCode();
-        Result<Void> result = this.handleThrowable(httpStatus, e, e.getStatusText());
+        Result<Void> result = this.handle(httpStatus, e, e.getStatusText());
         return ResponseEntity.status(httpStatus)
                 .body(result);
     }
@@ -60,19 +60,19 @@ public class SpringWebExceptionHandler extends ThrowableHandler {
     @ExceptionHandler(org.springframework.web.client.UnknownHttpStatusCodeException.class)
     public Result<Void> unknownHttpStatusCodeException(org.springframework.web.client.UnknownHttpStatusCodeException e) {
         log.error("RestTemplate response unknown http status code", e);
-        return this.handleThrowable(e.getRawStatusCode(), e, e.getStatusText());
+        return this.handle(e.getRawStatusCode(), e, e.getStatusText());
     }
 
     @ExceptionHandler(org.springframework.web.client.UnknownContentTypeException.class)
     public Result<Void> unknownContentTypeException(org.springframework.web.client.UnknownContentTypeException e) {
         log.error("RestTemplate unknown content type", e);
-        return this.handleThrowable(HttpStatus.UNSUPPORTED_MEDIA_TYPE, e, e.getStatusText());
+        return this.handle(HttpStatus.UNSUPPORTED_MEDIA_TYPE, e, e.getStatusText());
     }
 
     @ExceptionHandler(org.springframework.web.client.ResourceAccessException.class)
     public Result<Void> resourceAccessException(org.springframework.web.client.ResourceAccessException e) {
         log.error("RestTemplate resource access failed", e);
-        return this.handleThrowable(e);
+        return this.handle(e);
     }
 
     /* ################# org.springframework.web.bind.MissingRequestValueException ################# */
@@ -80,35 +80,35 @@ public class SpringWebExceptionHandler extends ThrowableHandler {
     public Result<Void> missingRequestHeaderException(org.springframework.web.bind.MissingRequestHeaderException e) {
         String headerName = e.getHeaderName();
         log.error(String.format("Missing request header: %s", headerName), e);
-        return this.handleThrowable(HttpStatus.EXPECTATION_FAILED, e, new Object[]{headerName});
+        return this.handle(HttpStatus.EXPECTATION_FAILED, e, new Object[]{headerName});
     }
 
     @ExceptionHandler(org.springframework.web.bind.MissingRequestCookieException.class)
     public Result<Void> missingRequestCookieException(org.springframework.web.bind.MissingRequestCookieException e) {
         String cookieName = e.getCookieName();
         log.error(String.format("Missing cookie: %s", cookieName), e);
-        return this.handleThrowable(e, Collections.singletonList(cookieName));
+        return this.handle(e, Collections.singletonList(cookieName));
     }
 
     @ExceptionHandler(org.springframework.web.bind.MissingServletRequestParameterException.class)
     public Result<Void> missingServletRequestParameterException(org.springframework.web.bind.MissingServletRequestParameterException e) {
         String parameterName = e.getParameterName();
         log.error(String.format("Missing request parameter: %s (%s)", parameterName, e.getParameterType()), e);
-        return this.handleThrowable(e, Collections.singletonList(parameterName));
+        return this.handle(e, Collections.singletonList(parameterName));
     }
 
     @ExceptionHandler(org.springframework.web.bind.MissingPathVariableException.class)
     public Result<Void> missingPathVariableException(org.springframework.web.bind.MissingPathVariableException e) {
         String variableName = e.getVariableName();
         log.error(String.format("Missing path variable: %s", variableName), e);
-        return this.handleThrowable(e, Collections.singletonList(variableName));
+        return this.handle(e, Collections.singletonList(variableName));
     }
 
     @ExceptionHandler(org.springframework.web.bind.MissingMatrixVariableException.class)
     public Result<Void> missingMatrixVariableException(org.springframework.web.bind.MissingMatrixVariableException e) {
         String variableName = e.getVariableName();
         log.error(String.format("Missing matrix variable: %s", variableName), e);
-        return this.handleThrowable(e, Collections.singletonList(variableName));
+        return this.handle(e, Collections.singletonList(variableName));
     }
 
     /* ################# org.springframework.web.multipart.support.MissingServletRequestPartException ################# */
@@ -116,7 +116,7 @@ public class SpringWebExceptionHandler extends ThrowableHandler {
     public Result<Void> missingServletRequestPartException(org.springframework.web.multipart.support.MissingServletRequestPartException e) {
         String requestPartName = e.getRequestPartName();
         log.error(String.format("Missing request part: %s", requestPartName), e);
-        return this.handleThrowable(e, Collections.singletonList(requestPartName));
+        return this.handle(e, Collections.singletonList(requestPartName));
     }
 
     /* ################# org.springframework.web.HttpSessionRequiredException ################# */
@@ -124,7 +124,7 @@ public class SpringWebExceptionHandler extends ThrowableHandler {
     public Result<Void> httpSessionRequiredException(org.springframework.web.HttpSessionRequiredException e) {
         String expectedAttribute = e.getExpectedAttribute();
         log.error(String.format("Http session expected: %s", expectedAttribute), e);
-        return this.handleThrowable(HttpStatus.EXPECTATION_FAILED, e, Collections.singletonList(expectedAttribute));
+        return this.handle(HttpStatus.EXPECTATION_FAILED, e, Collections.singletonList(expectedAttribute));
     }
 
     /* ################# org.springframework.web.HttpRequestMethodNotSupportedException ################# */
@@ -132,7 +132,7 @@ public class SpringWebExceptionHandler extends ThrowableHandler {
     public Result<Void> httpRequestMethodNotSupportedException(org.springframework.web.HttpRequestMethodNotSupportedException e) {
         String method = e.getMethod();
         log.error(String.format("The request targetMethod[%s] is not supported, only supported: %s", method, Arrays.toString(e.getSupportedMethods())), e);
-        return this.handleThrowable(HttpStatus.METHOD_NOT_ALLOWED, e, Collections.singletonList(method));
+        return this.handle(HttpStatus.METHOD_NOT_ALLOWED, e, Collections.singletonList(method));
     }
 
     /* ################# org.springframework.web.HttpMediaTypeException ################# */
@@ -140,13 +140,13 @@ public class SpringWebExceptionHandler extends ThrowableHandler {
     public Result<Void> httpMediaTypeNotSupportedException(org.springframework.web.HttpMediaTypeNotSupportedException e) {
         MediaType contentType = e.getContentType();
         log.error(String.format("The media type[%s] is not supported, only supported: %s", contentType, e.getSupportedMediaTypes()), e);
-        return this.handleThrowable(HttpStatus.UNSUPPORTED_MEDIA_TYPE, e, Collections.singletonList(contentType));
+        return this.handle(HttpStatus.UNSUPPORTED_MEDIA_TYPE, e, Collections.singletonList(contentType));
     }
 
     @ExceptionHandler(org.springframework.web.HttpMediaTypeNotAcceptableException.class)
     public Result<Void> httpMediaTypeNotAcceptableException(org.springframework.web.HttpMediaTypeNotAcceptableException e) {
         log.error(String.format("Media type is not acceptable, only supported: %s", e.getSupportedMediaTypes()), e);
-        return this.handleThrowable(HttpStatus.UNSUPPORTED_MEDIA_TYPE, e);
+        return this.handle(HttpStatus.UNSUPPORTED_MEDIA_TYPE, e);
     }
 
     /* ################# org.springframework.web.multipart.MultipartException ################# */
@@ -154,7 +154,7 @@ public class SpringWebExceptionHandler extends ThrowableHandler {
     public Result<Void> maxUploadSizeExceededException(org.springframework.web.multipart.MaxUploadSizeExceededException e) {
         String size = DataSizeUtil.format(e.getMaxUploadSize());
         log.error(String.format("The uploaded file exceeds the specified size: %s", size), e);
-        return this.handleThrowable(HttpStatus.PAYLOAD_TOO_LARGE, e, Collections.singletonList(size));
+        return this.handle(HttpStatus.PAYLOAD_TOO_LARGE, e, Collections.singletonList(size));
     }
 
     /* ################# org.springframework.web.bind.MethodArgumentNotValidException ################# */
@@ -166,19 +166,19 @@ public class SpringWebExceptionHandler extends ThrowableHandler {
                 .map(ObjectError::getDefaultMessage)
                 .collect(Collectors.joining(" | ", "[", "]"));
         log.error(String.format("The request parameter validation is abnormal: %s", errorMsg), e);
-        return this.handleThrowable(HttpStatus.BAD_REQUEST, e, Collections.singletonList(errorMsg));
+        return this.handle(HttpStatus.BAD_REQUEST, e, Collections.singletonList(errorMsg));
     }
 
     /* ################# org.springframework.http.converter.HttpMessageConversionException ################# */
     @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
     public Result<Void> httpMessageNotReadableException(org.springframework.http.converter.HttpMessageNotReadableException e) {
         log.error("Error parameter", e);
-        return this.handleThrowable(HttpStatus.BAD_REQUEST, e);
+        return this.handle(HttpStatus.BAD_REQUEST, e);
     }
 
     @ExceptionHandler(org.springframework.http.converter.HttpMessageNotWritableException.class)
     public Result<Void> httpMessageNotWritableException(org.springframework.http.converter.HttpMessageNotWritableException e) {
         log.error("Error result", e);
-        return this.handleThrowable(HttpStatus.BAD_REQUEST, e);
+        return this.handle(HttpStatus.BAD_REQUEST, e);
     }
 }

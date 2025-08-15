@@ -10,7 +10,7 @@ public interface LifeCycle {
      *
      * @throws Exception
      */
-    void init() throws Exception;
+    void initialize() throws Exception;
 
     /**
      * 销毁

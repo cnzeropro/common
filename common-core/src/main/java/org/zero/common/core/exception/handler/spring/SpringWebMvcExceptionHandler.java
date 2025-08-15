@@ -31,13 +31,13 @@ public class SpringWebMvcExceptionHandler extends ThrowableHandler {
     @ExceptionHandler(org.springframework.web.servlet.ModelAndViewDefiningException.class)
     public Result<Void> modelAndViewDefiningException(org.springframework.web.servlet.ModelAndViewDefiningException e) {
         log.error("Model and view definition exception", e);
-        return this.handleThrowable(e);
+        return this.handle(e);
     }
 
     @ExceptionHandler(org.springframework.web.servlet.NoHandlerFoundException.class)
     public Result<Void> noHandlerFoundException(org.springframework.web.servlet.NoHandlerFoundException e) {
         String requestURL = e.getRequestURL();
         log.error(String.format("The request did not find the resource: %s", requestURL), e);
-        return this.handleThrowable(HttpStatus.NOT_FOUND, e, Collections.singletonList(requestURL));
+        return this.handle(HttpStatus.NOT_FOUND, e, Collections.singletonList(requestURL));
     }
 }

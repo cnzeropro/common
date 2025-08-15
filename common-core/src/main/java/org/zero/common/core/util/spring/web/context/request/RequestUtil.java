@@ -22,17 +22,6 @@ public class RequestUtil {
         return Optional.ofNullable(RequestContextHolder.getRequestAttributes());
     }
 
-    public static ServletRequest getServletRequest() {
-        return getServletRequestOpt().orElse(null);
-    }
-
-    public static Optional<ServletRequest> getServletRequestOpt() {
-        return getRequestAttributesOpt()
-                .filter(ServletRequestAttributes.class::isInstance)
-                .map(ServletRequestAttributes.class::cast)
-                .map(ServletRequestAttributes::getRequest);
-    }
-
     /**
      * 获取当前 HttpServletRequest
      */
@@ -98,7 +87,7 @@ public class RequestUtil {
     }
 
     public static Optional<RequestPath> getRequestPathOpt() {
-        return getServletRequestOpt().map(ServletRequestPathUtils::getParsedRequestPath);
+        return getHttpServletRequestOpt().map(ServletRequestPathUtils::getParsedRequestPath);
     }
 
     public static RequestPath getRequestPath() {

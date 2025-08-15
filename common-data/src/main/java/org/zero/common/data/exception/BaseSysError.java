@@ -27,7 +27,6 @@ public interface BaseSysError extends Serializable {
         return OK_CODE.equals(this.getCode());
     }
 
-    // @RequiredArgsConstructor(access = AccessLevel.PROTECTED, staticName = "of")
     @Getter
     @Log
     class DefaultSysError implements BaseSysError {

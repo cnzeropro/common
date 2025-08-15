@@ -35,13 +35,13 @@ public class FeignExceptionHandler extends ThrowableHandler {
     @ExceptionHandler(feign.codec.EncodeException.class)
     public Result<Void> encodeException(feign.codec.EncodeException e) {
         log.error("Feign encode exception", e);
-        return this.handleThrowable(e);
+        return this.handle(e);
     }
 
     @ExceptionHandler(feign.codec.DecodeException.class)
     public Result<Void> decodeException(feign.codec.DecodeException e) {
         log.error("Feign decode exception", e);
-        return this.handleThrowable(e);
+        return this.handle(e);
     }
 
     @ExceptionHandler(feign.FeignException.class)
@@ -52,6 +52,6 @@ public class FeignExceptionHandler extends ThrowableHandler {
                 .map(RequestTemplate::feignTarget)
                 .map(Target::name)
                 .orElse("unknown");
-        return this.handleThrowable(e.status(), e, Collections.singletonList(feignServiceName));
+        return this.handle(e.status(), e, Collections.singletonList(feignServiceName));
     }
 }

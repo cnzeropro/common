@@ -15,7 +15,7 @@ class SocketPingClientTest {
                 .host("127.0.0.1")
                 .port(8080)
                 .build();
-        pongServer.init();
+        pongServer.initialize();
         pongServer.start();
         // 阻塞
         new Scanner(System.in).nextLine();
@@ -29,7 +29,7 @@ class SocketPingClientTest {
                 .serverPort(8080)
                 .period(3000)
                 .build();
-        pingClient.init();
+        pingClient.initialize();
         pingClient.start();
         // 阻塞
         new Scanner(System.in).nextLine();

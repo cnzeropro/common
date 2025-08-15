@@ -5,7 +5,6 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.TemporalAccessorUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.ReflectUtil;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -17,7 +16,6 @@ import org.zero.common.data.constant.StringPool;
 import org.zero.common.data.exception.UtilException;
 
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAccessor;
@@ -241,11 +239,6 @@ public class ValueToParamStringHandler extends MapValueHandler<String> {
     }
 
     protected WebApplicationType getWebApplicationType() {
-        WebApplicationType applicationType = SpringUtils.getProperty("spring.main.web-application-type", WebApplicationType.class);
-        if (Objects.nonNull(applicationType)) {
-            return applicationType;
-        }
-        Method method = ReflectUtil.getMethodByName(WebApplicationType.class, "deduceFromClasspath");
-        return ReflectUtil.invokeStatic(method);
+        return SpringUtils.getWebApplicationType();
     }
 }

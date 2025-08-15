@@ -1,0 +1,49 @@
+plugins {
+    id('java')
+    id('java-gradle-plugin')
+    id('groovy')
+    id('groovy-gradle-plugin')
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    gradlePluginPortal()
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+dependencies {
+    // 引入 Gradle API
+    implementation(gradleApi())
+    // 引入 Groovy 支持
+    implementation(localGroovy())
+
+    testImplementation(platform(libs.org.junit.junit.bom))
+    testImplementation(platform(libs.org.mockito.mockito.bom))
+    compileOnly(libs.org.projectlombok.lombok)
+    annotationProcessor(libs.org.projectlombok.lombok)
+    testCompileOnly(libs.org.projectlombok.lombok)
+    testAnnotationProcessor(libs.org.projectlombok.lombok)
+}
+
+gradlePlugin {
+    plugins {
+        sourceJar {
+            id = 'org.zero.plugin.source.source-jar'
+            implementationClass = 'org.zero.plugin.source.SourceJarPlugin'
+        }
+    }
+}
+
+tasks.named('processResources') {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+tasks.named('test', Test).configure {
+    onlyIf { !project.hasProperty("buildSrc.skipTests") }
+    useJUnitPlatform()
+}

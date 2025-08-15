@@ -56,7 +56,7 @@ public class SentinelRestTemplateHandler {
         ThrowableHandler throwableHandler = SpringUtils.getBeanProvider(ThrowableHandler.class).getIfAvailable();
         Result<Void> result = Result.fail(exception.getMessage());
         if (Objects.nonNull(throwableHandler)) {
-            result = throwableHandler.handleThrowable(exception);
+            result = throwableHandler.handle(exception);
         }
         String jsonStr = JacksonUtils.toJsonStr(result);
         return new CustomSentinelClientHttpResponse(jsonStr);

@@ -12,8 +12,6 @@ import org.springframework.core.Ordered;
 public interface BaseBanner extends ApplicationRunner, Ordered {
     @Override
     default void run(ApplicationArguments args) throws Exception {
-        // 延迟 500 毫秒，使其输出到尾部
-        Thread.sleep(500);
         this.print(args);
     }
 

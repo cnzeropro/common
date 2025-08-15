@@ -1,0 +1,122 @@
+plugins {
+    id('java-platform')
+}
+
+javaPlatform {
+    allowDependencies()
+}
+
+dependencies {
+    api(platform(libs.org.zero.common.bom))
+    api(platform(libs.org.apache.dubbo.dubbo.bom))
+    api(platform(libs.org.apache.shiro.shiro.bom))
+    api(platform(libs.org.apache.logging.log4j.log4j.bom))
+    api(platform(libs.org.springframework.spring.framework.bom))
+    api(platform(libs.org.springframework.boot.spring.boot.dependencies))
+    api(platform(libs.org.springframework.cloud.spring.cloud.dependencies))
+    api(platform(libs.org.springframework.data.spring.data.bom))
+    api(platform(libs.org.springframework.security.spring.security.bom))
+    api(platform(libs.org.springframework.integration.spring.integration.bom))
+    api(platform(libs.org.springframework.shell.spring.shell.dependencies))
+    api(platform(libs.org.springframework.session.spring.session.bom))
+    api(platform(libs.com.alibaba.cloud.spring.cloud.alibaba.dependencies))
+    api(platform(libs.org.eclipse.jetty.jetty.bom))
+    api(platform(libs.org.slf4j.slf4j.bom))
+    api(platform(libs.org.junit.junit.bom))
+    api(platform(libs.org.testcontainers.testcontainers.bom))
+    api(platform(libs.com.google.cloud.libraries.bom))
+    api(platform(libs.com.huaweicloud.spring.cloud.huawei.bom))
+    api(platform(libs.com.querydsl.querydsl.bom))
+    api(platform(libs.com.baomidou.mybatis.plus.bom))
+    api(platform(libs.com.mybatis.flex.mybatis.flex.dependencies))
+    api(platform(libs.io.projectreactor.reactor.bom))
+    api(platform(libs.io.netty.netty.bom))
+    api(platform(libs.cn.hutool.hutool.bom))
+    api(platform(libs.jakarta.platform.jakarta.jakartaee.bom))
+    constraints {
+    }
+}
+
+// 所有项目通用配置（包括根项目）
+allprojects {
+    apply plugin: 'base'
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
+// 所有子项目通用配置
+subprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'application'
+    apply plugin: 'jvm-test-suite'
+    apply plugin: 'maven-publish'
+    apply plugin: 'org.zero.plugin.source.source-jar'
+
+    dependencies {
+        testImplementation 'org.junit.jupiter:junit-jupiter'
+    }
+
+    // https://docs.gradle.org/current/userguide/java_plugin.html#java_plugin
+    plugins.withId('java') {
+        tasks.named('compileJava', JavaCompile) {
+            options.compilerArgs += ["-parameters"]
+            options.encoding = "UTF-8"
+        }
+        tasks.named('compileTestJava', JavaCompile) {
+            options.compilerArgs += ["-parameters"]
+            options.encoding = "UTF-8"
+        }
+        tasks.named('javadoc', Javadoc) {
+            failOnError = false
+            options.addStringOption('Xdoclint:none', '-quiet')
+            options.encoding = "UTF-8"
+        }
+    }
+
+    // https://docs.gradle.org/current/userguide/base_plugin.html#base_plugin
+    plugins.withId('base') {
+        tasks.named('clean', Delete) {
+            followSymlinks = true
+            doFirst {
+                println "Cleaning..."
+            }
+        }
+    }
+
+//    tasks.named('sourcesJar', Jar) {
+//        doFirst {
+//            println "Generating sourcesJar..."
+//        }
+//    }
+//    tasks.named('javadocJar', Jar) {
+//        doFirst {
+//            println "Generating javadocJar..."
+//        }
+//    }
+
+    test {
+        enabled = false
+        useJUnitPlatform()
+        filter {
+            includeTestsMatching("*Test")
+            includeTestsMatching("*Tests")
+            includeTestsMatching("*Spec")
+        }
+        testLogging {
+            showStandardStreams = true
+            events("passed", "skipped", "failed")
+        }
+    }
+}
+
+group = "org.zero"
+version = libs.versions.revison
+description = "Common Project"
+
+wrapper {
+    gradleVersion = "8.14.3"
+    distributionType = Wrapper.DistributionType.ALL
+}

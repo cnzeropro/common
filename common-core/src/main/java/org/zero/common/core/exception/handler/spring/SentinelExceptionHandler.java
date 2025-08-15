@@ -25,36 +25,36 @@ public class SentinelExceptionHandler extends ThrowableHandler {
     @ExceptionHandler(com.alibaba.csp.sentinel.slots.block.flow.FlowException.class)
     public Result<Void> flowException(com.alibaba.csp.sentinel.slots.block.flow.FlowException e) {
         log.error("Resource has been throttled", e);
-        return this.handleThrowable(e);
+        return this.handle(e);
     }
 
     @ExceptionHandler(com.alibaba.csp.sentinel.slots.block.degrade.DegradeException.class)
     public Result<Void> degradeException(com.alibaba.csp.sentinel.slots.block.degrade.DegradeException e) {
         log.error("Resource has been degraded", e);
-        return this.handleThrowable(e);
+        return this.handle(e);
     }
 
     @ExceptionHandler(com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowException.class)
     public Result<Void> paramFlowException(com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowException e) {
         log.error("Resource[param] has been throttled", e);
-        return this.handleThrowable(e);
+        return this.handle(e);
     }
 
     @ExceptionHandler(com.alibaba.csp.sentinel.slots.system.SystemBlockException.class)
     public Result<Void> systemBlockException(com.alibaba.csp.sentinel.slots.system.SystemBlockException e) {
         log.error("Resource[system] has been block", e);
-        return this.handleThrowable(e);
+        return this.handle(e);
     }
 
     @ExceptionHandler(com.alibaba.csp.sentinel.slots.block.authority.AuthorityException.class)
     public Result<Void> authorityException(com.alibaba.csp.sentinel.slots.block.authority.AuthorityException e) {
         log.error("Resource not authorized", e);
-        return this.handleThrowable(e);
+        return this.handle(e);
     }
 
     @ExceptionHandler(com.alibaba.csp.sentinel.slots.block.BlockException.class)
     public Result<Void> blockException(com.alibaba.csp.sentinel.slots.block.BlockException e) {
         log.error("Resource has been block", e);
-        return this.handleThrowable(e);
+        return this.handle(e);
     }
 }

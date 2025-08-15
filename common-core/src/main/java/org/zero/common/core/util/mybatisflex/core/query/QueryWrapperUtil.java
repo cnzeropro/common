@@ -82,7 +82,7 @@ public class QueryWrapperUtil {
             if (!fieldInfo.isTableColumn()) {
                 checkSqlInjection(column);
             }
-            queryWrapper.isNull(column, StringUtil.isNotBlank(column));
+            queryWrapper.isNull(column, StringUtil.hasText(column));
         });
         return queryWrapper;
     }
@@ -101,7 +101,7 @@ public class QueryWrapperUtil {
             if (!fieldInfo.isTableColumn()) {
                 checkSqlInjection(column);
             }
-            queryWrapper.isNotNull(column, StringUtil.isNotBlank(column));
+            queryWrapper.isNotNull(column, StringUtil.hasText(column));
         });
         return queryWrapper;
     }
@@ -292,7 +292,7 @@ public class QueryWrapperUtil {
      * 检查是否存在 SQL 注入风险
      */
     protected static void checkSqlInjection(String str) {
-        if (StringUtil.isNotBlank(str)) {
+        if (StringUtil.hasText(str)) {
             if (SQL_COMMENT_PATTERN.matcher(str).find() || SQL_SYNTAX_PATTERN.matcher(str).find()) {
                 throw new UtilException(String.format("There is a risk of SQL injection, please check: %s", str));
             }

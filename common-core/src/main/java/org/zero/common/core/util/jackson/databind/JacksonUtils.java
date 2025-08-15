@@ -19,6 +19,11 @@ import java.util.Objects;
  */
 public class JacksonUtils {
     @SneakyThrows
+    public static byte[] toJsonBytes(Object value) {
+        return getObjectMapper().writeValueAsBytes(value);
+    }
+
+    @SneakyThrows
     public static String toJsonStr(Object value) {
         return getObjectMapper().writeValueAsString(value);
     }

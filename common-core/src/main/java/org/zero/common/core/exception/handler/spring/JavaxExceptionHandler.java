@@ -41,6 +41,6 @@ public class JavaxExceptionHandler extends ThrowableHandler {
                 .map(ConstraintViolation::getMessage)
                 .collect(Collectors.joining(" | ", "[", "]"));
         log.error(String.format("Parameter validation not pass: %s", errorMsg), e);
-        return this.handleThrowable(HttpStatus.BAD_REQUEST, e, new Object[]{errorMsg});
+        return this.handle(HttpStatus.BAD_REQUEST, e, new Object[]{errorMsg});
     }
 }

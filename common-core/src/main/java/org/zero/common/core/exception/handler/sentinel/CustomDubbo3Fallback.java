@@ -30,7 +30,7 @@ public class CustomDubbo3Fallback extends ThrowableHandler implements DubboFallb
         log.error("Sentinel block exception", ex);
         AppResponse appResponse = new AppResponse(invocation);
         appResponse.setException(ex);
-        Result<Void> result = this.handleThrowable(ex);
+        Result<Void> result = this.handle(ex);
         appResponse.setValue(result);
         return AsyncRpcResult.newDefaultAsyncResult(appResponse, invocation);
     }

@@ -14,7 +14,7 @@ import org.springframework.lang.NonNull;
 @RequiredArgsConstructor
 public class NamedResource implements Resource {
     @NonNull
-    private final  String name;
+    private final String name;
 
     @NonNull
     @Delegate

@@ -1,0 +1,87 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 4
+indent_style = space
+insert_final_newline = false
+max_line_length = 120
+tab_width = 4
+
+[.editorconfig]
+
+[*.java]
+
+[*.{adoc,bat,groovy,html,java,js,jsp,kt,kts,md,properties,py,rb,sh,sql,svg,txt,xml,xsd}]
+charset = utf-8
+
+[*.{groovy,java,kt,kts,xml,xsd}]
+indent_style = tab
+indent_size = 4
+end_of_line = lf
+
+[*.css]
+
+[*.less]
+indent_size = 2
+
+[*.sass]
+indent_size = 2
+
+[*.scss]
+indent_size = 2
+
+[*.vue]
+indent_size = 2
+tab_width = 2
+
+[{*.yml,*.yaml}]
+indent_size = 2
+
+[{*.ant,*.fxml,*.jhm,*.jnlp,*.jrxml,*.pom,*.rng,*.tld,*.wadl,*.wsdd,*.wsdl,*.xjb,*.xml,*.xsd,*.xsl,*.xslt,*.xul}]
+
+[{*.ats,*.cts,*.mts,*.ts}]
+
+[{*.bash,*.sh,*.zsh}]
+indent_size = 2
+tab_width = 2
+
+[*.proto]
+indent_size = 2
+tab_width = 2
+
+[*.csv]
+indent_style = tab
+
+[{*.cjs,*.js}]
+
+[{*.ft,*.vm,*.vsl}]
+
+[{*.gant,*.groovy,*.gy}]
+
+[{*.har,*.jsb2,*.jsb3,*.jsonc,*.postman_collection,*.postman_collection.json,*.postman_environment,*.postman_environment.json,*.sonarlint/*.json,.babelrc,.eslintrc,.prettierrc,.stylelintrc,.ws-context,bowerrc,connectedMode.json,jest.config}]
+indent_size = 2
+
+[{*.htm,*.html,*.sht,*.shtm,*.shtml}]
+
+[{*.http,*.rest}]
+indent_size = 0
+
+[{*.jsf,*.jsp,*.jspf,*.tag,*.tagf,*.xjsp}]
+
+[{*.jspx,*.tagx}]
+
+[{*.kt,*.kts}]
+
+[{*.markdown,*.md}]
+
+[{*.pb,*.textproto,*.txtpb}]
+indent_size = 2
+tab_width = 2
+
+[{*.properties,spring.handlers,spring.schemas}]
+
+[{*.qute.htm,*.qute.html,*.qute.json,*.qute.txt,*.qute.yaml,*.qute.yml}]
+
+[{*.toml,Cargo.lock,Cargo.toml.orig,Gopkg.lock,Pipfile,poetry.lock}]

@@ -52,59 +52,60 @@ import java.util.function.Function;
  * @author Zero (cnzeropro@163.com)
  * @since 2025/4/29
  */
-public abstract class BaseBuilder<A, B extends BaseBuilder<A, B>> {
-    /**
-     * 实例化对象
-     * <p>
-     * 通过当前 {@code Builder} 对象类的 {@code enclosing class}（直接包含类）实例化对象。<br>
-     * 实例化对象尝试使用两种方式：<br>
-     * 1. 先尝试通过全参构造器实例化对象 <br>
-     * 2. 再尝试通过 setter 方法实例化对象
-     */
-    @SuppressWarnings("unchecked")
-    protected A instance() {
-        Class<?> clazz = this.getClass();
-        Class<?> enclosingClass = clazz.getEnclosingClass();
-        if (Objects.isNull(enclosingClass)) {
-            throw new CommonException(String.format("%s must have enclosing class", clazz));
-        }
-        Collection<Field> fields = FieldUtil.list(clazz, false);
-        // 先尝试使用全参构造器实例化对象，如果异常则尝试使用 setter 方法实例化对象
-        return ThrowableUtil.tryReturnNew((ThrowThrowableSupplier<A>) () -> {
-                    Class<?>[] parameterTypes = fields.stream()
-                            .map(Field::getType)
-                            .toArray(Class[]::new);
-                    @SuppressWarnings("unchecked")
-                    Constructor<A> constructor = (Constructor<A>) ConstructorUtil.getOptByParam(enclosingClass, parameterTypes).orElse(null);
-                    Object[] initArgs = fields.stream()
-                            .map(field -> FieldUtil.getValue(field, this))
-                            .toArray(Object[]::new);
-                    // 使用全参构造器
-                    return ConstructorUtil.newInstance(constructor, initArgs);
-                },
-                (Function<Throwable, A>) ignored -> ThrowableUtil.sneakyThrow((ThrowThrowableSupplier<A>) () -> {
-                            Constructor<?> constructor = enclosingClass.getDeclaredConstructor();
-                            A obj = (A) constructor.newInstance();
-                            // 使用 setter 方法
-                            fields.forEach(field -> {
-                                Object fieldValue = FieldUtil.getValue(field, this);
-                                MethodUtil.GetterOrSetterQuerier.create(MethodUtil.GetterOrSetterQuerier.Mode.SETTER)
-                                        .targetClass(enclosingClass)
-                                        .field(field)
-                                        .queryOpt()
-                                        .ifPresent(method -> MethodUtil.invoke(method, obj, fieldValue));
-                            });
-                            return obj;
-                        })
-                        .get());
-    }
+public abstract class BaseBuilder<A, B extends BaseBuilder<A, B>> implements Builder<A, B> {
+	/**
+	 * 实例化对象
+	 * <p>
+	 * 通过当前 {@code Builder} 对象类的 {@code enclosing class}（直接包含类）实例化对象。<br>
+	 * 实例化对象尝试使用两种方式：<br>
+	 * 1. 先尝试通过全参构造器实例化对象 <br>
+	 * 2. 再尝试通过 setter 方法实例化对象
+	 */
+	@SuppressWarnings("unchecked")
+	protected A instance() {
+		Class<?> clazz = this.getClass();
+		Class<?> enclosingClass = clazz.getEnclosingClass();
+		if (Objects.isNull(enclosingClass)) {
+			throw new CommonException(String.format("%s must have enclosing class", clazz));
+		}
+		Collection<Field> fields = FieldUtil.list(clazz, false);
+		// 先尝试使用全参构造器实例化对象，如果异常则尝试使用 setter 方法实例化对象
+		return ThrowableUtil.tryReturnNew((ThrowThrowableSupplier<A>) () -> {
+				Class<?>[] parameterTypes = fields.stream()
+					.map(Field::getType)
+					.toArray(Class[]::new);
+				@SuppressWarnings("unchecked")
+				Constructor<A> constructor = (Constructor<A>) ConstructorUtil.getOptByParam(enclosingClass, parameterTypes).orElse(null);
+				Object[] initArgs = fields.stream()
+					.map(field -> FieldUtil.getValue(field, this))
+					.toArray(Object[]::new);
+				// 使用全参构造器
+				return ConstructorUtil.newInstance(constructor, initArgs);
+			},
+			(Function<Throwable, A>) ignored -> ThrowableUtil.sneakyThrow((ThrowThrowableSupplier<A>) () -> {
+					Constructor<?> constructor = enclosingClass.getDeclaredConstructor();
+					A obj = (A) constructor.newInstance();
+					// 使用 setter 方法
+					fields.forEach(field -> {
+						Object fieldValue = FieldUtil.getValue(field, this);
+						MethodUtil.GetterOrSetterQuerier.create(MethodUtil.GetterOrSetterQuerier.Mode.SETTER)
+							.targetClass(enclosingClass)
+							.field(field)
+							.queryOpt()
+							.ifPresent(method -> MethodUtil.invoke(method, obj, fieldValue));
+					});
+					return obj;
+				})
+				.get());
+	}
 
-    protected void validate(A obj) {
-    }
+	protected void validate(A obj) {
+	}
 
-    public A build() {
-        A obj = this.instance();
-        this.validate(obj);
-        return obj;
-    }
+	@Override
+	public A build() {
+		A obj = this.instance();
+		this.validate(obj);
+		return obj;
+	}
 }

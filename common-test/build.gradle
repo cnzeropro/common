@@ -1,0 +1,52 @@
+dependencies {
+    implementation(platform(project(":")))
+    implementation('org.zero:common-core')
+    implementation('org.zero:common-data')
+    implementation('org.zero:common-api')
+    implementation('org.zero:common-job')
+    implementation('org.springframework:spring-aspects')
+    implementation('org.springframework.boot:spring-boot-starter-jdbc')
+    implementation('org.springframework.boot:spring-boot-starter-web')
+    implementation('org.springframework.boot:spring-boot-starter-hateoas')
+    implementation('org.springframework.boot:spring-boot-starter-actuator')
+    implementation('org.springframework.boot:spring-boot-starter-validation')
+    implementation('org.springframework.boot:spring-boot-starter-logging')
+    implementation('org.springframework.boot:spring-boot-starter-aop')
+    implementation('org.springframework.boot:spring-boot-configuration-processor')
+    runtimeOnly('org.springframework.boot:spring-boot-devtools')
+    testImplementation('org.springframework.boot:spring-boot-starter-test')
+    implementation('org.springframework.data:spring-data-commons')
+    implementation('org.springframework.cloud:spring-cloud-starter-openfeign')
+    implementation(libs.org.mybatis.spring.boot.mybatis.spring.boot.starter)
+    implementation(libs.org.apache.poi.poi.ooxml)
+    testImplementation(libs.org.openjdk.jmh.jmh.core)
+    testImplementation(libs.org.openjdk.jmh.jmh.generator.annprocess)
+    implementation('org.slf4j:slf4j-api')
+    implementation('com.querydsl:querydsl-core')
+    implementation('com.querydsl:querydsl-jpa')
+    implementation(libs.com.alibaba.easyexcel)
+    implementation(libs.com.alibaba.transmittable.thread.local)
+    runtimeOnly('com.h2database:h2')
+    implementation('cn.hutool:hutool-core')
+    implementation('cn.hutool:hutool-json')
+    implementation('io.projectreactor:reactor-core')
+    implementation('javax.annotation:javax.annotation-api')
+    implementation(libs.javax.inject.javax.inject)
+    implementation('jakarta.inject:jakarta.inject-api')
+
+    compileOnly('org.projectlombok:lombok')
+    annotationProcessor(libs.org.projectlombok.lombok)
+    testCompileOnly('org.projectlombok:lombok')
+    testAnnotationProcessor(libs.org.projectlombok.lombok)
+}
+
+description = 'common-test'
+
+application {
+    mainClass = 'org.zero.common.test.Application'
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}

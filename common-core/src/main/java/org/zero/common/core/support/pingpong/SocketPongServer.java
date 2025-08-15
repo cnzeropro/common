@@ -57,7 +57,7 @@ public class SocketPongServer implements PongServer {
     }
 
     @Override
-    public void init() throws Exception {
+    public void initialize() throws Exception {
         serverSocket = new ServerSocket();
         serverSocket.setSoTimeout(timeout);
         serverSocket.setReuseAddress(reuseAddress);

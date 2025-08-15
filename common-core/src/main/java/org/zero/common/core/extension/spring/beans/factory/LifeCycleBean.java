@@ -11,11 +11,11 @@ import org.zero.common.core.extension.java.LifeCycle;
 public interface LifeCycleBean extends LifeCycle, InitializingBean, DisposableBean {
     @Override
     default void afterPropertiesSet() throws Exception {
-        init();
+        initialize();
     }
 
     @Override
-    default void init() throws Exception {
+    default void initialize() throws Exception {
     }
 
     @Override

@@ -29,19 +29,19 @@ public class BaseExceptionHandler extends ThrowableHandler {
     @ExceptionHandler(org.zero.common.data.exception.UtilException.class)
     public Result<Void> utilException(org.zero.common.data.exception.UtilException e) {
         log.error("Util targetMethod called error", e);
-        return this.handleThrowable(e);
+        return this.handle(e);
     }
 
     @ExceptionHandler(org.zero.common.core.support.xss.XssException.class)
     public Result<Void> xssException(org.zero.common.core.support.xss.XssException e) {
         log.error("There is a risk of XSS (Cross Site Scripting)", e);
-        return this.handleThrowable(e);
+        return this.handle(e);
     }
 
     @ExceptionHandler(org.zero.common.data.exception.CommonException.class)
     public Result<Void> commonException(org.zero.common.data.exception.CommonException e) {
         log.error("Common exception", e);
-        return this.handleThrowable(e);
+        return this.handle(e);
     }
 
     @ExceptionHandler(org.zero.common.data.exception.BaseException.class)

@@ -1,8 +1,10 @@
 package org.zero.common.core.extension.slf4j.spi;
 
 import com.alibaba.ttl.TransmittableThreadLocal;
+import org.slf4j.helpers.ThreadLocalMapOfStacks;
 import org.slf4j.spi.MDCAdapter;
 
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -19,6 +21,7 @@ import java.util.Objects;
  */
 public class CustomMDCAdapter implements MDCAdapter {
     protected final ThreadLocal<Map<String, String>> context = TransmittableThreadLocal.withInitial(HashMap::new);
+	protected final ThreadLocalMapOfStacks threadLocalMapOfDeques = new ThreadLocalMapOfStacks();
 
     @Override
     public void put(String key, String val) {
@@ -52,7 +55,26 @@ public class CustomMDCAdapter implements MDCAdapter {
         context.set(map);
     }
 
-    protected Map<String, String> getContextMap() {
+	@Override
+	public void pushByKey(String key, String value) {
+		threadLocalMapOfDeques.pushByKey(key, value);
+	}
+
+	@Override
+	public String popByKey(String key) {
+		return threadLocalMapOfDeques.popByKey(key);
+	}
+
+	@Override
+	public Deque<String> getCopyOfDequeByKey(String key) {
+		return threadLocalMapOfDeques.getCopyOfDequeByKey(key);
+	}
+	@Override
+	public void clearDequeByKey(String key) {
+		threadLocalMapOfDeques.clearDequeByKey(key);
+	}
+
+	protected Map<String, String> getContextMap() {
         Map<String, String> map = context.get();
         if (Objects.isNull(map)) {
             map = new HashMap<>();

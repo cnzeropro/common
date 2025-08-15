@@ -33,6 +33,6 @@ public class SpringWebReactiveExceptionHandler extends ThrowableHandler {
     public Result<Void> unsupportedMediaTypeException(org.springframework.web.reactive.function.UnsupportedMediaTypeException e) {
         MediaType contentType = e.getContentType();
         log.error(String.format("The media type[%s] is not supported, only supported: %s", contentType, e.getSupportedMediaTypes()), e);
-        return this.handleThrowable(HttpStatus.UNSUPPORTED_MEDIA_TYPE, e, Collections.singletonList(contentType));
+        return this.handle(HttpStatus.UNSUPPORTED_MEDIA_TYPE, e, Collections.singletonList(contentType));
     }
 }

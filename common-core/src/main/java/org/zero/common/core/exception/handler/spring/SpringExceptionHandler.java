@@ -40,6 +40,6 @@ public class SpringExceptionHandler extends ThrowableHandler {
                 .map(ObjectError::getDefaultMessage)
                 .collect(Collectors.joining(" | ", "[", "]"));
         log.error(String.format("Data binding exception: %s", errorMsg), e);
-        return this.handleThrowable(HttpStatus.BAD_REQUEST, e, new Object[]{errorMsg});
+        return this.handle(HttpStatus.BAD_REQUEST, e, new Object[]{errorMsg});
     }
 }

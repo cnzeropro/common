@@ -1,7 +1,7 @@
-package org.zero.common.core.extension.spring.gateway;
+package org.zero.common.core.extension.spring.cloud.gateway.filter;
 
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.RouteToRequestUrlFilter;
 import org.springframework.cloud.gateway.route.Route;
@@ -34,13 +34,17 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.G
  * 由于内部 {@linkplain UriComponentsBuilder#build(boolean) UriComponentsBuilder.build} 抛了异常，因此返回 false（即未编码），
  * 最终导致构建 {@code mergedUrl} 时，进行重复编码（{@code %25E4%25BD%25A0%25E5%25A5%25BD}），因此出现了双重编码问题。
  * <p>
- * 但是，这本质是浏览器或服务器未采用严格模式引起的问题（保留字符在 url 参数中本就应该被编码），因此最好的方式还是手动编码或者前端编码处理后传递。
+ * 但是，这本质是浏览器或客户端未采用严格模式引起的问题（保留字符在 url 参数中本就应该被编码），因此最好的方式还是手动编码或者前端编码处理后传递，而不是使用该类。
  *
  * @author Zero (cnzeropro@163.com)
+ * @see RouteToRequestUrlFilterBeanReplacer
  * @since 2025/2/20
  */
-@Slf4j
+@CommonsLog
 public class CustomRouteToRequestUrlFilter extends RouteToRequestUrlFilter {
+    /**
+     * copy from {@link RouteToRequestUrlFilter#filter(ServerWebExchange, GatewayFilterChain)} and modify
+     */
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         Route route = exchange.getAttribute(GATEWAY_ROUTE_ATTR);
@@ -68,7 +72,7 @@ public class CustomRouteToRequestUrlFilter extends RouteToRequestUrlFilter {
 
         // 处理 QueryParam 中半编码情况，如：a[0].b=%E4%BD%A0%E5%A5%BD
         // 其中中文的字符（你好）被正常编码（%E4%BD%A0%E5%A5%BD），但方括号（[]）未被编码（%5B%5D）
-        // 原因在于其属于保留字符，各家实现不同，因此存在浏览器（如：Edge）或服务器采用宽松模式
+        // 原因在于其属于保留字符，各家实现不同，因此存在浏览器（如：Edge）或客户端采用宽松模式
         // https://github.com/spring-cloud/spring-cloud-gateway/issues/2065
         // https://datatracker.ietf.org/doc/html/rfc3986#section-2.2
         boolean encoded = hasEncodedQueryParam(uri);
@@ -81,7 +85,6 @@ public class CustomRouteToRequestUrlFilter extends RouteToRequestUrlFilter {
         } else {
             queryParam = encodedQueryParam(getQueryParam(uri));
         }
-
         URI mergedUrl = UriComponentsBuilder.fromUri(uri)
                 // .uri(routeUri)
                 .scheme(routeUri.getScheme())
@@ -94,20 +97,27 @@ public class CustomRouteToRequestUrlFilter extends RouteToRequestUrlFilter {
         return chain.filter(exchange);
     }
 
-    private static final String SCHEME_REGEX = "[a-zA-Z]([a-zA-Z]|\\d|\\+|\\.|-)*:.*";
+    protected static final String SCHEME_REGEX = "[a-zA-Z]([a-zA-Z]|\\d|\\+|\\.|-)*:.*";
     protected static final Pattern schemePattern = Pattern.compile(SCHEME_REGEX);
 
-    /* for testing */
+    /**
+     * copy from {@link RouteToRequestUrlFilter#hasAnotherScheme(URI)}
+     */
     protected static boolean hasAnotherScheme(URI uri) {
         return schemePattern.matcher(uri.getSchemeSpecificPart()).matches() && uri.getHost() == null
                 && uri.getRawPath() == null;
     }
 
-
+    /**
+     * copy from {@link org.springframework.cloud.gateway.support.ServerWebExchangeUtils#containsEncodedParts(java.net.URI)} and modify
+     */
     protected static boolean hasEncodedQueryParam(URI uri) {
         return uri.getRawQuery() != null && uri.getRawQuery().contains("%");
     }
 
+    /**
+     * copy from {@link org.springframework.cloud.gateway.support.ServerWebExchangeUtils#containsEncodedParts(java.net.URI)} and modify
+     */
     protected static boolean hasInvalidChar(URI uri) {
         try {
             UriComponentsBuilder.fromUri(uri).build(true);
@@ -128,21 +138,18 @@ public class CustomRouteToRequestUrlFilter extends RouteToRequestUrlFilter {
     protected static MultiValueMap<String, String> encodedQueryParam(MultiValueMap<String, String> queryParams) {
         MultiValueMap<String, String> encodedQueryParams = new LinkedMultiValueMap<>(queryParams.size());
         queryParams.forEach((key, values) -> {
-            String encodedKey = key;
-            if (!isAllowed(key)) {
-                encodedKey = UriUtils.encodeQueryParam(key, StandardCharsets.UTF_8);
-            }
+            String encodedKey = isAllowed(key) ? key : UriUtils.encodeQueryParam(key, StandardCharsets.UTF_8);
             for (String value : values) {
-                String encodedValue = value;
-                if (!isAllowed(value)) {
-                    encodedValue = UriUtils.encodeQueryParam(value, StandardCharsets.UTF_8);
-                }
+                String encodedValue = isAllowed(value) ? value : UriUtils.encodeQueryParam(value, StandardCharsets.UTF_8);
                 encodedQueryParams.add(encodedKey, encodedValue);
             }
         });
         return encodedQueryParams;
     }
 
+    /**
+     * copy from {@link org.springframework.web.util.HierarchicalUriComponents#verifyUriComponent(java.lang.String, org.springframework.web.util.HierarchicalUriComponents.Type)} and modify
+     */
     protected static boolean isAllowed(String source) {
         if (source == null) {
             return true;
@@ -188,10 +195,18 @@ public class CustomRouteToRequestUrlFilter extends RouteToRequestUrlFilter {
         }
     }
 
+    /**
+     * 由于 {@link org.springframework.web.util.HierarchicalUriComponents.Type} 枚举类是 private-package 访问权限的，因此进行反射调用
+     */
     @SneakyThrows
     protected static boolean isAllowed(int character) {
         method.setAccessible(true);
         Object invoked = method.invoke(type, character);
         return (boolean) invoked;
+    }
+
+    @Override
+    public int getOrder() {
+        return super.getOrder() - 10;
     }
 }

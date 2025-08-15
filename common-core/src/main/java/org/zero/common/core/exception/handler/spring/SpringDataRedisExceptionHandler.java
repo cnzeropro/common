@@ -29,18 +29,18 @@ public class SpringDataRedisExceptionHandler extends ThrowableHandler {
     @ExceptionHandler(org.springframework.data.redis.connection.PoolException.class)
     public Result<Void> poolException(org.springframework.data.redis.connection.PoolException e) {
         log.error("Redis connection pool exception", e);
-        return this.handleThrowable(e);
+        return this.handle(e);
     }
 
     @ExceptionHandler(org.springframework.data.redis.RedisSystemException.class)
     public Result<Void> redisSystemException(org.springframework.data.redis.RedisSystemException e) {
         log.error("Redis system exception", e);
-        return this.handleThrowable(e);
+        return this.handle(e);
     }
 
     @ExceptionHandler(org.springframework.data.redis.RedisConnectionFailureException.class)
     public Result<Void> redisConnectionFailureException(org.springframework.data.redis.RedisConnectionFailureException e) {
         log.error("Redis connection failed", e);
-        return this.handleThrowable(e);
+        return this.handle(e);
     }
 }

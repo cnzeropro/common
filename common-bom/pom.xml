@@ -46,46 +46,13 @@
             <dependency>
                 <groupId>org.zero</groupId>
                 <artifactId>common-job</artifactId>
-                <version>${common-jon.version}</version>
+                <version>${common-job.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>${maven-source-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>${maven-javadoc-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin.version}</version>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
@@ -96,7 +63,6 @@
                     </altDeploymentRepository>
                 </configuration>
             </plugin>
-            <!-- https://github.com/github/maven-plugins -->
             <plugin>
                 <groupId>com.github.github</groupId>
                 <artifactId>site-maven-plugin</artifactId>
@@ -108,23 +74,14 @@
                         </goals>
                         <phase>deploy</phase>
                         <configuration>
-                            <!-- 服务器 ID（setting.xml -> server） -->
                             <server>github</server>
-                            <!-- 分支 -->
                             <branch>refs/heads/main</branch>
-                            <!-- 提交信息 -->
                             <message>upload ${project.artifactId}-${project.version}</message>
-                            <!-- 仓库所有者  -->
                             <repositoryOwner>cnzeropro</repositoryOwner>
-                            <!-- 仓库名称 -->
                             <repositoryName>repository</repositoryName>
-                            <!-- true：合并；false：覆盖 -->
                             <merge>true</merge>
-                            <!-- 是否生成 .nojekyll 文件 -->
                             <noJekyll>true</noJekyll>
-                            <!-- 提交根目录-->
                             <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
-                            <!-- 要包含的路径和模式 -->
                             <includes>
                                 <include>**/*</include>
                             </includes>

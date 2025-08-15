@@ -46,7 +46,7 @@ public class CustomHandlerExceptionResolver extends DefaultHandlerExceptionResol
     @SneakyThrows
     protected ModelAndView handleException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         this.sendServerError(ex, request, response);
-        Result<Void> result = throwableHandler.handleThrowable(ex);
+        Result<Void> result = throwableHandler.handle(ex);
         request.setAttribute("javax.servlet.error.result", result);
         return new ModelAndView("error");
     }

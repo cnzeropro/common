@@ -1,0 +1,51 @@
+pluginManagement {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'common'
+
+String rootDirPath = rootDir.absolutePath + File.separator
+FileTree buildFiles = fileTree(rootDir) {
+    List excludes = gradle.startParameter.projectProperties.get("excludeProjects")?.split(",")
+    include '**/*.gradle', '**/*.gradle.kts'
+    exclude 'common-bom'
+    exclude 'build', '**/gradle', 'settings.gradle', 'buildSrc', '/build.gradle', '.*', 'out'
+    exclude '**/grails3'
+    if (excludes) {
+        exclude excludes
+    }
+}
+buildFiles.each { File buildFile ->
+    boolean isDefaultName = 'build.gradle' == buildFile.name || 'build.gradle.kts' == buildFile.name
+    String projectName
+    if (isDefaultName) {
+        String buildFilePath = buildFile.parentFile.absolutePath
+        projectName = buildFilePath.tokenize(File.separator)[-1]
+    } else {
+        boolean isKotlin = buildFile.name.endsWith(".kts")
+        if (isKotlin) {
+            projectName = buildFile.name.replace('.gradle.kts', '')
+        } else {
+            projectName = buildFile.name.replace('.gradle', '')
+        }
+    }
+    configureProject(':' + projectName, projectName, buildFile)
+}
+def configureProject(String projectPath, String projectName, File buildFile) {
+    include(projectPath)
+    def project = findProject(projectPath)
+    project.name = projectName
+    project.projectDir = buildFile.parentFile
+    project.buildFileName = buildFile.name
+}

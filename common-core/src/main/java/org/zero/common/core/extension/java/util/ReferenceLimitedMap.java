@@ -523,7 +523,7 @@ public class ReferenceLimitedMap<K, V> extends AbstractMap<K, V> implements Seri
     }
 
     @Getter
-    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
+    @EqualsAndHashCode(callSuper = false)
     protected static class PhantomPair<K, V> extends PhantomReference<V> implements Pair<K, V> {
         protected final K key;
         @EqualsAndHashCode.Exclude

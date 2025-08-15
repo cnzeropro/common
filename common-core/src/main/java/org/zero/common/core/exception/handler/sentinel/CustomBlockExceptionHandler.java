@@ -29,7 +29,7 @@ public class CustomBlockExceptionHandler extends ThrowableHandler implements Blo
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, BlockException e) {
         log.error("Sentinel block exception", e);
-        Result<Void> result = this.handleThrowable(e);
+        Result<Void> result = this.handle(e);
         String jsonStr = JacksonUtils.toJsonStr(result);
         ResponseUtil.writeErrorJson(response, jsonStr);
     }

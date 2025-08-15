@@ -40,7 +40,7 @@ public final class Result<T> implements BaseResult<T> {
      */
     private boolean success;
     /**
-     * 时间
+     * 响应时间
      */
     @Builder.Default
     private LocalDateTime time = LocalDateTime.now();

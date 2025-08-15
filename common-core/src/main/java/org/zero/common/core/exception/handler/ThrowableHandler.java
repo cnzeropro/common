@@ -19,54 +19,54 @@ import java.util.Objects;
 public class ThrowableHandler {
     protected final ThrowableMessageProvider throwableMessageProvider;
 
-    public Result<Void> handleThrowable(Throwable throwable, Object... args) {
-        return this.handleThrowable(throwable, null, args);
+    public Result<Void> handle(Throwable throwable, Object... args) {
+        return this.handle(throwable, null, args);
     }
 
-    public Result<Void> handleThrowable(Throwable throwable, Collection<Object> args) {
-        return this.handleThrowable(throwable, args.toArray());
+    public Result<Void> handle(Throwable throwable, Collection<Object> args) {
+        return this.handle(throwable, args.toArray());
     }
 
-    public Result<Void> handleThrowable(Throwable throwable, CharSequence defaultMessage, Object... args) {
-        return this.handleThrowable(BaseResult.FAIL_CODE, throwable, defaultMessage, args);
+    public Result<Void> handle(Throwable throwable, CharSequence defaultMessage, Object... args) {
+        return this.handle(BaseResult.FAIL_CODE, throwable, defaultMessage, args);
     }
 
-    public Result<Void> handleThrowable(Throwable throwable, CharSequence defaultMessage, Collection<Object> args) {
-        return this.handleThrowable(throwable, defaultMessage, args.toArray());
+    public Result<Void> handle(Throwable throwable, CharSequence defaultMessage, Collection<Object> args) {
+        return this.handle(throwable, defaultMessage, args.toArray());
     }
 
-    public Result<Void> handleThrowable(int code, Throwable throwable, Object... args) {
-        return this.handleThrowable(code, throwable, null, args);
+    public Result<Void> handle(int code, Throwable throwable, Object... args) {
+        return this.handle(code, throwable, null, args);
     }
 
-    public Result<Void> handleThrowable(int code, Throwable throwable, Collection<Object> args) {
-        return this.handleThrowable(code, throwable, args.toArray());
+    public Result<Void> handle(int code, Throwable throwable, Collection<Object> args) {
+        return this.handle(code, throwable, args.toArray());
     }
 
-    public Result<Void> handleThrowable(int code, Throwable throwable, CharSequence defaultMessage, Object... args) {
+    public Result<Void> handle(int code, Throwable throwable, CharSequence defaultMessage, Object... args) {
         CharSequence message = throwableMessageProvider.provide(throwable.getClass(),
                 Objects.nonNull(defaultMessage) ? defaultMessage : throwable.getMessage(),
                 args);
         return Result.fail(code, message);
     }
 
-    public Result<Void> handleThrowable(int code, Throwable throwable, CharSequence defaultMessage, Collection<Object> args) {
-        return this.handleThrowable(code, throwable, defaultMessage, args.toArray());
+    public Result<Void> handle(int code, Throwable throwable, CharSequence defaultMessage, Collection<Object> args) {
+        return this.handle(code, throwable, defaultMessage, args.toArray());
     }
 
-    public Result<Void> handleThrowable(HttpStatus httpStatus, Throwable throwable, Object... args) {
-        return this.handleThrowable(httpStatus, throwable, null, args);
+    public Result<Void> handle(HttpStatus httpStatus, Throwable throwable, Object... args) {
+        return this.handle(httpStatus, throwable, null, args);
     }
 
-    public Result<Void> handleThrowable(HttpStatus httpStatus, Throwable throwable, Collection<Object> args) {
-        return this.handleThrowable(httpStatus, throwable, args.toArray());
+    public Result<Void> handle(HttpStatus httpStatus, Throwable throwable, Collection<Object> args) {
+        return this.handle(httpStatus, throwable, args.toArray());
     }
 
-    public Result<Void> handleThrowable(HttpStatus httpStatus, Throwable throwable, CharSequence defaultMessage, Object... args) {
-        return this.handleThrowable(httpStatus.value(), throwable, defaultMessage, args);
+    public Result<Void> handle(HttpStatus httpStatus, Throwable throwable, CharSequence defaultMessage, Object... args) {
+        return this.handle(httpStatus.value(), throwable, defaultMessage, args);
     }
 
-    public Result<Void> handleThrowable(HttpStatus httpStatus, Throwable throwable, CharSequence defaultMessage, Collection<Object> args) {
-        return this.handleThrowable(httpStatus, throwable, defaultMessage, args.toArray());
+    public Result<Void> handle(HttpStatus httpStatus, Throwable throwable, CharSequence defaultMessage, Collection<Object> args) {
+        return this.handle(httpStatus, throwable, defaultMessage, args.toArray());
     }
 }

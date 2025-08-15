@@ -5,13 +5,12 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.CodeSignature;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.Ordered;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.zero.common.core.extension.spring.beans.factory.LifeCycleBean;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -25,7 +24,7 @@ import java.util.List;
  * @author Zero (cnzeropro@163.com)
  * @since 2025/5/28
  */
-public abstract class BaseAspect implements Ordered, InitializingBean, DisposableBean, ApplicationContextAware {
+public abstract class BaseAspect implements Ordered,  ApplicationContextAware, LifeCycleBean {
     public static final int DEFAULT_ORDER = 0;
     protected ApplicationContext applicationContext;
 
@@ -37,16 +36,6 @@ public abstract class BaseAspect implements Ordered, InitializingBean, Disposabl
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
-    }
-
-    @Override
-    public void afterPropertiesSet() {
-        // do nothing
-    }
-
-    @Override
-    public void destroy() {
-        // do nothing
     }
 
     protected Collection<Param> getParams(JoinPoint joinPoint) {
