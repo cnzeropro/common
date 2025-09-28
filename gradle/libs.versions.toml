@@ -8,6 +8,7 @@ org-zero_common-bom = "1.0.0"
 org-openjdk-jmh_jmh-core = "1.37"
 org-openjdk-jol_jol-core = "0.17"
 # Apache
+org-apache-maven_maven-model = "3.9.11"
 org-apache-commons_commons-text = "1.11.0"
 org-apache-commons_commons-compress = "1.26.1"
 org-apache-poi_poi-ooxml = "5.2.5"
@@ -94,6 +95,7 @@ com-lmax_disruptor = "3.4.4"
 com-esotericsoftware_kryo = "5.2.1"
 com-querydsl_querydsl-bom = "5.1.0"
 com-auth0_java-jwt = "4.5.0"
+com-oracle-database-jdbc_ojdbc-bom = "23.9.0.25.07"
 org-lionsoul_ip2region = "2.7.0"
 org-owasp-esapi_esapi = "2.6.2.0"
 org-owasp-encoder_encoder = "1.3.1"
@@ -172,90 +174,92 @@ org-liquibase_liquibase-maven-plugin = "4.31.1"
 org-graalvm-buildtools_native-maven-plugin = "0.10.6"
 
 [libraries]
-org-zero_common-bom = {module = "org.zero:common-bom", version.ref = "org-zero_common-bom"}
+org-zero_common-bom = { module = "org.zero:common-bom", version.ref = "org-zero_common-bom" }
 # Java
-org-openjdk-jol_jol-core = {module = "org.openjdk.jol:jol-core", version.ref = "org-openjdk-jol_jol-core"}
-org-openjdk-jmh_jmh-core = {module = "org.openjdk.jmh:jmh-core", version.ref = "org-openjdk-jmh_jmh-core"}
-org-openjdk-jmh_jmh-generator-annprocess = {module = "org.openjdk.jmh:jmh-generator-annprocess", version.ref = "org-openjdk-jmh_jmh-core"}
-javax-servlet_servlet-api = {module = "javax.servlet:servlet-api", version = "2.5"}
-javax-servlet_javax-servlet-api = {module = "javax.servlet:javax.servlet-api", version = "4.0.1"}
-javax-inject_javax-inject = {module = "javax.inject:javax.inject", version = "1"}
-javax-xml-bind_jaxb-api = {module = "javax.xml.bind:jaxb-api", version = "2.3.1"}
+org-openjdk-jol_jol-core = { module = "org.openjdk.jol:jol-core", version.ref = "org-openjdk-jol_jol-core" }
+org-openjdk-jmh_jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "org-openjdk-jmh_jmh-core" }
+org-openjdk-jmh_jmh-generator-annprocess = { module = "org.openjdk.jmh:jmh-generator-annprocess", version.ref = "org-openjdk-jmh_jmh-core" }
+javax-servlet_servlet-api = { module = "javax.servlet:servlet-api", version = "2.5" }
+javax-servlet_javax-servlet-api = { module = "javax.servlet:javax.servlet-api", version = "4.0.1" }
+javax-inject_javax-inject = { module = "javax.inject:javax.inject", version = "1" }
+javax-xml-bind_jaxb-api = { module = "javax.xml.bind:jaxb-api", version = "2.3.1" }
 # Apache
-org-apache-dubbo_dubbo-bom = {module = "org.apache.dubbo:dubbo-bom", version.ref = "org-apache-dubbo_dubbo-bom"}
-org-apache-shiro_shiro-bom = {module = "org.apache.shiro:shiro-bom", version.ref = "org-apache-shiro_shiro-bom"}
-org-apache-logging-log4j_log4j-bom = {module = "org.apache.logging.log4j:log4j-bom", version.ref = "org-apache-logging-log4j_log4j-bom"}
-log4j_log4j = {module = "log4j:log4j", version = "1.2.17"}
-org-apache-poi_poi-ooxml = {module = "org.apache.poi:poi-ooxml", version.ref = "org-apache-poi_poi-ooxml"}
-org-apache-commons_commons-text = {module = "org.apache.commons:commons-text", version.ref = "org-apache-commons_commons-text"}
-org-apache-commons_commons-compress = {module = "org.apache.commons:commons-compress", version.ref = "org-apache-commons_commons-compress"}
+org-apache-maven_maven-model = { module = "org.apache.maven:maven-model", version.ref = "org-apache-maven_maven-model" }
+org-apache-dubbo_dubbo-bom = { module = "org.apache.dubbo:dubbo-bom", version.ref = "org-apache-dubbo_dubbo-bom" }
+org-apache-shiro_shiro-bom = { module = "org.apache.shiro:shiro-bom", version.ref = "org-apache-shiro_shiro-bom" }
+org-apache-logging-log4j_log4j-bom = { module = "org.apache.logging.log4j:log4j-bom", version.ref = "org-apache-logging-log4j_log4j-bom" }
+log4j_log4j = { module = "log4j:log4j", version = "1.2.17" }
+org-apache-poi_poi-ooxml = { module = "org.apache.poi:poi-ooxml", version.ref = "org-apache-poi_poi-ooxml" }
+org-apache-commons_commons-text = { module = "org.apache.commons:commons-text", version.ref = "org-apache-commons_commons-text" }
+org-apache-commons_commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "org-apache-commons_commons-compress" }
 # Spring
-org-springframework_spring-framework-bom = {module = "org.springframework:spring-framework-bom", version.ref = "org-springframework_spring-framework-bom"}
-org-springframework-boot_spring-boot-dependencies = {module = "org.springframework.boot:spring-boot-dependencies", version.ref = "org-springframework-boot_spring-boot-dependencies"}
-org-springframework-cloud_spring-cloud-dependencies = {module = "org.springframework.cloud:spring-cloud-dependencies", version.ref = "org-springframework-cloud_spring-cloud-dependencies"}
-org-springframework-data_spring-data-bom = {module = "org.springframework.data:spring-data-bom", version.ref = "org-springframework-data_spring-data-bom"}
-org-springframework-security_spring-security-bom = {module = "org.springframework.security:spring-security-bom", version.ref = "org-springframework-security_spring-security-bom"}
-org-springframework-integration_spring-integration-bom = {module = "org.springframework.integration:spring-integration-bom", version.ref = "org-springframework-integration_spring-integration-bom"}
-org-springframework-shell_spring-shell-dependencies = {module = "org.springframework.shell:spring-shell-dependencies", version.ref = "org-springframework-shell_spring-shell-dependencies"}
-org-springframework-session_spring-session-bom = {module = "org.springframework.session:spring-session-bom", version.ref = "org-springframework-session_spring-session-bom"}
-org-springframework-plugin_spring-plugin-core = {module = "org.springframework.plugin:spring-plugin-core", version.ref = "org-springframework-plugin_spring-plugin-core"}
-org-springframework-plugin_spring-plugin-metadata = {module = "org.springframework.plugin:spring-plugin-metadata", version.ref = "org-springframework-plugin_spring-plugin-metadata"}
+org-springframework_spring-framework-bom = { module = "org.springframework:spring-framework-bom", version.ref = "org-springframework_spring-framework-bom" }
+org-springframework-boot_spring-boot-dependencies = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "org-springframework-boot_spring-boot-dependencies" }
+org-springframework-cloud_spring-cloud-dependencies = { module = "org.springframework.cloud:spring-cloud-dependencies", version.ref = "org-springframework-cloud_spring-cloud-dependencies" }
+org-springframework-data_spring-data-bom = { module = "org.springframework.data:spring-data-bom", version.ref = "org-springframework-data_spring-data-bom" }
+org-springframework-security_spring-security-bom = { module = "org.springframework.security:spring-security-bom", version.ref = "org-springframework-security_spring-security-bom" }
+org-springframework-integration_spring-integration-bom = { module = "org.springframework.integration:spring-integration-bom", version.ref = "org-springframework-integration_spring-integration-bom" }
+org-springframework-shell_spring-shell-dependencies = { module = "org.springframework.shell:spring-shell-dependencies", version.ref = "org-springframework-shell_spring-shell-dependencies" }
+org-springframework-session_spring-session-bom = { module = "org.springframework.session:spring-session-bom", version.ref = "org-springframework-session_spring-session-bom" }
+org-springframework-plugin_spring-plugin-core = { module = "org.springframework.plugin:spring-plugin-core", version.ref = "org-springframework-plugin_spring-plugin-core" }
+org-springframework-plugin_spring-plugin-metadata = { module = "org.springframework.plugin:spring-plugin-metadata", version.ref = "org-springframework-plugin_spring-plugin-metadata" }
 # Eclipse
-jakarta-platform_jakarta-jakartaee-bom = {module = "jakarta.platform:jakarta.jakartaee-bom", version.ref = "jakarta-platform_jakarta-jakartaee-bom"}
-jakarta-xml-bind_jakarta-xml-bind-api = {module = "jakarta.xml.bind:jakarta.xml.bind-api", version.ref = "jakarta-xml-bind_jakarta-xml-bind-api"}
-com-sun-xml-bind_jaxb-impl = {module = "com.sun.xml.bind:jaxb-impl", version.ref = "com-sun-xml-bind_jaxb-impl"}
-org-eclipse-jetty_jetty-bom = {module = "org.eclipse.jetty:jetty-bom", version.ref = "org-eclipse-jetty_jetty-bom"}
+jakarta-platform_jakarta-jakartaee-bom = { module = "jakarta.platform:jakarta.jakartaee-bom", version.ref = "jakarta-platform_jakarta-jakartaee-bom" }
+jakarta-xml-bind_jakarta-xml-bind-api = { module = "jakarta.xml.bind:jakarta.xml.bind-api", version.ref = "jakarta-xml-bind_jakarta-xml-bind-api" }
+com-sun-xml-bind_jaxb-impl = { module = "com.sun.xml.bind:jaxb-impl", version.ref = "com-sun-xml-bind_jaxb-impl" }
+org-eclipse-jetty_jetty-bom = { module = "org.eclipse.jetty:jetty-bom", version.ref = "org-eclipse-jetty_jetty-bom" }
 # Google
-com-google-cloud_libraries-bom = {module = "com.google.cloud:libraries-bom", version.ref = "com-google-cloud_libraries-bom"}
-com-google-guava_guava = {module = "com.google.guava:guava", version.ref = "com-google-guava_guava"}
-com-google-code-gson_gson = {module = "com.google.code.gson:gson", version.ref = "com-google-code-gson_gson"}
-com-google-protobuf_protobuf-bom = {module = "com.google.protobuf:protobuf-bom", version = "4.31.1"}
-com-googlecode-juniversalchardet_juniversalchardet = {module = "com.googlecode.juniversalchardet:juniversalchardet", version.ref = "com-googlecode-juniversalchardet_juniversalchardet"}
+com-google-cloud_libraries-bom = { module = "com.google.cloud:libraries-bom", version.ref = "com-google-cloud_libraries-bom" }
+com-google-guava_guava = { module = "com.google.guava:guava", version.ref = "com-google-guava_guava" }
+com-google-code-gson_gson = { module = "com.google.code.gson:gson", version.ref = "com-google-code-gson_gson" }
+com-google-protobuf_protobuf-bom = { module = "com.google.protobuf:protobuf-bom", version = "4.31.1" }
+com-googlecode-juniversalchardet_juniversalchardet = { module = "com.googlecode.juniversalchardet:juniversalchardet", version.ref = "com-googlecode-juniversalchardet_juniversalchardet" }
 # Alibaba
-com-alibaba_easyexcel = {module = "com.alibaba:easyexcel", version.ref = "com-alibaba_easyexcel"}
-com-alibaba_transmittable-thread-local = {module = "com.alibaba:transmittable-thread-local", version.ref = "com-alibaba_transmittable-thread-local"}
-com-alibaba-cloud_spring-cloud-alibaba-dependencies = {module = "com.alibaba.cloud:spring-cloud-alibaba-dependencies", version.ref = "com-alibaba-cloud_spring-cloud-alibaba-dependencies"}
-com-alibaba-csp_sentinel-apache-dubbo-adapter = {module = "com.alibaba.csp:sentinel-apache-dubbo-adapter", version.ref = "com-alibaba-csp_sentinel-apache-dubbo-adapter"}
-com-alibaba-csp_sentinel-apache-dubbo3-adapter = {module = "com.alibaba.csp:sentinel-apache-dubbo3-adapter", version.ref = "com-alibaba-csp_sentinel-apache-dubbo3-adapter"}
+com-alibaba_easyexcel = { module = "com.alibaba:easyexcel", version.ref = "com-alibaba_easyexcel" }
+com-alibaba_transmittable-thread-local = { module = "com.alibaba:transmittable-thread-local", version.ref = "com-alibaba_transmittable-thread-local" }
+com-alibaba-cloud_spring-cloud-alibaba-dependencies = { module = "com.alibaba.cloud:spring-cloud-alibaba-dependencies", version.ref = "com-alibaba-cloud_spring-cloud-alibaba-dependencies" }
+com-alibaba-csp_sentinel-apache-dubbo-adapter = { module = "com.alibaba.csp:sentinel-apache-dubbo-adapter", version.ref = "com-alibaba-csp_sentinel-apache-dubbo-adapter" }
+com-alibaba-csp_sentinel-apache-dubbo3-adapter = { module = "com.alibaba.csp:sentinel-apache-dubbo3-adapter", version.ref = "com-alibaba-csp_sentinel-apache-dubbo3-adapter" }
 # Huawei
-com-huaweicloud_spring-cloud-huawei-bom = {module = "com.huaweicloud:spring-cloud-huawei-bom", version.ref = "com-huaweicloud_spring-cloud-huawei-bom"}
+com-huaweicloud_spring-cloud-huawei-bom = { module = "com.huaweicloud:spring-cloud-huawei-bom", version.ref = "com-huaweicloud_spring-cloud-huawei-bom" }
 # Github
-com-github-rholder_guava-retrying = {module = "com.github.rholder:guava-retrying", version.ref = "com-github-rholder_guava-retrying"}
-com-github-ulisesbocchio_jasypt-spring-boot = {module = "com.github.ulisesbocchio:jasypt-spring-boot", version.ref = "com-github-ulisesbocchio_jasypt-spring-boot"}
-com-github-ulisesbocchio_jasypt-spring-boot-starter = {module = "com.github.ulisesbocchio:jasypt-spring-boot-starter", version.ref = "com-github-ulisesbocchio_jasypt-spring-boot-starter"}
+com-github-rholder_guava-retrying = { module = "com.github.rholder:guava-retrying", version.ref = "com-github-rholder_guava-retrying" }
+com-github-ulisesbocchio_jasypt-spring-boot = { module = "com.github.ulisesbocchio:jasypt-spring-boot", version.ref = "com-github-ulisesbocchio_jasypt-spring-boot" }
+com-github-ulisesbocchio_jasypt-spring-boot-starter = { module = "com.github.ulisesbocchio:jasypt-spring-boot-starter", version.ref = "com-github-ulisesbocchio_jasypt-spring-boot-starter" }
 # Dromara
-org-dromara-dynamictp_dynamic-tp-dependencies = {module = "org.dromara.dynamictp:dynamic-tp-dependencies", version.ref = "org-dromara-dynamictp_dynamic-tp-dependencies"}
-cn-hutool_hutool-bom = {module = "cn.hutool:hutool-bom", version.ref = "cn-hutool_hutool-bom"}
-cn-hutool_hutool-all = {module = "cn.hutool:hutool-all", version.ref = "cn-hutool_hutool-all"}
+org-dromara-dynamictp_dynamic-tp-dependencies = { module = "org.dromara.dynamictp:dynamic-tp-dependencies", version.ref = "org-dromara-dynamictp_dynamic-tp-dependencies" }
+cn-hutool_hutool-bom = { module = "cn.hutool:hutool-bom", version.ref = "cn-hutool_hutool-bom" }
+cn-hutool_hutool-all = { module = "cn.hutool:hutool-all", version.ref = "cn-hutool_hutool-all" }
 # Other
-org-projectlombok_lombok = {module = "org.projectlombok:lombok", version.ref = "org-projectlombok_lombok"}
-io-projectreactor_reactor-bom = {module = "io.projectreactor:reactor-bom", version.ref = "io-projectreactor_reactor-bom"}
-io-netty_netty-bom = {module = "io.netty:netty-bom", version.ref = "io-netty_netty-bom"}
-org-slf4j_slf4j-bom = {module = "org.slf4j:slf4j-bom", version.ref = "org-slf4j_slf4j-bom"}
-org-junit_junit-bom = {module = "org.junit:junit-bom", version.ref = "org-junit_junit-bom"}
-org-testcontainers_testcontainers-bom = {module = "org.testcontainers:testcontainers-bom", version.ref = "org-testcontainers_testcontainers-bom"}
-org-mybatis-spring-boot_mybatis-spring-boot-starter = {module = "org.mybatis.spring.boot:mybatis-spring-boot-starter", version.ref = "org-mybatis-spring-boot_mybatis-spring-boot-starter"}
-org-mockito-mockito-bom = {module = "org.mockito:mockito-bom", version.ref = "org-mockito-mockito-bom"}
-com-querydsl_querydsl-bom = {module = "com.querydsl:querydsl-bom", version.ref = "com-querydsl_querydsl-bom"}
-com-baomidou_mybatis-plus-bom = {module = "com.baomidou:mybatis-plus-bom", version.ref = "com-baomidou_mybatis-plus-bom"}
-com-mybatis-flex_mybatis-flex-dependencies = {module = "com.mybatis-flex:mybatis-flex-dependencies", version.ref = "com-mybatis-flex_mybatis-flex-dependencies"}
-cn-idev-excel_fastexcel = {module = "cn.idev.excel:fastexcel", version.ref = "cn-idev-excel_fastexcel"}
-io-minio_minio = {module = "io.minio:minio", version.ref = "io-minio_minio"}
-xerces_xercesImpl = {module = "xerces:xercesImpl", version.ref = "xerces_xercesImpl"}
-org-redisson_redisson = {module = "org.redisson:redisson", version.ref = "org-redisson_redisson"}
-org-jctools_jctools-core = {module = "org.jctools:jctools-core", version.ref = "org-jctools_jctools-core"}
-com-lmax_disruptor = {module = "com.lmax:disruptor", version.ref = "com-lmax_disruptor"}
-com-esotericsoftware_kryo = {module = "com.esotericsoftware:kryo", version.ref = "com-esotericsoftware_kryo"}
-org-lionsoul_ip2region = {module = "org.lionsoul:ip2region", version.ref = "org-lionsoul_ip2region"}
-org-jasypt_jasypt = {module = "org.jasypt:jasypt", version.ref = "org-jasypt_jasypt"}
-org-owasp-esapi_esapi = {module = "org.owasp.esapi:esapi", version.ref = "org-owasp-esapi_esapi"}
-org-owasp-encoder_encoder = {module = "org.owasp.encoder:encoder", version.ref = "org-owasp-encoder_encoder"}
-io-jsonwebtoken_jjwt-api = {module = "io.jsonwebtoken:jjwt-api", version.ref = "io-jsonwebtoken_jjwt-api"}
-io-jsonwebtoken_jjwt-impl = {module = "io.jsonwebtoken:jjwt-impl", version.ref = "io-jsonwebtoken_jjwt-impl"}
-io-jsonwebtoken_jjwt-jackson = {module = "io.jsonwebtoken:jjwt-jackson", version.ref = "io-jsonwebtoken_jjwt-jackson"}
-io-jsonwebtoken_jjwt-gson = {module = "io.jsonwebtoken:jjwt-gson", version.ref = "io-jsonwebtoken_jjwt-gson"}
-io-jsonwebtoken_jjwt-orgjson = {module = "io.jsonwebtoken:jjwt-orgjson", version.ref = "io-jsonwebtoken_jjwt-orgjson"}
-com-auth0_java-jwt = {module = "com.auth0:java-jwt", version.ref = "com-auth0_java-jwt"}
+org-projectlombok_lombok = { module = "org.projectlombok:lombok", version.ref = "org-projectlombok_lombok" }
+io-projectreactor_reactor-bom = { module = "io.projectreactor:reactor-bom", version.ref = "io-projectreactor_reactor-bom" }
+io-netty_netty-bom = { module = "io.netty:netty-bom", version.ref = "io-netty_netty-bom" }
+org-slf4j_slf4j-bom = { module = "org.slf4j:slf4j-bom", version.ref = "org-slf4j_slf4j-bom" }
+org-junit_junit-bom = { module = "org.junit:junit-bom", version.ref = "org-junit_junit-bom" }
+org-testcontainers_testcontainers-bom = { module = "org.testcontainers:testcontainers-bom", version.ref = "org-testcontainers_testcontainers-bom" }
+org-mybatis-spring-boot_mybatis-spring-boot-starter = { module = "org.mybatis.spring.boot:mybatis-spring-boot-starter", version.ref = "org-mybatis-spring-boot_mybatis-spring-boot-starter" }
+org-mockito-mockito-bom = { module = "org.mockito:mockito-bom", version.ref = "org-mockito-mockito-bom" }
+com-querydsl_querydsl-bom = { module = "com.querydsl:querydsl-bom", version.ref = "com-querydsl_querydsl-bom" }
+com-baomidou_mybatis-plus-bom = { module = "com.baomidou:mybatis-plus-bom", version.ref = "com-baomidou_mybatis-plus-bom" }
+com-mybatis-flex_mybatis-flex-dependencies = { module = "com.mybatis-flex:mybatis-flex-dependencies", version.ref = "com-mybatis-flex_mybatis-flex-dependencies" }
+com-oracle-database-jdbc_ojdbc-bom = { module = "com.oracle.database.jdbc:ojdbc-bom", version.ref = "com-oracle-database-jdbc_ojdbc-bom" }
+cn-idev-excel_fastexcel = { module = "cn.idev.excel:fastexcel", version.ref = "cn-idev-excel_fastexcel" }
+io-minio_minio = { module = "io.minio:minio", version.ref = "io-minio_minio" }
+xerces_xercesImpl = { module = "xerces:xercesImpl", version.ref = "xerces_xercesImpl" }
+org-redisson_redisson = { module = "org.redisson:redisson", version.ref = "org-redisson_redisson" }
+org-jctools_jctools-core = { module = "org.jctools:jctools-core", version.ref = "org-jctools_jctools-core" }
+com-lmax_disruptor = { module = "com.lmax:disruptor", version.ref = "com-lmax_disruptor" }
+com-esotericsoftware_kryo = { module = "com.esotericsoftware:kryo", version.ref = "com-esotericsoftware_kryo" }
+org-lionsoul_ip2region = { module = "org.lionsoul:ip2region", version.ref = "org-lionsoul_ip2region" }
+org-jasypt_jasypt = { module = "org.jasypt:jasypt", version.ref = "org-jasypt_jasypt" }
+org-owasp-esapi_esapi = { module = "org.owasp.esapi:esapi", version.ref = "org-owasp-esapi_esapi" }
+org-owasp-encoder_encoder = { module = "org.owasp.encoder:encoder", version.ref = "org-owasp-encoder_encoder" }
+io-jsonwebtoken_jjwt-api = { module = "io.jsonwebtoken:jjwt-api", version.ref = "io-jsonwebtoken_jjwt-api" }
+io-jsonwebtoken_jjwt-impl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "io-jsonwebtoken_jjwt-impl" }
+io-jsonwebtoken_jjwt-jackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "io-jsonwebtoken_jjwt-jackson" }
+io-jsonwebtoken_jjwt-gson = { module = "io.jsonwebtoken:jjwt-gson", version.ref = "io-jsonwebtoken_jjwt-gson" }
+io-jsonwebtoken_jjwt-orgjson = { module = "io.jsonwebtoken:jjwt-orgjson", version.ref = "io-jsonwebtoken_jjwt-orgjson" }
+com-auth0_java-jwt = { module = "com.auth0:java-jwt", version.ref = "com-auth0_java-jwt" }
 
 [bundles]
 
@@ -263,39 +267,39 @@ com-auth0_java-jwt = {module = "com.auth0:java-jwt", version.ref = "com-auth0_ja
 # Gradle
 org-gradle-wrapper-upgrade = "org.gradle.wrapper-upgrade:0.12"
 # Maven
-org-apache-maven-plugins_maven-clean-plugin = {id = "org.apache.maven.plugins.maven-clean-plugin", version.ref = "org-apache-maven-plugins_maven-clean-plugin"}
-org-apache-maven-plugins_maven-compiler-plugin = {id = "org.apache.maven.plugins.maven-compiler-plugin", version.ref = "org-apache-maven-plugins_maven-compiler-plugin"}
-org-apache-maven-plugins_maven-source-plugin = {id = "org.apache.maven.plugins.maven-source-plugin", version.ref = "org-apache-maven-plugins_maven-source-plugin"}
-org-apache-maven-plugins_maven-javadoc-plugin = {id = "org.apache.maven.plugins.maven-javadoc-plugin", version.ref = "org-apache-maven-plugins_maven-javadoc-plugin"}
-org-apache-maven-plugins_maven-dependency-plugin = {id = "org.apache.maven.plugins.maven-dependency-plugin", version.ref = "org-apache-maven-plugins_maven-dependency-plugin"}
-org-apache-maven-plugins_maven-resources-plugin = {id = "org.apache.maven.plugins.maven-resources-plugin", version.ref = "org-apache-maven-plugins_maven-resources-plugin"}
-org-apache-maven-plugins_maven-jar-plugin = {id = "org.apache.maven.plugins.maven-jar-plugin", version.ref = "org-apache-maven-plugins_maven-jar-plugin"}
-org-apache-maven-plugins_maven-war-plugin = {id = "org.apache.maven.plugins.maven-war-plugin", version.ref = "org-apache-maven-plugins_maven-war-plugin"}
-org-apache-maven-plugins_maven-shade-plugin = {id = "org.apache.maven.plugins.maven-shade-plugin", version.ref = "org-apache-maven-plugins_maven-shade-plugin"}
-org-apache-maven-plugins_maven-assembly-plugin = {id = "org.apache.maven.plugins.maven-assembly-plugin", version.ref = "org-apache-maven-plugins_maven-assembly-plugin"}
-org-apache-maven-plugins_maven-wrapper-plugin = {id = "org.apache.maven.plugins.maven-wrapper-plugin", version.ref = "org-apache-maven-plugins_maven-wrapper-plugin"}
-org-apache-maven-plugins_maven-antrun-plugin = {id = "org.apache.maven.plugins.maven-antrun-plugin", version.ref = "org-apache-maven-plugins_maven-antrun-plugin"}
-org-apache-maven-plugins_maven-deploy-plugin = {id = "org.apache.maven.plugins.maven-deploy-plugin", version.ref = "org-apache-maven-plugins_maven-deploy-plugin"}
-org-apache-maven-plugins_maven-enforcer-plugin = {id = "org.apache.maven.plugins.maven-enforcer-plugin", version.ref = "org-apache-maven-plugins_maven-enforcer-plugin"}
-org-apache-maven-plugins_maven-surefire-plugin = {id = "org.apache.maven.plugins.maven-surefire-plugin", version.ref = "org-apache-maven-plugins_maven-surefire-plugin"}
-org-apache-maven-plugins_maven-failsafe-plugin = {id = "org.apache.maven.plugins.maven-failsafe-plugin", version.ref = "org-apache-maven-plugins_maven-failsafe-plugin"}
-org-apache-maven-plugins_maven-help-plugin = {id = "org.apache.maven.plugins.maven-help-plugin", version.ref = "org-apache-maven-plugins_maven-help-plugin"}
-org-apache-maven-plugins_maven-install-plugin = {id = "org.apache.maven.plugins.maven-install-plugin", version.ref = "org-apache-maven-plugins_maven-install-plugin"}
-org-apache-maven-plugins_maven-invoker-plugin = {id = "org.apache.maven.plugins.maven-invoker-plugin", version.ref = "org-apache-maven-plugins_maven-invoker-plugin"}
-org-apache-maven-plugins_maven-gpg-plugin = {id = "org.apache.maven.plugins.maven-gpg-plugin", version.ref = "org-apache-maven-plugins_maven-gpg-plugin"}
+org-apache-maven-plugins_maven-clean-plugin = { id = "org.apache.maven.plugins.maven-clean-plugin", version.ref = "org-apache-maven-plugins_maven-clean-plugin" }
+org-apache-maven-plugins_maven-compiler-plugin = { id = "org.apache.maven.plugins.maven-compiler-plugin", version.ref = "org-apache-maven-plugins_maven-compiler-plugin" }
+org-apache-maven-plugins_maven-source-plugin = { id = "org.apache.maven.plugins.maven-source-plugin", version.ref = "org-apache-maven-plugins_maven-source-plugin" }
+org-apache-maven-plugins_maven-javadoc-plugin = { id = "org.apache.maven.plugins.maven-javadoc-plugin", version.ref = "org-apache-maven-plugins_maven-javadoc-plugin" }
+org-apache-maven-plugins_maven-dependency-plugin = { id = "org.apache.maven.plugins.maven-dependency-plugin", version.ref = "org-apache-maven-plugins_maven-dependency-plugin" }
+org-apache-maven-plugins_maven-resources-plugin = { id = "org.apache.maven.plugins.maven-resources-plugin", version.ref = "org-apache-maven-plugins_maven-resources-plugin" }
+org-apache-maven-plugins_maven-jar-plugin = { id = "org.apache.maven.plugins.maven-jar-plugin", version.ref = "org-apache-maven-plugins_maven-jar-plugin" }
+org-apache-maven-plugins_maven-war-plugin = { id = "org.apache.maven.plugins.maven-war-plugin", version.ref = "org-apache-maven-plugins_maven-war-plugin" }
+org-apache-maven-plugins_maven-shade-plugin = { id = "org.apache.maven.plugins.maven-shade-plugin", version.ref = "org-apache-maven-plugins_maven-shade-plugin" }
+org-apache-maven-plugins_maven-assembly-plugin = { id = "org.apache.maven.plugins.maven-assembly-plugin", version.ref = "org-apache-maven-plugins_maven-assembly-plugin" }
+org-apache-maven-plugins_maven-wrapper-plugin = { id = "org.apache.maven.plugins.maven-wrapper-plugin", version.ref = "org-apache-maven-plugins_maven-wrapper-plugin" }
+org-apache-maven-plugins_maven-antrun-plugin = { id = "org.apache.maven.plugins.maven-antrun-plugin", version.ref = "org-apache-maven-plugins_maven-antrun-plugin" }
+org-apache-maven-plugins_maven-deploy-plugin = { id = "org.apache.maven.plugins.maven-deploy-plugin", version.ref = "org-apache-maven-plugins_maven-deploy-plugin" }
+org-apache-maven-plugins_maven-enforcer-plugin = { id = "org.apache.maven.plugins.maven-enforcer-plugin", version.ref = "org-apache-maven-plugins_maven-enforcer-plugin" }
+org-apache-maven-plugins_maven-surefire-plugin = { id = "org.apache.maven.plugins.maven-surefire-plugin", version.ref = "org-apache-maven-plugins_maven-surefire-plugin" }
+org-apache-maven-plugins_maven-failsafe-plugin = { id = "org.apache.maven.plugins.maven-failsafe-plugin", version.ref = "org-apache-maven-plugins_maven-failsafe-plugin" }
+org-apache-maven-plugins_maven-help-plugin = { id = "org.apache.maven.plugins.maven-help-plugin", version.ref = "org-apache-maven-plugins_maven-help-plugin" }
+org-apache-maven-plugins_maven-install-plugin = { id = "org.apache.maven.plugins.maven-install-plugin", version.ref = "org-apache-maven-plugins_maven-install-plugin" }
+org-apache-maven-plugins_maven-invoker-plugin = { id = "org.apache.maven.plugins.maven-invoker-plugin", version.ref = "org-apache-maven-plugins_maven-invoker-plugin" }
+org-apache-maven-plugins_maven-gpg-plugin = { id = "org.apache.maven.plugins.maven-gpg-plugin", version.ref = "org-apache-maven-plugins_maven-gpg-plugin" }
 # Spring
-org-springframework-boot_spring-boot-maven-plugin = {id = "org.springframework.boot.spring-boot-maven-plugin", version.ref = "org-springframework-boot_spring-boot-maven-plugin"}
+org-springframework-boot_spring-boot-maven-plugin = { id = "org.springframework.boot.spring-boot-maven-plugin", version.ref = "org-springframework-boot_spring-boot-maven-plugin" }
 # Codehaus
-org-codehaus-mojo_build-helper-maven-plugin = {id = "org.codehaus.mojo.build-helper-maven-plugin", version.ref = "org-codehaus-mojo_build-helper-maven-plugin"}
-org-codehaus-mojo_versions-maven-plugin = {id = "org.codehaus.mojo.versions-maven-plugin", version.ref = "org-codehaus-mojo_versions-maven-plugin"}
-org-codehaus-mojo_xml-maven-plugin = {id = "org.codehaus.mojo.xml-maven-plugin", version.ref = "org-codehaus-mojo_xml-maven-plugin"}
+org-codehaus-mojo_build-helper-maven-plugin = { id = "org.codehaus.mojo.build-helper-maven-plugin", version.ref = "org-codehaus-mojo_build-helper-maven-plugin" }
+org-codehaus-mojo_versions-maven-plugin = { id = "org.codehaus.mojo.versions-maven-plugin", version.ref = "org-codehaus-mojo_versions-maven-plugin" }
+org-codehaus-mojo_xml-maven-plugin = { id = "org.codehaus.mojo.xml-maven-plugin", version.ref = "org-codehaus-mojo_xml-maven-plugin" }
 # Github
-io-github-git-commit-id_git-commit-id-maven-plugin = {id = "io.github.git-commit-id.git-commit-id-maven-plugin", version.ref = "io-github-git-commit-id_git-commit-id-maven-plugin"}
-com-github-github_site-maven-plugin = {id = "com.github.github.site-maven-plugin", version.ref = "com-github-github_site-maven-plugin"}
+io-github-git-commit-id_git-commit-id-maven-plugin = { id = "io.github.git-commit-id.git-commit-id-maven-plugin", version.ref = "io-github-git-commit-id_git-commit-id-maven-plugin" }
+com-github-github_site-maven-plugin = { id = "com.github.github.site-maven-plugin", version.ref = "com-github-github_site-maven-plugin" }
 # Other
-org-cyclonedx_cyclonedx-maven-plugin = {id = "org.cyclonedx.cyclonedx-maven-plugin", version.ref = "org-cyclonedx_cyclonedx-maven-plugin"}
-org-flywaydb_flyway-maven-plugin = {id = "org.flywaydb.flyway-maven-plugin", version.ref = "org-flywaydb_flyway-maven-plugin"}
-org-jooq_jooq-codegen-maven = {id = "org.jooq.jooq-codegen-maven", version.ref = "org-jooq_jooq-codegen-maven"}
-org-jetbrains-kotlin_kotlin-maven-plugin = {id = "org.jetbrains.kotlin.kotlin-maven-plugin", version.ref = "org-jetbrains-kotlin_kotlin-maven-plugin"}
-org-liquibase_liquibase-maven-plugin = {id = "org.liquibase.liquibase-maven-plugin", version.ref = "org-liquibase_liquibase-maven-plugin"}
-org-graalvm-buildtools_native-maven-plugin = {id = "org.graalvm.buildtools.native-maven-plugin", version.ref = "org-graalvm-buildtools_native-maven-plugin"}
+org-cyclonedx_cyclonedx-maven-plugin = { id = "org.cyclonedx.cyclonedx-maven-plugin", version.ref = "org-cyclonedx_cyclonedx-maven-plugin" }
+org-flywaydb_flyway-maven-plugin = { id = "org.flywaydb.flyway-maven-plugin", version.ref = "org-flywaydb_flyway-maven-plugin" }
+org-jooq_jooq-codegen-maven = { id = "org.jooq.jooq-codegen-maven", version.ref = "org-jooq_jooq-codegen-maven" }
+org-jetbrains-kotlin_kotlin-maven-plugin = { id = "org.jetbrains.kotlin.kotlin-maven-plugin", version.ref = "org-jetbrains-kotlin_kotlin-maven-plugin" }
+org-liquibase_liquibase-maven-plugin = { id = "org.liquibase.liquibase-maven-plugin", version.ref = "org-liquibase_liquibase-maven-plugin" }
+org-graalvm-buildtools_native-maven-plugin = { id = "org.graalvm.buildtools.native-maven-plugin", version.ref = "org-graalvm-buildtools_native-maven-plugin" }

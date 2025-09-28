@@ -8,6 +8,13 @@ javaPlatform {
 }
 
 dependencies {
+    api(platform(libs.com.alibaba.cloud.spring.cloud.alibaba.dependencies))
+    api(platform(libs.com.google.cloud.libraries.bom))
+    api(platform(libs.com.huaweicloud.spring.cloud.huawei.bom))
+    api(platform(libs.com.querydsl.querydsl.bom))
+    api(platform(libs.com.baomidou.mybatis.plus.bom))
+    api(platform(libs.com.mybatis.flex.mybatis.flex.dependencies))
+    api(platform(libs.com.oracle.database.jdbc.ojdbc.bom))
     api(platform(libs.org.zero.common.bom))
     api(platform(libs.org.apache.dubbo.dubbo.bom))
     api(platform(libs.org.apache.shiro.shiro.bom))
@@ -20,16 +27,10 @@ dependencies {
     api(platform(libs.org.springframework.integration.spring.integration.bom))
     api(platform(libs.org.springframework.shell.spring.shell.dependencies))
     api(platform(libs.org.springframework.session.spring.session.bom))
-    api(platform(libs.com.alibaba.cloud.spring.cloud.alibaba.dependencies))
     api(platform(libs.org.eclipse.jetty.jetty.bom))
     api(platform(libs.org.slf4j.slf4j.bom))
     api(platform(libs.org.junit.junit.bom))
     api(platform(libs.org.testcontainers.testcontainers.bom))
-    api(platform(libs.com.google.cloud.libraries.bom))
-    api(platform(libs.com.huaweicloud.spring.cloud.huawei.bom))
-    api(platform(libs.com.querydsl.querydsl.bom))
-    api(platform(libs.com.baomidou.mybatis.plus.bom))
-    api(platform(libs.com.mybatis.flex.mybatis.flex.dependencies))
     api(platform(libs.io.projectreactor.reactor.bom))
     api(platform(libs.io.netty.netty.bom))
     api(platform(libs.cn.hutool.hutool.bom))
@@ -46,7 +47,7 @@ allprojects {
     repositories {
         maven { url 'https://maven.aliyun.com/repository/public/' }
         mavenCentral()
-        mavenLocal{
+        mavenLocal {
             content {
                 includeGroup("org.zero")
             }
