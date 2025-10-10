@@ -26,4 +26,9 @@ public class MultiException extends BaseException {
         super(message);
         this.throwables = throwables;
     }
+
+	@Override
+	public void printStackTrace() {
+		super.printStackTrace();
+	}
 }

@@ -1,0 +1,21 @@
+dependencies {
+    implementation(platform(project(":")))
+    implementation('org.zero:common-data')
+    implementation('jakarta.servlet:jakarta.servlet-api')
+    implementation('jakarta.validation:jakarta.validation-api')
+    implementation('jakarta.websocket:jakarta.websocket-api')
+    implementation('jakarta.annotation:jakarta.annotation-api')
+    implementation('jakarta.mail:jakarta.mail-api')
+
+    compileOnly('org.projectlombok:lombok')
+    annotationProcessor(libs.org.projectlombok.lombok)
+    testCompileOnly('org.projectlombok:lombok')
+    testAnnotationProcessor(libs.org.projectlombok.lombok)
+}
+
+description = 'common-core::spring-boot3'
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}

@@ -2,6 +2,9 @@ package org.zero.common.data.exception;
 
 import lombok.Getter;
 
+import java.io.Serializable;
+import java.util.Objects;
+
 /**
  * 基础异常
  *
@@ -10,92 +13,61 @@ import lombok.Getter;
  */
 @Getter
 public class BaseException extends RuntimeException {
-    /**
-     * 用户提示消息
-     */
-    protected final String promptMessage;
-    /**
-     * 系统错误信息
-     */
-    protected final BaseSysError sysError;
+	/**
+	 * 错误状态
+	 */
+	protected final BaseStatus status;
 
-    /* ************************************************************** Exception() ************************************************************** */
-    public BaseException() {
-        this(BaseSysError.DefaultSysError.ERROR);
-    }
+	/* ************************************************************** Exception() ************************************************************** */
+	public BaseException() {
+		this(BaseStatus.DefaultStatus.ERROR);
+	}
 
-    public BaseException(BaseSysError sysError) {
-        this(sysError.getMessage(), sysError);
-    }
+	public BaseException(BaseStatus status) {
+		this(String.valueOf(status.getMessage()), status);
+	}
 
-    /* ************************************************************** Exception(java.lang.String) ************************************************************** */
-    public BaseException(String message) {
-        this(message, message);
-    }
+	/* ************************************************************** Exception(java.lang.String) ************************************************************** */
+	public BaseException(String message) {
+		this(message, BaseStatus.DefaultStatus.ERROR);
+	}
 
-    public BaseException(String message, String promptMessage) {
-        this(message, promptMessage, BaseSysError.DefaultSysError.ERROR);
-    }
+	public BaseException(String message, BaseStatus status) {
+		super(message);
+		this.status = status;
+	}
 
-    public BaseException(String message, BaseSysError sysError) {
-        this(message, message, sysError);
-    }
+	/* ************************************************************** Exception(java.lang.Throwable) ************************************************************** */
+	public BaseException(Throwable cause) {
+		this(cause, BaseStatus.DefaultStatus.ERROR);
+	}
 
-    public BaseException(String message, String promptMessage, BaseSysError sysError) {
-        super(message);
-        this.promptMessage = promptMessage;
-        this.sysError = sysError;
-    }
+	public BaseException(Throwable cause, BaseStatus status) {
+		super(cause);
+		this.status = status;
+	}
 
-    /* ************************************************************** Exception(java.lang.Throwable) ************************************************************** */
-    public BaseException(Throwable cause) {
-        this(cause, BaseSysError.DefaultSysError.ERROR);
-    }
+	/* ************************************************************** Exception(java.lang.String, java.lang.Throwable) ************************************************************** */
+	public BaseException(String message, Throwable cause) {
+		this(message, cause, BaseStatus.DefaultStatus.ERROR);
+	}
 
-    public BaseException(Throwable cause, String promptMessage) {
-        this(cause, promptMessage, BaseSysError.DefaultSysError.ERROR);
-    }
+	public BaseException(String message, Throwable cause, BaseStatus status) {
+		super(message, cause);
+		this.status = status;
+	}
 
-    public BaseException(Throwable cause, BaseSysError sysError) {
-        this(cause, sysError.getMessage(), sysError);
-    }
+	/* ************************************************************** other ************************************************************** */
+	public Serializable getErrorCode() {
+		return status.getCode();
+	}
 
-    public BaseException(Throwable cause, String promptMessage, BaseSysError sysError) {
-        super(cause);
-        this.promptMessage = promptMessage;
-        this.sysError = sysError;
-    }
+	public CharSequence getErrorMessage() {
+		return status.getMessage();
+	}
 
-    /* ************************************************************** Exception(java.lang.String, java.lang.Throwable) ************************************************************** */
-    public BaseException(String message, Throwable cause) {
-        this(message, cause, message);
-    }
-
-    public BaseException(String message, Throwable cause, String promptMessage) {
-        this(message, cause, promptMessage, BaseSysError.DefaultSysError.ERROR);
-    }
-
-    public BaseException(String message, Throwable cause, BaseSysError sysError) {
-        this(message, cause, message, sysError);
-    }
-
-    public BaseException(String message, Throwable cause, String promptMessage, BaseSysError sysError) {
-        super(message, cause);
-        this.promptMessage = promptMessage;
-        this.sysError = sysError;
-    }
-
-    /* ************************************************************** other ************************************************************** */
-    public String getErrorCode() {
-        return sysError.getCode();
-    }
-
-    public String getErrorMessage() {
-        return sysError.getMessage();
-    }
-
-    @Override
-    public String getLocalizedMessage() {
-        return this.getPromptMessage();
-    }
+	@Override
+	public String getLocalizedMessage() {
+		return Objects.toString(this.getErrorMessage(), null);
+	}
 }

@@ -1,30 +1,41 @@
 package org.zero.common.data.model.view;
 
-import org.zero.common.data.constant.HttpStatus;
-import org.zero.common.data.exception.BaseSysError;
+import org.zero.common.data.exception.BaseStatus;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * @author Zero (cnzeropro@163.com)
  * @since 2024/11/18
  */
 public interface BaseResult<T> extends org.zero.common.data.model.transfer.BaseResult {
-    int OK_CODE = HttpStatus.OK;
-    int ERROR_CODE = OK_CODE;
-    int FAIL_CODE = HttpStatus.INTERNAL_SERVER_ERROR;
+	String OK_CODE = BaseStatus.OK_CODE;
+	String ERROR_CODE = BaseStatus.ERROR_CODE;
 
-    String OK_MSG = "操作成功";
-    String ERROR_MSG = "操作错误";
-    String FAIL_MSG = "操作失败";
+	String OK_MSG = "操作成功";
+	String ERROR_MSG = "操作失败";
 
-    int getCode();
+	BaseStatus getStatus();
 
-    CharSequence getMessage();
+	default Serializable getCode() {
+		BaseStatus status = getStatus();
+		return Objects.nonNull(status) ? status.getCode() : null;
+	}
 
-    BaseSysError getError();
+	default CharSequence getMessage() {
+		BaseStatus status = getStatus();
+		return Objects.nonNull(status) ? status.getMessage() : null;
+	}
 
-    LocalDateTime getTime();
+	@Override
+	default boolean isSuccess() {
+		BaseStatus status = getStatus();
+		return Objects.nonNull(status) && status.isOk();
+	}
 
-    T getData();
+	LocalDateTime getTime();
+
+	T getData();
 }

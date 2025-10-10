@@ -11,7 +11,7 @@ import org.zero.common.core.extension.jackson.JavaTimeJackson2ObjectMapperBuilde
 import org.zero.common.core.extension.jackson.JsonJavaTimeProperties;
 import org.zero.common.core.extension.jackson.databind.NumberJsonComponent;
 import org.zero.common.core.extension.jackson.databind.ser.JSONNullSerializer;
-import org.zero.common.data.exception.BaseSysError;
+import org.zero.common.data.exception.BaseStatus;
 
 /**
  * @author Zero (cnzeropro@163.com)
@@ -36,7 +36,7 @@ public class JacksonConfig {
 
     @Bean
     Jackson2ObjectMapperBuilderCustomizer jackson2ObjectMapperBuilderCustomizer() {
-        return builder -> builder.mixIn(BaseSysError.class, BaseSysErrorMixIn.class);
+        return builder -> builder.mixIn(BaseStatus.class, BaseSysErrorMixIn.class);
     }
 
     private interface BaseSysErrorMixIn{

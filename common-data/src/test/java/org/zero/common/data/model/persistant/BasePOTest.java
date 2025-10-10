@@ -2,7 +2,7 @@ package org.zero.common.data.model.persistant;
 
 import org.junit.jupiter.api.Test;
 import org.zero.common.data.enumeration.Gender;
-import org.zero.common.data.enumeration.Status;
+import org.zero.common.data.enumeration.UserStatus;
 
 import java.time.LocalDateTime;
 
@@ -18,7 +18,7 @@ class BasePOTest {
                 .name("Bob")
                 .createdBy(65474L)
                 .gender(Gender.MALE)
-                .status(Status.FREEZE)
+                .status(UserStatus.FREEZE)
                 .createdAt(LocalDateTime.now())
                 .updatedBy(91232234L)
                 .updatedAt(LocalDateTime.now())

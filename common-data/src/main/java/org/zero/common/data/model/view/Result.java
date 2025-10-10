@@ -5,8 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import org.zero.common.data.exception.BaseSysError;
+import org.zero.common.data.exception.BaseStatus;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -20,132 +21,122 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 public final class Result<T> implements BaseResult<T> {
-    private static final long serialVersionUID = 7893804841950761019L;
+	private static final long serialVersionUID = 7893804841950761019L;
+	/**
+	 * 状态信息
+	 */
+	private BaseStatus status;
+	/**
+	 * 成功标志
+	 */
+	private boolean success;
+	/**
+	 * 响应时间
+	 */
+	@Builder.Default
+	private LocalDateTime time = LocalDateTime.now();
+	/**
+	 * 数据对象
+	 */
+	private T data;
 
-    /**
-     * 状态码
-     */
-    private int code;
-    /**
-     * 用户提示信息
-     */
-    private CharSequence message;
-    /**
-     * 错误信息
-     */
-    private BaseSysError error;
+	/* ******************************************************** 请求成功 ******************************************************** */
+	public static <T> Result<T> ok() {
+		return ok((T) null);
+	}
 
-    /**
-     * 成功标志
-     */
-    private boolean success;
-    /**
-     * 响应时间
-     */
-    @Builder.Default
-    private LocalDateTime time = LocalDateTime.now();
-    /**
-     * 数据对象
-     */
-    private T data;
+	public static <T> Result<T> ok(CharSequence message) {
+		return ok(OK_CODE, message, null);
+	}
 
-    /* ******************************************************** 请求成功 ******************************************************** */
-    public static <T> Result<T> ok() {
-        return ok((T) null);
-    }
+	public static <T> Result<T> ok(BaseStatus status) {
+		return ok(status, (T) null);
+	}
 
-    public static <T> Result<T> ok(T data) {
-        return ok(OK_MSG, data);
-    }
+	public static <T> Result<T> ok(Serializable code, CharSequence message) {
+		return ok(code, message, null);
+	}
 
-    public static <T> Result<T> ok(CharSequence message) {
-        return ok(message, null);
-    }
+	public static <T> Result<T> ok(T data) {
+		return ok(BaseStatus.DefaultStatus.OK, data);
+	}
 
-    public static <T> Result<T> ok(CharSequence message, T data) {
-        return of(OK_CODE, message, BaseSysError.DefaultSysError.OK, data);
-    }
+	public static <T> Result<T> ok(CharSequence message, T data) {
+		return ok(OK_CODE, message, data);
+	}
 
-    /* ******************************************************** 请求成功但没有达到预期响应 ******************************************************** */
-    public static <T> Result<T> error() {
-        return error((T) null);
-    }
+	public static <T> Result<T> ok(Serializable code, CharSequence message, T data) {
+		return of(code, message, data, true);
+	}
 
-    public static <T> Result<T> error(CharSequence message) {
-        return error(message, (T) null);
-    }
+	public static <T> Result<T> ok(BaseStatus status, T data) {
+		return of(status, data, true);
+	}
 
-    public static <T> Result<T> error(BaseSysError error) {
-        return error(error, null);
-    }
+	/* ******************************************************** 请求失败 ******************************************************** */
+	public static <T> Result<T> error() {
+		return error((T) null);
+	}
 
-    public static <T> Result<T> error(T data) {
-        return error(ERROR_MSG, data);
-    }
+	public static <T> Result<T> error(CharSequence message) {
+		return error(ERROR_CODE, message, null);
+	}
 
-    public static <T> Result<T> error(CharSequence message, BaseSysError error) {
-        return error(message, error, null);
-    }
+	public static <T> Result<T> error(BaseStatus status) {
+		return error(status, (T) null);
+	}
 
-    public static <T> Result<T> error(CharSequence message, T data) {
-        return error(message, BaseSysError.DefaultSysError.ERROR, data);
-    }
+	public static <T> Result<T> error(Serializable code, CharSequence message) {
+		return error(code, message, null);
+	}
 
-    public static <T> Result<T> error(BaseSysError error, T data) {
-        return error(ERROR_MSG, error, data);
-    }
+	public static <T> Result<T> error(T data) {
+		return error(BaseStatus.DefaultStatus.ERROR, data);
+	}
 
-    public static <T> Result<T> error(CharSequence message, BaseSysError error, T data) {
-        return of(ERROR_CODE, message, error, data);
-    }
+	public static <T> Result<T> error(Serializable code, CharSequence message, T data) {
+		return of(code, message, data, false);
+	}
 
-    /* ******************************************************** 请求失败 ******************************************************** */
-    public static <T> Result<T> fail() {
-        return fail(FAIL_MSG);
-    }
+	public static <T> Result<T> error(BaseStatus status, T data) {
+		return of(status, data, false);
+	}
 
-    public static <T> Result<T> fail(CharSequence message) {
-        return fail(FAIL_CODE, message);
-    }
+	/* ******************************************************** 通用构造 ******************************************************** */
+	public static <T> Result<T> of(Serializable code, CharSequence message, T data) {
+		return of(BaseStatus.DefaultStatus.of(code, message), data);
+	}
 
-    public static <T> Result<T> fail(CharSequence message, BaseSysError error) {
-        return fail(FAIL_CODE, message, error);
-    }
+	public static <T> Result<T> of(Serializable code, CharSequence message, T data, boolean success) {
+		return of(BaseStatus.DefaultStatus.of(code, message), data, success);
+	}
 
-    public static <T> Result<T> fail(int code, CharSequence message) {
-        return fail(code, message, BaseSysError.DefaultSysError.ERROR);
-    }
+	public static <T> Result<T> of(Serializable code, CharSequence message, T data, LocalDateTime time) {
+		return of(BaseStatus.DefaultStatus.of(code, message), data, time);
+	}
 
-    public static <T> Result<T> fail(int code, CharSequence message, BaseSysError error) {
-        return of(code, message, error, null);
-    }
+	public static <T> Result<T> of(Serializable code, CharSequence message, T data, boolean success, LocalDateTime time) {
+		return of(BaseStatus.DefaultStatus.of(code, message), data, success, time);
+	}
 
-    /* ******************************************************** 通用构造 ******************************************************** */
+	public static <T> Result<T> of(BaseStatus status, T data) {
+		return of(status, data, Objects.nonNull(status) && status.isOk());
+	}
 
-    public static <T> Result<T> of(int code, CharSequence message, BaseSysError error, T data) {
-        return of(code, message, error, LocalDateTime.now(), data);
-    }
+	public static <T> Result<T> of(BaseStatus status, T data, boolean success) {
+		return of(status, data, success, LocalDateTime.now());
+	}
 
-    public static <T> Result<T> of(int code, CharSequence message, BaseSysError error, LocalDateTime time, T data) {
-        boolean success = OK_CODE == code;
-        if (Objects.nonNull(error)) {
-            success = success && error.isOk();
-        }
-        return of(code, message, error, success, time, data);
-    }
+	public static <T> Result<T> of(BaseStatus status, T data, LocalDateTime time) {
+		return of(status, data, Objects.nonNull(status) && status.isOk(), time);
+	}
 
-    public static <T> Result<T> of(int code, CharSequence message, BaseSysError error, boolean success, T data) {
-        return of(code, message, error, success, LocalDateTime.now(), data);
-    }
-
-    public static <T> Result<T> of(int code, CharSequence message, BaseSysError error, boolean success, LocalDateTime time, T data) {
-        return Result.<T>builder()
-                .code(code)
-                .message(message)
-                .error(error)
-                .success(success)
-                .time(time)
-                .data(data)
-                .build();
-    }
+	public static <T> Result<T> of(BaseStatus status, T data, boolean success, LocalDateTime time) {
+		return Result.<T>builder()
+			.status(status)
+			.success(success)
+			.time(time)
+			.data(data)
+			.build();
+	}
 }

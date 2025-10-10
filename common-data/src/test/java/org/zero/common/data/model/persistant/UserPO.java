@@ -9,7 +9,7 @@ import lombok.With;
 import lombok.experimental.SuperBuilder;
 import lombok.experimental.WithBy;
 import org.zero.common.data.enumeration.Gender;
-import org.zero.common.data.enumeration.Status;
+import org.zero.common.data.enumeration.UserStatus;
 
 @Data
 @NoArgsConstructor
@@ -25,5 +25,5 @@ public class UserPO extends FullBasePO {
     private String code;
     private String name;
     private Gender gender;
-    private Status status;
+    private UserStatus status;
 }

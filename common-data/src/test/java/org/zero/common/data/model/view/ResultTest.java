@@ -2,8 +2,7 @@ package org.zero.common.data.model.view;
 
 import org.junit.jupiter.api.Test;
 import org.zero.common.data.enumeration.Gender;
-import org.zero.common.data.enumeration.Status;
-import org.zero.common.data.enumeration.SysError;
+import org.zero.common.data.enumeration.UserStatus;
 import org.zero.common.data.model.transfer.SmartPageDTO;
 import org.zero.common.data.model.transfer.UserDTO;
 
@@ -31,7 +30,7 @@ class ResultTest {
                                 .code("s00001")
                                 .name("小明")
                                 .gender(Gender.MALE)
-                                .status(Status.FREEZE)
+                                .status(UserStatus.FREEZE)
                                 .createdAt(LocalDateTime.now())
                                 .updatedBy(1L)
                                 .build(),
@@ -40,7 +39,7 @@ class ResultTest {
                                 .code("s00002")
                                 .name("小红")
                                 .gender(Gender.FEMALE)
-                                .status(Status.NORMAL)
+                                .status(UserStatus.NORMAL)
                                 .createdAt(LocalDateTime.now())
                                 .updatedBy(1L)
                                 .build())));
@@ -55,11 +54,11 @@ class ResultTest {
 
     @Test
     void fail() {
-        Result<Void> failVoid = Result.fail();
+        Result<Void> failVoid = Result.error();
         System.out.println(failVoid);
-        Result<Double> failDouble = Result.fail("fail");
+        Result<Double> failDouble = Result.error("fail");
         System.out.println(failDouble);
-        Result<Void> fail404 = Result.fail(404, "资源未找到", SysError.ERROR);
+        Result<Void> fail404 = Result.error(404, "资源未找到");
         System.out.println(fail404);
     }
 }

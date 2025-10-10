@@ -14,5 +14,4 @@ public interface ConstantPool extends StringPool, CharPool {
     char CHAR_ZERO = '\u0000';
     boolean BOOLEAN_FALSE = false;
     boolean BOOLEAN_TRUE = true;
-    Object OBJECT_NULL = null;
 }
