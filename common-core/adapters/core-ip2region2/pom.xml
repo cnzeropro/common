@@ -4,26 +4,23 @@
 
 	<parent>
 		<groupId>org.zero</groupId>
-		<artifactId>common-core</artifactId>
+		<artifactId>common</artifactId>
 		<version>1.0.0</version>
 	</parent>
 
 	<artifactId>core-ip2region2</artifactId>
 	<packaging>jar</packaging>
 
-	<properties>
-		<java.version>8</java.version>
-		<maven.compiler.release>${java.version}</maven.compiler.release>
+	<name>common-core::ip2region2</name>
 
-		<classifier>ip2region2</classifier>
-		<maven.source.classifier>${classifier}-sources</maven.source.classifier>
-		<maven.javadoc.classifier>${classifier}-javadoc</maven.javadoc.classifier>
+	<properties>
+		<!-- <java.version>6</java.version> -->
+		<java.version>8</java.version>
 
 		<org.lionsoul_ip2region.version>2.7.0</org.lionsoul_ip2region.version>
 	</properties>
 
 	<dependencies>
-		<!-- 引入核心模块，使其优先编译，从而方便获取 class 文件 -->
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>core-base</artifactId>
@@ -34,62 +31,13 @@
 			<groupId>org.lionsoul</groupId>
 			<artifactId>ip2region</artifactId>
 			<version>${org.lionsoul_ip2region.version}</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+			<optional>true</optional>
 		</dependency>
 	</dependencies>
-
-	<build>
-		<finalName>${project.parent.artifactId}-${project.parent.version}</finalName>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>copy-classes</id>
-						<!-- 因为 Maven 没有内置的 pre-compile 阶段，所以只能绑定到 generate-sources 来复制 class 文件 -->
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.outputDirectory}</outputDirectory>
-							<resources>
-								<resource>
-									<directory>${project.basedir}/../../core-base/target/classes</directory>
-								</resource>
-							</resources>
-							<overwrite>true</overwrite>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<classifier>${classifier}</classifier>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>com.github.github</groupId>
-				<artifactId>site-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
 </project>

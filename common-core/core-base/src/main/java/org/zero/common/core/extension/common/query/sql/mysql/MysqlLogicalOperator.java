@@ -3,7 +3,7 @@ package org.zero.common.core.extension.common.query.sql.mysql;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.zero.common.data.model.query.Operator;
+import org.zero.common.data.enumeration.Operator;
 
 import java.util.Collection;
 import java.util.function.Function;

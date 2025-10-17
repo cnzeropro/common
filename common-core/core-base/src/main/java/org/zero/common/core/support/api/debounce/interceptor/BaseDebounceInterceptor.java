@@ -45,7 +45,7 @@ public abstract class BaseDebounceInterceptor implements AbstractHandlerMethodIn
             return true;
         }
         String message = this.getMessage(request, handlerMethod, debounce);
-        Result<Void> result = Result.fail(message);
+        Result<Void> result = Result.error(message);
         String jsonStr = JacksonUtils.toJsonStr(result);
         ResponseUtil.writeOkJson(response, jsonStr);
         return false;

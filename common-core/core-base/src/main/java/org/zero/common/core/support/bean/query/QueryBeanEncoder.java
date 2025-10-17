@@ -3,12 +3,14 @@ package org.zero.common.core.support.bean.query;
 import feign.RequestTemplate;
 import feign.codec.EncodeException;
 import feign.codec.Encoder;
-import org.zero.common.core.util.BeanPathMapUtil;
-import org.zero.common.core.util.hutool.core.bean.BeanUtil;
+import org.zero.common.core.support.bean.map.BeanEvaluator;
+import org.zero.common.core.support.bean.map.BeanMap;
+import org.zero.common.core.support.bean.map.DefaultBeanEvaluator;
+import org.zero.common.core.support.bean.map.ObjectConfig;
+import org.zero.common.core.support.bean.map.ValueToParamStringHandler;
 
 import java.lang.reflect.Type;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * 使用方式：<br>
@@ -42,29 +44,34 @@ import java.util.Objects;
  * @since 2024/10/31
  */
 public class QueryBeanEncoder implements Encoder {
-    protected final Encoder delegate;
-    protected String[] beanBasePackages = BeanUtil.DEFAULT_PACKAGE_LEVEL_NAMES;
+	protected final Encoder delegate;
+	protected final BeanEvaluator beanEvaluator;
 
-    public QueryBeanEncoder(Encoder delegate) {
-        this.delegate = delegate;
-    }
+	public QueryBeanEncoder(Encoder delegate) {
+		this(delegate, DefaultBeanEvaluator.INSTANCE);
+	}
 
-    public QueryBeanEncoder(Encoder delegate, String[] beanBasePackages) {
-        this.delegate = delegate;
-        this.beanBasePackages = beanBasePackages;
-    }
+	public QueryBeanEncoder(Encoder delegate, BeanEvaluator beanEvaluator) {
+		this.delegate = delegate;
+		this.beanEvaluator = beanEvaluator;
+	}
 
-    /**
-     * @see feign.ReflectiveFeign.BuildEncodedTemplateFromArgs#resolve(Object[], RequestTemplate, Map)
-     */
-    @Override
-    public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
-        if (bodyType == Object[].class) {
-            Object[] objects = (Object[]) object;
-            Map<String, Object> map = BeanPathMapUtil.toMapIn(beanBasePackages, objects);
-            map.forEach((k, v) -> template.query(k, Objects.toString(v, null)));
-        } else {
-            delegate.encode(object, bodyType, template);
-        }
-    }
+	/**
+	 * @see feign.ReflectiveFeign.BuildEncodedTemplateFromArgs#resolve(Object[], RequestTemplate, Map)
+	 */
+	@Override
+	public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
+		if (bodyType == Object[].class) {
+			Object[] objects = (Object[]) object;
+			ObjectConfig objectConfig = ObjectConfig.of(objects)
+				.prefix(null);
+			Map<String, String> map = BeanMap.of(new ValueToParamStringHandler())
+				.objectConfig(objectConfig)
+				.beanEvaluator(beanEvaluator)
+				.toMap();
+			map.forEach(template::query);
+		} else {
+			delegate.encode(object, bodyType, template);
+		}
+	}
 }

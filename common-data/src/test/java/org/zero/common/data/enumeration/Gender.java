@@ -10,10 +10,10 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum Gender {
-    MALE(1, "男"),
-    FEMALE(2, "女"),
-    ;
+	MALE(1, "男"),
+	FEMALE(2, "女"),
+	UNKNOWN(0, "未知");
 
-    private final Integer type;
-    private final String name;
+	private final Integer type;
+	private final String name;
 }

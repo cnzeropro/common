@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import org.zero.common.data.exception.BaseStatus;
+import org.zero.common.data.exception.Status;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -23,9 +23,9 @@ import java.util.Objects;
 public final class Result<T> implements BaseResult<T> {
 	private static final long serialVersionUID = 7893804841950761019L;
 	/**
-	 * 状态信息
+	 * 请求状态
 	 */
-	private BaseStatus status;
+	private Status status;
 	/**
 	 * 成功标志
 	 */
@@ -49,7 +49,7 @@ public final class Result<T> implements BaseResult<T> {
 		return ok(OK_CODE, message, null);
 	}
 
-	public static <T> Result<T> ok(BaseStatus status) {
+	public static <T> Result<T> ok(Status status) {
 		return ok(status, (T) null);
 	}
 
@@ -58,7 +58,7 @@ public final class Result<T> implements BaseResult<T> {
 	}
 
 	public static <T> Result<T> ok(T data) {
-		return ok(BaseStatus.DefaultStatus.OK, data);
+		return ok(Status.Default.OK, data);
 	}
 
 	public static <T> Result<T> ok(CharSequence message, T data) {
@@ -69,7 +69,7 @@ public final class Result<T> implements BaseResult<T> {
 		return of(code, message, data, true);
 	}
 
-	public static <T> Result<T> ok(BaseStatus status, T data) {
+	public static <T> Result<T> ok(Status status, T data) {
 		return of(status, data, true);
 	}
 
@@ -82,7 +82,7 @@ public final class Result<T> implements BaseResult<T> {
 		return error(ERROR_CODE, message, null);
 	}
 
-	public static <T> Result<T> error(BaseStatus status) {
+	public static <T> Result<T> error(Status status) {
 		return error(status, (T) null);
 	}
 
@@ -91,47 +91,47 @@ public final class Result<T> implements BaseResult<T> {
 	}
 
 	public static <T> Result<T> error(T data) {
-		return error(BaseStatus.DefaultStatus.ERROR, data);
+		return error(Status.Default.ERROR, data);
 	}
 
 	public static <T> Result<T> error(Serializable code, CharSequence message, T data) {
 		return of(code, message, data, false);
 	}
 
-	public static <T> Result<T> error(BaseStatus status, T data) {
+	public static <T> Result<T> error(Status status, T data) {
 		return of(status, data, false);
 	}
 
 	/* ******************************************************** 通用构造 ******************************************************** */
 	public static <T> Result<T> of(Serializable code, CharSequence message, T data) {
-		return of(BaseStatus.DefaultStatus.of(code, message), data);
+		return of(Status.Default.of(code, message), data);
 	}
 
 	public static <T> Result<T> of(Serializable code, CharSequence message, T data, boolean success) {
-		return of(BaseStatus.DefaultStatus.of(code, message), data, success);
+		return of(Status.Default.of(code, message), data, success);
 	}
 
 	public static <T> Result<T> of(Serializable code, CharSequence message, T data, LocalDateTime time) {
-		return of(BaseStatus.DefaultStatus.of(code, message), data, time);
+		return of(Status.Default.of(code, message), data, time);
 	}
 
 	public static <T> Result<T> of(Serializable code, CharSequence message, T data, boolean success, LocalDateTime time) {
-		return of(BaseStatus.DefaultStatus.of(code, message), data, success, time);
+		return of(Status.Default.of(code, message), data, success, time);
 	}
 
-	public static <T> Result<T> of(BaseStatus status, T data) {
+	public static <T> Result<T> of(Status status, T data) {
 		return of(status, data, Objects.nonNull(status) && status.isOk());
 	}
 
-	public static <T> Result<T> of(BaseStatus status, T data, boolean success) {
+	public static <T> Result<T> of(Status status, T data, boolean success) {
 		return of(status, data, success, LocalDateTime.now());
 	}
 
-	public static <T> Result<T> of(BaseStatus status, T data, LocalDateTime time) {
+	public static <T> Result<T> of(Status status, T data, LocalDateTime time) {
 		return of(status, data, Objects.nonNull(status) && status.isOk(), time);
 	}
 
-	public static <T> Result<T> of(BaseStatus status, T data, boolean success, LocalDateTime time) {
+	public static <T> Result<T> of(Status status, T data, boolean success, LocalDateTime time) {
 		return Result.<T>builder()
 			.status(status)
 			.success(success)

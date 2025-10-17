@@ -1,7 +1,7 @@
 package org.zero.common.core.extension.javax.net.ssl;
 
 import lombok.SneakyThrows;
-import org.zero.common.core.extension.java.lang.BaseBuilder;
+import org.zero.common.core.extension.java.lang.Builder;
 import org.zero.common.core.util.java.lang.CharSequenceUtil;
 
 import javax.net.ssl.KeyManager;
@@ -19,7 +19,7 @@ import java.util.Objects;
  * @author Zero (cnzeropro@163.com)
  * @since 2025/4/30
  */
-public class KeyManagerBuilder extends BaseBuilder<KeyManager[], KeyManagerBuilder> {
+public class KeyManagerBuilder implements Builder<KeyManager[], KeyManagerBuilder> {
     protected String algorithm = KeyManagerFactory.getDefaultAlgorithm();
     protected String providerName;
     protected Provider provider;
@@ -69,7 +69,7 @@ public class KeyManagerBuilder extends BaseBuilder<KeyManager[], KeyManagerBuild
 
     @SneakyThrows
     @Override
-    protected KeyManager[] instance() {
+    public KeyManager[] build() {
         KeyManagerFactory factory;
         if (Objects.nonNull(provider)) {
             factory = KeyManagerFactory.getInstance(algorithm, provider);

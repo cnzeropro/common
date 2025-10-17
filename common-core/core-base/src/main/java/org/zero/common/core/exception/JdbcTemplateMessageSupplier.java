@@ -23,12 +23,6 @@ public class JdbcTemplateMessageSupplier implements MessageSupplier {
      * WHERE code = ?
      *   AND COALESCE(locale, 'default') = COALESCE(?, 'default')
      * }</pre>
-     * <pre>{@code
-     * SELECT message
-     * FROM sys_error_dict
-     * WHERE code = ?
-     *   AND ((? IS NOT NULL AND locale = ?) OR (? IS NULL AND locale IS NULL))
-     * }</pre>
      */
     protected static final String DEFAULT_QUERY_SQL = "SELECT message FROM sys_error_dict WHERE code = ? AND (locale = ? OR (locale IS NULL AND ? IS NULL))";
 

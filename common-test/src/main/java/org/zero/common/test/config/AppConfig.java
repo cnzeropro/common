@@ -8,7 +8,6 @@ import org.zero.common.core.support.context.spring.EnableSpringUtils;
 import org.zero.common.core.support.converter.ConverterComposite;
 import org.zero.common.core.support.converter.ToList;
 import org.zero.common.core.support.fallback.FallbackAspect;
-import org.zero.common.core.support.log.EnableLogTracker;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -17,7 +16,6 @@ import java.util.ArrayList;
  * @author Zero (cnzeropro@163.com)
  * @since 2025/1/7
  */
-@EnableLogTracker
 @EnableSpringUtils
 @Configuration(proxyBeanMethods = false)
 public class AppConfig {

@@ -7,7 +7,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 import lombok.extern.java.Log;
-import org.zero.common.core.extension.java.lang.BaseBuilder;
+import org.zero.common.core.extension.java.lang.InnerBuilder;
 import org.zero.common.core.extension.java.util.function.ThrowThrowableSupplier;
 import org.zero.common.core.util.java.lang.ThrowableUtil;
 
@@ -123,7 +123,7 @@ public class SocketPingClient implements PingClient {
 
     @Setter
     @Accessors(chain = true, fluent = true)
-    public static class Builder extends BaseBuilder<SocketPingClient, Builder> {
+    public static class Builder extends InnerBuilder<SocketPingClient, Builder> {
         /**
          * 服务器地址
          */

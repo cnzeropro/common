@@ -16,8 +16,6 @@ import org.zero.common.core.extension.spring.web.method.support.JsonObjectParam;
 import org.zero.common.core.support.bean.dynamic.DynamicBean;
 import org.zero.common.core.support.bean.dynamic.DynamicBeanArgumentResolver;
 import org.zero.common.core.support.bean.dynamic.DynamicBeanParam;
-import org.zero.common.core.support.log.LogLevel;
-import org.zero.common.core.support.log.LogTracker;
 import org.zero.common.data.model.query.BaseQO;
 import org.zero.common.data.model.view.Result;
 
@@ -37,7 +35,6 @@ public class QueryController {
      * @see StringToFieldConverter
      * @see StringToOperatorConverter
      */
-    @LogTracker(LogLevel.INFO)
     @GetMapping("q1")
     public Result<BaseQO> q1(@Validated BaseQO param) {
         return Result.ok(param);

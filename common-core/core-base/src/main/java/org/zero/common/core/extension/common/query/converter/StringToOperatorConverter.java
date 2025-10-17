@@ -3,7 +3,7 @@ package org.zero.common.core.extension.common.query.converter;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.util.StringUtils;
 import org.zero.common.core.extension.common.query.sql.ComparisonOperator;
-import org.zero.common.data.model.query.Operator;
+import org.zero.common.data.enumeration.Operator;
 
 import java.util.Arrays;
 import java.util.Collection;

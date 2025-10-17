@@ -1,7 +1,7 @@
 package org.zero.common.core.extension.java.security.cert;
 
 import lombok.SneakyThrows;
-import org.zero.common.core.extension.java.lang.BaseBuilder;
+import org.zero.common.core.extension.java.lang.Builder;
 import org.zero.common.core.util.java.io.IoUtil;
 import org.zero.common.core.util.java.lang.CharSequenceUtil;
 import org.zero.common.core.util.javax.net.ssl.SslUtil;
@@ -23,7 +23,7 @@ import java.util.Objects;
  * @author Zero (cnzeropro@163.com)
  * @since 2025/4/30
  */
-public class CertificateBuilder extends BaseBuilder<Certificate[], CertificateBuilder> {
+public class CertificateBuilder implements Builder<Certificate[], CertificateBuilder> {
     protected String type = SslUtil.DEFAULT_CERTIFICATE_TYPE;
     protected String providerName;
     protected Provider provider;
@@ -63,7 +63,7 @@ public class CertificateBuilder extends BaseBuilder<Certificate[], CertificateBu
 
     @SneakyThrows
     @Override
-    protected Certificate[] instance() {
+    public Certificate[] build() {
         CertificateFactory factory;
         if (Objects.nonNull(provider)) {
             factory = CertificateFactory.getInstance(type, provider);

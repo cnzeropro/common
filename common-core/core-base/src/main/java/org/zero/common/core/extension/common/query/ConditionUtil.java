@@ -5,8 +5,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.zero.common.core.util.java.lang.ClassUtil;
+import org.zero.common.data.enumeration.Operator;
 import org.zero.common.data.model.query.Condition;
-import org.zero.common.data.model.query.Operator;
 
 import java.math.BigDecimal;
 import java.util.Collection;

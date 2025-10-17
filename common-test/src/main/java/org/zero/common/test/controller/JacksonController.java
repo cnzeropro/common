@@ -7,7 +7,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.zero.common.core.extension.jackson.databind.NumberJsonComponent;
+import org.zero.common.core.extension.jackson.databind.ser.NumberJsonComponent;
 import org.zero.common.data.model.view.Result;
 
 import java.io.Serializable;

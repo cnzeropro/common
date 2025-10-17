@@ -1,7 +1,5 @@
 package org.zero.common.data.enumeration;
 
-import org.zero.common.data.model.query.CacheStrategy;
-
 /**
  * @author Zero (cnzeropro@163.com)
  * @since 2025/7/3

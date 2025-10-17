@@ -9,10 +9,10 @@ import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.zero.common.core.exception.MessageSourceThrowableMessageProvider;
-import org.zero.common.core.exception.ThrowableMessageProvider;
+import org.zero.common.core.exception.MessageSourceThrowableMessageSupplier;
 import org.zero.common.core.exception.ThrowableMessageSource;
-import org.zero.common.core.exception.controller.CustomErrorController;
+import org.zero.common.core.exception.ThrowableMessageSupplier;
+import org.zero.common.core.exception.controller.javax.CustomErrorController;
 import org.zero.common.core.exception.handler.spring.BaseExceptionHandler;
 import org.zero.common.core.exception.handler.spring.JavaExceptionHandler;
 import org.zero.common.core.exception.handler.spring.SpringWebExceptionHandler;
@@ -34,13 +34,13 @@ import java.util.stream.Collectors;
 @Configuration(proxyBeanMethods = false)
 public class ExceptionConfig {
     // @Bean
-    // ThrowableMessageProvider throwableMessageProvider(final JdbcTemplate jdbcTemplate) {
-    //     return new JdbcTemplateThrowableMessageProvider(jdbcTemplate);
+    // ThrowableMessageSupplier throwableMessageSupplier(final JdbcTemplate jdbcTemplate) {
+    //     return new JdbcTemplateThrowableMessageSupplier(jdbcTemplate);
     // }
 
     @Bean
-    ThrowableMessageProvider throwableMessageProvider() {
-        return new MessageSourceThrowableMessageProvider(ThrowableMessageSource.getAccessor());
+    ThrowableMessageSupplier throwableMessageProvider() {
+        return new MessageSourceThrowableMessageSupplier(ThrowableMessageSource.getAccessor());
     }
 
     /**

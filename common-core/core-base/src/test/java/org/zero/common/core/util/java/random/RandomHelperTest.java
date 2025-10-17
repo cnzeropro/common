@@ -2,36 +2,32 @@ package org.zero.common.core.util.java.random;
 
 import org.junit.jupiter.api.Test;
 import org.zero.common.core.util.java.util.RandomHelper;
+import org.zero.common.core.util.java.util.RandomUtil;
 
 /**
  * @author Zero (cnzeropro@qq.com)
  * @date 2022/11/29
  */
 class RandomHelperTest {
-    RandomHelper randomHelper = RandomHelper.createWithStrongRandom();
+    RandomHelper randomHelper = new RandomHelper(RandomUtil.getRandom());
 
     @Test
-    void randomChar() {
-        System.out.println(randomHelper.randomChar());
+    void nextChar() {
+        System.out.println(randomHelper.nextChar());
     }
 
     @Test
-    void randomString() {
-        System.out.println(randomHelper.randomString(50));
+    void nextString() {
+        System.out.println(randomHelper.nextString(50));
     }
 
     @Test
-    void randomChinese() {
-        System.out.println(randomHelper.randomChinese());
+    void nextChinese() {
+        System.out.println(randomHelper.nextChinese());
     }
 
     @Test
-    void randomChineseString() {
-        System.out.println(randomHelper.randomChineseString(50));
-    }
-
-    @Test
-    void randomInt() {
-        System.out.println(randomHelper.randomInt(0, 100));
+    void nextChineseString() {
+        System.out.println(randomHelper.nextChineseString(50));
     }
 }

@@ -3,6 +3,7 @@ package org.zero.common.data.model.query;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.zero.common.data.constant.CommonConstant;
 
 import java.io.Serializable;
@@ -18,6 +19,7 @@ import java.io.Serializable;
  * @since 2021/1/5
  */
 @Data
+@SuperBuilder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class PageQO implements Serializable {

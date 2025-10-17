@@ -7,7 +7,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 import lombok.extern.java.Log;
-import org.zero.common.core.extension.java.lang.BaseBuilder;
+import org.zero.common.core.extension.java.lang.InnerBuilder;
 import org.zero.common.core.extension.java.util.function.ThrowThrowableSupplier;
 import org.zero.common.core.util.java.lang.ThrowableUtil;
 
@@ -114,7 +114,7 @@ public class SocketPongServer implements PongServer {
 
     @Setter
     @Accessors(chain = true, fluent = true)
-    public static class Builder extends BaseBuilder<SocketPongServer, Builder> {
+    public static class Builder extends InnerBuilder<SocketPongServer, Builder> {
         /**
          * 地址。{@code null} 表示使用 {@linkplain InetAddress#anyLocalAddress() LocalAddress}
          */

@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.util.StringUtils;
-import org.zero.common.data.exception.BaseStatus;
+import org.zero.common.data.exception.Status;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -17,7 +17,7 @@ import java.util.Objects;
  * @since 2024/11/18
  */
 @Slf4j
-public class MessageSourceStatus extends BaseStatus.DefaultStatus {
+public class MessageSourceStatus extends Status.Default {
 	@Setter
 	protected static MessageSourceAccessor messageSourceAccessor;
 

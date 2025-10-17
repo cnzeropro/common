@@ -11,7 +11,12 @@
 
 	<packaging>pom</packaging>
 	<modules>
-		<module>common-core</module>
+		<module>common-core/core-base</module>
+		<module>common-core/adapters/core-jakarta</module>
+		<module>common-core/adapters/core-spring-boot3</module>
+		<module>common-core/adapters/core-ip2region2</module>
+		<module>common-core/core-distribution</module>
+
 		<module>common-data</module>
 		<module>common-api</module>
 		<module>common-job</module>

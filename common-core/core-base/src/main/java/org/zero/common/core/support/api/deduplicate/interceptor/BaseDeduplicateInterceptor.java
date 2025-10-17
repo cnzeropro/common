@@ -49,7 +49,7 @@ public abstract class BaseDeduplicateInterceptor implements AbstractHandlerMetho
             return true;
         }
         String message = this.getMessage(request, handlerMethod, deduplicate);
-        Result<Void> result = Result.fail(message);
+        Result<Void> result = Result.error(message);
         String jsonStr = JacksonUtils.toJsonStr(result);
         ResponseUtil.writeOkJson(response, jsonStr);
         return false;

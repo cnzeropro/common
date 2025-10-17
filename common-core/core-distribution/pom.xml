@@ -3,21 +3,16 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.zero</groupId>
-		<artifactId>common-core</artifactId>
+		<artifactId>common</artifactId>
 		<version>1.0.0</version>
 	</parent>
 
-	<artifactId>core-distribution</artifactId>
+	<artifactId>common-core</artifactId>
 	<packaging>jar</packaging>
 
 	<properties>
-		<classifier>default</classifier>
-		<maven.source.classifier>${classifier}-sources</maven.source.classifier>
-		<maven.javadoc.classifier>${classifier}-javadoc</maven.javadoc.classifier>
-
-		<spring-boot3.classes.dir>${project.basedir}/../adapters/core-spring-boot3/target/classes
-		</spring-boot3.classes.dir>
-		<ip2region2.classes.dir>${project.basedir}/../adapters/core-ip2region2/target/classes</ip2region2.classes.dir>
+		<adapters.dir>${project.basedir}/../adapters</adapters.dir>
+		<classes.dir>target/classes</classes.dir>
 	</properties>
 
 	<!-- 引入其他模块，使其优先编译，从而方便获取 class 文件 -->
@@ -44,45 +39,6 @@
 		</dependency>
 	</dependencies>
 
-	<profiles>
-		<profile>
-			<id>spring-boot3+ip2region2</id>
-			<properties>
-				<classifier>spring-boot3-ip2region2</classifier>
-			</properties>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-resources-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>copy-base-classes</id>
-								<!-- 因为 Maven 没有内置的 pre-compile 阶段，所以只能绑定到 generate-sources 来复制 class 文件 -->
-								<phase>generate-sources</phase>
-								<goals>
-									<goal>copy-resources</goal>
-								</goals>
-								<configuration>
-									<outputDirectory>${project.build.outputDirectory}</outputDirectory>
-									<resources>
-										<resource>
-											<directory>${spring-boot3.classes.dir}</directory>
-										</resource>
-										<resource>
-											<directory>${ip2region2.classes.dir}</directory>
-										</resource>
-									</resources>
-									<overwrite>true</overwrite>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
-
 	<build>
 		<finalName>${project.parent.artifactId}-${project.parent.version}</finalName>
 		<plugins>
@@ -101,7 +57,16 @@
 							<outputDirectory>${project.build.outputDirectory}</outputDirectory>
 							<resources>
 								<resource>
-									<directory>${project.basedir}/../core-base/target/classes</directory>
+									<directory>${project.basedir}/../core-base/${classes.dir}</directory>
+								</resource>
+								<resource>
+									<directory>${adapters.dir}/core-jakarta/${classes.dir}</directory>
+								</resource>
+								<resource>
+									<directory>${adapters.dir}/core-spring-boot3/${classes.dir}</directory>
+								</resource>
+								<resource>
+									<directory>${adapters.dir}/core-ip2region2/${classes.dir}</directory>
 								</resource>
 							</resources>
 							<overwrite>true</overwrite>
@@ -112,9 +77,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<classifier>${classifier}</classifier>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

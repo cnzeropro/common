@@ -49,7 +49,7 @@ public abstract class BaseIdempotentInterceptor implements AbstractHandlerMethod
             return true;
         }
         String message = this.getMessage(request, handlerMethod, idempotent);
-        Result<Void> result = Result.fail(message);
+        Result<Void> result = Result.error(message);
         String jsonStr = JacksonUtils.toJsonStr(result);
         ResponseUtil.writeOkJson(response, jsonStr);
         return false;

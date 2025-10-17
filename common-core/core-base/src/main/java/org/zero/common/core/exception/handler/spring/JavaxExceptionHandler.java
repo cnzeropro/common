@@ -9,7 +9,6 @@ import org.zero.common.core.exception.ThrowableMessageSupplier;
 import org.zero.common.core.exception.handler.ThrowableHandler;
 import org.zero.common.data.model.view.Result;
 
-import javax.validation.ConstraintViolation;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,19 +27,19 @@ import java.util.stream.Stream;
 @ConditionalOnWebApplication
 public class JavaxExceptionHandler extends ThrowableHandler {
 
-    public JavaxExceptionHandler(ThrowableMessageSupplier throwableMessageProvider) {
-        super(throwableMessageProvider);
-    }
+	public JavaxExceptionHandler(ThrowableMessageSupplier throwableMessageProvider) {
+		super(throwableMessageProvider);
+	}
 
-    /* *************************************************** Javax 异常 *************************************************** */
-    @ExceptionHandler(javax.validation.ConstraintViolationException.class)
-    public Result<Void> constraintViolationException(javax.validation.ConstraintViolationException e) {
-        String errorMsg = Optional.ofNullable(e.getConstraintViolations())
-                .map(Set::stream)
-                .orElseGet(Stream::empty)
-                .map(ConstraintViolation::getMessage)
-                .collect(Collectors.joining(" | ", "[", "]"));
-        log.error(String.format("Parameter validation not pass: %s", errorMsg), e);
-        return this.handle(HttpStatus.BAD_REQUEST, e, new Object[]{errorMsg});
-    }
+	/* *************************************************** Javax 异常 *************************************************** */
+	@ExceptionHandler(javax.validation.ConstraintViolationException.class)
+	public Result<Void> constraintViolationException(javax.validation.ConstraintViolationException e) {
+		String errorMsg = Optional.ofNullable(e.getConstraintViolations())
+			.map(Set::stream)
+			.orElseGet(Stream::empty)
+			.map(javax.validation.ConstraintViolation::getMessage)
+			.collect(Collectors.joining(" | ", "[", "]"));
+		log.error(String.format("Parameter validation not pass: %s", errorMsg), e);
+		return this.handle(HttpStatus.BAD_REQUEST, e, new Object[]{errorMsg});
+	}
 }

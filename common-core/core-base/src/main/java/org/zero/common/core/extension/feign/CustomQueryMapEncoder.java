@@ -1,9 +1,13 @@
 package org.zero.common.core.extension.feign;
 
 import feign.QueryMapEncoder;
-import org.zero.common.core.util.BeanPathMapUtil;
-import org.zero.common.core.util.hutool.core.bean.BeanUtil;
+import org.zero.common.core.support.bean.map.BeanEvaluator;
+import org.zero.common.core.support.bean.map.BeanMap;
+import org.zero.common.core.support.bean.map.DefaultBeanEvaluator;
+import org.zero.common.core.support.bean.map.ObjectConfig;
+import org.zero.common.core.support.bean.map.ValueToParamStringHandler;
 
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -23,14 +27,20 @@ import java.util.Map;
  * @since 2021/2/14
  */
 public class CustomQueryMapEncoder implements QueryMapEncoder {
-    protected String[] beanBasePackages = BeanUtil.DEFAULT_PACKAGE_LEVEL_NAMES;
+	protected BeanEvaluator beanEvaluator = DefaultBeanEvaluator.INSTANCE;
 
-    public CustomQueryMapEncoder(String... beanBasePackages) {
-        this.beanBasePackages = beanBasePackages;
-    }
+	public CustomQueryMapEncoder(BeanEvaluator beanEvaluator) {
+		this.beanEvaluator = beanEvaluator;
+	}
 
-    @Override
-    public Map<String, Object> encode(Object object) {
-        return BeanPathMapUtil.toMap(beanBasePackages, object);
-    }
+	@Override
+	public Map<String, Object> encode(Object object) {
+		ObjectConfig objectConfig = ObjectConfig.of(object)
+			.prefix(null);
+		Map<String, String> map = BeanMap.of(new ValueToParamStringHandler())
+			.objectConfig(objectConfig)
+			.beanEvaluator(beanEvaluator)
+			.toMap();
+		return Collections.unmodifiableMap(map);
+	}
 }

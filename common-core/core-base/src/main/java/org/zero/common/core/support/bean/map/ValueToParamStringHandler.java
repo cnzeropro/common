@@ -37,6 +37,9 @@ public class ValueToParamStringHandler extends MapValueHandler<String> {
     protected final String nullString;
     protected final String multivariableSeparator;
 
+	public ValueToParamStringHandler() {
+		this(false);
+	}
     public ValueToParamStringHandler(boolean append) {
         this(true, append);
     }

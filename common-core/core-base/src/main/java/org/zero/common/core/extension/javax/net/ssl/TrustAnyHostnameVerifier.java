@@ -8,7 +8,7 @@ import javax.net.ssl.SSLSession;
  * @since 2025/4/29
  */
 public class TrustAnyHostnameVerifier implements HostnameVerifier {
-    public static final TrustAnyHostnameVerifier INSTANCE = new TrustAnyHostnameVerifier();
+    public static final HostnameVerifier INSTANCE = new TrustAnyHostnameVerifier();
 
     @Override
     public boolean verify(String hostname, SSLSession session) {

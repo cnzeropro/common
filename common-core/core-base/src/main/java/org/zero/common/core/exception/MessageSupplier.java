@@ -1,6 +1,7 @@
 package org.zero.common.core.exception;
 
 import org.zero.common.core.util.java.lang.CharSequenceUtil;
+import org.zero.common.data.constant.StringPool;
 
 import java.text.MessageFormat;
 import java.util.Locale;
@@ -35,7 +36,7 @@ public interface MessageSupplier {
 
      static CharSequence formatMessage(CharSequence message, Locale locale, Object... args) {
         if (CharSequenceUtil.isEmpty(message)) {
-            return null;
+            return StringPool.EMPTY;
         }
         if (Objects.isNull(args) || args.length <= 0) {
             return message;

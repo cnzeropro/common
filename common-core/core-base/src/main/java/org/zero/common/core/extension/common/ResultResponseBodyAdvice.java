@@ -20,11 +20,11 @@ import org.zero.common.data.model.view.Result;
  * <p>
  * 方式一：添加到包扫描路径
  * <pre>{@code
- *     @SpringBootApplication(scanBasePackages = {"org.zero.common.core.support.common"})
+ *     @SpringBootApplication(scanBasePackages = {"org.zero.common.core.extension.common"})
  * }</pre>
  * 或
  * <pre>{@code
- *     @ComponentScan(scanBasePackages = {"org.zero.common.core.support.common"})
+ *     @ComponentScan(scanBasePackages = {"org.zero.common.core.extension.common"})
  * }</pre>
  * 方式二：使用 @Bean 注入（推荐）
  * <pre>{@code

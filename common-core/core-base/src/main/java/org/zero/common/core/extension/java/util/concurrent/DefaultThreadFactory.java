@@ -2,7 +2,7 @@ package org.zero.common.core.extension.java.util.concurrent;
 
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.zero.common.core.extension.java.lang.BaseBuilder;
+import org.zero.common.core.extension.java.lang.InnerBuilder;
 import org.zero.common.core.util.java.security.SecurityUtil;
 
 import java.util.Objects;
@@ -55,7 +55,7 @@ public class DefaultThreadFactory implements ThreadFactory {
 
     @Setter
     @Accessors(chain = true, fluent = true)
-    public static class Builder extends BaseBuilder<ThreadFactory, Builder> {
+    public static class Builder extends InnerBuilder<ThreadFactory, Builder> {
         protected String jobName = "UnknownJob";
         protected ThreadGroup group = this.defaultThreadGroup();
         protected long stackSize;

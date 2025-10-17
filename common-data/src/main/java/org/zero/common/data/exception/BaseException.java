@@ -16,43 +16,43 @@ public class BaseException extends RuntimeException {
 	/**
 	 * 错误状态
 	 */
-	protected final BaseStatus status;
+	protected final Status status;
 
 	/* ************************************************************** Exception() ************************************************************** */
 	public BaseException() {
-		this(BaseStatus.DefaultStatus.ERROR);
+		this(Status.Default.ERROR);
 	}
 
-	public BaseException(BaseStatus status) {
+	public BaseException(Status status) {
 		this(String.valueOf(status.getMessage()), status);
 	}
 
 	/* ************************************************************** Exception(java.lang.String) ************************************************************** */
 	public BaseException(String message) {
-		this(message, BaseStatus.DefaultStatus.ERROR);
+		this(message, Status.Default.ERROR);
 	}
 
-	public BaseException(String message, BaseStatus status) {
+	public BaseException(String message, Status status) {
 		super(message);
 		this.status = status;
 	}
 
 	/* ************************************************************** Exception(java.lang.Throwable) ************************************************************** */
 	public BaseException(Throwable cause) {
-		this(cause, BaseStatus.DefaultStatus.ERROR);
+		this(cause, Status.Default.ERROR);
 	}
 
-	public BaseException(Throwable cause, BaseStatus status) {
+	public BaseException(Throwable cause, Status status) {
 		super(cause);
 		this.status = status;
 	}
 
 	/* ************************************************************** Exception(java.lang.String, java.lang.Throwable) ************************************************************** */
 	public BaseException(String message, Throwable cause) {
-		this(message, cause, BaseStatus.DefaultStatus.ERROR);
+		this(message, cause, Status.Default.ERROR);
 	}
 
-	public BaseException(String message, Throwable cause, BaseStatus status) {
+	public BaseException(String message, Throwable cause, Status status) {
 		super(message, cause);
 		this.status = status;
 	}

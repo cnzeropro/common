@@ -25,7 +25,6 @@ public class ObjectTree {
     protected String levelSeparator;
     protected String multivariableLeft;
     protected String multivariableRight;
-    protected BeanEvaluator beanEvaluator;
 
     protected ObjectTree parent;
     protected List<ObjectTree> children = new ArrayList<>();
@@ -44,7 +43,6 @@ public class ObjectTree {
         objectTree.levelSeparator = objectConfig.levelSeparator;
         objectTree.multivariableLeft = objectConfig.multivariableLeft;
         objectTree.multivariableRight = objectConfig.multivariableRight;
-        objectTree.beanEvaluator = objectConfig.beanEvaluator;
         return objectTree;
     }
 
@@ -96,7 +94,6 @@ public class ObjectTree {
         objectTree.levelSeparator = levelSeparator;
         objectTree.multivariableLeft = multivariableLeft;
         objectTree.multivariableRight = multivariableRight;
-        objectTree.beanEvaluator = beanEvaluator;
     }
 
     public enum Kind {

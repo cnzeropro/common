@@ -4,12 +4,14 @@
 
 	<parent>
 		<groupId>org.zero</groupId>
-		<artifactId>common-core</artifactId>
+		<artifactId>common</artifactId>
 		<version>1.0.0</version>
 	</parent>
 
 	<artifactId>core-base</artifactId>
 	<packaging>jar</packaging>
+
+	<name>common-core::base</name>
 
 	<dependencies>
 		<dependency>
@@ -398,6 +400,10 @@
 			<artifactId>slf4j-api</artifactId>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -485,6 +491,42 @@
 						</manifestEntries>
 					</archive>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>test-base</id>
+						<configuration>
+							<testSourceDirectory>${project.basedir}/src/test/java</testSourceDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>test-java9</id>
+						<configuration>
+							<testSourceDirectory>${project.basedir}/src/test/java9</testSourceDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>test-java11</id>
+						<configuration>
+							<testSourceDirectory>${project.basedir}/src/test/java11</testSourceDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>test-java17</id>
+						<configuration>
+							<testSourceDirectory>${project.basedir}/src/test/java17</testSourceDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>test-java21</id>
+						<configuration>
+							<testSourceDirectory>${project.basedir}/src/test/java21</testSourceDirectory>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

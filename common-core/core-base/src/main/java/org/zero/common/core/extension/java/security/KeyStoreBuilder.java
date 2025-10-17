@@ -1,7 +1,7 @@
 package org.zero.common.core.extension.java.security;
 
 import lombok.SneakyThrows;
-import org.zero.common.core.extension.java.lang.BaseBuilder;
+import org.zero.common.core.extension.java.lang.Builder;
 import org.zero.common.core.util.java.io.IoUtil;
 import org.zero.common.core.util.java.lang.CharSequenceUtil;
 
@@ -20,7 +20,7 @@ import java.util.Objects;
  * @author Zero (cnzeropro@163.com)
  * @since 2025/4/30
  */
-public class KeyStoreBuilder extends BaseBuilder<KeyStore, KeyStoreBuilder> {
+public class KeyStoreBuilder implements Builder<KeyStore, KeyStoreBuilder> {
     protected String type = KeyStore.getDefaultType();
     protected String providerName;
     protected Provider provider;
@@ -75,7 +75,7 @@ public class KeyStoreBuilder extends BaseBuilder<KeyStore, KeyStoreBuilder> {
 
     @SneakyThrows
     @Override
-    protected KeyStore instance() {
+    public KeyStore build() {
         KeyStore keyStore;
         if (Objects.nonNull(provider)) {
             keyStore = KeyStore.getInstance(type, provider);

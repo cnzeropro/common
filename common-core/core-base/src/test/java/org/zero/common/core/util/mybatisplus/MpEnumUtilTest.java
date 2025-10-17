@@ -3,7 +3,7 @@ package org.zero.common.core.util.mybatisplus;
 import org.junit.jupiter.api.Test;
 import org.zero.common.core.util.mybatisplus.annotation.MpEnumUtil;
 import org.zero.common.data.enumeration.Gender;
-import org.zero.common.data.enumeration.Status;
+import org.zero.common.data.enumeration.UserStatus;
 
 import java.lang.reflect.Method;
 
@@ -17,7 +17,7 @@ class MpEnumUtilTest {
         Method method = MpEnumUtil.getMethod(Gender.class);
         System.out.println(method);
 
-        Integer value = MpEnumUtil.getValue(Status.FREEZE, Integer.class);
+        Integer value = MpEnumUtil.getValue(UserStatus.FREEZE, Integer.class);
         System.out.println(value);
     }
 }

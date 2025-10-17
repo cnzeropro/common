@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
+import org.zero.common.data.enumeration.Operator;
 
 import java.io.Serializable;
 

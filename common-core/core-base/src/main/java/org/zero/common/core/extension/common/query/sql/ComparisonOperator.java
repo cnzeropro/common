@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.zero.common.data.model.query.Operator;
+import org.zero.common.data.enumeration.Operator;
 
 import java.util.Collection;
 import java.util.Collections;

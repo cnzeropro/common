@@ -6,7 +6,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.StringUtils;
-import org.zero.common.data.exception.BaseStatus;
+import org.zero.common.data.exception.Status;
 
 import java.util.Locale;
 
@@ -18,7 +18,7 @@ import java.util.Locale;
  * @since 2024/11/18
  */
 @Slf4j
-public class JdbcTemplateStatus extends BaseStatus.DefaultStatus {
+public class JdbcTemplateStatus extends Status.Default {
 	@Setter
 	protected static JdbcTemplate jdbcTemplate;
 	@Setter

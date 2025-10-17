@@ -4,6 +4,8 @@ import org.zero.common.core.extension.java.util.function.ToBoolFunction;
 import org.zero.common.core.extension.java.util.function.ToByteFunction;
 import org.zero.common.core.util.java.util.CollectionUtil;
 import org.zero.common.core.util.java.util.ListUtil;
+import org.zero.common.core.util.java.util.stream.StreamUtil;
+import org.zero.common.data.constant.StringPool;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -15,511 +17,597 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Zero (cnzeropro@163.com)
  * @since 2024/9/11
  */
 public class ArrayUtil {
-    /**
-     * 数组中元素未找到的下标，值为 -1
-     */
-    public static final int INDEX_NOT_FOUND = -1;
-    /**
-     * Java 虚拟机最大数组长度
-     */
-    public static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 2;
-    /**
-     * The maximum size of array to allocate (unless necessary).
-     * Some VMs reserve some header words in an array.
-     * Attempts to allocate larger arrays may result in
-     * OutOfMemoryError: Requested array size exceeds VM limit
-     */
-    public static final int SAFE_MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
-    /**
-     * 空数组
-     */
-    public static final Object[] EMPTY = {};
+	/**
+	 * 数组中元素未找到的下标，值为 -1
+	 */
+	public static final int INDEX_NOT_FOUND = -1;
+	/**
+	 * Java 虚拟机最大数组长度
+	 */
+	public static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 2;
+	/**
+	 * The maximum size of array to allocate (unless necessary).
+	 * Some VMs reserve some header words in an array.
+	 * Attempts to allocate larger arrays may result in
+	 * OutOfMemoryError: Requested array size exceeds VM limit
+	 */
+	public static final int SAFE_MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+	/**
+	 * 空数组
+	 */
+	public static final Object[] EMPTY = {};
 
-    public static boolean isArray(Object object) {
-        return ObjectUtil.nonNull(object) && ClassUtil.isArray(object.getClass());
-    }
+	public static boolean isArray(Object object) {
+		return ObjectUtil.nonNull(object) && ClassUtil.isArray(object.getClass());
+	}
 
-    public static int length(Object object) {
-        if (ObjectUtil.isNull(object)) {
-            return 0;
-        }
-        if (isArray(object)) {
-            return Array.getLength(object);
-        }
-        return 0;
-    }
+	public static int length(Object object) {
+		if (ObjectUtil.isNull(object)) {
+			return 0;
+		}
+		if (isArray(object)) {
+			return Array.getLength(object);
+		}
+		return 0;
+	}
 
-    public static Class<?> getComponentType(Object object) {
-        return ObjectUtil.nonNull(object) ? object.getClass().getComponentType() : null;
-    }
+	public static Class<?> getComponentType(Object object) {
+		return ObjectUtil.nonNull(object) ? object.getClass().getComponentType() : null;
+	}
 
-    public static boolean isEmpty(Object[] array) {
-        return ObjectUtil.isNull(array) || array.length == 0;
-    }
+	public static boolean isEmpty(Object[] array) {
+		return ObjectUtil.isNull(array) || array.length == 0;
+	}
 
-    public static boolean nonEmpty(Object[] array) {
-        return !isEmpty(array);
-    }
+	public static boolean nonEmpty(Object[] array) {
+		return !isEmpty(array);
+	}
 
-    @SuppressWarnings("unchecked")
-    public static <T> T[] create(Class<?> componentType, int length) {
-        return (T[]) Array.newInstance(componentType, length);
-    }
+	public static boolean isEmpty(byte[] array) {
+		return ObjectUtil.isNull(array) || array.length == 0;
+	}
 
-    @SuppressWarnings("unchecked")
-    public static <T> T[] of(Object object, Class<T> componentType) {
-        if (Objects.isNull(object)) {
-            return create(componentType, 0);
-        }
-        if (isArray(object)) {
-            Class<?> rawComponentType = getComponentType(object);
-            // 处理原始类型数组（如int[]）
-            // 因为原始类型数组继承自 Object，因此无法使用 (Object[]) object 强转
-            // 使用 object instanceof int[]、 object instanceof double[] 等等一个一个判断又过于麻烦，因此原始类型数组统一处理
-            if (rawComponentType.isPrimitive()) {
-                int length = Array.getLength(object);
-                Class<?> wrappedComponentType = PrimitiveType.wrap(componentType);
-                T[] array = create(wrappedComponentType, length);
-                for (int i = 0; i < length; i++) {
-                    array[i] = (T) Array.get(object, i);
-                }
-                return array;
-            }
-            // 处理对象数组（如String[]）
-            return (T[]) object;
-        }
-        if (object instanceof Collection) {
-            return of((Collection<T>) object, componentType);
-        }
-        if (object instanceof Iterator) {
-            return of((Iterator<T>) object, componentType);
-        }
-        if (object instanceof Iterable) {
-            return of((Iterable<T>) object, componentType);
-        }
-        if (object instanceof Enumeration) {
-            return of((Enumeration<T>) object, componentType);
-        }
-        return of(componentType, (T) object);
-    }
+	public static boolean nonEmpty(byte[] array) {
+		return !isEmpty(array);
+	}
 
-    public static Object[] of(Object object) {
-        return of(object, Object.class);
-    }
+	public static boolean isEmpty(short[] array) {
+		return ObjectUtil.isNull(array) || array.length == 0;
+	}
 
-    public static <T> T[] of(Collection<T> collection, Class<T> componentType) {
-        T[] array = create(componentType, 0);
-        if (CollectionUtil.isEmpty(collection)) {
-            return array;
-        }
-        return collection.toArray(array);
-    }
+	public static boolean nonEmpty(short[] array) {
+		return !isEmpty(array);
+	}
 
-    public static Object[] of(Collection<?> collection) {
-        return CollectionUtil.isEmpty(collection) ? EMPTY : collection.toArray();
-    }
+	public static boolean isEmpty(int[] array) {
+		return ObjectUtil.isNull(array) || array.length == 0;
+	}
 
-    public static <T> T[] of(Iterable<T> iterable, Class<T> componentType) {
-        List<T> list = ListUtil.of(iterable);
-        return of(list, componentType);
-    }
+	public static boolean nonEmpty(int[] array) {
+		return !isEmpty(array);
+	}
 
-    public static Object[] of(Iterable<?> iterable) {
-        List<?> list = ListUtil.of(iterable);
-        return of(list);
-    }
+	public static boolean isEmpty(long[] array) {
+		return ObjectUtil.isNull(array) || array.length == 0;
+	}
 
-    public static <T> T[] of(Iterator<T> iterator, Class<T> componentType) {
-        List<T> list = ListUtil.of(iterator);
-        return of(list, componentType);
-    }
+	public static boolean nonEmpty(long[] array) {
+		return !isEmpty(array);
+	}
 
-    public static Object[] of(Iterator<?> iterator) {
-        List<?> list = ListUtil.of(iterator);
-        return of(list);
-    }
+	public static boolean isEmpty(float[] array) {
+		return ObjectUtil.isNull(array) || array.length == 0;
+	}
 
-    public static <T> T[] of(Enumeration<T> enumeration, Class<T> componentType) {
-        List<T> list = ListUtil.of(enumeration);
-        return of(list, componentType);
-    }
+	public static boolean nonEmpty(float[] array) {
+		return !isEmpty(array);
+	}
 
-    public static Object[] of(Enumeration<?> enumeration) {
-        List<?> list = ListUtil.of(enumeration);
-        return of(list);
-    }
+	public static boolean isEmpty(double[] array) {
+		return ObjectUtil.isNull(array) || array.length == 0;
+	}
 
-    public static <T> T[] of(Class<T> componentType, T t) {
-        T[] array = create(componentType, 1);
-        Array.set(array, 0, t);
-        return array;
-    }
+	public static boolean nonEmpty(double[] array) {
+		return !isEmpty(array);
+	}
 
-    public static <T> T[] of(Class<T> componentType, T t1, T t2) {
-        T[] array = create(componentType, 2);
-        Array.set(array, 0, t1);
-        Array.set(array, 1, t2);
-        return array;
-    }
+	public static boolean isEmpty(char[] array) {
+		return ObjectUtil.isNull(array) || array.length == 0;
+	}
 
-    public static <T> T[] of(Class<T> componentType, T t1, T t2, T t3) {
-        T[] array = create(componentType, 3);
-        Array.set(array, 0, t1);
-        Array.set(array, 1, t2);
-        Array.set(array, 2, t3);
-        return array;
-    }
+	public static boolean nonEmpty(char[] array) {
+		return !isEmpty(array);
+	}
 
-    @SafeVarargs
-    public static <T> T[] of(Class<T> componentType, T... ts) {
-        T[] array = create(componentType, ts.length);
-        System.arraycopy(ts, 0, array, 0, ts.length);
-        return array;
-    }
+	public static boolean isEmpty(boolean[] array) {
+		return ObjectUtil.isNull(array) || array.length == 0;
+	}
 
-    /**
-     * 追加 byte 数组内容
-     */
-    public static byte[] append(byte[] array, byte... bytes) {
-        return merge(array, bytes);
-    }
+	public static boolean nonEmpty(boolean[] array) {
+		return !isEmpty(array);
+	}
 
-    /**
-     * 追加 short 数组内容
-     */
-    public static short[] append(short[] array, short... shorts) {
-        return merge(array, shorts);
-    }
+	@SuppressWarnings("unchecked")
+	public static <T> T[] create(Class<?> componentType, int length) {
+		return (T[]) Array.newInstance(componentType, length);
+	}
 
-    /**
-     * 追加 int 数组内容
-     */
-    public static int[] append(int[] array, int... ints) {
-        return merge(array, ints);
-    }
+	@SuppressWarnings("unchecked")
+	public static <T> T[] of(Object object, Class<T> componentType) {
+		if (Objects.isNull(object)) {
+			return create(componentType, 0);
+		}
+		if (isArray(object)) {
+			Class<?> rawComponentType = getComponentType(object);
+			// 处理原始类型数组（如int[]）
+			// 因为原始类型数组继承自 Object，因此无法使用 (Object[]) object 强转
+			// 使用 object instanceof int[]、 object instanceof double[] 等等一个一个判断又过于麻烦，因此原始类型数组统一处理
+			if (rawComponentType.isPrimitive()) {
+				int length = Array.getLength(object);
+				Class<?> wrappedComponentType = PrimitiveType.wrap(componentType);
+				T[] array = create(wrappedComponentType, length);
+				for (int i = 0; i < length; i++) {
+					array[i] = (T) Array.get(object, i);
+				}
+				return array;
+			}
+			// 处理对象数组（如String[]）
+			return (T[]) object;
+		}
+		if (object instanceof Collection) {
+			return of((Collection<T>) object, componentType);
+		}
+		if (object instanceof Iterator) {
+			return of((Iterator<T>) object, componentType);
+		}
+		if (object instanceof Iterable) {
+			return of((Iterable<T>) object, componentType);
+		}
+		if (object instanceof Enumeration) {
+			return of((Enumeration<T>) object, componentType);
+		}
+		return of(componentType, (T) object);
+	}
 
-    /**
-     * 追加 long 数组内容
-     */
-    public static long[] append(long[] array, long... longs) {
-        return merge(array, longs);
-    }
+	public static Object[] of(Object object) {
+		return of(object, Object.class);
+	}
 
-    /**
-     * 追加 float 数组内容
-     */
-    public static float[] append(float[] array, float... floats) {
-        return merge(array, floats);
-    }
+	public static <T> T[] of(Collection<T> collection, Class<T> componentType) {
+		T[] array = create(componentType, 0);
+		if (CollectionUtil.isEmpty(collection)) {
+			return array;
+		}
+		return collection.toArray(array);
+	}
 
-    /**
-     * 追加 double 数组内容
-     */
-    public static double[] append(double[] array, double... doubles) {
-        return merge(array, doubles);
-    }
+	public static Object[] of(Collection<?> collection) {
+		return CollectionUtil.isEmpty(collection) ? EMPTY : collection.toArray();
+	}
 
-    /**
-     * 追加 char 数组内容
-     */
-    public static char[] append(char[] array, char... chars) {
-        return merge(array, chars);
-    }
+	public static <T> T[] of(Iterable<T> iterable, Class<T> componentType) {
+		List<T> list = ListUtil.of(iterable);
+		return of(list, componentType);
+	}
 
-    /**
-     * 追加 boolean 数组内容
-     */
-    public static boolean[] append(boolean[] array, boolean... booleans) {
-        return merge(array, booleans);
-    }
+	public static Object[] of(Iterable<?> iterable) {
+		List<?> list = ListUtil.of(iterable);
+		return of(list);
+	}
 
-    /**
-     * 追加泛型数组内容
-     * <p>
-     * 切勿乱用，造成堆污染
-     */
-    @SafeVarargs
-    public static <T> T[] append(T[] array, T... objects) {
-        return merge(array, objects);
-    }
+	public static <T> T[] of(Iterator<T> iterator, Class<T> componentType) {
+		List<T> list = ListUtil.of(iterator);
+		return of(list, componentType);
+	}
 
-    /**
-     * 合并多个 byte 数组
-     */
-    public static byte[] merge(byte[] array, byte[]... arrays) {
-        int length = array.length;
-        for (byte[] a : arrays) {
-            length += a.length;
-        }
-        byte[] result = Arrays.copyOf(array, length);
-        int pos = array.length;
-        for (byte[] a : arrays) {
-            System.arraycopy(a, 0, result, pos, a.length);
-            pos += a.length;
-        }
-        return result;
-    }
+	public static Object[] of(Iterator<?> iterator) {
+		List<?> list = ListUtil.of(iterator);
+		return of(list);
+	}
 
-    /**
-     * 合并多个 short 数组
-     */
-    public static short[] merge(short[] array, short[]... arrays) {
-        int length = array.length;
-        for (short[] a : arrays) {
-            length += a.length;
-        }
-        short[] result = Arrays.copyOf(array, length);
-        int pos = array.length;
-        for (short[] a : arrays) {
-            System.arraycopy(a, 0, result, pos, a.length);
-            pos += a.length;
-        }
-        return result;
-    }
+	public static <T> T[] of(Enumeration<T> enumeration, Class<T> componentType) {
+		List<T> list = ListUtil.of(enumeration);
+		return of(list, componentType);
+	}
 
-    /**
-     * 合并多个 int 数组
-     */
-    public static int[] merge(int[] array, int[]... arrays) {
-        int length = array.length;
-        for (int[] a : arrays) {
-            length += a.length;
-        }
-        int[] result = Arrays.copyOf(array, length);
-        int pos = array.length;
-        for (int[] a : arrays) {
-            System.arraycopy(a, 0, result, pos, a.length);
-            pos += a.length;
-        }
-        return result;
-    }
+	public static Object[] of(Enumeration<?> enumeration) {
+		List<?> list = ListUtil.of(enumeration);
+		return of(list);
+	}
 
-    /**
-     * 合并多个 long 数组
-     */
-    public static long[] merge(long[] array, long[]... arrays) {
-        int length = array.length;
-        for (long[] a : arrays) {
-            length += a.length;
-        }
-        long[] result = Arrays.copyOf(array, length);
-        int pos = array.length;
-        for (long[] a : arrays) {
-            System.arraycopy(a, 0, result, pos, a.length);
-            pos += a.length;
-        }
-        return result;
-    }
+	public static <T> T[] of(Class<T> componentType, T t) {
+		T[] array = create(componentType, 1);
+		Array.set(array, 0, t);
+		return array;
+	}
 
-    /**
-     * 合并多个 float 数组
-     */
-    public static float[] merge(float[] array, float[]... arrays) {
-        int length = array.length;
-        for (float[] a : arrays) {
-            length += a.length;
-        }
-        float[] result = Arrays.copyOf(array, length);
-        int pos = array.length;
-        for (float[] a : arrays) {
-            System.arraycopy(a, 0, result, pos, a.length);
-            pos += a.length;
-        }
-        return result;
-    }
+	public static <T> T[] of(Class<T> componentType, T t1, T t2) {
+		T[] array = create(componentType, 2);
+		Array.set(array, 0, t1);
+		Array.set(array, 1, t2);
+		return array;
+	}
 
-    /**
-     * 合并多个 double 数组
-     */
-    public static double[] merge(double[] array, double[]... arrays) {
-        int length = array.length;
-        for (double[] a : arrays) {
-            length += a.length;
-        }
-        double[] result = Arrays.copyOf(array, length);
-        int pos = array.length;
-        for (double[] a : arrays) {
-            System.arraycopy(a, 0, result, pos, a.length);
-            pos += a.length;
-        }
-        return result;
-    }
+	public static <T> T[] of(Class<T> componentType, T t1, T t2, T t3) {
+		T[] array = create(componentType, 3);
+		Array.set(array, 0, t1);
+		Array.set(array, 1, t2);
+		Array.set(array, 2, t3);
+		return array;
+	}
 
-    /**
-     * 合并多个 char 数组
-     */
-    public static char[] merge(char[] array, char[]... arrays) {
-        int length = array.length;
-        for (char[] a : arrays) {
-            length += a.length;
-        }
-        char[] result = Arrays.copyOf(array, length);
-        int pos = array.length;
-        for (char[] a : arrays) {
-            System.arraycopy(a, 0, result, pos, a.length);
-            pos += a.length;
-        }
-        return result;
-    }
+	@SafeVarargs
+	public static <T> T[] of(Class<T> componentType, T... ts) {
+		T[] array = create(componentType, ts.length);
+		System.arraycopy(ts, 0, array, 0, ts.length);
+		return array;
+	}
 
-    /**
-     * 合并多个 boolean 数组
-     */
-    public static boolean[] merge(boolean[] array, boolean[]... arrays) {
-        int length = array.length;
-        for (boolean[] a : arrays) {
-            length += a.length;
-        }
-        boolean[] result = Arrays.copyOf(array, length);
-        int pos = array.length;
-        for (boolean[] a : arrays) {
-            System.arraycopy(a, 0, result, pos, a.length);
-            pos += a.length;
-        }
-        return result;
-    }
+	/**
+	 * 追加 byte 数组内容
+	 */
+	public static byte[] append(byte[] array, byte... bytes) {
+		return merge(array, bytes);
+	}
 
-    /**
-     * 合并多个泛型数组
-     * <p>
-     * 切勿乱用，造成堆污染
-     */
-    @SafeVarargs
-    public static <T> T[] merge(T[] array, T[]... arrays) {
-        int length = array.length;
-        for (T[] a : arrays) {
-            length += a.length;
-        }
-        T[] result = Arrays.copyOf(array, length);
-        int pos = array.length;
-        for (T[] a : arrays) {
-            System.arraycopy(a, 0, result, pos, a.length);
-            pos += a.length;
-        }
-        return result;
-    }
+	/**
+	 * 追加 short 数组内容
+	 */
+	public static short[] append(short[] array, short... shorts) {
+		return merge(array, shorts);
+	}
 
-    public static <T> byte[] map(T[] array, ToByteFunction<T> function) {
-        if (isEmpty(array)) {
-            return new byte[0];
-        }
-        byte[] result = new byte[array.length];
-        for (int i = 0; i < array.length; i++) {
-            result[i] = function.applyAsByte(array[i]);
-        }
-        return result;
-    }
+	/**
+	 * 追加 int 数组内容
+	 */
+	public static int[] append(int[] array, int... ints) {
+		return merge(array, ints);
+	}
 
-    public static <T> boolean[] map(T[] array, ToBoolFunction<T> function) {
-        if (isEmpty(array)) {
-            return new boolean[0];
-        }
-        boolean[] result = new boolean[array.length];
-        for (int i = 0; i < array.length; i++) {
-            result[i] = function.applyAsBool(array[i]);
-        }
-        return result;
-    }
+	/**
+	 * 追加 long 数组内容
+	 */
+	public static long[] append(long[] array, long... longs) {
+		return merge(array, longs);
+	}
 
-    /**
-     * 数组映射
-     * <p>
-     * <b>注意：映射函数必须要处理原始元素为 null 也返回有值（不为 null）的情况</b>
-     *
-     * @param array    原始数组
-     * @param function 映射函数
-     * @param <T>      原始数组元素类型
-     * @param <R>      映射后的数组元素类型
-     * @return 映射后的数组
-     */
-    public static <T, R> R[] map(T[] array, Function<T, R> function) {
-        @SuppressWarnings("unchecked")
-        Class<R> clazz = (Class<R>) function.apply(null).getClass();
-        return map(array, function, clazz);
-    }
+	/**
+	 * 追加 float 数组内容
+	 */
+	public static float[] append(float[] array, float... floats) {
+		return merge(array, floats);
+	}
 
-    /**
-     * 数组映射
-     *
-     * @param array    原始数组
-     * @param function 映射函数
-     * @param <T>      原始数组元素类型
-     * @param <R>      映射后的数组元素类型
-     * @return 映射后的数组
-     */
-    @SuppressWarnings("unchecked")
-    public static <T, R> R[] map(T[] array, Function<T, R> function, Class<R> componentType) {
-        if (isEmpty(array)) {
-            return create(componentType, 0);
-        }
-        return Arrays.stream(array)
-                .map(function)
-                .toArray(size -> (R[]) Array.newInstance(componentType, size));
-    }
+	/**
+	 * 追加 double 数组内容
+	 */
+	public static double[] append(double[] array, double... doubles) {
+		return merge(array, doubles);
+	}
 
-    public static <T> String join(T[] array, CharSequence delimiter) {
-        return Arrays.stream(array)
-                .filter(Objects::nonNull)
-                .map(Objects::toString)
-                .collect(Collectors.joining(delimiter));
-    }
+	/**
+	 * 追加 char 数组内容
+	 */
+	public static char[] append(char[] array, char... chars) {
+		return merge(array, chars);
+	}
 
-    /**
-     * 获取子数组
-     *
-     * @param array 数组
-     * @param start 开始位置（包括）
-     * @param end   结束位置（不包括）
-     * @param <T>   数组元素类型
-     * @return 新的数组
-     * @see Arrays#copyOfRange(Object[], int, int)
-     */
-    public static <T> T[] sub(T[] array, int start, int end) {
-        if (isEmpty(array)) {
-            return array;
-        }
-        int length = length(array);
-        if (start < 0) {
-            start += length;
-        }
-        if (end < 0) {
-            end += length;
-        }
-        if (start == length) {
-            return create(array.getClass().getComponentType(), 0);
-        }
-        if (start > end) {
-            int tmp = start;
-            start = end;
-            end = tmp;
-        }
-        if (end > length) {
-            if (start >= length) {
-                return create(array.getClass().getComponentType(), 0);
-            }
-            end = length;
-        }
-        return Arrays.copyOfRange(array, start, end);
-    }
+	/**
+	 * 追加 boolean 数组内容
+	 */
+	public static boolean[] append(boolean[] array, boolean... booleans) {
+		return merge(array, booleans);
+	}
 
-    public static <T> T get(T[] array, int index) {
-        return getOpt(array, index).orElse(null);
-    }
+	/**
+	 * 追加泛型数组内容
+	 * <p>
+	 * 切勿乱用，造成堆污染
+	 */
+	@SafeVarargs
+	public static <T> T[] append(T[] array, T... objects) {
+		return merge(array, objects);
+	}
 
-    public static <T> Optional<T> getOpt(T[] array, int index) {
-        if (isEmpty(array)) {
-            return Optional.empty();
-        }
-        return index > INDEX_NOT_FOUND && index < array.length ? Optional.ofNullable(array[index]) : Optional.empty();
-    }
+	/**
+	 * 合并多个 byte 数组
+	 */
+	public static byte[] merge(byte[] array, byte[]... arrays) {
+		int length = array.length;
+		for (byte[] a : arrays) {
+			length += a.length;
+		}
+		byte[] result = Arrays.copyOf(array, length);
+		int pos = array.length;
+		for (byte[] a : arrays) {
+			System.arraycopy(a, 0, result, pos, a.length);
+			pos += a.length;
+		}
+		return result;
+	}
 
-    protected ArrayUtil() {
-        throw new UnsupportedOperationException();
-    }
+	/**
+	 * 合并多个 short 数组
+	 */
+	public static short[] merge(short[] array, short[]... arrays) {
+		int length = array.length;
+		for (short[] a : arrays) {
+			length += a.length;
+		}
+		short[] result = Arrays.copyOf(array, length);
+		int pos = array.length;
+		for (short[] a : arrays) {
+			System.arraycopy(a, 0, result, pos, a.length);
+			pos += a.length;
+		}
+		return result;
+	}
+
+	/**
+	 * 合并多个 int 数组
+	 */
+	public static int[] merge(int[] array, int[]... arrays) {
+		int length = array.length;
+		for (int[] a : arrays) {
+			length += a.length;
+		}
+		int[] result = Arrays.copyOf(array, length);
+		int pos = array.length;
+		for (int[] a : arrays) {
+			System.arraycopy(a, 0, result, pos, a.length);
+			pos += a.length;
+		}
+		return result;
+	}
+
+	/**
+	 * 合并多个 long 数组
+	 */
+	public static long[] merge(long[] array, long[]... arrays) {
+		int length = array.length;
+		for (long[] a : arrays) {
+			length += a.length;
+		}
+		long[] result = Arrays.copyOf(array, length);
+		int pos = array.length;
+		for (long[] a : arrays) {
+			System.arraycopy(a, 0, result, pos, a.length);
+			pos += a.length;
+		}
+		return result;
+	}
+
+	/**
+	 * 合并多个 float 数组
+	 */
+	public static float[] merge(float[] array, float[]... arrays) {
+		int length = array.length;
+		for (float[] a : arrays) {
+			length += a.length;
+		}
+		float[] result = Arrays.copyOf(array, length);
+		int pos = array.length;
+		for (float[] a : arrays) {
+			System.arraycopy(a, 0, result, pos, a.length);
+			pos += a.length;
+		}
+		return result;
+	}
+
+	/**
+	 * 合并多个 double 数组
+	 */
+	public static double[] merge(double[] array, double[]... arrays) {
+		int length = array.length;
+		for (double[] a : arrays) {
+			length += a.length;
+		}
+		double[] result = Arrays.copyOf(array, length);
+		int pos = array.length;
+		for (double[] a : arrays) {
+			System.arraycopy(a, 0, result, pos, a.length);
+			pos += a.length;
+		}
+		return result;
+	}
+
+	/**
+	 * 合并多个 char 数组
+	 */
+	public static char[] merge(char[] array, char[]... arrays) {
+		int length = array.length;
+		for (char[] a : arrays) {
+			length += a.length;
+		}
+		char[] result = Arrays.copyOf(array, length);
+		int pos = array.length;
+		for (char[] a : arrays) {
+			System.arraycopy(a, 0, result, pos, a.length);
+			pos += a.length;
+		}
+		return result;
+	}
+
+	/**
+	 * 合并多个 boolean 数组
+	 */
+	public static boolean[] merge(boolean[] array, boolean[]... arrays) {
+		int length = array.length;
+		for (boolean[] a : arrays) {
+			length += a.length;
+		}
+		boolean[] result = Arrays.copyOf(array, length);
+		int pos = array.length;
+		for (boolean[] a : arrays) {
+			System.arraycopy(a, 0, result, pos, a.length);
+			pos += a.length;
+		}
+		return result;
+	}
+
+	/**
+	 * 合并多个泛型数组
+	 * <p>
+	 * 切勿乱用，造成堆污染
+	 */
+	@SafeVarargs
+	public static <T> T[] merge(T[] array, T[]... arrays) {
+		int length = array.length;
+		for (T[] a : arrays) {
+			length += a.length;
+		}
+		T[] result = Arrays.copyOf(array, length);
+		int pos = array.length;
+		for (T[] a : arrays) {
+			System.arraycopy(a, 0, result, pos, a.length);
+			pos += a.length;
+		}
+		return result;
+	}
+
+	public static <T> byte[] map(T[] array, ToByteFunction<T> function) {
+		if (isEmpty(array)) {
+			return new byte[0];
+		}
+		byte[] result = new byte[array.length];
+		for (int i = 0; i < array.length; i++) {
+			result[i] = function.applyAsByte(array[i]);
+		}
+		return result;
+	}
+
+	public static <T> boolean[] map(T[] array, ToBoolFunction<T> function) {
+		if (isEmpty(array)) {
+			return new boolean[0];
+		}
+		boolean[] result = new boolean[array.length];
+		for (int i = 0; i < array.length; i++) {
+			result[i] = function.applyAsBool(array[i]);
+		}
+		return result;
+	}
+
+	/**
+	 * 数组映射
+	 * <p>
+	 * <b>注意：使用该方法，映射函数必须要处理原始元素为 null 也返回有值（不为 null）的情况，否则请使用 {@link #map(Object[], Function, Class)}</b>
+	 *
+	 * @param array    原始数组
+	 * @param function 映射函数
+	 * @param <T>      原始数组元素类型
+	 * @param <R>      映射后的数组元素类型
+	 * @return 映射后的数组
+	 */
+	public static <T, R> R[] map(T[] array, Function<T, R> function) {
+		@SuppressWarnings("unchecked")
+		Class<R> clazz = (Class<R>) function.apply(null).getClass();
+		return map(array, function, clazz);
+	}
+
+	/**
+	 * 数组映射
+	 *
+	 * @param array    原始数组
+	 * @param function 映射函数
+	 * @param <T>      原始数组元素类型
+	 * @param <R>      映射后的数组元素类型
+	 * @return 映射后的数组
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T, R> R[] map(T[] array, Function<T, R> function, Class<R> componentType) {
+		if (isEmpty(array)) {
+			return create(componentType, 0);
+		}
+		return Arrays.stream(array)
+			.map(function)
+			.toArray(size -> (R[]) Array.newInstance(componentType, size));
+	}
+
+	public static <T> String join(T[] array) {
+		return join(array, StringPool.COMMA);
+	}
+
+	public static <T> String join(T[] array, CharSequence delimiter) {
+		return join(array, null, delimiter);
+	}
+
+	/**
+	 * 数组连接
+	 *
+	 * @param array       数组
+	 * @param nullDefault 数组元素为 null 时使用的默认值，当其本身为 null 时则过滤掉为 null 的数组元素
+	 * @param delimiter   分隔符
+	 * @param <T>         数组元素类型
+	 * @return 连接后的字符串
+	 */
+	public static <T> String join(T[] array, String nullDefault, CharSequence delimiter) {
+		Stream<T> stream = StreamUtil.of(array);
+		Stream<String> stringStream;
+		if (Objects.isNull(nullDefault)) {
+			stringStream = stream.filter(Objects::nonNull).map(Objects::toString);
+		} else {
+			stringStream = stream.map(a -> Objects.toString(a, nullDefault));
+		}
+		return stringStream.collect(Collectors.joining(delimiter));
+	}
+
+	/**
+	 * 获取子数组
+	 *
+	 * @param array 数组
+	 * @param start 开始位置（包括）
+	 * @param end   结束位置（不包括）
+	 * @param <T>   数组元素类型
+	 * @return 新的数组
+	 * @see Arrays#copyOfRange(Object[], int, int)
+	 */
+	public static <T> T[] sub(T[] array, int start, int end) {
+		if (isEmpty(array)) {
+			return array;
+		}
+		int length = length(array);
+		if (start < 0) {
+			start += length;
+		}
+		if (end < 0) {
+			end += length;
+		}
+		if (start == length) {
+			return create(array.getClass().getComponentType(), 0);
+		}
+		if (start > end) {
+			int tmp = start;
+			start = end;
+			end = tmp;
+		}
+		if (end > length) {
+			if (start >= length) {
+				return create(array.getClass().getComponentType(), 0);
+			}
+			end = length;
+		}
+		return Arrays.copyOfRange(array, start, end);
+	}
+
+	public static <T> T get(T[] array, int index) {
+		return getOpt(array, index).orElse(null);
+	}
+
+	public static <T> Optional<T> getOpt(T[] array, int index) {
+		if (isEmpty(array)) {
+			return Optional.empty();
+		}
+		return index > INDEX_NOT_FOUND && index < array.length ? Optional.ofNullable(array[index]) : Optional.empty();
+	}
+
+	protected ArrayUtil() {
+		throw new UnsupportedOperationException();
+	}
 }
