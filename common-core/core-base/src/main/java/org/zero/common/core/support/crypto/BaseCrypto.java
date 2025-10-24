@@ -4,12 +4,14 @@ import lombok.Cleanup;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import org.zero.common.core.util.java.io.IoUtil;
+import org.zero.common.core.util.java.util.RandomUtil;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.Key;
 import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.Security;
@@ -22,42 +24,22 @@ import java.util.Objects;
 public abstract class BaseCrypto implements Crypto {
 	protected final Cipher cipher;
 	@Setter
-	protected SecureRandom secureRandom = new SecureRandom();
+	protected SecureRandom secureRandom = RandomUtil.getStrongRandom();
 
 	protected BaseCrypto(String algorithm) {
 		this.cipher = this.generateCipher(algorithm, null);
-	}
-
-	protected BaseCrypto(String algorithm, SecureRandom secureRandom) {
-		this.cipher = this.generateCipher(algorithm, null);
-		this.secureRandom = secureRandom;
 	}
 
 	protected BaseCrypto(String algorithm, String provider) {
 		this.cipher = this.generateCipher(algorithm, Security.getProvider(provider));
 	}
 
-	protected BaseCrypto(String algorithm, String provider, SecureRandom secureRandom) {
-		this.cipher = this.generateCipher(algorithm, Security.getProvider(provider));
-		this.secureRandom = secureRandom;
-	}
-
 	protected BaseCrypto(String algorithm, Provider provider) {
 		this.cipher = this.generateCipher(algorithm, provider);
 	}
 
-	protected BaseCrypto(String algorithm, Provider provider, SecureRandom secureRandom) {
-		this.cipher = this.generateCipher(algorithm, provider);
-		this.secureRandom = secureRandom;
-	}
-
 	protected BaseCrypto(Cipher cipher) {
 		this.cipher = cipher;
-	}
-
-	protected BaseCrypto(Cipher cipher, SecureRandom secureRandom) {
-		this.cipher = cipher;
-		this.secureRandom = secureRandom;
 	}
 
 	public String getAlgorithm() {
@@ -85,5 +67,15 @@ public abstract class BaseCrypto implements Crypto {
 		this.initMode(Cipher.DECRYPT_MODE);
 		@Cleanup CipherInputStream cipherInputStream = new CipherInputStream(inputStream, cipher);
 		IoUtil.copy(cipherInputStream, outputStream);
+	}
+
+	@SneakyThrows
+	public byte[] wrap(Key key) {
+		return cipher.wrap(key);
+	}
+
+	@SneakyThrows
+	public Key unwrap(byte[] wrappedKey, String wrappedKeyAlgorithm, int wrappedKeyType) {
+		return cipher.unwrap(wrappedKey, wrappedKeyAlgorithm, wrappedKeyType);
 	}
 }

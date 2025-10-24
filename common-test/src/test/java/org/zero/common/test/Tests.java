@@ -2,7 +2,7 @@ package org.zero.common.test;
 
 import cn.hutool.core.codec.Base64;
 import org.junit.jupiter.api.Test;
-import org.zero.common.core.support.api.cipher.CodecUtil;
+import org.zero.common.core.support.api.crypto.CodecUtil;
 
 import java.security.KeyPair;
 

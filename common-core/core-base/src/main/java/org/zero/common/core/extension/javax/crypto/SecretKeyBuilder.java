@@ -4,6 +4,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 import org.zero.common.core.extension.java.lang.Builder;
+import org.zero.common.core.util.java.util.RandomHelper;
 import org.zero.common.core.util.java.util.RandomUtil;
 import org.zero.common.core.util.javax.crypto.KeyUtil;
 
@@ -22,30 +23,105 @@ import java.nio.charset.StandardCharsets;
 import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.KeySpec;
 import java.util.Objects;
 
 /**
  * @author Zero (cnzeropro@163.com)
+ * @see <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/security/standard-names.html#keygenerator-algorithms">KeyGenerator Algorithms</a>
+ * @see <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/security/standard-names.html#secretkeyfactory-algorithms">SecretKeyFactory Algorithms</a>
  * @since 2025/10/17
  */
 @Setter
 @Accessors(chain = true, fluent = true)
 public class SecretKeyBuilder implements Builder<SecretKey, SecretKeyBuilder> {
-	protected String algorithm;
-	protected Provider provider;
+	/**
+	 * 密钥算法
+	 */
+	protected final String algorithm;
+	/**
+	 * 密钥工厂提供者
+	 */
+	protected Provider secretKeyFactoryProvider;
+	/**
+	 * 密钥生成器提供者
+	 */
+	protected Provider keyGeneratorProvider;
+	/**
+	 * 密钥
+	 * <p>
+	 * 和长度二选一即可，或者都不配置，使用自动生成的密钥
+	 */
 	protected byte[] key;
 	/**
 	 * 密钥长度
 	 * <p>
-	 * 默认为 0，表示使用默认长度
+	 * 大于 0 生效，否则表示使用默认长度
+	 * <p>
+	 * 和密钥长度二选一即可，或者都不配置，使用自动生成的密钥
+	 *
+	 * <table>
+	 *     <caption>常见算法密钥长度要求</caption>
+	 *     <tr>
+	 *         <th>密钥算法</th>
+	 *         <th>密钥长度</th>
+	 *     </tr>
+	 *     <tr>
+	 *         <td>AES</td>
+	 *         <td>128, 192, 256</td>
+	 *     </tr>
+	 *     <tr>
+	 *         <td>DES</td>
+	 *         <td>56</td>
+	 *     </tr>
+	 *     <tr>
+	 *         <td>3DES\TripleDES\DESede</td>
+	 *         <td>112, 168</td>
+	 *     </tr>
+	 *     <tr>
+	 *         <td>SM4</td>
+	 *         <td>128</td>
+	 *     </tr>
+	 * </table>
 	 */
 	protected int keySize;
+	/**
+	 * 随机数生成器
+	 */
 	protected SecureRandom random;
+	/**
+	 * 密钥参数规格
+	 */
+	protected AlgorithmParameterSpec[] algorithmParameterSpecs = {};
+	/**
+	 * 字符集
+	 * <p>
+	 * 如需使用 {@link #password} 相关方法设置密码，请在这之前指定字符集
+	 */
 	protected Charset charset = StandardCharsets.UTF_8;
+
+	@SneakyThrows
+	protected SecretKeyBuilder(String algorithm) {
+		this.algorithm = algorithm;
+	}
 
 	public SecretKeyBuilder providerName(String providerName) {
 		return this.provider(Security.getProvider(providerName));
+	}
+
+	@SneakyThrows
+	public SecretKeyBuilder provider(Provider provider) {
+		this.secretKeyFactoryProvider(provider);
+		return this.keyGeneratorProvider(provider);
+	}
+
+	public SecretKeyBuilder secretKeyFactoryProviderName(String secretKeyFactoryProviderName) {
+		return this.secretKeyFactoryProvider(Security.getProvider(secretKeyFactoryProviderName));
+	}
+
+	public SecretKeyBuilder keyGeneratorProviderName(String keyGeneratorProviderName) {
+		return this.keyGeneratorProvider(Security.getProvider(keyGeneratorProviderName));
 	}
 
 	public SecretKeyBuilder password(CharSequence password) {
@@ -66,12 +142,30 @@ public class SecretKeyBuilder implements Builder<SecretKey, SecretKeyBuilder> {
 		return this.key(bytes);
 	}
 
-	public static SecretKeyBuilder builder() {
-		return new SecretKeyBuilder();
+	public SecretKeyBuilder seedBytes(int seedBytes) {
+		return this.seed(SecureRandom.getSeed(seedBytes));
+	}
+
+	public SecretKeyBuilder seed(byte[] seed) {
+		return this.random(Objects.isNull(seed) ? new SecureRandom() : new SecureRandom(seed));
+	}
+
+	public SecretKeyBuilder algorithmParameterSpec(AlgorithmParameterSpec algorithmParameterSpec) {
+		return this.algorithmParameterSpecs(algorithmParameterSpec);
+	}
+
+	public SecretKeyBuilder algorithmParameterSpecs(AlgorithmParameterSpec... algorithmParameterSpecs) {
+		this.algorithmParameterSpecs = algorithmParameterSpecs;
+		return this;
+	}
+
+	public static SecretKeyBuilder builder(String algorithm) {
+		return new SecretKeyBuilder(algorithm);
 	}
 
 	@Override
 	public SecretKey build() {
+		Objects.requireNonNull(algorithm, "algorithm cannot be null");
 		if (algorithm.startsWith("PBE")) {
 			// PBE密钥
 			return generatePBEKey();
@@ -85,29 +179,32 @@ public class SecretKeyBuilder implements Builder<SecretKey, SecretKeyBuilder> {
 	}
 
 	@SneakyThrows
-	public SecretKey generatePBEKey() {
-		char[] password = Objects.isNull(key) ? RandomUtil.randomString(32).toCharArray() : new String(key, charset).toCharArray();
+	protected SecretKey generatePBEKey() {
+		char[] password = Objects.isNull(key) ? new RandomHelper(Objects.isNull(random) ? RandomUtil.getStrongRandom() : random).nextString(32).toCharArray() : new String(key, charset).toCharArray();
 		KeySpec keySpec = new PBEKeySpec(password);
-		return generateKey(keySpec);
+		return this.generateKey(keySpec);
 	}
 
 	@SneakyThrows
-	public SecretKey generateDESKey() {
+	protected SecretKey generateDESKey() {
 		if (Objects.isNull(key)) {
 			return generateKey();
 		}
 		KeySpec keySpec = algorithm.startsWith("DESede") ? new DESedeKeySpec(key) : new DESKeySpec(key);
-		return generateKey(keySpec);
+		return this.generateKey(keySpec);
+	}
+
+	@SneakyThrows
+	protected SecretKey generateKey(KeySpec keySpec) {
+		String mainAlgorithm = KeyUtil.getMainAlgorithm(algorithm);
+		SecretKeyFactory secretKeyFactory = Objects.isNull(secretKeyFactoryProvider) ? SecretKeyFactory.getInstance(mainAlgorithm) : SecretKeyFactory.getInstance(mainAlgorithm, secretKeyFactoryProvider);
+		return secretKeyFactory.generateSecret(keySpec);
 	}
 
 	@SneakyThrows
 	public SecretKey generateKey() {
 		String mainAlgorithm = KeyUtil.getMainAlgorithm(algorithm);
-		final KeyGenerator keyGenerator = Objects.isNull(provider) ? KeyGenerator.getInstance(mainAlgorithm) : KeyGenerator.getInstance(mainAlgorithm, provider);
-		// 对于 AES 的密钥，除非指定，否则强制使用128位
-		if (keySize <= 0 && "AES".equals(mainAlgorithm)) {
-			keySize = 128;
-		}
+		KeyGenerator keyGenerator = Objects.isNull(keyGeneratorProvider) ? KeyGenerator.getInstance(mainAlgorithm) : KeyGenerator.getInstance(mainAlgorithm, keyGeneratorProvider);
 		if (keySize > 0) {
 			if (Objects.isNull(random)) {
 				keyGenerator.init(keySize);
@@ -115,12 +212,13 @@ public class SecretKeyBuilder implements Builder<SecretKey, SecretKeyBuilder> {
 				keyGenerator.init(keySize, random);
 			}
 		}
+		for (AlgorithmParameterSpec algorithmParameterSpec : algorithmParameterSpecs) {
+			if (Objects.isNull(random)) {
+				keyGenerator.init(algorithmParameterSpec);
+			} else {
+				keyGenerator.init(algorithmParameterSpec, random);
+			}
+		}
 		return keyGenerator.generateKey();
-	}
-
-	@SneakyThrows
-	protected SecretKey generateKey(KeySpec keySpec) {
-		SecretKeyFactory secretKeyFactory = Objects.isNull(provider) ? SecretKeyFactory.getInstance(algorithm) : SecretKeyFactory.getInstance(KeyUtil.getMainAlgorithm(algorithm), provider);
-		return secretKeyFactory.generateSecret(keySpec);
 	}
 }

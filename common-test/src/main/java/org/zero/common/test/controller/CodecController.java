@@ -4,8 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.zero.common.core.support.api.cipher.encryption.Encryption;
-import org.zero.common.core.support.api.cipher.encryption.EncryptionResponseBodyAdvice;
+import org.zero.common.core.support.api.crypto.encryption.Encryption;
+import org.zero.common.core.support.api.crypto.encryption.EncryptionResponseBodyAdvice;
 import org.zero.common.data.model.view.Result;
 import org.zero.common.test.model.JobPO;
 

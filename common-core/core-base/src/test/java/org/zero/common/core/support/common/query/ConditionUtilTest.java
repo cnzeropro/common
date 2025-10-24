@@ -1,8 +1,8 @@
 package org.zero.common.core.support.common.query;
 
 import org.junit.jupiter.api.Test;
-import org.zero.common.core.extension.common.query.ConditionUtil;
-import org.zero.common.core.extension.common.query.sql.ComparisonOperator;
+import org.zero.common.core.extension.common.data.model.query.ConditionUtil;
+import org.zero.common.core.extension.common.data.model.query.sql.ComparisonOperator;
 import org.zero.common.data.model.query.Condition;
 
 /**

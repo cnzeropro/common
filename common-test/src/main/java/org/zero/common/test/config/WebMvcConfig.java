@@ -8,10 +8,10 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.util.UrlPathHelper;
-import org.zero.common.core.extension.common.query.converter.StringArrayToFieldArrayConverter;
-import org.zero.common.core.extension.common.query.converter.StringToFieldArrayConverter;
-import org.zero.common.core.extension.common.query.converter.StringToFieldConverter;
-import org.zero.common.core.extension.common.query.converter.StringToOperatorConverter;
+import org.zero.common.core.extension.common.data.model.query.converter.StringArrayToFieldArrayConverter;
+import org.zero.common.core.extension.common.data.model.query.converter.StringToFieldArrayConverter;
+import org.zero.common.core.extension.common.data.model.query.converter.StringToFieldConverter;
+import org.zero.common.core.extension.common.data.model.query.converter.StringToOperatorConverter;
 import org.zero.common.core.extension.spring.web.method.support.JsonObjectArgumentResolvers;
 import org.zero.common.core.support.bean.dynamic.DynamicBeanArgumentResolver;
 

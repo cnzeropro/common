@@ -1,8 +1,8 @@
 package org.zero.common.test.config;
 
 import org.springframework.context.annotation.Import;
-import org.zero.common.core.support.api.cipher.decryption.DecryptionRequestBodyAdvice;
-import org.zero.common.core.support.api.cipher.encryption.EncryptionResponseBodyAdvice;
+import org.zero.common.core.support.api.crypto.decryption.DecryptionRequestBodyAdvice;
+import org.zero.common.core.support.api.crypto.encryption.EncryptionResponseBodyAdvice;
 
 /**
  * @author Zero (cnzeropro@163.com)

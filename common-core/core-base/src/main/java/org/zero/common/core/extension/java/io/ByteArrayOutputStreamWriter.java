@@ -29,8 +29,6 @@ public class ByteArrayOutputStreamWriter extends ByteArrayOutputStream implement
 	protected final Charset charset;
 	protected final String nullDefault;
 
-	protected Formatter formatter;
-
 	public ByteArrayOutputStreamWriter() {
 		this(StandardCharsets.UTF_8);
 	}
@@ -205,6 +203,8 @@ public class ByteArrayOutputStreamWriter extends ByteArrayOutputStream implement
 	private void format(String format, Object... args) {
 		format(Locale.getDefault(), format, args);
 	}
+
+	protected Formatter formatter;
 
 	private synchronized void format(Locale locale, String format, Object... args) {
 		if (Objects.isNull(formatter) || formatter.locale() != locale) {
