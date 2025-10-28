@@ -27,11 +27,11 @@ public interface CharPool {
      */
     char COLON = ':';
     /**
-     * 双引号：{@code '\''}
+     * 双引号：{@code '"'}
      */
     char DOUBLE_QUOTE = '"';
     /**
-     * 单引号：{@code '''}
+     * 单引号：{@code '\''}
      */
     char SINGLE_QUOTE = '\'';
     /**

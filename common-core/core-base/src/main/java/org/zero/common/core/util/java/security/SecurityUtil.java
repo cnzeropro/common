@@ -1,7 +1,7 @@
 package org.zero.common.core.util.java.security;
 
 import lombok.experimental.UtilityClass;
-import org.zero.common.core.extension.java.util.function.ThrowThrowableSupplier;
+import org.zero.common.core.extension.java.util.function.ThrowableSupplier;
 import org.zero.common.core.util.java.lang.ThrowableUtil;
 
 import java.security.AccessController;
@@ -17,7 +17,7 @@ public class SecurityUtil {
     public static final SecurityManager SECURITY_MANAGER = System.getSecurityManager();
     public static final boolean IS_SECURITY_ENABLED = Objects.nonNull(SECURITY_MANAGER);
 
-    public static <T> T doPrivileged(ThrowThrowableSupplier<T> supplier) {
+    public static <T> T doPrivileged(ThrowableSupplier<T> supplier) {
         if (Objects.isNull(SECURITY_MANAGER)) {
             return ThrowableUtil.sneakyThrow(supplier).get();
         }

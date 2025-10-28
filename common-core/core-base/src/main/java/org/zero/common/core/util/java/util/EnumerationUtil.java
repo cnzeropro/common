@@ -2,7 +2,7 @@ package org.zero.common.core.util.java.util;
 
 import org.zero.common.core.extension.java.util.EmptyEnumeration;
 import org.zero.common.core.extension.java.util.EnumerationIterator;
-import org.zero.common.core.extension.java.util.function.ThrowThrowableSupplier;
+import org.zero.common.core.extension.java.util.function.ThrowableSupplier;
 import org.zero.common.core.util.java.lang.ThrowableUtil;
 
 import java.util.Enumeration;
@@ -39,7 +39,7 @@ public class EnumerationUtil {
     }
 
     public static <T> Optional<T> getOpt(final Enumeration<T> enumeration, final int index) {
-        return ThrowableUtil.ignoreOpt((ThrowThrowableSupplier<T>) () -> get(enumeration, index));
+        return ThrowableUtil.ignoreOpt((ThrowableSupplier<T>) () -> get(enumeration, index));
     }
 
     protected EnumerationUtil() {

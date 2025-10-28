@@ -1,5 +1,8 @@
 package org.zero.common.core.extension.java.io;
 
+import lombok.Getter;
+import lombok.SneakyThrows;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -11,8 +14,16 @@ import java.nio.ByteBuffer;
  */
 public class ByteBufferInputStream extends InputStream {
 	protected final ByteBuffer byteBuffer;
+	@Getter
 	protected volatile boolean closed = false;
 
+	/**
+	 * 使用 {@link ByteBuffer} 构造
+	 * <p>
+	 * 注意：传入的 {@link ByteBuffer} 需要先调用 {@linkplain ByteBuffer#flip() flip} 方法切换为读模式。
+	 *
+	 * @param byteBuffer 字节缓冲区
+	 */
 	public ByteBufferInputStream(ByteBuffer byteBuffer) {
 		this.byteBuffer = byteBuffer;
 	}
@@ -78,11 +89,11 @@ public class ByteBufferInputStream extends InputStream {
 		return true;
 	}
 
+	@SneakyThrows
 	@Override
 	public synchronized void mark(int readlimit) {
-		if (!closed) {
-			byteBuffer.mark();
-		}
+		checkClosed();
+		byteBuffer.mark();
 	}
 
 	@Override
@@ -91,18 +102,14 @@ public class ByteBufferInputStream extends InputStream {
 		byteBuffer.reset();
 	}
 
-	public ByteBuffer asReadOnlyBuffer() {
-		return byteBuffer.asReadOnlyBuffer();
-	}
-
 	@Override
 	public void close() throws IOException {
 		closed = true;
 	}
 
 	protected void checkClosed() throws IOException {
-		if (closed) {
-			throw new IOException("Stream is closed");
+		if (isClosed()) {
+			throw new IOException(this.getClass() + " is closed");
 		}
 	}
 }

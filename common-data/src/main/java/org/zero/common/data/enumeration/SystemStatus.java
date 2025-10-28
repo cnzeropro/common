@@ -2,6 +2,7 @@ package org.zero.common.data.enumeration;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.zero.common.data.exception.Status;
 
 /**
  * 系统错误枚举
@@ -11,7 +12,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Getter
 @RequiredArgsConstructor
-public enum SystemStatus implements org.zero.common.data.exception.Status {
+public enum SystemStatus implements Status {
 	/**
 	 * 一切可行
 	 */

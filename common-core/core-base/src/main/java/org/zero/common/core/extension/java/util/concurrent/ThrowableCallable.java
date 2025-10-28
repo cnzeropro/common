@@ -9,10 +9,10 @@ import java.util.concurrent.Callable;
  * @since 2025/5/8
  */
 @FunctionalInterface
-public interface ThrowThrowableCallable<V> {
+public interface ThrowableCallable<V> {
     V call() throws Throwable;
 
-    static <V> ThrowThrowableCallable<V> of(Callable<V> callable) {
+    static <V> ThrowableCallable<V> of(Callable<V> callable) {
         return callable::call;
     }
 

@@ -30,7 +30,7 @@ public class ByteArrayOutputStreamWriter extends ByteArrayOutputStream implement
 	protected final String nullDefault;
 
 	public ByteArrayOutputStreamWriter() {
-		this(StandardCharsets.UTF_8);
+		this(StandardCharsets.UTF_8, "null");
 	}
 
 	public ByteArrayOutputStreamWriter(Charset charset) {
@@ -65,10 +65,11 @@ public class ByteArrayOutputStreamWriter extends ByteArrayOutputStream implement
 	}
 
 	public void write(String str, int off, int len) {
-		char[] chars = new char[len];
+		char[] chars;
 		if (Objects.isNull(str)) {
-			nullDefault.getChars(0, nullDefault.length(), chars, 0);
+			chars = nullDefault.toCharArray();
 		} else {
+			chars = new char[len];
 			str.getChars(off, (off + len), chars, 0);
 		}
 		this.write(chars);

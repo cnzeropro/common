@@ -368,7 +368,8 @@ public class ChunkedByteBuffer implements Serializable {
 		while (length.compareTo(BigInteger.ZERO) > 0 && currentBlockIndex < blocks.size()) {
 			byte[] currentBlock = blocks.get(currentBlockIndex);
 			int availableInBlock = currentBlock.length - currentBlockOffset;
-			int bytesToCopy = Math.min(availableInBlock, length.intValue());
+			int maxCopy = length.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) >= 0 ? Integer.MAX_VALUE : length.intValue();
+			int bytesToCopy = Math.min(availableInBlock, maxCopy);
 			byte[] chunk = new byte[bytesToCopy];
 			System.arraycopy(currentBlock, currentBlockOffset, chunk, 0, bytesToCopy);
 			result.put(chunk);

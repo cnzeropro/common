@@ -50,22 +50,76 @@ public class IoUtil {
 	 * @param in         输入流
 	 * @param out        输出流
 	 * @param bufferSize 缓冲区大小
+	 * @param maxBytes   拷贝最大字节数
 	 * @param closeIn    是否关闭输入流
-	 * @return 拷贝的字节数
+	 * @return 实际拷贝的字节数
 	 */
 	@SneakyThrows
-	public static long copy(final InputStream in, final OutputStream out, int bufferSize, boolean closeIn) {
+	public static long copy(final InputStream in, final OutputStream out, int bufferSize, long maxBytes, boolean closeIn) {
 		long count = 0L;
 		byte[] buffer = new byte[bufferSize];
 		int read;
-		while ((read = in.read(buffer)) != EOF) {
-			out.write(buffer, 0, read);
-			count += read;
+		if (maxBytes < 0) {
+			while ((read = in.read(buffer)) != EOF) {
+				out.write(buffer, 0, read);
+				count += read;
+			}
+		} else {
+			while (count < maxBytes) {
+				int toRead = (int) Math.min(maxBytes - count, bufferSize);
+				if (toRead <= 0) {
+					break;
+				}
+				read = in.read(buffer, 0, toRead);
+				if (read == EOF) {
+					break;
+				}
+				out.write(buffer, 0, read);
+				count += read;
+			}
 		}
 		if (closeIn) {
-			in.close();
+			close(in);
 		}
 		return count;
+	}
+
+	/**
+	 * 将输入流中的内容拷贝到输出流中
+	 *
+	 * @param in       输入流
+	 * @param out      输出流
+	 * @param maxBytes 拷贝最大字节数
+	 * @param closeIn  是否关闭输入流
+	 * @return 实际拷贝的字节数
+	 */
+	public static long copy(final InputStream in, final OutputStream out, long maxBytes, boolean closeIn) {
+		return copy(in, out, DEFAULT_BUFFER_SIZE, maxBytes, closeIn);
+	}
+
+	/**
+	 * 将输入流中的内容拷贝到输出流中
+	 *
+	 * @param in         输入流
+	 * @param out        输出流
+	 * @param bufferSize 缓冲区大小
+	 * @param closeIn    是否关闭输入流
+	 * @return 拷贝的字节数
+	 */
+	public static long copy(final InputStream in, final OutputStream out, int bufferSize, boolean closeIn) {
+		return copy(in, out, bufferSize, -1, closeIn);
+	}
+
+	/**
+	 * 将输入流中的内容拷贝到输出流中，默认不关闭输入流
+	 *
+	 * @param in       输入流
+	 * @param out      输出流
+	 * @param maxBytes 拷贝最大字节数
+	 * @return 拷贝的字节数
+	 */
+	public static long copy(final InputStream in, final OutputStream out, long maxBytes) {
+		return copy(in, out, maxBytes, false);
 	}
 
 	/**
@@ -103,6 +157,60 @@ public class IoUtil {
 		return copy(in, out, DEFAULT_BUFFER_SIZE);
 	}
 
+
+	/**
+	 * 将输入流中的内容拷贝到输出流中
+	 *
+	 * @param in         输入流
+	 * @param out        输出流
+	 * @param bufferSize 缓冲区大小
+	 * @param maxChars   拷贝最大字符数
+	 * @param closeIn    是否关闭输入流
+	 * @return 实际拷贝的字符数
+	 */
+	@SneakyThrows
+	public static long copy(final Reader in, final Writer out, int bufferSize, long maxChars, boolean closeIn) {
+		long count = 0L;
+		char[] buffer = new char[bufferSize];
+		int read;
+		if (maxChars < 0) {
+			while ((read = in.read(buffer)) != EOF) {
+				out.write(buffer, 0, read);
+				count += read;
+			}
+		} else {
+			while (count < maxChars) {
+				int toRead = (int) Math.min(maxChars - count, bufferSize);
+				if (toRead <= 0) {
+					break;
+				}
+				read = in.read(buffer, 0, toRead);
+				if (read == EOF) {
+					break;
+				}
+				out.write(buffer, 0, read);
+				count += read;
+			}
+		}
+		if (closeIn) {
+			close(in);
+		}
+		return count;
+	}
+
+	/**
+	 * 将输入流中的内容拷贝到输出流中
+	 *
+	 * @param in       输入流
+	 * @param out      输出流
+	 * @param maxChars 拷贝最大字符数
+	 * @param closeIn  是否关闭输入流
+	 * @return 实际拷贝的字符数
+	 */
+	public static long copy(final Reader in, final Writer out, long maxChars, boolean closeIn) {
+		return copy(in, out, DEFAULT_BUFFER_SIZE, maxChars, closeIn);
+	}
+
 	/**
 	 * 将输入流中的内容拷贝到输出流中
 	 *
@@ -112,19 +220,20 @@ public class IoUtil {
 	 * @param closeIn    是否关闭输入流
 	 * @return 拷贝的字符数
 	 */
-	@SneakyThrows
 	public static long copy(final Reader in, final Writer out, int bufferSize, boolean closeIn) {
-		long count = 0L;
-		char[] buffer = new char[bufferSize];
-		int read;
-		while ((read = in.read(buffer)) != EOF) {
-			out.write(buffer, 0, read);
-			count += read;
-		}
-		if (closeIn) {
-			in.close();
-		}
-		return count;
+		return copy(in, out, bufferSize, -1, closeIn);
+	}
+
+	/**
+	 * 将输入流中的内容拷贝到输出流中，默认不关闭输入流
+	 *
+	 * @param in       输入流
+	 * @param out      输出流
+	 * @param maxChars 拷贝最大字符数
+	 * @return 拷贝的字符数
+	 */
+	public static long copy(final Reader in, final Writer out, long maxChars) {
+		return copy(in, out, maxChars, false);
 	}
 
 	/**

@@ -9,7 +9,7 @@ import org.zero.common.core.util.java.lang.ThrowableUtil;
  */
 @RequiredArgsConstructor
 public class LoopRunnable implements Runnable {
-    protected final ThrowThrowableRunnable runnable;
+    protected final ThrowableRunnable runnable;
 
     @Override
     public void run() {

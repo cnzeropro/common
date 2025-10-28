@@ -5,7 +5,7 @@ import lombok.experimental.UtilityClass;
 import lombok.extern.java.Log;
 import org.zero.common.core.extension.java.lang.reflect.TypeReference;
 import org.zero.common.core.extension.java.net.Schemes;
-import org.zero.common.core.extension.java.util.function.ThrowThrowableFunction;
+import org.zero.common.core.extension.java.util.function.ThrowableFunction;
 import org.zero.common.core.util.java.lang.reflect.ConstructorUtil;
 import org.zero.common.core.util.java.lang.reflect.FieldUtil;
 import org.zero.common.core.util.java.lang.reflect.MethodUtil;
@@ -125,7 +125,7 @@ public class ClassUtil {
 	public static Collection<String> getClassNames(String packageName) {
 		String packageFileName = packageName.replace(PACKAGE_SEPARATOR, CLASS_FILE_SEPARATOR);
 		Enumeration<URL> urls = ThrowableUtil.sneakyThrow(ClassLoaderUtil.get(),
-			(ThrowThrowableFunction<ClassLoader, Enumeration<URL>>) classLoader -> classLoader.getResources(packageFileName));
+			(ThrowableFunction<ClassLoader, Enumeration<URL>>) classLoader -> classLoader.getResources(packageFileName));
 		return Collections.list(urls)
 			.stream()
 			.map(url -> getClassNamesByUrl(url, packageName))
@@ -140,7 +140,7 @@ public class ClassUtil {
 	public static Collection<String> getClassNamesByUrl(URL url, String packageName, boolean withSubordinateClass, boolean withInnerClass) {
 		String protocol = url.getProtocol();
 		if (Schemes.FILE.equalsIgnoreCase(protocol)) {
-			return ThrowableUtil.sneakyThrowOpt(url, (ThrowThrowableFunction<URL, URI>) URL::toURI)
+			return ThrowableUtil.sneakyThrowOpt(url, (ThrowableFunction<URL, URI>) URL::toURI)
 				.map(File::new)
 				.map(file -> getClassNamesByFile(file, packageName, withSubordinateClass, withInnerClass))
 				.orElseGet(LinkedHashSet::new);

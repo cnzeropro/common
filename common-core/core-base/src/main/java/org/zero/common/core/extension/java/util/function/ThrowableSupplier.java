@@ -1,23 +1,25 @@
-package org.zero.common.core.extension.java.lang;
+package org.zero.common.core.extension.java.util.function;
 
 import org.zero.common.core.util.java.lang.ThrowableUtil;
+
+import java.util.function.Supplier;
 
 /**
  * @author Zero (cnzeropro@163.com)
  * @since 2025/5/8
  */
 @FunctionalInterface
-public interface ThrowThrowableRunnable {
-    void run() throws Throwable;
+public interface ThrowableSupplier<T> {
+    T get() throws Throwable;
 
-    static ThrowThrowableRunnable of(Runnable runnable) {
-        return runnable::run;
+    static <T> ThrowableSupplier<T> of(Supplier<T> supplier) {
+        return supplier::get;
     }
 
-    default Runnable to() {
+    default Supplier<T> to() {
         return () -> {
             try {
-                this.run();
+                return this.get();
             } catch (Throwable throwable) {
                 throw ThrowableUtil.throwUnchecked(throwable);
             }

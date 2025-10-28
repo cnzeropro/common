@@ -4,7 +4,7 @@ import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.zero.common.core.util.spring.web.context.request.javax.RequestUtil;
+import org.zero.common.core.util.spring.web.context.request.jakarta.RequestUtil;
 
 import java.util.Objects;
 

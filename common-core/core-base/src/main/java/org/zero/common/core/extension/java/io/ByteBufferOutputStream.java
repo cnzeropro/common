@@ -1,5 +1,6 @@
 package org.zero.common.core.extension.java.io;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.zero.common.core.util.java.lang.ArrayUtil;
@@ -15,20 +16,20 @@ import java.nio.ByteBuffer;
  */
 public class ByteBufferOutputStream extends OutputStream {
 	protected ByteBuffer byteBuffer;
+	@Getter
 	protected volatile boolean closed = false;
 	protected final BufferSizeStrategy bufferSizeStrategy;
 
-	public ByteBufferOutputStream(int bufferSize) {
-		this(bufferSize, DefaultBufferSizeStrategy.DEFAULT);
+	public ByteBufferOutputStream(int initBufferSize) {
+		this(initBufferSize, DefaultBufferSizeStrategy.DEFAULT);
 	}
 
-	public ByteBufferOutputStream(int bufferSize, int maxBufferSize) {
-		this(bufferSize, new DefaultBufferSizeStrategy(maxBufferSize));
+	public ByteBufferOutputStream(int initBufferSize, int maxBufferSize) {
+		this(initBufferSize, new DefaultBufferSizeStrategy(maxBufferSize));
 	}
 
-	public ByteBufferOutputStream(int bufferSize, BufferSizeStrategy bufferSizeStrategy) {
-		this.byteBuffer = ByteBuffer.allocate(bufferSize);
-		this.bufferSizeStrategy = bufferSizeStrategy;
+	public ByteBufferOutputStream(int initBufferSize, BufferSizeStrategy bufferSizeStrategy) {
+		this(ByteBuffer.allocate(initBufferSize), bufferSizeStrategy);
 	}
 
 	public ByteBufferOutputStream(ByteBuffer byteBuffer) {
@@ -78,9 +79,8 @@ public class ByteBufferOutputStream extends OutputStream {
 	 * 确保有足够的容量写入数据
 	 */
 	protected void ensureCapacity(int required) {
-		if (byteBuffer.remaining() < required) {
-			int oldCapacity = byteBuffer.capacity();
-			int newCapacity = bufferSizeStrategy.nextSize(oldCapacity, required);
+		while (byteBuffer.remaining() < required) {
+			int newCapacity = bufferSizeStrategy.nextSize(byteBuffer.capacity(), required);
 			ByteBuffer newBuffer = ByteBuffer.allocate(newCapacity);
 			byteBuffer.flip();
 			newBuffer.put(byteBuffer);
@@ -144,8 +144,8 @@ public class ByteBufferOutputStream extends OutputStream {
 	}
 
 	protected void checkClosed() throws IOException {
-		if (closed) {
-			throw new IOException("Stream is closed");
+		if (isClosed()) {
+			throw new IOException(this.getClass() + " is closed");
 		}
 	}
 

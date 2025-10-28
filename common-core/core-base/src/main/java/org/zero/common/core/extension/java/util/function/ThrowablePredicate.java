@@ -2,24 +2,24 @@ package org.zero.common.core.extension.java.util.function;
 
 import org.zero.common.core.util.java.lang.ThrowableUtil;
 
-import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * @author Zero (cnzeropro@163.com)
  * @since 2025/5/8
  */
 @FunctionalInterface
-public interface ThrowThrowableConsumer<T> {
-    void accept(T t) throws Throwable;
+public interface ThrowablePredicate<T> {
+    boolean test(T t) throws Throwable;
 
-    static <T> ThrowThrowableConsumer<T> of(Consumer<T> consumer) {
-        return consumer::accept;
+    static <T> ThrowablePredicate<T> of(Predicate<T> predicate) {
+        return predicate::test;
     }
 
-    default Consumer<T> to() {
+    default Predicate<T> to() {
         return t -> {
             try {
-                this.accept(t);
+                return this.test(t);
             } catch (Throwable throwable) {
                 throw ThrowableUtil.throwUnchecked(throwable);
             }

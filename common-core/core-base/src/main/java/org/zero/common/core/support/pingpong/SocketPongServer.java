@@ -8,7 +8,7 @@ import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 import lombok.extern.java.Log;
 import org.zero.common.core.extension.java.lang.InnerBuilder;
-import org.zero.common.core.extension.java.util.function.ThrowThrowableSupplier;
+import org.zero.common.core.extension.java.util.function.ThrowableSupplier;
 import org.zero.common.core.util.java.lang.ThrowableUtil;
 
 import java.io.IOException;
@@ -118,7 +118,7 @@ public class SocketPongServer implements PongServer {
         /**
          * 地址。{@code null} 表示使用 {@linkplain InetAddress#anyLocalAddress() LocalAddress}
          */
-        protected InetAddress inetAddress = ThrowableUtil.ignore((ThrowThrowableSupplier<InetAddress>) InetAddress::getLocalHost);
+        protected InetAddress inetAddress = ThrowableUtil.ignore((ThrowableSupplier<InetAddress>) InetAddress::getLocalHost);
         /**
          * 端口号。0 表示自动分配
          */

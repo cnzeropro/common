@@ -1,13 +1,13 @@
 package org.zero.common.core.util.java.lang;
 
-import org.zero.common.core.extension.java.lang.ThrowThrowableRunnable;
-import org.zero.common.core.extension.java.util.ThrowThrowableComparator;
-import org.zero.common.core.extension.java.util.concurrent.ThrowThrowableCallable;
-import org.zero.common.core.extension.java.util.function.ThrowThrowableBiFunction;
-import org.zero.common.core.extension.java.util.function.ThrowThrowableConsumer;
-import org.zero.common.core.extension.java.util.function.ThrowThrowableFunction;
-import org.zero.common.core.extension.java.util.function.ThrowThrowablePredicate;
-import org.zero.common.core.extension.java.util.function.ThrowThrowableSupplier;
+import org.zero.common.core.extension.java.lang.ThrowableRunnable;
+import org.zero.common.core.extension.java.util.ThrowableComparator;
+import org.zero.common.core.extension.java.util.concurrent.ThrowableCallable;
+import org.zero.common.core.extension.java.util.function.ThrowableBiFunction;
+import org.zero.common.core.extension.java.util.function.ThrowableConsumer;
+import org.zero.common.core.extension.java.util.function.ThrowableFunction;
+import org.zero.common.core.extension.java.util.function.ThrowablePredicate;
+import org.zero.common.core.extension.java.util.function.ThrowableSupplier;
 import org.zero.common.core.extension.java.util.function.ToBoolFunction;
 import org.zero.common.data.constant.ConstantPool;
 
@@ -42,28 +42,28 @@ public class ThrowableUtil {
     /* ******************************************** sneakyThrow ******************************************** */
     protected static final Consumer<Throwable> SNEAKY_THROW_THROWABLE_CONSUMER = ThrowableUtil::throwUnchecked;
 
-    protected static <T> Function<Throwable, T> sneakyThrowThrowableMapper() {
+    protected static <T> Function<Throwable, T> sneakyThrowableMapper() {
         return throwable -> {
             throw throwUnchecked(throwable);
         };
     }
 
     /* -------------------------------------------- Runnable -------------------------------------------- */
-    public static Runnable sneakyThrow(ThrowThrowableRunnable runnable) {
+    public static Runnable sneakyThrow(ThrowableRunnable runnable) {
         return runnable.to();
     }
 
     public static void sneakyThrow(Runnable runnable) {
-        tryDo(ThrowThrowableRunnable.of(runnable), SNEAKY_THROW_THROWABLE_CONSUMER);
+        tryDo(ThrowableRunnable.of(runnable), SNEAKY_THROW_THROWABLE_CONSUMER);
     }
 
     /* -------------------------------------------- Callable -------------------------------------------- */
-    public static <V> Callable<V> sneakyThrow(ThrowThrowableCallable<V> callable) {
+    public static <V> Callable<V> sneakyThrow(ThrowableCallable<V> callable) {
         return callable.to();
     }
 
     public static <V> V sneakyThrow(Callable<V> callable) {
-        return tryReturnNew(ThrowThrowableCallable.of(callable), sneakyThrowThrowableMapper());
+        return tryReturnNew(ThrowableCallable.of(callable), sneakyThrowableMapper());
     }
 
     public static <V> Optional<V> sneakyThrowOpt(Callable<V> callable) {
@@ -71,20 +71,20 @@ public class ThrowableUtil {
     }
 
     /* -------------------------------------------- Function -------------------------------------------- */
-    public static <T, R> Function<T, R> sneakyThrow(ThrowThrowableFunction<T, R> function) {
+    public static <T, R> Function<T, R> sneakyThrow(ThrowableFunction<T, R> function) {
         return function.to();
     }
 
-    public static <T, R> R sneakyThrow(T t, ThrowThrowableFunction<T, R> function) {
-        return tryReturnNew(t, function, sneakyThrowThrowableMapper());
+    public static <T, R> R sneakyThrow(T t, ThrowableFunction<T, R> function) {
+        return tryReturnNew(t, function, sneakyThrowableMapper());
     }
 
-    public static <T, R> Optional<R> sneakyThrowOpt(T t, ThrowThrowableFunction<T, R> function) {
+    public static <T, R> Optional<R> sneakyThrowOpt(T t, ThrowableFunction<T, R> function) {
         return Optional.ofNullable(sneakyThrow(t, function));
     }
 
     public static <T, R> R sneakyThrow(T t, Function<T, R> function) {
-        return sneakyThrow(t, ThrowThrowableFunction.of(function));
+        return sneakyThrow(t, ThrowableFunction.of(function));
     }
 
     public static <T, R> Optional<R> sneakyThrowOpt(T t, Function<T, R> function) {
@@ -92,20 +92,20 @@ public class ThrowableUtil {
     }
 
     /* -------------------------------------------- BiFunction -------------------------------------------- */
-    public static <T, U, R> BiFunction<T, U, R> sneakyThrow(ThrowThrowableBiFunction<T, U, R> function) {
+    public static <T, U, R> BiFunction<T, U, R> sneakyThrow(ThrowableBiFunction<T, U, R> function) {
         return function.to();
     }
 
-    public static <T, U, R> R sneakyThrow(T t, U u, ThrowThrowableBiFunction<T, U, R> function) {
-        return tryReturnNew(t, u, function, sneakyThrowThrowableMapper());
+    public static <T, U, R> R sneakyThrow(T t, U u, ThrowableBiFunction<T, U, R> function) {
+        return tryReturnNew(t, u, function, sneakyThrowableMapper());
     }
 
-    public static <T, U, R> Optional<R> sneakyThrowOpt(T t, U u, ThrowThrowableBiFunction<T, U, R> function) {
+    public static <T, U, R> Optional<R> sneakyThrowOpt(T t, U u, ThrowableBiFunction<T, U, R> function) {
         return Optional.ofNullable(sneakyThrow(t, u, function));
     }
 
     public static <T, U, R> R sneakyThrow(T t, U u, BiFunction<T, U, R> function) {
-        return sneakyThrow(t, u, ThrowThrowableBiFunction.of(function));
+        return sneakyThrow(t, u, ThrowableBiFunction.of(function));
     }
 
     public static <T, U, R> Optional<R> sneakyThrowOpt(T t, U u, BiFunction<T, U, R> function) {
@@ -113,12 +113,12 @@ public class ThrowableUtil {
     }
 
     /* -------------------------------------------- Supplier -------------------------------------------- */
-    public static <T> Supplier<T> sneakyThrow(ThrowThrowableSupplier<T> supplier) {
+    public static <T> Supplier<T> sneakyThrow(ThrowableSupplier<T> supplier) {
         return supplier.to();
     }
 
     public static <T> T sneakyThrow(Supplier<T> supplier) {
-        return tryReturnNew(ThrowThrowableSupplier.of(supplier), sneakyThrowThrowableMapper());
+        return tryReturnNew(ThrowableSupplier.of(supplier), sneakyThrowableMapper());
     }
 
     public static <T> Optional<T> sneakyThrowOpt(Supplier<T> supplier) {
@@ -126,46 +126,46 @@ public class ThrowableUtil {
     }
 
     /* -------------------------------------------- Consumer -------------------------------------------- */
-    public static <T> Consumer<T> sneakyThrow(ThrowThrowableConsumer<T> consumer) {
+    public static <T> Consumer<T> sneakyThrow(ThrowableConsumer<T> consumer) {
         return consumer.to();
     }
 
-    public static <T> void sneakyThrow(T t, ThrowThrowableConsumer<T> consumer) {
+    public static <T> void sneakyThrow(T t, ThrowableConsumer<T> consumer) {
         tryDo(t, consumer, IGNORE_THROWABLE_CONSUMER);
     }
 
     public static <T> void sneakyThrow(T t, Consumer<T> consumer) {
-        sneakyThrow(t, ThrowThrowableConsumer.of(consumer));
+        sneakyThrow(t, ThrowableConsumer.of(consumer));
     }
 
     /* -------------------------------------------- Predicate -------------------------------------------- */
-    public static <T> Predicate<T> sneakyThrow(ThrowThrowablePredicate<T> predicate) {
+    public static <T> Predicate<T> sneakyThrow(ThrowablePredicate<T> predicate) {
         return predicate.to();
     }
 
-    public static <T> boolean sneakyThrow(T t, ThrowThrowablePredicate<T> predicate) {
+    public static <T> boolean sneakyThrow(T t, ThrowablePredicate<T> predicate) {
         return tryReturnNew(t, predicate, throwable -> {
             throw throwUnchecked(throwable);
         });
     }
 
     public static <T> boolean sneakyThrow(T t, Predicate<T> predicate) {
-        return sneakyThrow(t, ThrowThrowablePredicate.of(predicate));
+        return sneakyThrow(t, ThrowablePredicate.of(predicate));
     }
 
     /* -------------------------------------------- Comparator -------------------------------------------- */
-    public static <T> Comparator<T> sneakyThrow(ThrowThrowableComparator<T> comparator) {
+    public static <T> Comparator<T> sneakyThrow(ThrowableComparator<T> comparator) {
         return comparator.to();
     }
 
-    public static <T> int sneakyThrow(T t1, T t2, ThrowThrowableComparator<T> comparator) {
+    public static <T> int sneakyThrow(T t1, T t2, ThrowableComparator<T> comparator) {
         return tryReturnNew(t1, t2, comparator, throwable -> {
             throw throwUnchecked(throwable);
         });
     }
 
     public static <T> int sneakyThrow(T t1, T t2, Comparator<T> comparator) {
-        return sneakyThrow(t1, t2, ThrowThrowableComparator.of(comparator));
+        return sneakyThrow(t1, t2, ThrowableComparator.of(comparator));
     }
 
     /* ******************************************** ignore ******************************************** */
@@ -173,64 +173,64 @@ public class ThrowableUtil {
     };
 
     /* -------------------------------------------- Runnable -------------------------------------------- */
-    public static void ignore(ThrowThrowableRunnable runnable) {
+    public static void ignore(ThrowableRunnable runnable) {
         tryDo(runnable, IGNORE_THROWABLE_CONSUMER);
     }
 
     /* -------------------------------------------- Callable -------------------------------------------- */
-    public static <V> V ignore(ThrowThrowableCallable<V> callable) {
+    public static <V> V ignore(ThrowableCallable<V> callable) {
         return tryReturnNew(callable, (V) null);
     }
 
-    public static <V> Optional<V> ignoreOpt(ThrowThrowableCallable<V> callable) {
+    public static <V> Optional<V> ignoreOpt(ThrowableCallable<V> callable) {
         return Optional.ofNullable(ignore(callable));
     }
 
     /* -------------------------------------------- Function -------------------------------------------- */
-    public static <T, R> R ignore(T obj, ThrowThrowableFunction<T, R> function) {
+    public static <T, R> R ignore(T obj, ThrowableFunction<T, R> function) {
         return tryReturnNew(obj, function, (R) null);
     }
 
-    public static <T, R> Optional<R> ignoreOpt(T obj, ThrowThrowableFunction<T, R> function) {
+    public static <T, R> Optional<R> ignoreOpt(T obj, ThrowableFunction<T, R> function) {
         return Optional.ofNullable(ignore(obj, function));
     }
 
     /* -------------------------------------------- BiFunction -------------------------------------------- */
-    public static <T, U, R> R ignore(T t, U u, ThrowThrowableBiFunction<T, U, R> function) {
+    public static <T, U, R> R ignore(T t, U u, ThrowableBiFunction<T, U, R> function) {
         return tryReturnNew(t, u, function, (R) null);
     }
 
-    public static <T, U, R> Optional<R> ignoreOpt(T t, U u, ThrowThrowableBiFunction<T, U, R> function) {
+    public static <T, U, R> Optional<R> ignoreOpt(T t, U u, ThrowableBiFunction<T, U, R> function) {
         return Optional.ofNullable(ignore(t, u, function));
     }
 
     /* -------------------------------------------- Supplier -------------------------------------------- */
-    public static <T> T ignore(ThrowThrowableSupplier<T> supplier) {
+    public static <T> T ignore(ThrowableSupplier<T> supplier) {
         return tryReturnNew(supplier, (T) null);
     }
 
-    public static <T> Optional<T> ignoreOpt(ThrowThrowableSupplier<T> supplier) {
+    public static <T> Optional<T> ignoreOpt(ThrowableSupplier<T> supplier) {
         return Optional.ofNullable(ignore(supplier));
     }
 
     /* -------------------------------------------- Consumer -------------------------------------------- */
-    public static <T> void ignore(T t, ThrowThrowableConsumer<T> consumer) {
+    public static <T> void ignore(T t, ThrowableConsumer<T> consumer) {
         tryDo(t, consumer, IGNORE_THROWABLE_CONSUMER);
     }
 
     /* -------------------------------------------- Predicate -------------------------------------------- */
-    public static <T> boolean ignore(T t, ThrowThrowablePredicate<T> predicate) {
+    public static <T> boolean ignore(T t, ThrowablePredicate<T> predicate) {
         return tryReturnNew(t, predicate, ConstantPool.BOOLEAN_FALSE);
     }
 
     /* -------------------------------------------- Comparator -------------------------------------------- */
-    public static <T> int ignore(T t1, T t2, ThrowThrowableComparator<T> comparator) {
+    public static <T> int ignore(T t1, T t2, ThrowableComparator<T> comparator) {
         return tryReturnNew(t1, t2, comparator, ConstantPool.INT_ZERO);
     }
 
     /* ******************************************** tryDo ******************************************** */
     /* -------------------------------------------- Runnable -------------------------------------------- */
-    public static void tryDo(ThrowThrowableRunnable runnable, Consumer<Throwable> throwableConsumer) {
+    public static void tryDo(ThrowableRunnable runnable, Consumer<Throwable> throwableConsumer) {
         try {
             runnable.run();
         } catch (Throwable throwable) {
@@ -251,7 +251,7 @@ public class ThrowableUtil {
     // no implement
 
     /* -------------------------------------------- Consumer -------------------------------------------- */
-    public static <T> void tryDo(T t, ThrowThrowableConsumer<T> consumer, Consumer<Throwable> throwableConsumer) {
+    public static <T> void tryDo(T t, ThrowableConsumer<T> consumer, Consumer<Throwable> throwableConsumer) {
         try {
             consumer.accept(t);
         } catch (Throwable throwable) {
@@ -278,23 +278,23 @@ public class ThrowableUtil {
     // no implement
 
     /* -------------------------------------------- Callable -------------------------------------------- */
-    public static <V> V tryReturnNew(ThrowThrowableCallable<V> callable, V defaultValue) {
+    public static <V> V tryReturnNew(ThrowableCallable<V> callable, V defaultValue) {
         return tryReturnNew(callable, defaultValueSupplier(defaultValue));
     }
 
-    public static <V> Optional<V> tryReturnNewOpt(ThrowThrowableCallable<V> callable, V defaultValue) {
+    public static <V> Optional<V> tryReturnNewOpt(ThrowableCallable<V> callable, V defaultValue) {
         return Optional.ofNullable(tryReturnNew(callable, defaultValue));
     }
 
-    public static <V> V tryReturnNew(ThrowThrowableCallable<V> callable, Supplier<V> defaultValueSupplier) {
+    public static <V> V tryReturnNew(ThrowableCallable<V> callable, Supplier<V> defaultValueSupplier) {
         return tryReturnNew(callable, throwableToNewValueMapper(defaultValueSupplier));
     }
 
-    public static <V> Optional<V> tryReturnNewOpt(ThrowThrowableCallable<V> callable, Supplier<V> defaultValueSupplier) {
+    public static <V> Optional<V> tryReturnNewOpt(ThrowableCallable<V> callable, Supplier<V> defaultValueSupplier) {
         return Optional.ofNullable(tryReturnNew(callable, defaultValueSupplier));
     }
 
-    public static <V> V tryReturnNew(ThrowThrowableCallable<V> callable, Function<Throwable, V> throwableMapper) {
+    public static <V> V tryReturnNew(ThrowableCallable<V> callable, Function<Throwable, V> throwableMapper) {
         try {
             return callable.call();
         } catch (Throwable throwable) {
@@ -302,28 +302,28 @@ public class ThrowableUtil {
         }
     }
 
-    public static <V> Optional<V> tryReturnNewOpt(ThrowThrowableCallable<V> callable, Function<Throwable, V> throwableMapper) {
+    public static <V> Optional<V> tryReturnNewOpt(ThrowableCallable<V> callable, Function<Throwable, V> throwableMapper) {
         return Optional.ofNullable(tryReturnNew(callable, throwableMapper));
     }
 
     /* -------------------------------------------- Function -------------------------------------------- */
-    public static <T, R> R tryReturnNew(T t, ThrowThrowableFunction<T, R> function, R defaultValue) {
+    public static <T, R> R tryReturnNew(T t, ThrowableFunction<T, R> function, R defaultValue) {
         return tryReturnNew(t, function, defaultValueSupplier(defaultValue));
     }
 
-    public static <T, R> Optional<R> tryReturnNewOpt(T t, ThrowThrowableFunction<T, R> function, R defaultValue) {
+    public static <T, R> Optional<R> tryReturnNewOpt(T t, ThrowableFunction<T, R> function, R defaultValue) {
         return Optional.ofNullable(tryReturnNew(t, function, defaultValue));
     }
 
-    public static <T, R> R tryReturnNew(T t, ThrowThrowableFunction<T, R> function, Supplier<R> defaultValueSupplier) {
+    public static <T, R> R tryReturnNew(T t, ThrowableFunction<T, R> function, Supplier<R> defaultValueSupplier) {
         return tryReturnNew(t, function, throwableToNewValueMapper(defaultValueSupplier));
     }
 
-    public static <T, R> Optional<R> tryReturnNewOpt(T t, ThrowThrowableFunction<T, R> function, Supplier<R> defaultValueSupplier) {
+    public static <T, R> Optional<R> tryReturnNewOpt(T t, ThrowableFunction<T, R> function, Supplier<R> defaultValueSupplier) {
         return Optional.ofNullable(tryReturnNew(t, function, defaultValueSupplier));
     }
 
-    public static <T, R> R tryReturnNew(T t, ThrowThrowableFunction<T, R> function, Function<Throwable, R> throwableMapper) {
+    public static <T, R> R tryReturnNew(T t, ThrowableFunction<T, R> function, Function<Throwable, R> throwableMapper) {
         try {
             return function.apply(t);
         } catch (Throwable throwable) {
@@ -331,28 +331,28 @@ public class ThrowableUtil {
         }
     }
 
-    public static <T, R> Optional<R> tryReturnNewOpt(T t, ThrowThrowableFunction<T, R> function, Function<Throwable, R> throwableMapper) {
+    public static <T, R> Optional<R> tryReturnNewOpt(T t, ThrowableFunction<T, R> function, Function<Throwable, R> throwableMapper) {
         return Optional.ofNullable(tryReturnNew(t, function, throwableMapper));
     }
 
     /* -------------------------------------------- BiFunction -------------------------------------------- */
-    public static <T, U, R> R tryReturnNew(T t, U u, ThrowThrowableBiFunction<T, U, R> function, R defaultValue) {
+    public static <T, U, R> R tryReturnNew(T t, U u, ThrowableBiFunction<T, U, R> function, R defaultValue) {
         return tryReturnNew(t, u, function, defaultValueSupplier(defaultValue));
     }
 
-    public static <T, U, R> Optional<R> tryReturnNewOpt(T t, U u, ThrowThrowableBiFunction<T, U, R> function, R defaultValue) {
+    public static <T, U, R> Optional<R> tryReturnNewOpt(T t, U u, ThrowableBiFunction<T, U, R> function, R defaultValue) {
         return Optional.ofNullable(tryReturnNew(t, u, function, defaultValue));
     }
 
-    public static <T, U, R> R tryReturnNew(T t, U u, ThrowThrowableBiFunction<T, U, R> function, Supplier<R> defaultValueSupplier) {
+    public static <T, U, R> R tryReturnNew(T t, U u, ThrowableBiFunction<T, U, R> function, Supplier<R> defaultValueSupplier) {
         return tryReturnNew(t, u, function, throwableToNewValueMapper(defaultValueSupplier));
     }
 
-    public static <T, U, R> Optional<R> tryReturnNewOpt(T t, U u, ThrowThrowableBiFunction<T, U, R> function, Supplier<R> defaultValueSupplier) {
+    public static <T, U, R> Optional<R> tryReturnNewOpt(T t, U u, ThrowableBiFunction<T, U, R> function, Supplier<R> defaultValueSupplier) {
         return Optional.ofNullable(tryReturnNew(t, u, function, defaultValueSupplier));
     }
 
-    public static <T, U, R> R tryReturnNew(T t, U u, ThrowThrowableBiFunction<T, U, R> function, Function<Throwable, R> throwableMapper) {
+    public static <T, U, R> R tryReturnNew(T t, U u, ThrowableBiFunction<T, U, R> function, Function<Throwable, R> throwableMapper) {
         try {
             return function.apply(t, u);
         } catch (Throwable throwable) {
@@ -360,28 +360,28 @@ public class ThrowableUtil {
         }
     }
 
-    public static <T, U, R> Optional<R> tryReturnNewOpt(T t, U u, ThrowThrowableBiFunction<T, U, R> function, Function<Throwable, R> throwableMapper) {
+    public static <T, U, R> Optional<R> tryReturnNewOpt(T t, U u, ThrowableBiFunction<T, U, R> function, Function<Throwable, R> throwableMapper) {
         return Optional.ofNullable(tryReturnNew(t, u, function, throwableMapper));
     }
 
     /* -------------------------------------------- Supplier -------------------------------------------- */
-    public static <T> T tryReturnNew(ThrowThrowableSupplier<T> supplier, T defaultValue) {
+    public static <T> T tryReturnNew(ThrowableSupplier<T> supplier, T defaultValue) {
         return tryReturnNew(supplier, defaultValueSupplier(defaultValue));
     }
 
-    public static <T> Optional<T> tryReturnNewOpt(ThrowThrowableSupplier<T> supplier, T defaultValue) {
+    public static <T> Optional<T> tryReturnNewOpt(ThrowableSupplier<T> supplier, T defaultValue) {
         return Optional.ofNullable(tryReturnNew(supplier, defaultValue));
     }
 
-    public static <T> T tryReturnNew(ThrowThrowableSupplier<T> supplier, Supplier<T> defaultValueSupplier) {
+    public static <T> T tryReturnNew(ThrowableSupplier<T> supplier, Supplier<T> defaultValueSupplier) {
         return tryReturnNew(supplier, throwableToNewValueMapper(defaultValueSupplier));
     }
 
-    public static <T> Optional<T> tryReturnNewOpt(ThrowThrowableSupplier<T> supplier, Supplier<T> defaultValueSupplier) {
+    public static <T> Optional<T> tryReturnNewOpt(ThrowableSupplier<T> supplier, Supplier<T> defaultValueSupplier) {
         return Optional.ofNullable(tryReturnNew(supplier, defaultValueSupplier));
     }
 
-    public static <T> T tryReturnNew(ThrowThrowableSupplier<T> supplier, Function<Throwable, T> throwableMapper) {
+    public static <T> T tryReturnNew(ThrowableSupplier<T> supplier, Function<Throwable, T> throwableMapper) {
         try {
             return supplier.get();
         } catch (Throwable throwable) {
@@ -389,7 +389,7 @@ public class ThrowableUtil {
         }
     }
 
-    public static <T> Optional<T> tryReturnNewOpt(ThrowThrowableSupplier<T> supplier, Function<Throwable, T> throwableMapper) {
+    public static <T> Optional<T> tryReturnNewOpt(ThrowableSupplier<T> supplier, Function<Throwable, T> throwableMapper) {
         return Optional.ofNullable(tryReturnNew(supplier, throwableMapper));
     }
 
@@ -397,15 +397,15 @@ public class ThrowableUtil {
     // no implement
 
     /* -------------------------------------------- Predicate -------------------------------------------- */
-    public static <T> boolean tryReturnNew(T t, ThrowThrowablePredicate<T> predicate, boolean defaultValue) {
+    public static <T> boolean tryReturnNew(T t, ThrowablePredicate<T> predicate, boolean defaultValue) {
         return tryReturnNew(t, predicate, () -> defaultValue);
     }
 
-    public static <T> boolean tryReturnNew(T t, ThrowThrowablePredicate<T> predicate, BooleanSupplier defaultValueSupplier) {
+    public static <T> boolean tryReturnNew(T t, ThrowablePredicate<T> predicate, BooleanSupplier defaultValueSupplier) {
         return tryReturnNew(t, predicate, throwable -> defaultValueSupplier.getAsBoolean());
     }
 
-    public static <T> boolean tryReturnNew(T t, ThrowThrowablePredicate<T> predicate, ToBoolFunction<Throwable> throwableMapper) {
+    public static <T> boolean tryReturnNew(T t, ThrowablePredicate<T> predicate, ToBoolFunction<Throwable> throwableMapper) {
         try {
             return predicate.test(t);
         } catch (Throwable throwable) {
@@ -414,15 +414,15 @@ public class ThrowableUtil {
     }
 
     /* -------------------------------------------- Comparator -------------------------------------------- */
-    public static <T> int tryReturnNew(T t1, T t2, ThrowThrowableComparator<T> comparator, int defaultValue) {
+    public static <T> int tryReturnNew(T t1, T t2, ThrowableComparator<T> comparator, int defaultValue) {
         return tryReturnNew(t1, t2, comparator, () -> defaultValue);
     }
 
-    public static <T> int tryReturnNew(T t1, T t2, ThrowThrowableComparator<T> comparator, IntSupplier defaultValueSupplier) {
+    public static <T> int tryReturnNew(T t1, T t2, ThrowableComparator<T> comparator, IntSupplier defaultValueSupplier) {
         return tryReturnNew(t1, t2, comparator, throwable -> defaultValueSupplier.getAsInt());
     }
 
-    public static <T> int tryReturnNew(T t1, T t2, ThrowThrowableComparator<T> comparator, ToIntFunction<Throwable> throwableMapper) {
+    public static <T> int tryReturnNew(T t1, T t2, ThrowableComparator<T> comparator, ToIntFunction<Throwable> throwableMapper) {
         try {
             return comparator.compare(t1, t2);
         } catch (Throwable throwable) {
@@ -448,15 +448,15 @@ public class ThrowableUtil {
     }
 
     /* -------------------------------------------- Runnable -------------------------------------------- */
-    public static <T extends Throwable> void tryThrowNew(ThrowThrowableRunnable runnable, T throwable) {
+    public static <T extends Throwable> void tryThrowNew(ThrowableRunnable runnable, T throwable) {
         tryThrowNew(runnable, defaultThrowableSupplier(throwable));
     }
 
-    public static <T extends Throwable> void tryThrowNew(ThrowThrowableRunnable runnable, Supplier<? extends T> throwableSupplier) {
+    public static <T extends Throwable> void tryThrowNew(ThrowableRunnable runnable, Supplier<? extends T> throwableSupplier) {
         tryThrowNew(runnable, throwableToNewMapper(throwableSupplier));
     }
 
-    public static <T extends Throwable> void tryThrowNew(ThrowThrowableRunnable runnable, Function<Throwable, ? extends T> throwableMapper) {
+    public static <T extends Throwable> void tryThrowNew(ThrowableRunnable runnable, Function<Throwable, ? extends T> throwableMapper) {
         try {
             runnable.run();
         } catch (Throwable throwable) {
@@ -465,24 +465,24 @@ public class ThrowableUtil {
         }
     }
 
-    public static <T extends Throwable> void tryThrowNew(ThrowThrowableRunnable runnable, BiFunction<CharSequence, Throwable, ? extends T> throwableMapper) {
+    public static <T extends Throwable> void tryThrowNew(ThrowableRunnable runnable, BiFunction<CharSequence, Throwable, ? extends T> throwableMapper) {
         tryThrowNew(runnable, throwableToNewMapper(throwableMapper));
     }
 
-    public static <T extends Throwable> void tryThrowNew(ThrowThrowableRunnable runnable, BiFunction<CharSequence, Throwable, ? extends T> throwableMapper, CharSequence message) {
+    public static <T extends Throwable> void tryThrowNew(ThrowableRunnable runnable, BiFunction<CharSequence, Throwable, ? extends T> throwableMapper, CharSequence message) {
         tryThrowNew(runnable, throwableToNewMapper(throwableMapper, message));
     }
 
     /* -------------------------------------------- Callable -------------------------------------------- */
-    public static <V, T extends Throwable> void tryThrowNew(ThrowThrowableCallable<V> callable, T throwable) {
+    public static <V, T extends Throwable> void tryThrowNew(ThrowableCallable<V> callable, T throwable) {
         tryThrowNew(callable, (Supplier<Throwable>) () -> throwable);
     }
 
-    public static <V, T extends Throwable> V tryThrowNew(ThrowThrowableCallable<V> callable, Supplier<? extends T> throwableSupplier) {
+    public static <V, T extends Throwable> V tryThrowNew(ThrowableCallable<V> callable, Supplier<? extends T> throwableSupplier) {
         return tryThrowNew(callable, (Function<Throwable, Throwable>) ignored -> throwableSupplier.get());
     }
 
-    public static <V, T extends Throwable> V tryThrowNew(ThrowThrowableCallable<V> callable, Function<Throwable, ? extends T> throwableMapper) {
+    public static <V, T extends Throwable> V tryThrowNew(ThrowableCallable<V> callable, Function<Throwable, ? extends T> throwableMapper) {
         try {
             return callable.call();
         } catch (Throwable throwable) {
@@ -491,11 +491,11 @@ public class ThrowableUtil {
         }
     }
 
-    public static <V, T extends Throwable> V tryThrowNew(ThrowThrowableCallable<V> callable, BiFunction<CharSequence, Throwable, ? extends T> throwableMapper) {
+    public static <V, T extends Throwable> V tryThrowNew(ThrowableCallable<V> callable, BiFunction<CharSequence, Throwable, ? extends T> throwableMapper) {
         return tryThrowNew(callable, throwableToNewMapper(throwableMapper));
     }
 
-    public static <V, T extends Throwable> V tryThrowNew(ThrowThrowableCallable<V> callable, BiFunction<CharSequence, Throwable, ? extends T> throwableMapper, CharSequence message) {
+    public static <V, T extends Throwable> V tryThrowNew(ThrowableCallable<V> callable, BiFunction<CharSequence, Throwable, ? extends T> throwableMapper, CharSequence message) {
         return tryThrowNew(callable, throwableToNewMapper(throwableMapper, message));
     }
 

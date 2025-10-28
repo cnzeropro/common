@@ -2,7 +2,7 @@ package org.zero.common.core.util.java.net;
 
 import lombok.extern.java.Log;
 import org.zero.common.core.extension.java.net.Schemes;
-import org.zero.common.core.extension.java.util.function.ThrowThrowableFunction;
+import org.zero.common.core.extension.java.util.function.ThrowableFunction;
 import org.zero.common.core.util.java.io.FileUtil;
 import org.zero.common.core.util.java.lang.CharSequenceUtil;
 import org.zero.common.core.util.java.lang.ClassLoaderUtil;
@@ -179,7 +179,7 @@ public class UrlUtil {
 		return Optional.ofNullable(jatUrl)
 			.map(URL::getPath)
 			// 处理路径中特殊字符（如：中文）部分
-			.map(ThrowableUtil.sneakyThrow(new ThrowThrowableFunction<String, String>() {
+			.map(ThrowableUtil.sneakyThrow(new ThrowableFunction<String, String>() {
 				@Override
 				public String apply(String path) throws Throwable {
 					return URLDecoder.decode(path, FileUtil.getDefaultEncoding());
@@ -194,7 +194,7 @@ public class UrlUtil {
 	}
 
 	public static URLConnection openConnection(URL url) {
-		return ObjectUtil.mapIfNonNull(url, ThrowableUtil.sneakyThrow((ThrowThrowableFunction<URL, URLConnection>) URL::openConnection));
+		return ObjectUtil.mapIfNonNull(url, ThrowableUtil.sneakyThrow((ThrowableFunction<URL, URLConnection>) URL::openConnection));
 	}
 
 	public static InputStream openStream(URL url) {

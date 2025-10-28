@@ -1,6 +1,6 @@
 package org.zero.common.core.extension.java.lang;
 
-import org.zero.common.core.extension.java.util.function.ThrowThrowableSupplier;
+import org.zero.common.core.extension.java.util.function.ThrowableSupplier;
 import org.zero.common.core.util.java.lang.ThrowableUtil;
 import org.zero.common.core.util.java.lang.reflect.ConstructorUtil;
 import org.zero.common.core.util.java.lang.reflect.FieldUtil;
@@ -70,7 +70,7 @@ public abstract class InnerBuilder<A, B extends InnerBuilder<A, B>> implements B
 		}
 		Collection<Field> fields = FieldUtil.list(clazz, false);
 		// 先尝试使用全参构造器实例化对象，如果异常则尝试使用 setter 方法实例化对象
-		return ThrowableUtil.tryReturnNew((ThrowThrowableSupplier<A>) () -> {
+		return ThrowableUtil.tryReturnNew((ThrowableSupplier<A>) () -> {
 				Class<?>[] parameterTypes = fields.stream()
 					.map(Field::getType)
 					.toArray(Class[]::new);
@@ -82,7 +82,7 @@ public abstract class InnerBuilder<A, B extends InnerBuilder<A, B>> implements B
 				// 使用全参构造器
 				return ConstructorUtil.newInstance(constructor, initArgs);
 			},
-			(Function<Throwable, A>) ignored -> ThrowableUtil.sneakyThrow((ThrowThrowableSupplier<A>) () -> {
+			(Function<Throwable, A>) ignored -> ThrowableUtil.sneakyThrow((ThrowableSupplier<A>) () -> {
 					// 使用无参构造器
 					Constructor<?> constructor = enclosingClass.getDeclaredConstructor();
 					A obj = (A) constructor.newInstance();

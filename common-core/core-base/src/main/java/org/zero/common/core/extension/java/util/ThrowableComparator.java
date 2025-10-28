@@ -9,10 +9,10 @@ import java.util.Comparator;
  * @since 2025/5/8
  */
 @FunctionalInterface
-public interface ThrowThrowableComparator<T> {
+public interface ThrowableComparator<T> {
     int compare(T o1, T o2) throws Throwable;
 
-    static <T> ThrowThrowableComparator<T> of(Comparator<T> comparator) {
+    static <T> ThrowableComparator<T> of(Comparator<T> comparator) {
         return comparator::compare;
     }
 

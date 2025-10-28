@@ -2,24 +2,24 @@ package org.zero.common.core.extension.java.util.function;
 
 import org.zero.common.core.util.java.lang.ThrowableUtil;
 
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * @author Zero (cnzeropro@163.com)
  * @since 2025/5/8
  */
 @FunctionalInterface
-public interface ThrowThrowableBiFunction<T, U, R> {
-    R apply(T t, U u) throws Throwable;
+public interface ThrowableFunction<T, R> {
+    R apply(T t) throws Throwable;
 
-    static <T, U, R> ThrowThrowableBiFunction<T, U, R> of(BiFunction<T, U, R> function) {
+    static <T, R> ThrowableFunction<T, R> of(Function<T, R> function) {
         return function::apply;
     }
 
-    default BiFunction<T, U, R> to() {
-        return (t, u) -> {
+    default Function<T, R> to() {
+        return t -> {
             try {
-                return this.apply(t, u);
+                return this.apply(t);
             } catch (Throwable throwable) {
                 throw ThrowableUtil.throwUnchecked(throwable);
             }

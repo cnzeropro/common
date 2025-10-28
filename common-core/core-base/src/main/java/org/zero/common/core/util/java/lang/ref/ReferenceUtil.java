@@ -1,4 +1,4 @@
-package org.zero.common.core.extension.java.lang.ref;
+package org.zero.common.core.util.java.lang.ref;
 
 import java.lang.ref.PhantomReference;
 import java.lang.ref.Reference;

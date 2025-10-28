@@ -8,7 +8,7 @@ import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 import lombok.extern.java.Log;
 import org.zero.common.core.extension.java.lang.InnerBuilder;
-import org.zero.common.core.extension.java.util.function.ThrowThrowableSupplier;
+import org.zero.common.core.extension.java.util.function.ThrowableSupplier;
 import org.zero.common.core.util.java.lang.ThrowableUtil;
 
 import java.io.IOException;
@@ -127,7 +127,7 @@ public class SocketPingClient implements PingClient {
         /**
          * 服务器地址
          */
-        protected InetAddress serverAddress = ThrowableUtil.ignore((ThrowThrowableSupplier<InetAddress>) InetAddress::getLocalHost);
+        protected InetAddress serverAddress = ThrowableUtil.ignore((ThrowableSupplier<InetAddress>) InetAddress::getLocalHost);
         /**
          * 服务器端口
          */

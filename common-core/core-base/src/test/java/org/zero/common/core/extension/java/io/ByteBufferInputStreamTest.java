@@ -13,8 +13,10 @@ class ByteBufferInputStreamTest {
 	@Test
 	void test() {
 		ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+		byteBuffer.put("Hello World".getBytes());
+		byteBuffer.flip();
 		ByteBufferInputStream inputStream = new ByteBufferInputStream(byteBuffer);
 		byte[] bytes = IoUtil.readAll(inputStream);
-		System.out.println(bytes.length);
+		System.out.println(new String(bytes));
 	}
 }

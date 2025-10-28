@@ -11,7 +11,7 @@ import java.io.IOException;
 class ByteBufferOutputStreamTest {
 	@Test
 	void test() throws IOException {
-		ByteBufferOutputStream outputStream = new ByteBufferOutputStream(1,13);
+		ByteBufferOutputStream outputStream = new ByteBufferOutputStream(1,130);
 		outputStream.write("Hello, World!".getBytes());
 		byte[] byteArray = outputStream.toByteArray();
 		System.out.println(new String(byteArray));

@@ -1,7 +1,7 @@
 package org.zero.common.core.util.java.net;
 
 import lombok.SneakyThrows;
-import org.zero.common.core.extension.java.util.function.ThrowThrowableSupplier;
+import org.zero.common.core.extension.java.util.function.ThrowableSupplier;
 import org.zero.common.core.extension.java.util.function.ToBoolFunction;
 import org.zero.common.core.util.java.lang.CharSequenceUtil;
 import org.zero.common.core.util.java.lang.ThrowableUtil;
@@ -83,7 +83,7 @@ public class InetAddressUtil {
      * @return 本机 IP 地址数组
      */
     public static String[] getLocalIpsWithInfo() {
-        return ThrowableUtil.ignoreOpt((ThrowThrowableSupplier<Enumeration<NetworkInterface>>) NetworkInterface::getNetworkInterfaces)
+        return ThrowableUtil.ignoreOpt((ThrowableSupplier<Enumeration<NetworkInterface>>) NetworkInterface::getNetworkInterfaces)
                 .map(StreamUtil::of)
                 .orElseGet(Stream::empty)
                 .filter(networkInterface -> ThrowableUtil.ignore(networkInterface, NetworkInterface::isUp) &&
