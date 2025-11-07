@@ -54,7 +54,7 @@ import java.util.concurrent.TimeUnit;
 class MethodReturnTypeController {
     /* ********************************************************* sync ********************************************************* */
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.ViewNameMethodReturnValueHandler ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.ViewNameMethodReturnValueHandler ****************************** */
 
     /**
      * 参见 {@link CharSequence} 的派生类
@@ -74,7 +74,7 @@ class MethodReturnTypeController {
     public void none() {
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.ViewMethodReturnValueHandler ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.ViewMethodReturnValueHandler ****************************** */
 
     /**
      * 参见 {@link View} 的派生类
@@ -84,7 +84,7 @@ class MethodReturnTypeController {
         return new InternalResourceView();
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.ModelAndViewMethodReturnValueHandler ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.ModelAndViewMethodReturnValueHandler ****************************** */
 
     /**
      * 参见 {@link ModelAndView} 及其派生类
@@ -94,7 +94,7 @@ class MethodReturnTypeController {
         return new ModelAndView("modelAndView");
     }
 
-    /* ****************************** org.springframework.web.targetMethod.annotation.MapMethodProcessor ****************************** */
+    /* ****************************** org.springframework.web.method.annotation.MapMethodProcessor ****************************** */
 
     /**
      * 参见 {@link Map} 的派生类
@@ -114,7 +114,7 @@ class MethodReturnTypeController {
         return new ModelMap("test", 123);
     }
 
-    /* ****************************** org.springframework.web.targetMethod.annotation.ModelMethodProcessor ****************************** */
+    /* ****************************** org.springframework.web.method.annotation.ModelMethodProcessor ****************************** */
 
     /**
      * 参见 {@link Model} 的派生类
@@ -124,7 +124,7 @@ class MethodReturnTypeController {
         return new ConcurrentModel("test", 123);
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.HttpHeadersReturnValueHandler ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.HttpHeadersReturnValueHandler ****************************** */
 
     /**
      * 参见 {@link HttpHeaders} 及其派生类
@@ -136,7 +136,7 @@ class MethodReturnTypeController {
         return headers;
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.HttpEntityMethodProcessor ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.HttpEntityMethodProcessor ****************************** */
 
     /**
      * 参见 {@link HttpEntity} 及其派生类，但从中排除 {@link RequestEntity} 及其派生类
@@ -148,7 +148,7 @@ class MethodReturnTypeController {
                 .body("httpEntity");
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.RequestResponseBodyMethodProcessor ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor ****************************** */
 
     /**
      * 参见 {@link Object} 及其派生类
@@ -161,7 +161,7 @@ class MethodReturnTypeController {
         return Collections.singletonList(Collections.singletonMap("test", 123));
     }
 
-    /* ****************************** org.springframework.web.targetMethod.annotation.ModelAttributeMethodProcessor ****************************** */
+    /* ****************************** org.springframework.web.method.annotation.ModelAttributeMethodProcessor ****************************** */
 
     /**
      * 参见 {@link Object} 及其派生类
@@ -177,7 +177,7 @@ class MethodReturnTypeController {
 
     /* ********************************************************* async ********************************************************* */
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.StreamingResponseBodyReturnValueHandler ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBodyReturnValueHandler ****************************** */
 
     /**
      * 参见 {@link StreamingResponseBody} 的派生类
@@ -188,7 +188,7 @@ class MethodReturnTypeController {
         return outputStream -> FileCopyUtils.copy(inputStream, outputStream);
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.DeferredResultMethodReturnValueHandler ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.DeferredResultMethodReturnValueHandler ****************************** */
 
     /**
      * 参见 {@link DeferredResult} 及其派生类
@@ -214,7 +214,7 @@ class MethodReturnTypeController {
         return CompletableFuture.completedFuture("completionStage");
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.CallableMethodReturnValueHandler ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.CallableMethodReturnValueHandler ****************************** */
 
     /**
      * 参见 {@link Callable} 的派生类
@@ -227,7 +227,7 @@ class MethodReturnTypeController {
         };
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.ResponseBodyEmitterReturnValueHandler ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitterReturnValueHandler ****************************** */
 
     /**
      * 参见 {@link ResponseBodyEmitter} 及其派生类
@@ -280,7 +280,7 @@ class MethodReturnTypeController {
         return Mono.just("Mono");
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.AsyncTaskMethodReturnValueHandler ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.AsyncTaskMethodReturnValueHandler ****************************** */
 
     /**
      * 参见 {@link WebAsyncTask} 及其派生类

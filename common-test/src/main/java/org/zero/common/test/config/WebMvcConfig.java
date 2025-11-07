@@ -26,7 +26,7 @@ import java.util.List;
 public class WebMvcConfig implements WebMvcConfigurer {
     private final ObjectMapper objectMapper;
 
-    @Override
+	@Override
     public void addFormatters(FormatterRegistry registry) {
         registry.addConverter(new StringToFieldConverter());
         registry.addConverter(new StringToFieldArrayConverter());

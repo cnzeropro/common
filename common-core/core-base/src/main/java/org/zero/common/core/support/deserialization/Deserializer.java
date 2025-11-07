@@ -22,7 +22,7 @@ public interface Deserializer<T> extends Ordered {
 	}
 
 	default T deserialize(ByteBuffer byteBuffer) {
-		byte[] bytes = new byte[byteBuffer.position()];
+		byte[] bytes = new byte[byteBuffer.remaining()];
 		byteBuffer.get(bytes);
 		return this.deserialize(bytes);
 	}

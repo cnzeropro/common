@@ -12,11 +12,14 @@ import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.spec.AlgorithmParameterSpec;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
  * @author Zero (cnzeropro@163.com)
- * @see <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/security/standard-names.html#keypairgenerator-algorithms">KeyPairGenerator Algorithms</a>
+ * @see <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html#KeyPairGenerator">KeyPairGenerator Algorithms</a>
  * @since 2025/10/17
  */
 @Setter
@@ -50,7 +53,7 @@ public class KeyPairBuilder implements Builder<KeyPair, KeyPairBuilder> {
 	 *         <td>512（不安全）, 1024（基本淘汰）, 2048（当前最小安全）, 3072, 4096, 8192, 16384（技术上限）</td>
 	 *     </tr>
 	 *     <tr>
-	 *         <td>ECC</td>
+	 *         <td>EC</td>
 	 *         <td>
 	 *             <ul>
 	 *                 <li>secp112r1: 112</li>
@@ -84,18 +87,20 @@ public class KeyPairBuilder implements Builder<KeyPair, KeyPairBuilder> {
 	/**
 	 * 密钥参数规格
 	 */
-	protected AlgorithmParameterSpec[] algorithmParameterSpecs = {};
+	protected Collection<AlgorithmParameterSpec> algorithmParameterSpecs = new ArrayList<>();
 
 	public KeyPairBuilder(String algorithm) {
 		this.algorithm = algorithm;
 	}
 
 	public KeyPairBuilder providerName(String providerName) {
-		return this.provider(Security.getProvider(providerName));
+		Provider provider = Security.getProvider(providerName);
+		return this.provider(provider);
 	}
 
 	public KeyPairBuilder seedBytes(int seedBytes) {
-		return this.seed(SecureRandom.getSeed(seedBytes));
+		byte[] seed = SecureRandom.getSeed(seedBytes);
+		return this.seed(seed);
 	}
 
 	public KeyPairBuilder seed(byte[] seed) {
@@ -107,7 +112,11 @@ public class KeyPairBuilder implements Builder<KeyPair, KeyPairBuilder> {
 	}
 
 	public KeyPairBuilder algorithmParameterSpecs(AlgorithmParameterSpec... algorithmParameterSpecs) {
-		this.algorithmParameterSpecs = algorithmParameterSpecs;
+		return this.algorithmParameterSpecs(Arrays.asList(algorithmParameterSpecs));
+	}
+
+	public KeyPairBuilder algorithmParameterSpecs(Collection<AlgorithmParameterSpec> algorithmParameterSpecs) {
+		this.algorithmParameterSpecs.addAll(algorithmParameterSpecs);
 		return this;
 	}
 

@@ -478,15 +478,18 @@ public class ClassUtil {
 	}
 
 	/**
-	 * 检查目标类型是否从源类型分配而来<br>
-	 * 包括：<br>
-	 * 1、原类是对象，目标类型是源类型实现的接口<br>
-	 * 2、目标类型是源类型的父类<br>
-	 * 3、两者是原始类型或者包装类型（相互转换）
+	 * 检查目标类型是否从源类型分配而来
+	 * <p>
+	 * 包括：
+	 * <ol>
+	 *     <li>目标类型是源类型实现的接口</li>
+	 *     <li>目标类型是源类型的父类</li>
+	 *     <li>两者是原始类型或者包装类型（相互转换）</li>
+	 * </ol>
 	 *
-	 * @param targetClass 目标类型，如：int.class
-	 * @param sourceClass 源类型，如：Integer.class
-	 * @return 是否可转化
+	 * @param targetClass 目标类型，如：Number.class
+	 * @param sourceClass 源类型，如：BigDecimal.class
+	 * @return 是否可强转
 	 */
 	public static boolean isAssignable(Class<?> targetClass, Class<?> sourceClass) {
 		if (Objects.isNull(targetClass) || Objects.isNull(sourceClass)) {
@@ -509,7 +512,7 @@ public class ClassUtil {
 	/**
 	 * 检查目标类型是否可以从源类型转化
 	 * <p>
-	 * 注意：该方法支持 Java 中可强转的和可以相互兼容的类型，因此当该方法返回 true，不一定可强转。
+	 * 注意：该方法支持 Java 中可强转的和可以相互兼容的类型，因此当该方法返回 true，不一定可强转。（可强转需要 {@link #isAssignable(Class, Class)} 返回 true）
 	 *
 	 * @param targetType 目标类型，如：int[].class
 	 * @param sourceType 源类型，如：Integer[].class

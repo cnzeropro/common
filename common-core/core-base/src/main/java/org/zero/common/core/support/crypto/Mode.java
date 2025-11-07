@@ -2,8 +2,11 @@ package org.zero.common.core.support.crypto;
 
 /**
  * @author Zero (cnzeropro@163.com)
+ * @see <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html#Cipher">JDK8 - Cipher (Encryption) Algorithms</a>
+ * @see <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/security/standard-names.html#cipher-algorithm-modes">JDK25 - Cipher Algorithm Modes</a>
  * @since 2025/10/20
  */
+
 public enum Mode {
 	/**
 	 * 无模式
@@ -18,7 +21,7 @@ public enum Mode {
 	 */
 	CFB,
 	/**
-	 * 计数器模式（A simplification of OFB）
+	 * 计数器模式（Counter）
 	 */
 	CTR,
 	/**
@@ -34,7 +37,24 @@ public enum Mode {
 	 */
 	OFB,
 	/**
-	 * Propagating Cipher Block
+	 * Galois/Counter Mode
 	 */
-	PCBC
+	GCM,
+	/**
+	 * Counter with CBC-MAC
+	 */
+	CCM,
+	/**
+	 * XEX-based Tweaked CodeBook with CipherText Stealing
+	 */
+	XTS,
+	/**
+	 * Offset Codebook Mode
+	 */
+	OCB,
+	/**
+	 * Propagating Cipher Block Chaining
+	 */
+	PCBC,
+	;
 }

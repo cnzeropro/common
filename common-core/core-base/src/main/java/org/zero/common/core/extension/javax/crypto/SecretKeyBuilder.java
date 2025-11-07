@@ -25,12 +25,15 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.KeySpec;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
  * @author Zero (cnzeropro@163.com)
- * @see <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/security/standard-names.html#keygenerator-algorithms">KeyGenerator Algorithms</a>
- * @see <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/security/standard-names.html#secretkeyfactory-algorithms">SecretKeyFactory Algorithms</a>
+ * @see <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html#KeyGenerator">KeyGenerator Algorithms</a>
+ * @see <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html#SecretKeyFactory">SecretKeyFactory Algorithms</a>
  * @since 2025/10/17
  */
 @Setter
@@ -93,7 +96,7 @@ public class SecretKeyBuilder implements Builder<SecretKey, SecretKeyBuilder> {
 	/**
 	 * 密钥参数规格
 	 */
-	protected AlgorithmParameterSpec[] algorithmParameterSpecs = {};
+	protected Collection<AlgorithmParameterSpec> algorithmParameterSpecs = new ArrayList<>();
 	/**
 	 * 字符集
 	 * <p>
@@ -101,27 +104,28 @@ public class SecretKeyBuilder implements Builder<SecretKey, SecretKeyBuilder> {
 	 */
 	protected Charset charset = StandardCharsets.UTF_8;
 
-	@SneakyThrows
 	protected SecretKeyBuilder(String algorithm) {
 		this.algorithm = algorithm;
 	}
 
 	public SecretKeyBuilder providerName(String providerName) {
-		return this.provider(Security.getProvider(providerName));
+		Provider provider = Security.getProvider(providerName);
+		return this.provider(provider);
 	}
 
-	@SneakyThrows
 	public SecretKeyBuilder provider(Provider provider) {
 		this.secretKeyFactoryProvider(provider);
 		return this.keyGeneratorProvider(provider);
 	}
 
 	public SecretKeyBuilder secretKeyFactoryProviderName(String secretKeyFactoryProviderName) {
-		return this.secretKeyFactoryProvider(Security.getProvider(secretKeyFactoryProviderName));
+		Provider provider = Security.getProvider(secretKeyFactoryProviderName);
+		return this.secretKeyFactoryProvider(provider);
 	}
 
 	public SecretKeyBuilder keyGeneratorProviderName(String keyGeneratorProviderName) {
-		return this.keyGeneratorProvider(Security.getProvider(keyGeneratorProviderName));
+		Provider provider = Security.getProvider(keyGeneratorProviderName);
+		return this.keyGeneratorProvider(provider);
 	}
 
 	public SecretKeyBuilder password(CharSequence password) {
@@ -143,7 +147,8 @@ public class SecretKeyBuilder implements Builder<SecretKey, SecretKeyBuilder> {
 	}
 
 	public SecretKeyBuilder seedBytes(int seedBytes) {
-		return this.seed(SecureRandom.getSeed(seedBytes));
+		byte[] seed = SecureRandom.getSeed(seedBytes);
+		return this.seed(seed);
 	}
 
 	public SecretKeyBuilder seed(byte[] seed) {
@@ -155,7 +160,11 @@ public class SecretKeyBuilder implements Builder<SecretKey, SecretKeyBuilder> {
 	}
 
 	public SecretKeyBuilder algorithmParameterSpecs(AlgorithmParameterSpec... algorithmParameterSpecs) {
-		this.algorithmParameterSpecs = algorithmParameterSpecs;
+		return this.algorithmParameterSpecs(Arrays.asList(algorithmParameterSpecs));
+	}
+
+	public SecretKeyBuilder algorithmParameterSpecs(Collection<AlgorithmParameterSpec> algorithmParameterSpecs) {
+		this.algorithmParameterSpecs.addAll(algorithmParameterSpecs);
 		return this;
 	}
 

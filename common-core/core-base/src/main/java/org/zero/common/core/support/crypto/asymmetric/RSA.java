@@ -123,7 +123,7 @@ public class RSA extends AsymmetricCrypto {
 	}
 
 	@SneakyThrows
-	public PublicKey generatePublicKey(String algorithm, Provider provider, BigInteger modulus, BigInteger publicExponent) {
+	protected PublicKey generatePublicKey(String algorithm, Provider provider, BigInteger modulus, BigInteger publicExponent) {
 		String afterWithAlgorithm = KeyUtil.getAlgorithmAfterWith(algorithm);
 		KeyFactory keyFactory = Objects.isNull(provider) ? KeyFactory.getInstance(afterWithAlgorithm) : KeyFactory.getInstance(afterWithAlgorithm, provider);
 		KeySpec keySpec = new RSAPublicKeySpec(modulus, publicExponent);
@@ -131,7 +131,7 @@ public class RSA extends AsymmetricCrypto {
 	}
 
 	@SneakyThrows
-	public PrivateKey generatePrivateKey(String algorithm, Provider provider, BigInteger modulus, BigInteger privateExponent) {
+	protected PrivateKey generatePrivateKey(String algorithm, Provider provider, BigInteger modulus, BigInteger privateExponent) {
 		String afterWithAlgorithm = KeyUtil.getAlgorithmAfterWith(algorithm);
 		KeyFactory keyFactory = Objects.isNull(provider) ? KeyFactory.getInstance(afterWithAlgorithm) : KeyFactory.getInstance(afterWithAlgorithm, provider);
 		KeySpec keySpec = new RSAPrivateKeySpec(modulus, privateExponent);

@@ -5,8 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-
-import java.util.Properties;
+import org.zero.common.core.extension.java.util.MapHelper;
 
 /**
  * @author Zero (cnzeropro@163.com)
@@ -19,5 +18,5 @@ import java.util.Properties;
 @AllArgsConstructor
 public class KeyContext {
     private String algorithm;
-    private Properties properties;
+    private MapHelper config;
 }

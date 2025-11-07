@@ -78,7 +78,7 @@ import java.util.TimeZone;
 @RestController
 @RequestMapping("/arg")
 class MethodArgumentTypeController {
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.RequestPartMethodArgumentResolver ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.RequestPartMethodArgumentResolver ****************************** */
 
     /**
      * 参见 {@link MultipartFile} 类
@@ -122,7 +122,7 @@ class MethodArgumentTypeController {
         return this.result(object);
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.HttpEntityMethodProcessor ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.HttpEntityMethodProcessor ****************************** */
 
     /**
      * 参见 {@link HttpEntity} 类
@@ -140,7 +140,7 @@ class MethodArgumentTypeController {
         return this.result(requestEntity);
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.RequestResponseBodyMethodProcessor ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor ****************************** */
 
     /**
      * 参见 {@link Object} 及其派生类
@@ -152,7 +152,7 @@ class MethodArgumentTypeController {
         return this.result(object);
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.RequestResponseBodyMethodProcessor ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor ****************************** */
 
     /**
      * 参见 {@link Cookie} 类
@@ -170,7 +170,7 @@ class MethodArgumentTypeController {
         return this.result(object);
     }
 
-    /* ****************************** org.springframework.web.targetMethod.annotation.ExpressionValueMethodArgumentResolver ****************************** */
+    /* ****************************** org.springframework.web.method.annotation.ExpressionValueMethodArgumentResolver ****************************** */
 
     /**
      * 参见 {@link Object} 及其派生类
@@ -180,7 +180,7 @@ class MethodArgumentTypeController {
         return this.result(object);
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.MatrixVariableMethodArgumentResolver ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.MatrixVariableMethodArgumentResolver ****************************** */
 
     /**
      * 参见 {@link Object} 及其派生类
@@ -207,7 +207,7 @@ class MethodArgumentTypeController {
         return this.result(object);
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.MatrixVariableMapMethodArgumentResolver ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.MatrixVariableMapMethodArgumentResolver ****************************** */
 
     /**
      * 参见 {@link Map} 及其派生类
@@ -220,7 +220,7 @@ class MethodArgumentTypeController {
         return this.result(map);
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.PathVariableMethodArgumentResolver ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.PathVariableMethodArgumentResolver ****************************** */
 
     /**
      * 参见 {@link Object} 及其派生类
@@ -232,7 +232,7 @@ class MethodArgumentTypeController {
         return this.result(object);
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.PathVariableMapMethodArgumentResolver ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.PathVariableMapMethodArgumentResolver ****************************** */
 
     /**
      * 参见 {@link Map} 及其派生类
@@ -242,7 +242,7 @@ class MethodArgumentTypeController {
         return this.result(map);
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.RequestAttributeMethodArgumentResolver ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.RequestAttributeMethodArgumentResolver ****************************** */
 
     /**
      * 参见 {@link Object} 及其派生类
@@ -252,7 +252,7 @@ class MethodArgumentTypeController {
         return this.result(object);
     }
 
-    /* ****************************** org.springframework.web.targetMethod.annotation.RequestHeaderMethodArgumentResolver ****************************** */
+    /* ****************************** org.springframework.web.method.annotation.RequestHeaderMethodArgumentResolver ****************************** */
 
     /**
      * 参见 {@link Object} 及其派生类
@@ -264,7 +264,7 @@ class MethodArgumentTypeController {
         return this.result(object);
     }
 
-    /* ****************************** org.springframework.web.targetMethod.annotation.RequestHeaderMapMethodArgumentResolver ****************************** */
+    /* ****************************** org.springframework.web.method.annotation.RequestHeaderMapMethodArgumentResolver ****************************** */
 
     /**
      * 参见 {@link Map} 及其派生类
@@ -274,7 +274,7 @@ class MethodArgumentTypeController {
         return this.result(map);
     }
 
-    /* ****************************** org.springframework.web.targetMethod.annotation.RequestParamMethodArgumentResolver ****************************** */
+    /* ****************************** org.springframework.web.method.annotation.RequestParamMethodArgumentResolver ****************************** */
 
     /**
      * 参见 {@link Object} 及其派生类
@@ -287,7 +287,7 @@ class MethodArgumentTypeController {
         return this.result(object);
     }
 
-    /* ****************************** org.springframework.web.targetMethod.annotation.RequestParamMapMethodArgumentResolver ****************************** */
+    /* ****************************** org.springframework.web.method.annotation.RequestParamMapMethodArgumentResolver ****************************** */
 
     /**
      * 参见 {@link Map} 及其派生类
@@ -297,7 +297,7 @@ class MethodArgumentTypeController {
         return this.result(map);
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.SessionAttributeMethodArgumentResolver ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.SessionAttributeMethodArgumentResolver ****************************** */
 
     /**
      * 参见 {@link Object} 及其派生类
@@ -307,11 +307,11 @@ class MethodArgumentTypeController {
         return this.result(object);
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.ServletWebArgumentResolverAdapter ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.ServletWebArgumentResolverAdapter ****************************** */
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.ContinuationHandlerMethodArgumentResolver ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.ContinuationHandlerMethodArgumentResolver ****************************** */
 
-    /* ****************************** org.springframework.web.targetMethod.annotation.ErrorsMethodArgumentResolver ****************************** */
+    /* ****************************** org.springframework.web.method.annotation.ErrorsMethodArgumentResolver ****************************** */
 
     /**
      * 参见 {@link Errors} 及其派生类
@@ -321,7 +321,7 @@ class MethodArgumentTypeController {
         return this.result(errors);
     }
 
-    /* ****************************** org.springframework.web.targetMethod.annotation.MapMethodProcessor ****************************** */
+    /* ****************************** org.springframework.web.method.annotation.MapMethodProcessor ****************************** */
 
     /**
      * 参见 {@link Map} 及其派生类
@@ -333,7 +333,7 @@ class MethodArgumentTypeController {
         return this.result(map);
     }
 
-    /* ****************************** org.springframework.web.targetMethod.annotation.ModelAttributeMethodProcessor ****************************** */
+    /* ****************************** org.springframework.web.method.annotation.ModelAttributeMethodProcessor ****************************** */
 
     /**
      * 参见 {@link Object} 及其派生类
@@ -343,7 +343,7 @@ class MethodArgumentTypeController {
         return this.result(object);
     }
 
-    /* ****************************** org.springframework.web.targetMethod.annotation.ModelMethodProcessor ****************************** */
+    /* ****************************** org.springframework.web.method.annotation.ModelMethodProcessor ****************************** */
 
     /**
      * 参见 {@link Model} 及其派生类
@@ -375,7 +375,7 @@ class MethodArgumentTypeController {
         return this.result(pageable);
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.PrincipalMethodArgumentResolver ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.PrincipalMethodArgumentResolver ****************************** */
 
     /**
      * 参见 {@link Principal} 及其派生类
@@ -403,7 +403,7 @@ class MethodArgumentTypeController {
         return this.result(predicate);
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.RedirectAttributesMethodArgumentResolver ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.RedirectAttributesMethodArgumentResolver ****************************** */
 
     /**
      * 参见 {@link RedirectAttributes} 及其派生类
@@ -413,7 +413,7 @@ class MethodArgumentTypeController {
         return this.result(redirectAttributes);
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.ServletRequestMethodArgumentResolver ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.ServletRequestMethodArgumentResolver ****************************** */
 
     /**
      * 参见 {@link WebRequest} 及其派生类
@@ -503,7 +503,7 @@ class MethodArgumentTypeController {
         return this.result(zoneId);
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.ServletResponseMethodArgumentResolver ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.ServletResponseMethodArgumentResolver ****************************** */
 
     /**
      * 参见 {@link ServletResponse} 及其派生类
@@ -529,7 +529,7 @@ class MethodArgumentTypeController {
         return this.result(writer);
     }
 
-    /* ****************************** org.springframework.web.targetMethod.annotation.SessionStatusMethodArgumentResolver ****************************** */
+    /* ****************************** org.springframework.web.method.annotation.SessionStatusMethodArgumentResolver ****************************** */
 
     /**
      * 参见 {@link SessionStatus} 类
@@ -549,7 +549,7 @@ class MethodArgumentTypeController {
         return this.result(sort);
     }
 
-    /* ****************************** org.springframework.web.servlet.mvc.targetMethod.annotation.UriComponentsBuilderMethodArgumentResolver ****************************** */
+    /* ****************************** org.springframework.web.servlet.mvc.method.annotation.UriComponentsBuilderMethodArgumentResolver ****************************** */
 
     /**
      * 参见 {@link UriComponentsBuilder} 类

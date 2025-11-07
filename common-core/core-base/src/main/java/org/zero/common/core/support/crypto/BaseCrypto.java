@@ -1,6 +1,7 @@
 package org.zero.common.core.support.crypto;
 
 import lombok.Cleanup;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import org.zero.common.core.util.java.io.IoUtil;
@@ -19,9 +20,12 @@ import java.util.Objects;
 
 /**
  * @author Zero (cnzeropro@163.com)
+ * @see <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html">Java Cryptography Architecture (JCA) Standard Algorithm Name Documentation for JDK 8</a>
+ * @see <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
  * @since 2025/10/16
  */
 public abstract class BaseCrypto implements Crypto {
+	@Getter
 	protected final Cipher cipher;
 	@Setter
 	protected SecureRandom secureRandom = RandomUtil.getStrongRandom();
@@ -51,12 +55,12 @@ public abstract class BaseCrypto implements Crypto {
 		return Objects.isNull(provider) ? Cipher.getInstance(algorithm) : Cipher.getInstance(algorithm, provider);
 	}
 
-	protected abstract void initMode(int mode);
+	protected abstract void initMode(CipherMode mode);
 
 	@SneakyThrows
 	@Override
 	public void encrypt(InputStream inputStream, OutputStream outputStream) {
-		this.initMode(Cipher.ENCRYPT_MODE);
+		this.initMode(CipherMode.ENCRYPT);
 		@Cleanup CipherOutputStream cipherOutputStream = new CipherOutputStream(outputStream, cipher);
 		IoUtil.copy(inputStream, cipherOutputStream);
 	}
@@ -64,18 +68,20 @@ public abstract class BaseCrypto implements Crypto {
 	@SneakyThrows
 	@Override
 	public void decrypt(InputStream inputStream, OutputStream outputStream) {
-		this.initMode(Cipher.DECRYPT_MODE);
+		this.initMode(CipherMode.DECRYPT);
 		@Cleanup CipherInputStream cipherInputStream = new CipherInputStream(inputStream, cipher);
 		IoUtil.copy(cipherInputStream, outputStream);
 	}
 
 	@SneakyThrows
 	public byte[] wrap(Key key) {
+		this.initMode(CipherMode.WRAP);
 		return cipher.wrap(key);
 	}
 
 	@SneakyThrows
-	public Key unwrap(byte[] wrappedKey, String wrappedKeyAlgorithm, int wrappedKeyType) {
-		return cipher.unwrap(wrappedKey, wrappedKeyAlgorithm, wrappedKeyType);
+	public Key unwrap(byte[] wrappedKey, String wrappedKeyAlgorithm, KeyType wrappedKeyType) {
+		this.initMode(CipherMode.UNWRAP);
+		return cipher.unwrap(wrappedKey, wrappedKeyAlgorithm, wrappedKeyType.getType());
 	}
 }
