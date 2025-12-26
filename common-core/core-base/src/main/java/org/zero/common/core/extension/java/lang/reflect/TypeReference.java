@@ -68,10 +68,10 @@ public abstract class TypeReference<T> implements Type {
      * 通过此方法，传入 B.class 即可得到 B 的 {@link ParameterizedType}，从而获取到String
      */
     public static ParameterizedType getParameterizedType(Type type) {
-        ParameterizedType result = null;
         if (type instanceof ParameterizedType) {
-            result = (ParameterizedType) type;
-        } else if (type instanceof Class) {
+			return  (ParameterizedType) type;
+		}
+		if (type instanceof Class) {
             final Class<?> clazz = (Class<?>) type;
             Type genericSuperclass = clazz.getGenericSuperclass();
             // 如果类没有父类，而是实现一些定义好的泛型接口，则取接口的 Type
@@ -82,8 +82,8 @@ public abstract class TypeReference<T> implements Type {
                     genericSuperclass = genericInterfaces[0];
                 }
             }
-            result = getParameterizedType(genericSuperclass);
+            return getParameterizedType(genericSuperclass);
         }
-        return result;
+        return null;
     }
 }

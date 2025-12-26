@@ -10,17 +10,22 @@ import java.lang.ref.ReferenceQueue;
  * @since 2025/5/3
  */
 public enum ReferenceType {
-    /**
-     * 软引用，在 GC 报告内存不足时会被 GC 回收
-     */
-    SOFT,
-    /**
-     * 弱引用，在 GC 时发现弱引用会回收其对象
-     */
-    WEAK,
-    /**
-     * 虚引用，在 GC 时发现虚引用对象，会将 {@link PhantomReference} 插入 {@link ReferenceQueue}。 <br>
-     * 此时对象未被真正回收，要等到 {@link ReferenceQueue} 被真正处理后才会被回收。
-     */
-    PHANTOM
+	/**
+	 * 强引用，对象不会被 GC 回收
+	 */
+	STRONG,
+	/**
+	 * 软引用，在 GC 报告内存不足时会被 GC 回收
+	 */
+	SOFT,
+	/**
+	 * 弱引用，在 GC 时发现弱引用会回收其对象
+	 */
+	WEAK,
+	/**
+	 * 虚引用，在 GC 时发现虚引用对象，会将 {@link PhantomReference} 插入 {@link ReferenceQueue}。
+	 * <p>
+	 * 此时对象未被真正回收，要等到 {@link ReferenceQueue} 被真正处理后才会被回收。
+	 */
+	PHANTOM
 }

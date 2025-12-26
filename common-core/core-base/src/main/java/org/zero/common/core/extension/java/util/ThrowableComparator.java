@@ -10,19 +10,19 @@ import java.util.Comparator;
  */
 @FunctionalInterface
 public interface ThrowableComparator<T> {
-    int compare(T o1, T o2) throws Throwable;
+	int compare(T o1, T o2) throws Throwable;
 
-    static <T> ThrowableComparator<T> of(Comparator<T> comparator) {
-        return comparator::compare;
-    }
+	static <T> ThrowableComparator<T> of(Comparator<T> comparator) {
+		return comparator::compare;
+	}
 
-    default Comparator<T> to() {
-        return (o1, o2) -> {
-            try {
-                return this.compare(o1, o2);
-            } catch (Throwable throwable) {
-                throw ThrowableUtil.throwUnchecked(throwable);
-            }
-        };
-    }
+	default Comparator<T> to() {
+		return (o1, o2) -> {
+			try {
+				return this.compare(o1, o2);
+			} catch (Throwable throwable) {
+				throw ThrowableUtil.throwUnchecked(throwable);
+			}
+		};
+	}
 }

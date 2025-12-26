@@ -27,7 +27,7 @@ public class LoginUserWebSocketSessionManager extends WebSocketSessionManager {
     @Override
     public void add(WebSocketSession session) {
         Serializable userId = this.getUserId(session);
-        userSessionCache.mapAndPut(userId, (id, sessions) -> {
+        userSessionCache.compute(userId, (id, sessions) -> {
             if (sessions == null) {
                 sessions = new ArrayList<>();
             }
@@ -47,7 +47,7 @@ public class LoginUserWebSocketSessionManager extends WebSocketSessionManager {
     @Override
     public void delete(WebSocketSession session) {
         Serializable userId = this.getUserId(session);
-        userSessionCache.mapAndPut(userId, (id, sessions) -> {
+        userSessionCache.compute(userId, (id, sessions) -> {
             sessions.remove(session);
             return sessions;
         });

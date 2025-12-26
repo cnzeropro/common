@@ -14,18 +14,20 @@ import java.util.UUID;
  * @since 2025/5/26
  */
 public class CustomBeanNameGenerator implements BeanNameGenerator {
-    @Override
-    public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
-        String beanName = AnnotationBeanNameGenerator.INSTANCE.generateBeanName(definition, registry);
-        if (registry.isBeanNameInUse(beanName)) {
-            beanName = FullyQualifiedAnnotationBeanNameGenerator.INSTANCE.generateBeanName(definition, registry);
-            if (registry.isBeanNameInUse(beanName)) {
-                beanName = DefaultBeanNameGenerator.INSTANCE.generateBeanName(definition, registry);
-                if (registry.isBeanNameInUse(beanName)) {
-                    return String.format("%s-%s", beanName, UUID.randomUUID());
-                }
-            }
-        }
-        return beanName;
-    }
+	@Override
+	public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
+		String beanName = AnnotationBeanNameGenerator.INSTANCE.generateBeanName(definition, registry);
+		if (!registry.isBeanNameInUse(beanName)) {
+			return beanName;
+		}
+		beanName = FullyQualifiedAnnotationBeanNameGenerator.INSTANCE.generateBeanName(definition, registry);
+		if (!registry.isBeanNameInUse(beanName)) {
+			return beanName;
+		}
+		beanName = DefaultBeanNameGenerator.INSTANCE.generateBeanName(definition, registry);
+		if (!registry.isBeanNameInUse(beanName)) {
+			return beanName;
+		}
+		return String.format("%s-%s", beanName, UUID.randomUUID());
+	}
 }

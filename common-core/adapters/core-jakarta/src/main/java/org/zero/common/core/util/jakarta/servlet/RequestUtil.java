@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -54,8 +53,8 @@ public class RequestUtil {
 			.orElse(UNKNOWN);
 	}
 
-	public List<String> getIps(HttpServletRequest request) {
-		List<String> ips = getIpMap(request).values()
+	public Collection<String> getIps(HttpServletRequest request) {
+		Collection<String> ips = getIpMap(request).values()
 			.stream()
 			.flatMap(Collection::stream)
 			.filter(ip -> CharSequenceUtil.nonBlank(ip) && !UNKNOWN.equalsIgnoreCase(ip))
@@ -65,11 +64,11 @@ public class RequestUtil {
 		return ips;
 	}
 
-	public Map<String, List<String>> getIpMap(HttpServletRequest request) {
-		Map<String, List<String>> result = new LinkedHashMap<>();
+	public Map<String, Collection<String>> getIpMap(HttpServletRequest request) {
+		Map<String, Collection<String>> result = new LinkedHashMap<>();
 		for (String header : IP_HEADERS) {
 			String ipsStr = request.getHeader(header);
-			List<String> ips = StringUtil.split(ipsStr, StringPool.COMMA);
+			Collection<String> ips = StringUtil.split(ipsStr, StringPool.COMMA);
 			result.put(header, ips);
 		}
 		return result;

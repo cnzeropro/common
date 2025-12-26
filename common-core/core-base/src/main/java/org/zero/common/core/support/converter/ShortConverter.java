@@ -1,5 +1,7 @@
 package org.zero.common.core.support.converter;
 
+import org.zero.common.data.constant.ConstantPool;
+
 import java.util.Objects;
 
 /**
@@ -11,6 +13,6 @@ public class ShortConverter implements Converter {
 
     public short convert(Object source) {
         Short s = ToShort.INSTANCE.convert(source);
-        return Objects.nonNull(s) ? s : (short) 0;
+        return Objects.nonNull(s) ? s : ConstantPool.SHORT_ZERO;
     }
 }

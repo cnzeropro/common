@@ -124,8 +124,7 @@ public class SymmetricCrypto extends BaseCrypto {
 	}
 
 	public void setIv(byte[] iv) {
-		AlgorithmParameterSpec algorithmParameterSpec = Objects.isNull(iv) ? null : new IvParameterSpec(iv);
-		this.setAlgorithmParameterSpec(algorithmParameterSpec);
+		this.setAlgorithmParameterSpec(Objects.isNull(iv) ? null : new IvParameterSpec(iv));
 	}
 
 	@SneakyThrows

@@ -5,5 +5,21 @@ package org.zero.common.core.extension.java.util;
  * @since 2025/7/4
  */
 public enum PurgeReason {
-    EVICTION, EXPIRY, RECLAMATION, EXPLICIT;
+	/**
+	 * 驱逐
+	 */
+	EVICTION,
+	/**
+	 * 过期
+	 */
+	EXPIRY,
+	/**
+	 * 回收
+	 */
+	RECLAMATION,
+	/**
+	 * 删除
+	 */
+	EXPLICIT,
+	;
 }

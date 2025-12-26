@@ -23,36 +23,4 @@ public class DefaultCrypto implements Crypto {
 		this.context = context;
 		this.crypto = crypto;
 	}
-
-	public String encrypt(String string) {
-		byte[] bytes = this.context.getSourceStringMode().toBytes(string);
-		byte[] encryptedBytes = this.encrypt(bytes);
-		return this.context.getTargetStringMode().toString(encryptedBytes);
-	}
-
-	public String encryptToString(byte[] bytes) {
-		byte[] encryptedBytes = this.encrypt(bytes);
-		return this.context.getTargetStringMode().toString(encryptedBytes);
-	}
-
-	public byte[] encryptToBytes(String string) {
-		byte[] bytes = this.context.getSourceStringMode().toBytes(string);
-		return this.encrypt(bytes);
-	}
-
-	public String decrypt(String string) {
-		byte[] bytes = this.context.getSourceStringMode().toBytes(string);
-		byte[] encryptedBytes = this.decrypt(bytes);
-		return this.context.getTargetStringMode().toString(encryptedBytes);
-	}
-
-	public String decryptToString(byte[] bytes) {
-		byte[] decrypted = this.decrypt(bytes);
-		return this.context.getSourceStringMode().toString(decrypted);
-	}
-
-	public byte[] decryptToBytes(String string) {
-		byte[] bytes = this.context.getSourceStringMode().toBytes(string);
-		return this.decrypt(bytes);
-	}
 }

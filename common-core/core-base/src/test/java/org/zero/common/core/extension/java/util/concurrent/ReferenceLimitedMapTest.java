@@ -1,6 +1,10 @@
-package org.zero.common.core.extension.java.util;
+package org.zero.common.core.extension.java.util.concurrent;
 
 import org.junit.jupiter.api.Test;
+import org.zero.common.core.extension.java.util.LRUMap;
+import org.zero.common.core.extension.java.util.PurgeReason;
+import org.zero.common.core.extension.java.util.ReferenceLimitedMap;
+import org.zero.common.core.util.java.lang.ref.ReferenceType;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -87,7 +91,7 @@ class ReferenceLimitedMapTest {
         System.out.println(map.getClass() + " time-consuming: " + Duration.between(start, end));
 
         start = Instant.now();
-        map = new LRUMap<>(10000);
+        map =  LRUMap.create(true);
         for (int i = 0; i < count; i++) {
             map.put("key" + i, "value" + i);
         }

@@ -15,7 +15,7 @@ import java.util.Objects;
  * @author Zero (cnzeropro@163.com)
  * @since 2025/2/17
  */
-public abstract class ToArray<T> implements GenericConverter<T[]> {
+public abstract class ToArray<T> implements ObjectConverter<T[]> {
     protected final Class<T> componentType;
     protected final ConverterComposite converterComposite;
 

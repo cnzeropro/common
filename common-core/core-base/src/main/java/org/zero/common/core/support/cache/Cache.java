@@ -1,13 +1,16 @@
 package org.zero.common.core.support.cache;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -16,50 +19,54 @@ import java.util.function.Supplier;
  */
 public interface Cache<K, V> {
 	/* ****************************************************************** put ****************************************************************** */
+	void set(K key, V value);
 
-	void put(K key, V value);
-
-	default V putIfAbsent(K key, V value) {
-		V v = this.get(key);
-		if (v == null) {
-			this.put(key, value);
-			v = value;
-		}
-		return v;
+	default V put(K key, V value) {
+		V oldValue = this.get(key);
+		this.set(key, value);
+		return oldValue;
 	}
 
-	default V mapAndPutIfAbsent(K key, Function<? super K, ? extends V> mapper) {
-		V v;
-		if ((v = this.get(key)) == null) {
+	default V putIfAbsent(K key, V value) {
+		V oldValue = this.get(key);
+		if (Objects.isNull(oldValue)) {
+			oldValue = this.put(key, value);
+		}
+		return oldValue;
+	}
+
+	default V computeIfAbsent(K key, Function<? super K, ? extends V> mapper) {
+		V oldValue;
+		if ((oldValue = this.get(key)) == null) {
 			V newValue;
 			if ((newValue = mapper.apply(key)) != null) {
 				this.put(key, newValue);
 				return newValue;
 			}
 		}
-		return v;
+		return oldValue;
 	}
 
-	default V mapAndPutIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> reMapper) {
+	default V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> reMapper) {
 		V oldValue;
 		if ((oldValue = this.get(key)) != null) {
 			V newValue = reMapper.apply(key, oldValue);
-			if (newValue != null) {
+			if (Objects.nonNull(newValue)) {
 				this.put(key, newValue);
 				return newValue;
 			}
-			remove(key);
+			this.remove(key);
 			return null;
 		}
 		return null;
 	}
 
-	default V mapAndPut(K key, BiFunction<? super K, ? super V, ? extends V> reMapper) {
+	default V compute(K key, BiFunction<? super K, ? super V, ? extends V> reMapper) {
 		V oldValue = this.get(key);
 		V newValue = reMapper.apply(key, oldValue);
-		if (newValue == null) {
-			if (oldValue != null || exists(key)) {
-				remove(key);
+		if (Objects.isNull(newValue)) {
+			if (Objects.nonNull(oldValue) || this.existKey(key)) {
+				this.remove(key);
 			}
 			return null;
 		}
@@ -69,8 +76,8 @@ public interface Cache<K, V> {
 
 	default V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> reMapper) {
 		V oldValue = this.get(key);
-		V newValue = (oldValue == null) ? value : reMapper.apply(oldValue, value);
-		if (newValue == null) {
+		V newValue = Objects.isNull(oldValue) ? value : reMapper.apply(oldValue, value);
+		if (Objects.isNull(newValue)) {
 			this.remove(key);
 		} else {
 			this.put(key, newValue);
@@ -83,13 +90,15 @@ public interface Cache<K, V> {
 	}
 
 	default void putAll(Cache<? extends K, ? extends V> cache) {
-		this.putAll(cache.getAll());
+		this.putAll(cache.asMap());
 	}
 
+
 	/* ****************************************************************** get ****************************************************************** */
+	Map<K, V> asMap();
 
 	default V get(K key) {
-		return this.getOpt(key).orElse(null);
+		return this.asMap().get(key);
 	}
 
 	default Map<K, V> get(K... keys) {
@@ -104,9 +113,9 @@ public interface Cache<K, V> {
 		return map;
 	}
 
-	Map<K, V> getAll();
-
-	Optional<V> getOpt(K key);
+	default Optional<V> getOpt(K key) {
+		return Optional.ofNullable(this.get(key));
+	}
 
 	default V getOrDefault(K key, V defaultValue) {
 		return this.getOpt(key).orElse(defaultValue);
@@ -120,20 +129,12 @@ public interface Cache<K, V> {
 		return this.getOpt(key).orElseThrow(exceptionSupplier);
 	}
 
-	default <R> R getAndConvert(K key, Function<? super V, ? extends R> mapper) {
-		return this.getOpt(key).map(mapper).orElse(null);
+	default <R> R getAndConvert(K key, Function<? super V, ? extends R> converter) {
+		return this.getOpt(key).map(converter).orElse(null);
 	}
 
-	default boolean exists(K key) {
-		return this.getOpt(key).isPresent();
-	}
-
-	default Number size() {
-		return this.getAll().size();
-	}
-
-	default boolean isEmpty() {
-		return Objects.equals(this.size(), 0);
+	default V getAndFilter(K key, Predicate<? super V> filter) {
+		return this.getOpt(key).filter(filter).orElse(null);
 	}
 
 	/* ****************************************************************** remove ****************************************************************** */
@@ -145,12 +146,89 @@ public interface Cache<K, V> {
 	}
 
 	default void remove(Collection<K> keys) {
-		for (K key : keys) {
-			this.remove(key);
-		}
+		keys.forEach(this::remove);
 	}
 
 	default void removeAll() {
-		this.getAll().forEach((k, v) -> this.remove(k));
+		this.remove(this.keys());
+	}
+
+	/* ****************************************************************** other ****************************************************************** */
+	default V replace(K key, V value) {
+		V oldValue;
+		if (((oldValue = this.get(key)) != null) || this.existKey(key)) {
+			oldValue = this.put(key, value);
+		}
+		return oldValue;
+	}
+
+	default boolean replace(K key, V oldValue, V newValue) {
+		Object value = this.get(key);
+		if (!Objects.equals(value, oldValue) ||
+			(Objects.isNull(value) && !this.existKey(key))) {
+			return false;
+		}
+		this.put(key, newValue);
+		return true;
+	}
+
+	default void replaceAll(BiFunction<? super K, ? super V, ? extends V> reMapper) {
+		for (K key : this.keys()) {
+			V oldValue = this.get(key);
+			V newValue = reMapper.apply(key, oldValue);
+			if (Objects.isNull(newValue)) {
+				this.remove(key);
+			} else {
+				this.set(key, newValue);
+			}
+		}
+	}
+
+	default boolean hasValue(K key) {
+		return this.getOpt(key).isPresent();
+	}
+
+	default Collection<K> keys() {
+		return this.asMap().keySet();
+	}
+
+	default Collection<V> values() {
+		return this.asMap().values();
+	}
+
+	default boolean exist(K key, V value) {
+		return this.hasValue(key) && Objects.equals(this.get(key), value);
+	}
+
+	default boolean existKey(K key) {
+		return this.keys().contains(key);
+	}
+
+	default boolean existValue(V value) {
+		return this.values().contains(value);
+	}
+
+	default Number size() {
+		return this.asMap().size();
+	}
+
+	default boolean isEmpty() {
+		return !this.nonEmpty();
+	}
+
+	default boolean nonEmpty() {
+		Number size = this.size();
+		if (Objects.isNull(size)) {
+			return false;
+		}
+		if (size instanceof Long || size instanceof Integer || size instanceof Short || size instanceof Byte) {
+			return size.longValue() > 0;
+		}
+		BigInteger bigInteger = size instanceof BigInteger ? (BigInteger) size : new BigInteger(size.toString());
+		return bigInteger.compareTo(BigInteger.ZERO) > 0;
+	}
+
+	default void forEach(BiConsumer<? super K, ? super V> action) {
+		this.asMap().forEach(action);
 	}
 }

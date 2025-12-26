@@ -9,20 +9,31 @@ import org.zero.common.core.util.java.lang.ThrowableUtil;
  */
 @RequiredArgsConstructor
 public class LoopRunnable implements Runnable {
-    protected final ThrowableRunnable runnable;
+	protected final ThrowableRunnable runnable;
 
-    @Override
-    public void run() {
-        Thread currentThread = Thread.currentThread();
-        while (!currentThread.isInterrupted()) {
-            try {
-                runnable.run();
-            } catch (InterruptedException e) {
-                currentThread.interrupt();
-                break;
-            } catch (Throwable t) {
-                throw ThrowableUtil.throwUnchecked(t);
-            }
-        }
-    }
+	@Override
+	public void run() {
+		while (this.shouldRunning()) {
+			try {
+				runnable.run();
+			} catch (InterruptedException e) {
+				this.handleInterrupt(e);
+				break;
+			} catch (Throwable t) {
+				this.handleThrowable(t);
+			}
+		}
+	}
+
+	protected boolean shouldRunning() {
+		return !Thread.currentThread().isInterrupted();
+	}
+
+	protected void handleInterrupt(InterruptedException interruptedException) {
+		Thread.currentThread().interrupt();
+	}
+
+	protected void handleThrowable(Throwable throwable) {
+		throw ThrowableUtil.throwUnchecked(throwable);
+	}
 }

@@ -1,5 +1,7 @@
 package org.zero.common.core.support.converter;
 
+import org.zero.common.data.constant.ConstantPool;
+
 import java.util.Objects;
 
 /**
@@ -11,6 +13,6 @@ public class LongConverter implements Converter {
 
     public long convert(Object source) {
         Long l = ToLong.INSTANCE.convert(source);
-        return Objects.nonNull(l) ? l : 0L;
+        return Objects.nonNull(l) ? l : ConstantPool.LONG_ZERO;
     }
 }

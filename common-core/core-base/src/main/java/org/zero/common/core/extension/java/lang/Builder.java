@@ -6,9 +6,4 @@ package org.zero.common.core.extension.java.lang;
  */
 public interface Builder<T, B extends Builder<T, B>> {
 	T build();
-
-	@SuppressWarnings("unchecked")
-	default B self() {
-		return (B) this;
-	}
 }

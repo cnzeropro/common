@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.zero.common.core.extension.java.util.MapHelper;
+import org.zero.common.core.support.api.crypto.converter.InputConverter;
+import org.zero.common.core.support.api.crypto.converter.OutputConverter;
 
 /**
  * @author Zero (cnzeropro@163.com)
@@ -24,7 +26,7 @@ public class CryptoContext {
 	private CryptoMode cryptoMode;
 	private MapHelper config;
 	@EqualsAndHashCode.Exclude
-	private StringMode sourceStringMode;
+	private InputConverter<?> sourceConverter;
 	@EqualsAndHashCode.Exclude
-	private StringMode targetStringMode;
+	private OutputConverter<?> targetConverter;
 }

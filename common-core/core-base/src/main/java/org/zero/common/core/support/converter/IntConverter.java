@@ -1,5 +1,7 @@
 package org.zero.common.core.support.converter;
 
+import org.zero.common.data.constant.ConstantPool;
+
 import java.util.Objects;
 
 /**
@@ -11,6 +13,6 @@ public class IntConverter implements Converter {
 
     public int convert(Object source) {
         Integer i = ToInt.INSTANCE.convert(source);
-        return Objects.nonNull(i) ? i : 0;
+        return Objects.nonNull(i) ? i : ConstantPool.INT_ZERO;
     }
 }

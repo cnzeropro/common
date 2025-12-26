@@ -6,7 +6,7 @@ import java.util.Objects;
  * @author Zero (cnzeropro@163.com)
  * @since 2024/12/30
  */
-public class ToLong implements GenericConverter<Long>{
+public class ToLong implements ObjectConverter<Long> {
     public static final ToLong INSTANCE = new ToLong();
 
     @Override

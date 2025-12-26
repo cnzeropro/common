@@ -1,5 +1,7 @@
 package org.zero.common.core.support.converter;
 
+import org.zero.common.data.constant.ConstantPool;
+
 import java.util.Objects;
 
 /**
@@ -11,6 +13,6 @@ public class ByteConverter implements Converter {
 
     public byte convert(Object source) {
         Byte b = ToByte.INSTANCE.convert(source);
-        return Objects.nonNull(b) ? b : (byte) 0;
+        return Objects.nonNull(b) ? b : ConstantPool.BYTE_ZERO;
     }
 }

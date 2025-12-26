@@ -219,7 +219,7 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
     protected static final Cache<String, Object> cache = MapCache.of(ConcurrentReferenceHashMap::new);
 
     public static WebApplicationType getWebApplicationType() {
-        Object webApplicationType = cache.mapAndPutIfAbsent("webApplicationType", k -> {
+        Object webApplicationType = cache.computeIfAbsent("webApplicationType", k -> {
             WebApplicationType applicationType = getProperty("spring.main.web-application-type", WebApplicationType.class);
             if (Objects.nonNull(applicationType)) {
                 return applicationType;

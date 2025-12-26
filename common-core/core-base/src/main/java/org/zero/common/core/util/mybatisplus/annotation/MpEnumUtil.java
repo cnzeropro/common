@@ -5,9 +5,9 @@ import com.baomidou.mybatisplus.annotation.IEnum;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.zero.common.core.extension.java.util.ReferenceLimitedMap;
-import org.zero.common.core.extension.java.util.ReferenceType;
 import org.zero.common.core.support.cache.Cache;
 import org.zero.common.core.support.cache.MapCache;
+import org.zero.common.core.util.java.lang.ref.ReferenceType;
 import org.zero.common.core.util.java.lang.reflect.FieldUtil;
 import org.zero.common.core.util.java.lang.reflect.MethodUtil;
 import org.zero.common.data.exception.UtilException;
@@ -51,7 +51,7 @@ public class MpEnumUtil {
      * 获取枚举对象的值的对应方法
      */
     public static Method getMethod(Class<? extends Enum<?>> enumClass) {
-        return METHOD_CACHE.mapAndPutIfAbsent(enumClass, clazz -> {
+        return METHOD_CACHE.computeIfAbsent(enumClass, clazz -> {
             // 此处可使用自定义父类和注解，但因为 Mp 已经提供，所以无需重复造轮子
             if (IEnum.class.isAssignableFrom(clazz)) {
                 return MethodUtil.getOptByNameAndParam(clazz, true, "getValue")

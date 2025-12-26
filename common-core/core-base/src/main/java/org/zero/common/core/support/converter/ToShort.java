@@ -6,7 +6,7 @@ import java.util.Objects;
  * @author Zero (cnzeropro@163.com)
  * @since 2024/12/30
  */
-public class ToShort implements GenericConverter<Short>{
+public class ToShort implements ObjectConverter<Short> {
     public static final ToShort INSTANCE = new ToShort();
     @Override
     public Short convert(Object source) {

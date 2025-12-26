@@ -2,23 +2,28 @@ package org.zero.common.core.support.api.crypto.decryption;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.type.SimpleType;
-import lombok.Cleanup;
+import lombok.extern.java.Log;
 import org.zero.common.core.support.api.crypto.CryptoContext;
 import org.zero.common.core.support.api.crypto.CryptoProperties;
 import org.zero.common.core.support.api.crypto.CryptoUtil;
-import org.zero.common.core.support.api.crypto.StringMode;
+import org.zero.common.core.support.api.crypto.converter.InputConverter;
+import org.zero.common.core.support.api.crypto.converter.OutputConverter;
 import org.zero.common.core.support.crypto.Decryptor;
-import org.zero.common.core.util.java.lang.ClassUtil;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.Objects;
+import java.util.logging.Level;
 
 /**
  * Jackson 解密反序列化器
@@ -26,6 +31,7 @@ import java.util.Objects;
  * @author Zero (cnzeropro@163.com)
  * @since 2025/11/5
  */
+@Log
 public class DecryptionDeserializer extends StdDeserializer<Object> implements ContextualDeserializer {
 	protected final CryptoProperties.DecryptionProperties decryptionProperties;
 	protected final BeanProperty property;
@@ -42,31 +48,20 @@ public class DecryptionDeserializer extends StdDeserializer<Object> implements C
 
 	@Override
 	public Object deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
-		// 处理 null 值
-		if (p.getCurrentToken() == JsonToken.VALUE_NULL) {
-			return null;
-		}
-		// 获取字段上的 @Decryption 注解
-		Decryption decryption = getAnnotation();
-		// 没有注解，使用默认反序列化
-		if (Objects.isNull(decryption)) {
+		Decryption decryption = this.getAnnotation();
+		if (Objects.isNull(decryption) || !decryption.enable()) {
 			return ctxt.readValue(p, getValueType(ctxt));
 		}
-		// 解密功能被禁用，使用默认反序列化
-		if (!decryption.enable()) {
-			return ctxt.readValue(p, getValueType(ctxt));
-		}
-		// 读取原始值
-		Object rawValue = readRawValue(p, ctxt);
+		Object rawValue = p.readValueAs(Object.class);
 		if (Objects.isNull(rawValue)) {
 			return null;
 		}
 		// 执行解密逻辑
-		return decryptValue(rawValue, decryption, ctxt);
+		return this.decryptValue(rawValue, decryption, p, ctxt);
 	}
 
 	@Override
-	public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property) {
+	public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property) throws JsonMappingException {
 		return new DecryptionDeserializer(decryptionProperties, property);
 	}
 
@@ -74,53 +69,66 @@ public class DecryptionDeserializer extends StdDeserializer<Object> implements C
 		return Objects.isNull(property) ? null : property.getAnnotation(Decryption.class);
 	}
 
-	protected Object readRawValue(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
-		JsonToken token = jsonParser.getCurrentToken();
-		switch (token) {
-			case VALUE_NULL:
-				return null;
-			case VALUE_STRING:
-				return jsonParser.getText();
-			case VALUE_EMBEDDED_OBJECT:
-				return jsonParser.getEmbeddedObject();
-			case VALUE_NUMBER_INT:
-			case VALUE_NUMBER_FLOAT:
-				return jsonParser.getNumberValue();
-			case VALUE_TRUE:
-			case VALUE_FALSE:
-				return jsonParser.getBooleanValue();
-			default:
-				return jsonParser.getCurrentValue();
-		}
+	protected Object decryptValue(Object source, Decryption decryption, JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
+		CryptoContext context = CryptoUtil.getContext(decryption, decryptionProperties);
+		@SuppressWarnings("unchecked")
+		InputConverter<Object> sourceConverter = (InputConverter<Object>) context.getSourceConverter();
+		byte[] bytes = this.toBytes(source, sourceConverter, jsonParser, deserializationContext);
+		Decryptor decryptor = this.getDecryptor(decryption, decryptionProperties, context);
+		byte[] decryptedBytes = this.decrypt(decryptor, bytes);
+		@SuppressWarnings("unchecked")
+		OutputConverter<Object> targetConverter = (OutputConverter<Object>) context.getTargetConverter();
+		return this.toObject(decryptedBytes, targetConverter, jsonParser, deserializationContext);
 	}
 
-	protected Object decryptValue(Object source, Decryption decryption, DeserializationContext deserializationContext) throws IOException {
-		Class<?> sourceClass = source.getClass();
-		Class<?> targetClass = getValueType(deserializationContext).getRawClass();
 
-		CryptoContext cryptoContext = CryptoUtil.getContext(decryption, decryptionProperties);
-		if (ClassUtil.isAssignable(CharSequence.class, sourceClass)) {
-			StringMode sourceStringMode = cryptoContext.getSourceStringMode();
-			source = sourceStringMode.toBytes(source.toString());
-			sourceClass = byte[].class;
+	protected byte[] toBytes(Object source, InputConverter<Object> sourceConverter, JsonParser jsonParser, DeserializationContext deserializationContext) {
+		if (sourceConverter.supports(source)) {
+			return sourceConverter.toBytes(source);
 		}
-
-		// 处理字节数组输入
-		if (sourceClass == byte[].class) {
-			Decryptor decryptor = getDecryptor(decryption, decryptionProperties, cryptoContext);
-			byte[] decryptedBytes = this.decrypt(decryptor, (byte[]) source);
-			if (targetClass == byte[].class) {
-				return decryptedBytes;
+		for (Type type : sourceConverter.supportTypes()) {
+			try {
+				JavaType javaType = deserializationContext.constructType(type);
+				Object object = this.convertValue(source, javaType, jsonParser);
+				if (sourceConverter.supports(object)) {
+					return sourceConverter.toBytes(object);
+				}
+			} catch (Exception e) {
+				log.log(Level.FINE, String.format("Conversion path failed: [%s] -> [%s] -> byte[]", source.getClass(), type), e);
 			}
-			StringMode targetStringMode = cryptoContext.getTargetStringMode();
-			String decryptedString = targetStringMode.toString(decryptedBytes);
-			if (targetClass == String.class || targetClass == CharSequence.class) {
-				return decryptedString;
-			}
-			return convert(decryptedString, deserializationContext);
 		}
+		throw new DecryptionException("Can't convert " + source + " to byte array");
+	}
 
-		throw new DecryptionException("Unsupported source type for decryption: " + sourceClass);
+	protected Object toObject(byte[] target, OutputConverter<Object> targetConverter, JsonParser jsonParser, DeserializationContext deserializationContext) {
+		JavaType targetType = this.getValueType(deserializationContext);
+		Object object = targetConverter.fromBytes(target);
+		if (Objects.isNull(object)) {
+			return null;
+		}
+		if (targetType.isTypeOrSuperTypeOf(object.getClass())) {
+			return object;
+		}
+		return this.convertValue(object, targetType, jsonParser);
+	}
+
+	protected Object convertValue(Object value, JavaType javaType, JsonParser jsonParser) {
+		ObjectCodec objectCodec = jsonParser.getCodec();
+		if (!(objectCodec instanceof ObjectMapper)) {
+			throw new DecryptionException("Can't convert value: " + value);
+		}
+		ObjectMapper objectMapper = (ObjectMapper) objectCodec;
+		try {
+			return objectMapper.convertValue(value, javaType);
+		} catch (Exception e) {
+			log.log(Level.FINE, "Direct value conversion failed, attempting JSON serialization/deserialization fallback", e);
+			try {
+				String json = objectMapper.writeValueAsString(value);
+				return objectMapper.readValue(json, javaType);
+			} catch (Exception ex) {
+				throw new DecryptionException("Can't convert value " + value + " to " + javaType, ex);
+			}
+		}
 	}
 
 	protected Decryptor getDecryptor(Decryption decryption, CryptoProperties.DecryptionProperties decryptionProperties, CryptoContext cryptoContext) {
@@ -129,13 +137,5 @@ public class DecryptionDeserializer extends StdDeserializer<Object> implements C
 
 	protected byte[] decrypt(Decryptor decryptor, byte[] source) {
 		return decryptor.decrypt(source);
-	}
-
-	protected Object convert(String source, DeserializationContext deserializationContext) throws IOException {
-		// 使用 Jackson 的类型转换
-		@Cleanup JsonParser newParser = deserializationContext.getParser().getCodec().getFactory().createParser(source);
-		// 推进到第一个 token
-		newParser.nextToken();
-		return deserializationContext.readValue(newParser, getValueType(deserializationContext));
 	}
 }

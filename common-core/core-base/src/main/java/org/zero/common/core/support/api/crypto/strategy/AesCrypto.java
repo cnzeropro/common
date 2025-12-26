@@ -3,7 +3,7 @@ package org.zero.common.core.support.api.crypto.strategy;
 import lombok.experimental.Delegate;
 import org.zero.common.core.extension.java.util.MapHelper;
 import org.zero.common.core.support.api.crypto.CryptoContext;
-import org.zero.common.core.support.api.crypto.StringMode;
+import org.zero.common.core.support.api.crypto.converter.StringMode;
 import org.zero.common.core.support.crypto.Crypto;
 import org.zero.common.core.support.crypto.symmetric.AES;
 import org.zero.common.core.util.java.lang.CharSequenceUtil;

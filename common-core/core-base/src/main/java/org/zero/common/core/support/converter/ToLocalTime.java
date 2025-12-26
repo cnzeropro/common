@@ -14,7 +14,7 @@ import java.util.Objects;
  * @author Zero (cnzeropro@163.com)
  * @since 2024/12/30
  */
-public class ToLocalTime implements GenericConverter<LocalTime> {
+public class ToLocalTime implements ObjectConverter<LocalTime> {
     public static final ToLocalTime INSTANCE = new ToLocalTime();
 
     @Override

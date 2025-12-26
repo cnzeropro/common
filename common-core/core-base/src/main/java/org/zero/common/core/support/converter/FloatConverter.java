@@ -1,5 +1,7 @@
 package org.zero.common.core.support.converter;
 
+import org.zero.common.data.constant.ConstantPool;
+
 import java.util.Objects;
 
 /**
@@ -11,6 +13,6 @@ public class FloatConverter implements Converter {
 
     public float convert(Object source) {
         Float f = ToFloat.INSTANCE.convert(source);
-        return Objects.nonNull(f) ? f : 0.0F;
+        return Objects.nonNull(f) ? f : ConstantPool.FLOAT_ZERO;
     }
 }

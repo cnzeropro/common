@@ -3,6 +3,7 @@ package org.zero.common.core.util.java.lang;
 import org.zero.common.data.constant.StringPool;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -212,7 +213,11 @@ public class StringUtil extends CharSequenceUtil implements StringPool {
 		return true;
 	}
 
-	public static List<String> split(String string, String delimiter) {
+	public static Collection<String> split(String string, String delimiter) {
+		return split(string, delimiter, false);
+	}
+
+	public static Collection<String> split(String string, String delimiter, boolean isTrim) {
 		if (Objects.isNull(string)) {
 			return Collections.emptyList();
 		}
@@ -224,7 +229,7 @@ public class StringUtil extends CharSequenceUtil implements StringPool {
 		if (delimiter.isEmpty()) {
 			for (int i = 0; i < string.length(); i++) {
 				String charStr = string.substring(i, i + 1);
-				result.add(charStr);
+				result.add(isTrim ? charStr.trim() : charStr);
 			}
 		} else {
 			int delimiterLength = delimiter.length();
@@ -232,12 +237,12 @@ public class StringUtil extends CharSequenceUtil implements StringPool {
 			int findIndex;
 			while ((findIndex = string.indexOf(delimiter, fromIndex)) != -1) {
 				String subStr = string.substring(fromIndex, findIndex);
-				result.add(subStr);
+				result.add(isTrim ? subStr.trim() : subStr);
 				fromIndex = findIndex + delimiterLength;
 			}
 			if (!string.isEmpty() && fromIndex <= string.length()) {
 				String subStr = string.substring(fromIndex);
-				result.add(subStr);
+				result.add(isTrim ? subStr.trim() : subStr);
 			}
 		}
 		return result;

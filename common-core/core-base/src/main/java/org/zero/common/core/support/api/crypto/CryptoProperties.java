@@ -3,6 +3,9 @@ package org.zero.common.core.support.api.crypto;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.zero.common.core.support.api.crypto.converter.InputConverter;
+import org.zero.common.core.support.api.crypto.converter.OutputConverter;
+import org.zero.common.core.support.api.crypto.converter.StringMode;
 import org.zero.common.core.support.api.crypto.strategy.DefaultCrypto;
 import org.zero.common.core.support.api.crypto.supplier.EmptyKeySupplier;
 import org.zero.common.core.support.api.crypto.supplier.KeySupplier;
@@ -57,7 +60,7 @@ public class CryptoProperties {
 		/**
 		 * 密钥字符串
 		 * <ul>
-		 *     <li>请指定 {@linkplain #keyStringMode 密钥字符串模式} 来表明其如何转成密钥，默认：{@link org.zero.common.core.support.api.crypto.CryptoProperties.EncryptionProperties#keyStringMode}</li>
+		 *     <li>请指定 {@linkplain #keyStringMode 密钥字符串模式} 来表明其如何转成密钥</li>
 		 *     <li>如果为空，则默认使用 {@linkplain KeySupplier 密钥提供者} 获取密钥</li>
 		 *     <li>如果算法是非对称加密算法，此处为公钥</li>
 		 * </ul>
@@ -67,10 +70,10 @@ public class CryptoProperties {
 		/**
 		 * 密钥字符串模式
 		 * <ul>
-		 *     <li>用于将密钥从字符串转成 byte 数组，默认：{@link StringMode.HexLower}</li>
+		 *     <li>用于将密钥从字符串转成字节数组，默认：{@link StringMode.HexLower}</li>
 		 * </ul>
 		 *
-		 * @see StringMode#toBytes(String)
+		 * @see StringMode#toBytes(CharSequence)
 		 */
 		private Class<? extends StringMode> keyStringMode = StringMode.HexLower.class;
 
@@ -80,32 +83,35 @@ public class CryptoProperties {
 		 *     <li>如果算法是非对称加密算法，此处为公钥提供者</li>
 		 * </ul>
 		 */
-		private Class<? extends KeySupplier> keyProvider = EmptyKeySupplier.class;
+		private Class<? extends KeySupplier> keySupplier = EmptyKeySupplier.class;
 
 		/**
-		 * 源字符串模式
+		 * 源转换器
 		 * <ul>
-		 *     <li>如果待加密对象是字符串，则使用该指定模式将其从字符串转成 byte 数组，默认：{@link StringMode.Utf8}</li>
+		 *     <li>将对象源转成字节数组，默认：{@link StringMode.Utf8}</li>
 		 * </ul>
 		 *
-		 * @see StringMode#toBytes(String)
+		 * @see InputConverter#toBytes(Object)
 		 */
-		private Class<? extends StringMode> sourceStringMode = StringMode.Utf8.class;
+		private Class<? extends InputConverter<?>> sourceConverter = StringMode.Utf8.class;
 
 		/**
-		 * 目标字符串模式
+		 * 目标转换器
 		 * <ul>
-		 *     <li>如果加密后的转换对象是字符串，则使用该指定模式将其从 byte 数组转成字符串，默认：{@link StringMode.UrlSafeBase64AndUtf8}</li>
+		 *     <li>将字节数组转成目标对象，默认：{@link StringMode.UrlSafeBase64AndUtf8}</li>
 		 * </ul>
 		 *
-		 * @see StringMode#toString(byte[])
+		 * @see OutputConverter#fromBytes(byte[])
 		 */
-		private Class<? extends StringMode> targetStringMode = StringMode.UrlSafeBase64AndUtf8.class;
+		private Class<? extends OutputConverter<?>> targetConverter = StringMode.UrlSafeBase64AndUtf8.class;
 
 		/**
 		 * 额外配置
-		 * <p>
-		 * 如：AES 算法可能配置 iv 等等
+		 * <ul>
+		 *     <li>AES 算法可能配置 iv</li>
+		 *     <li>RSA 算法可能配置 OAEP 相关参数</li>
+		 *     <li>....</li>
+		 * </ul>
 		 *
 		 * @see org.zero.common.core.support.api.crypto.strategy.AesCrypto
 		 * @see org.zero.common.core.support.api.crypto.strategy.RsaCrypto
@@ -147,10 +153,10 @@ public class CryptoProperties {
 		/**
 		 * 密钥字符串模式
 		 * <ul>
-		 *     <li>用于将密钥从字符串转成 byte 数组，默认：{@link StringMode.HexLower}</li>
+		 *     <li>用于将密钥从字符串转成字节数组，默认：{@link StringMode.HexLower}</li>
 		 * </ul>
 		 *
-		 * @see StringMode#toBytes(String)
+		 * @see StringMode#toBytes(CharSequence)
 		 */
 		private Class<? extends StringMode> keyStringMode = StringMode.HexLower.class;
 
@@ -160,32 +166,35 @@ public class CryptoProperties {
 		 *     <li>如果算法是非对称加密算法，此处为私钥提供者</li>
 		 * </ul>
 		 */
-		private Class<? extends KeySupplier> keyProvider = EmptyKeySupplier.class;
+		private Class<? extends KeySupplier> keySupplier = EmptyKeySupplier.class;
 
 		/**
-		 * 源字符串模式
+		 * 源转换器
 		 * <ul>
-		 *     <li>如果待解密对象是字符串，则使用该指定模式将其从字符串转成 byte 数组，默认：{@link StringMode.UrlSafeBase64AndUtf8}</li>
+		 *     <li>将对象源转成字节数组，默认：{@link StringMode.UrlSafeBase64AndUtf8}</li>
 		 * </ul>
 		 *
-		 * @see StringMode#toBytes(String)
+		 * @see InputConverter#toBytes(Object)
 		 */
-		private Class<? extends StringMode> sourceStringMode = StringMode.UrlSafeBase64AndUtf8.class;
+		private Class<? extends InputConverter<?>> sourceConverter = StringMode.UrlSafeBase64AndUtf8.class;
 
 		/**
-		 * 目标字符串模式
+		 * 目标转换器
 		 * <ul>
-		 *     <li>如果解密后的转换对象是字符串，则使用该指定模式将其从 byte 数组转成字符串，默认：{@link StringMode.Utf8}</li>
+		 *     <li>将字节数组转成目标对象，默认：{@link StringMode.Utf8}</li>
 		 * </ul>
 		 *
-		 * @see StringMode#toString(byte[])
+		 * @see OutputConverter#fromBytes(byte[])
 		 */
-		private Class<? extends StringMode> targetStringMode = StringMode.Utf8.class;
+		private Class<? extends OutputConverter<?>> targetConverter = StringMode.Utf8.class;
 
 		/**
 		 * 额外配置
-		 * <p>
-		 * 如：AES 算法可能配置 iv 等等
+		 * <ul>
+		 *     <li>AES 算法可能配置 iv</li>
+		 *     <li>RSA 算法可能配置 OAEP 相关参数</li>
+		 *     <li>....</li>
+		 * </ul>
 		 *
 		 * @see org.zero.common.core.support.api.crypto.strategy.AesCrypto
 		 * @see org.zero.common.core.support.api.crypto.strategy.RsaCrypto

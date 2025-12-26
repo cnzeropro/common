@@ -158,8 +158,7 @@ public abstract class JwtBaseBuilder<B extends JwtBaseBuilder<B>> implements Bui
 	}
 
 	@SuppressWarnings("unchecked")
-	@Override
-	public B self() {
+	private B self() {
 		return (B) this;
 	}
 }

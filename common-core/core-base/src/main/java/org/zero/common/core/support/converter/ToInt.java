@@ -6,7 +6,7 @@ import java.util.Objects;
  * @author Zero (cnzeropro@163.com)
  * @since 2024/12/30
  */
-public class ToInt implements GenericConverter<Integer> {
+public class ToInt implements ObjectConverter<Integer> {
     public static final ToInt INSTANCE = new ToInt();
 
     @Override

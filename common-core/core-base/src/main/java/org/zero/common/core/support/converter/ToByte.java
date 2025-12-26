@@ -6,7 +6,7 @@ import java.util.Objects;
  * @author Zero (cnzeropro@163.com)
  * @since 2024/12/30
  */
-public class ToByte implements GenericConverter<Byte> {
+public class ToByte implements ObjectConverter<Byte> {
     public static final ToByte INSTANCE = new ToByte();
 
     @Override

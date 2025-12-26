@@ -17,7 +17,7 @@ import java.util.function.Supplier;
  * @author Zero (cnzeropro@163.com)
  * @since 2025/2/24
  */
-public abstract class ToCollection<T> implements GenericConverter<Collection<T>> {
+public abstract class ToCollection<T> implements ObjectConverter<Collection<T>> {
     protected final Supplier<? extends Collection<T>> collectionSupplier;
     protected final Type componentType;
     protected final ConverterComposite converterComposite;

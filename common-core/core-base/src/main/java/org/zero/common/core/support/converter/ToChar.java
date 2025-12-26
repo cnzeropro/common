@@ -6,7 +6,7 @@ import java.util.Objects;
  * @author Zero (cnzeropro@163.com)
  * @since 2024/12/30
  */
-public class ToChar implements GenericConverter<Character> {
+public class ToChar implements ObjectConverter<Character> {
     public static final ToChar INSTANCE = new ToChar();
 
     @Override

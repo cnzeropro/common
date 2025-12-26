@@ -42,7 +42,7 @@ public class CryptoFactory {
 		if (Objects.isNull(cryptoClass)) {
 			throw new UtilException("Crypto class not found for algorithm: " + algorithm);
 		}
-		return CRYPTO_CACHE.mapAndPutIfAbsent(context, c -> {
+		return CRYPTO_CACHE.computeIfAbsent(context, c -> {
 			Crypto crypto = MemberUtil.getInstance(cryptoClass, true, new Object[]{c});
 			if (Objects.isNull(crypto)) {
 				crypto = MemberUtil.getInstance(cryptoClass, true);

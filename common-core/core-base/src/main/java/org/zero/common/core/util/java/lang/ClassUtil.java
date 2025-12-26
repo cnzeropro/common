@@ -472,7 +472,37 @@ public class ClassUtil {
 		}
 		if (type instanceof TypeVariable) {
 			Type[] bounds = ((TypeVariable<?>) type).getBounds();
+			for (Type bound : bounds) {
+				Class<?> rawBound = getRawClass(bound);
+				if (rawBound != Object.class && !rawBound.isInterface()) {
+					return rawBound;
+				}
+			}
 			return bounds.length > 0 ? getRawClass(bounds[0]) : Object.class;
+		}
+		if (type instanceof WildcardType) {
+			WildcardType wildcardType = (WildcardType) type;
+			Type[] upperBounds = wildcardType.getUpperBounds();
+			for (Type upperBound : upperBounds) {
+				Class<?> rawUpperBound = getRawClass(upperBound);
+				if (rawUpperBound != Object.class && !rawUpperBound.isInterface()) {
+					return rawUpperBound;
+				}
+			}
+			if (upperBounds.length > 0) {
+				return getRawClass(upperBounds[0]);
+			}
+			Type[] lowerBounds = wildcardType.getLowerBounds();
+			for (Type lowerBound : lowerBounds) {
+				Class<?> rawLowerBound = getRawClass(lowerBound);
+				if (rawLowerBound != Object.class && !rawLowerBound.isInterface()) {
+					return rawLowerBound;
+				}
+			}
+			return lowerBounds.length > 0 ? getRawClass(lowerBounds[0]) : Object.class;
+		}
+		if (type instanceof TypeReference) {
+			return getRawClass(((TypeReference<?>) type).getType());
 		}
 		return Object.class;
 	}

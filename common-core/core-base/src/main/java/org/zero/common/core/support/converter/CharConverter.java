@@ -1,5 +1,7 @@
 package org.zero.common.core.support.converter;
 
+import org.zero.common.data.constant.ConstantPool;
+
 import java.util.Objects;
 
 /**
@@ -11,6 +13,6 @@ public class CharConverter implements Converter {
 
     public char convert(Object source) {
         Character c = ToChar.INSTANCE.convert(source);
-        return Objects.nonNull(c) ? c : '\u0000';
+        return Objects.nonNull(c) ? c : ConstantPool.CHAR_ZERO;
     }
 }

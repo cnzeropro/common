@@ -25,13 +25,13 @@ class ConverterCompositeTest {
                 }.getType(),
                 new ToArray<Date>(Date.class, converterComposite) {
                 });
-        converterComposite.converterMap.forEach((key, value) -> System.out.println(key + ":" + value));
+        converterComposite.converters.forEach((key, value) -> System.out.println(key + ":" + value));
     }
 
     @Test
     void getConverters() {
-        Collection<GenericConverter<?>> converters = converterComposite.getConverters(Number.class, false);
-        for (GenericConverter<?> converter : converters) {
+        Collection<ObjectConverter<?>> converters = converterComposite.getConverters(Number.class, false);
+        for (ObjectConverter<?> converter : converters) {
             System.out.println(converter);
         }
     }

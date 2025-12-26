@@ -1,4 +1,4 @@
-package org.zero.common.core.support.api.crypto;
+package org.zero.common.core.support.api.crypto.converter;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -12,20 +12,20 @@ import java.nio.charset.StandardCharsets;
  * @author Zero (cnzeropro@163.com)
  * @since 2025/10/31
  */
-public interface StringMode {
+public interface StringMode extends InputConverter<CharSequence>, OutputConverter<CharSequence> {
 	@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 	abstract class HexMode implements StringMode {
-		public final Base16 base16;
+		protected final Base16 base16;
 
 		@Override
-		public String toString(byte[] bytes) {
+		public CharSequence fromBytes(byte[] bytes) {
 			char[] chars = base16.encode(bytes);
 			return String.valueOf(chars);
 		}
 
 		@Override
-		public byte[] toBytes(String string) {
-			return base16.decode(string);
+		public byte[] toBytes(CharSequence charSequence) {
+			return base16.decode(charSequence);
 		}
 	}
 
@@ -51,14 +51,14 @@ public interface StringMode {
 		protected final CharsetMode charsetMode;
 
 		@Override
-		public String toString(byte[] bytes) {
+		public CharSequence fromBytes(byte[] bytes) {
 			byte[] encodedBytes = base64Codec.encode(bytes);
-			return charsetMode.toString(encodedBytes);
+			return charsetMode.fromBytes(encodedBytes);
 		}
 
 		@Override
-		public byte[] toBytes(String string) {
-			byte[] bytes = charsetMode.toBytes(string);
+		public byte[] toBytes(CharSequence charSequence) {
+			byte[] bytes = charsetMode.toBytes(charSequence);
 			return base64Codec.decode(bytes);
 		}
 	}
@@ -73,16 +73,16 @@ public interface StringMode {
 
 	@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 	abstract class CharsetMode implements StringMode {
-		public final Charset charset;
+		protected final Charset charset;
 
 		@Override
-		public String toString(byte[] bytes) {
+		public CharSequence fromBytes(byte[] bytes) {
 			return new String(bytes, charset);
 		}
 
 		@Override
-		public byte[] toBytes(String string) {
-			return string.getBytes(charset);
+		public byte[] toBytes(CharSequence charSequence) {
+			return charSequence.toString().getBytes(charset);
 		}
 	}
 
@@ -94,7 +94,19 @@ public interface StringMode {
 		}
 	}
 
-	String toString(byte[] bytes);
+	@Override
+	CharSequence fromBytes(byte[] bytes);
 
-	byte[] toBytes(String string);
+	@Override
+	byte[] toBytes(CharSequence charSequence);
+
+	@Override
+	default Class<?>[] supportTypes() {
+		return new Class[]{CharSequence.class};
+	}
+
+	@Override
+	default boolean supports(Object object) {
+		return object instanceof CharSequence;
+	}
 }

@@ -10,9 +10,9 @@ import com.baomidou.mybatisplus.core.toolkit.sql.SqlInjectionUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.zero.common.core.extension.java.util.ReferenceLimitedMap;
-import org.zero.common.core.extension.java.util.ReferenceType;
 import org.zero.common.core.support.cache.Cache;
 import org.zero.common.core.support.cache.MapCache;
+import org.zero.common.core.util.java.lang.ref.ReferenceType;
 import org.zero.common.core.util.java.lang.reflect.FieldUtil;
 import org.zero.common.core.util.java.lang.reflect.MethodUtil;
 import org.zero.common.data.exception.UtilException;
@@ -468,7 +468,7 @@ public class QueryWrapperUtil {
             return Collections.emptyMap();
         }
         Class<?> entityClass = entity.getClass();
-        Map<String, Collection<Method>> methodMap = METHOD_CACHE.mapAndPutIfAbsent(entityClass,
+        Map<String, Collection<Method>> methodMap = METHOD_CACHE.computeIfAbsent(entityClass,
                 c -> MethodUtil.listPublic(c)
                         .stream()
                         .filter(method -> MethodUtil.isGetter(method, false))

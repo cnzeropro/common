@@ -347,6 +347,10 @@ public class CharSequenceUtil {
 		return trim(charSequence, TrimMode.END, predicate);
 	}
 
+	public static CharSequence trim(CharSequence charSequence) {
+		return trim(charSequence, TrimMode.ALL);
+	}
+
 	public static CharSequence trim(CharSequence charSequence, TrimMode mode) {
 		return trim(charSequence, mode, Character::isWhitespace);
 	}

@@ -1,6 +1,8 @@
 package org.zero.common.core.support.converter;
 
 import org.zero.common.core.extension.java.lang.reflect.TypeReference;
+import org.zero.common.core.support.cache.Cache;
+import org.zero.common.core.support.cache.MapCache;
 import org.zero.common.core.util.java.lang.ClassUtil;
 import org.zero.common.core.util.java.lang.reflect.ConstructorUtil;
 import org.zero.common.core.util.java.lang.reflect.FieldUtil;
@@ -16,7 +18,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
  */
 public class ConverterComposite {
     private static ConverterComposite instance;
-    protected final Map<Type, Set<GenericConverter<?>>> converterMap = new HashMap<>();
+    protected final Cache<Type, Set<ObjectConverter<?>>> converters = MapCache.of(HashMap::new);
 
     protected ConverterComposite() {
     }
@@ -47,16 +48,16 @@ public class ConverterComposite {
 
     private void init() {
         Collection<Class<?>> classes = ClassUtil.getClasses(ConverterComposite.class.getPackage());
-        List<GenericConverter<?>> converters = classes.stream()
-                .filter(GenericConverter.class::isAssignableFrom)
+        List<ObjectConverter<?>> converters = classes.stream()
+                .filter(ObjectConverter.class::isAssignableFrom)
                 .filter(clazz -> !clazz.isInterface())
                 .filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()))
                 .map(clazz -> {
-                    Optional<GenericConverter<?>> converterOpt = FieldUtil.listStatic(clazz)
+                    Optional<ObjectConverter<?>> converterOpt = FieldUtil.listStatic(clazz)
                             .stream()
                             .filter(field -> ClassUtil.isAssignable(field.getType(), clazz))
                             .findFirst()
-                            .map(field -> FieldUtil.getStaticValue(field, GenericConverter.class));
+                            .map(field -> FieldUtil.getStaticValue(field, ObjectConverter.class));
                     if (converterOpt.isPresent()) {
                         return converterOpt.get();
                     }
@@ -66,19 +67,19 @@ public class ConverterComposite {
                     }
                     return ConstructorUtil.newInstance(clazz);
                 })
-                .filter(GenericConverter.class::isInstance)
-                .map(o -> ClassUtil.<GenericConverter<?>>cast(o, new TypeReference<GenericConverter<?>>() {
+                .filter(ObjectConverter.class::isInstance)
+                .map(o -> ClassUtil.<ObjectConverter<?>>cast(o, new TypeReference<ObjectConverter<?>>() {
                 }))
                 .collect(Collectors.toList());
         this.addConverter(converters);
     }
 
-    public ConverterComposite addConverter(Collection<GenericConverter<?>> converters) {
+    public ConverterComposite addConverter(Collection<ObjectConverter<?>> converters) {
         converters.forEach(this::addConverter);
         return this;
     }
 
-    public ConverterComposite addConverter(GenericConverter<?> converter) {
+    public ConverterComposite addConverter(ObjectConverter<?> converter) {
         MethodUtil.listByName(converter.getClass(), false, "convert")
                 .stream()
                 // 当子类继承带有泛型的父类或接口时，编译器会生成桥接方法来保持类型安全
@@ -93,9 +94,9 @@ public class ConverterComposite {
         return this;
     }
 
-    public ConverterComposite addConverter(Type type, GenericConverter<?> converter) {
-        converterMap.compute(type, (key, value) -> {
-            Set<GenericConverter<?>> set = value;
+    public ConverterComposite addConverter(Type type, ObjectConverter<?> converter) {
+        converters.compute(type, (key, value) -> {
+            Set<ObjectConverter<?>> set = value;
             if (Objects.isNull(set)) {
                 set = new HashSet<>();
             }
@@ -105,16 +106,16 @@ public class ConverterComposite {
         return this;
     }
 
-    public Collection<GenericConverter<?>> getConverters(Type type, boolean exact) {
-        Set<GenericConverter<?>> exactConverters = converterMap.getOrDefault(type, Collections.emptySet());
-        Set<GenericConverter<?>> converters = new HashSet<>(exactConverters);
+    public Collection<ObjectConverter<?>> getConverters(Type type, boolean exact) {
+        Set<ObjectConverter<?>> exactConverters = converters.getOrDefault(type, Collections.emptySet());
+        Set<ObjectConverter<?>> converters = new HashSet<>(exactConverters);
         if (!exact) {
-            Set<Type> types = converterMap.keySet();
+            Set<Type> types = this.converters.asMap().keySet();
             types.stream()
                     // 精确类型转换器已添加，此处排除
                     .filter(t -> !t.equals(type))
                     .filter(t -> ClassUtil.isConvertible(type, t))
-                    .map(c -> converterMap.getOrDefault(c, Collections.emptySet()))
+                    .map(c -> this.converters.getOrDefault(c, Collections.emptySet()))
                     .forEach(converters::addAll);
         }
         return converters.stream().sorted(Comparator.comparingInt(Ordered::order)).collect(Collectors.toList());
@@ -137,8 +138,8 @@ public class ConverterComposite {
     }
 
     public <T> T convert(Type type, Object source, boolean exact, boolean quietly) {
-        Collection<GenericConverter<?>> converters = this.getConverters(type, exact);
-        for (GenericConverter<?> converter : converters) {
+        Collection<ObjectConverter<?>> converters = this.getConverters(type, exact);
+        for (ObjectConverter<?> converter : converters) {
             try {
                 @SuppressWarnings("unchecked")
                 T converted = (T) converter.convert(source);

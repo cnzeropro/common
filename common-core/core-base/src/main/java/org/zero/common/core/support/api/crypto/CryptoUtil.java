@@ -2,6 +2,9 @@ package org.zero.common.core.support.api.crypto;
 
 import lombok.experimental.UtilityClass;
 import org.zero.common.core.extension.java.util.MapHelper;
+import org.zero.common.core.support.api.crypto.converter.InputConverter;
+import org.zero.common.core.support.api.crypto.converter.OutputConverter;
+import org.zero.common.core.support.api.crypto.converter.StringMode;
 import org.zero.common.core.support.api.crypto.decryption.Decryption;
 import org.zero.common.core.support.api.crypto.encryption.Encryption;
 import org.zero.common.core.support.api.crypto.supplier.CryptoConfigSupplier;
@@ -39,22 +42,22 @@ public class CryptoUtil {
 			StringMode keyStringMode = getInstance(encryption.keyStringMode(), encryptionProperties.getKeyStringMode());
 			key = keyStringMode.toBytes(keyString);
 		} else {
-			KeySupplier keySupplier = getInstance(encryption.keyProvider(), encryptionProperties.getKeyProvider());
+			KeySupplier keySupplier = getInstance(encryption.keySupplier(), encryptionProperties.getKeySupplier());
 			KeyContext keyContext = KeyContext.builder()
 				.algorithm(algorithm)
 				.config(config)
 				.build();
 			key = keySupplier.generate(keyContext);
 		}
-		StringMode sourceStringMode = getInstance(encryption.sourceStringMode(), encryptionProperties.getSourceStringMode());
-		StringMode targetStringMode = getInstance(encryption.targetStringMode(), encryptionProperties.getTargetStringMode());
+		InputConverter<?> sourceConverter = getInstance(encryption.sourceConverter(), encryptionProperties.getSourceConverter());
+		OutputConverter<?> targetConverter = getInstance(encryption.targetConverter(), encryptionProperties.getTargetConverter());
 		return CryptoContext.builder()
 			.algorithm(algorithm)
 			.key(key)
 			.cryptoMode(CryptoMode.DECRYPT)
 			.config(config)
-			.sourceStringMode(sourceStringMode)
-			.targetStringMode(targetStringMode)
+			.sourceConverter(sourceConverter)
+			.targetConverter(targetConverter)
 			.build();
 	}
 
@@ -73,22 +76,22 @@ public class CryptoUtil {
 			StringMode keyStringMode = getInstance(decryption.keyStringMode(), decryptionProperties.getKeyStringMode());
 			key = keyStringMode.toBytes(keyString);
 		} else {
-			KeySupplier keySupplier = getInstance(decryption.keyProvider(), decryptionProperties.getKeyProvider());
+			KeySupplier keySupplier = getInstance(decryption.keySupplier(), decryptionProperties.getKeySupplier());
 			KeyContext keyContext = KeyContext.builder()
 				.algorithm(algorithm)
 				.config(config)
 				.build();
 			key = keySupplier.generate(keyContext);
 		}
-		StringMode sourceStringMode = getInstance(decryption.sourceStringMode(), decryptionProperties.getSourceStringMode());
-		StringMode targetStringMode = getInstance(decryption.targetStringMode(), decryptionProperties.getTargetStringMode());
+		InputConverter<?> sourceConverter = getInstance(decryption.sourceConverter(), decryptionProperties.getSourceConverter());
+		OutputConverter<?> targetConverter = getInstance(decryption.targetConverter(), decryptionProperties.getTargetConverter());
 		return CryptoContext.builder()
 			.algorithm(algorithm)
 			.key(key)
 			.cryptoMode(CryptoMode.DECRYPT)
 			.config(config)
-			.sourceStringMode(sourceStringMode)
-			.targetStringMode(targetStringMode)
+			.sourceConverter(sourceConverter)
+			.targetConverter(targetConverter)
 			.build();
 	}
 

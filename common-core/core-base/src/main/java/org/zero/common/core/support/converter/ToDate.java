@@ -10,7 +10,7 @@ import java.util.Objects;
  * @author Zero (cnzeropro@163.com)
  * @since 2024/12/30
  */
-public class ToDate implements GenericConverter<Date> {
+public class ToDate implements ObjectConverter<Date> {
     public static final ToDate INSTANCE = new ToDate();
 
     @Override

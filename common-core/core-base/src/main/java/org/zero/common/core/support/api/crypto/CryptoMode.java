@@ -1,5 +1,6 @@
 package org.zero.common.core.support.api.crypto;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import javax.crypto.Cipher;
@@ -8,6 +9,7 @@ import javax.crypto.Cipher;
  * @author Zero (cnzeropro@163.com)
  * @since 2025/10/31
  */
+@Getter
 @RequiredArgsConstructor
 public enum CryptoMode {
 	/**

@@ -4,26 +4,26 @@ import java.util.function.Function;
 
 /**
  * @author Zero (cnzeropro@163.com)
- * @since 2024/12/30
+ * @since 2025/11/11
  */
 @FunctionalInterface
-public interface GenericConverter<T> extends Function<Object, T>, Converter {
-    T convert(Object source);
+public interface GenericConverter<T, R> extends Function<T, R>, Converter {
+	R convert(T source);
 
-    @Override
-    default T apply(Object o) {
-        return this.convert(o);
-    }
+	@Override
+	default R apply(T t) {
+		return this.convert(t);
+	}
 
-    default <U> GenericConverter<U> andThen(GenericConverter<? extends U> after) {
-        return source -> after.convert(convert(source));
-    }
+	default <V> GenericConverter<V, R> compose(GenericConverter<? super V, ? extends T> before) {
+		return source -> this.apply(before.apply(source));
+	}
 
-    default <U> GenericConverter<T> compose(GenericConverter<? super U> before) {
-        return source -> convert(before.convert(source));
-    }
+	default <V> GenericConverter<T, V> andThen(GenericConverter<? super R, ? extends V> after) {
+		return source -> after.apply(this.apply(source));
+	}
 
-    static GenericConverter<Object> not() {
-        return source -> source;
-    }
+	static <T> GenericConverter<T, T> not() {
+		return source -> source;
+	}
 }

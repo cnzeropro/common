@@ -12,7 +12,7 @@ import java.util.Objects;
  * @author Zero (cnzeropro@163.com)
  * @since 2024/12/30
  */
-public class ToLocalDateTime implements GenericConverter<LocalDateTime> {
+public class ToLocalDateTime implements ObjectConverter<LocalDateTime> {
     public static final ToLocalDateTime INSTANCE = new ToLocalDateTime();
 
     @Override
