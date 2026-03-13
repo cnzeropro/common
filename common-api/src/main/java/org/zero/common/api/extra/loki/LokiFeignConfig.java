@@ -52,9 +52,9 @@ import java.util.Optional;
  * @author Zero (cnzeropro@163.com)
  * @since 2024/11/25
  */
+@RequiredArgsConstructor
 public class LokiFeignConfig extends AbstractFeignConfig {
-    @Autowired
-    ObjectMapper objectMapper;
+    final ObjectMapper objectMapper;
 
     @Bean
     Encoder lokiFeignEncoder() {
@@ -110,9 +110,18 @@ public class LokiFeignConfig extends AbstractFeignConfig {
 
         @Override
         public Object decode(Response response, Type type) throws IOException, DecodeException, FeignException {
-            if (TypeUtils.isAssignable(ResolvableType.forClassWithGenerics(LokiResponse.class, ResolvableType.forClassWithGenerics(Collection.class, LokiSeriesResponse.class)).getType(), type) ||
-                    TypeUtils.isAssignable(ResolvableType.forClassWithGenerics(LokiResponse.class, LokiQueryResponse.class).getType(), type) ||
-                    TypeUtils.isAssignable(ResolvableType.forClassWithGenerics(LokiResponse.class, LokiQueryRangeResponse.class).getType(), type)) {
+            if (TypeUtils
+                    .isAssignable(ResolvableType
+                            .forClassWithGenerics(LokiResponse.class,
+                                    ResolvableType.forClassWithGenerics(Collection.class, LokiSeriesResponse.class))
+                            .getType(), type)
+                    ||
+                    TypeUtils.isAssignable(
+                            ResolvableType.forClassWithGenerics(LokiResponse.class, LokiQueryResponse.class).getType(),
+                            type)
+                    ||
+                    TypeUtils.isAssignable(ResolvableType
+                            .forClassWithGenerics(LokiResponse.class, LokiQueryRangeResponse.class).getType(), type)) {
                 Response.Body body = response.body();
                 if (Objects.nonNull(body)) {
                     InputStream inputStream = body.asInputStream();
@@ -131,7 +140,8 @@ public class LokiFeignConfig extends AbstractFeignConfig {
             }
 
             @Override
-            public LokiQueryResponse deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+            public LokiQueryResponse deserialize(JsonParser p, DeserializationContext ctxt)
+                    throws IOException, JacksonException {
                 JsonNode root = p.getCodec().readTree(p);
                 ResultType resultType = Optional.ofNullable(root.get("resultType"))
                         .map(JsonNode::asText)
@@ -141,9 +151,11 @@ public class LokiFeignConfig extends AbstractFeignConfig {
                 TypeFactory typeFactory = ctxt.getTypeFactory();
                 JavaType javaType;
                 if (ResultType.VECTOR == resultType) {
-                    javaType = typeFactory.constructCollectionType(Collection.class, typeFactory.constructType(LokiVector.class));
+                    javaType = typeFactory.constructCollectionType(Collection.class,
+                            typeFactory.constructType(LokiVector.class));
                 } else if (ResultType.STREAMS == resultType) {
-                    javaType = typeFactory.constructCollectionType(Collection.class, typeFactory.constructType(LokiStream.class));
+                    javaType = typeFactory.constructCollectionType(Collection.class,
+                            typeFactory.constructType(LokiStream.class));
                 } else {
                     // never
                     throw new IllegalArgumentException("Unknown resultType: " + resultType);
@@ -170,7 +182,8 @@ public class LokiFeignConfig extends AbstractFeignConfig {
             }
 
             @Override
-            public LokiQueryRangeResponse deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+            public LokiQueryRangeResponse deserialize(JsonParser p, DeserializationContext ctxt)
+                    throws IOException, JacksonException {
                 JsonNode root = p.getCodec().readTree(p);
                 ResultType resultType = Optional.ofNullable(root.get("resultType"))
                         .map(JsonNode::asText)
@@ -180,9 +193,11 @@ public class LokiFeignConfig extends AbstractFeignConfig {
                 TypeFactory typeFactory = ctxt.getTypeFactory();
                 JavaType javaType;
                 if (ResultType.MATRIX == resultType) {
-                    javaType = typeFactory.constructCollectionType(Collection.class, typeFactory.constructType(LokiMatrix.class));
+                    javaType = typeFactory.constructCollectionType(Collection.class,
+                            typeFactory.constructType(LokiMatrix.class));
                 } else if (ResultType.STREAMS == resultType) {
-                    javaType = typeFactory.constructCollectionType(Collection.class, typeFactory.constructType(LokiStream.class));
+                    javaType = typeFactory.constructCollectionType(Collection.class,
+                            typeFactory.constructType(LokiStream.class));
                 } else {
                     // never
                     throw new IllegalArgumentException("Unknown resultType: " + resultType);
