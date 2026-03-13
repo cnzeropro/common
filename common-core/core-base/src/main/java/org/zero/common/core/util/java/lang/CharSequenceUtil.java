@@ -8,6 +8,7 @@ import org.zero.common.core.extension.java.util.function.ToShortFunction;
 import org.zero.common.data.constant.ConstantPool;
 import org.zero.common.data.constant.StringPool;
 
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
@@ -51,6 +52,23 @@ public class CharSequenceUtil {
 
 	public static boolean nonBlank(CharSequence charSequence) {
 		return !isBlank(charSequence);
+	}
+
+	public static int count(CharSequence charSequence, char c) {
+		return count(charSequence, character -> Objects.equals(c, character));
+	}
+
+	public static int count(CharSequence charSequence, Predicate<Character> predicate) {
+		if (isEmpty(charSequence)) {
+			return 0;
+		}
+		int count = 0;
+		for (int i = 0; i < charSequence.length(); i++) {
+			if (predicate.test(charSequence.charAt(i))) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 	public static int indexOf(CharSequence charSequence, CharSequence searchCharSequence, boolean ignoreCase) {

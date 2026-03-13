@@ -1,7 +1,9 @@
 package org.zero.common.core.extension.java.io;
 
 import lombok.RequiredArgsConstructor;
+import org.zero.common.core.util.java.io.IoUtil;
 import org.zero.common.core.util.java.lang.ArrayUtil;
+import org.zero.common.core.util.java.lang.NumberUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,6 +15,10 @@ import java.util.List;
 import java.util.Objects;
 
 /**
+ * 分块字节缓冲区
+ * <p>
+ * 性能较差，如果存放数据小于 2GiB 时，建议使用 {@link java.nio.ByteBuffer}
+ *
  * @author Zero (cnzeropro@163.com)
  * @since 2025/10/22
  */
@@ -23,11 +29,9 @@ public class ChunkedByteBuffer implements Serializable {
 	 */
 	protected final List<byte[]> blocks = new LinkedList<>();
 	/**
-	 * 每个块的最大大小
-	 * <p>
-	 * 建议：0 < {@link #maxBlockSize} < {@link ArrayUtil#SAFE_MAX_ARRAY_SIZE}
+	 * 每块的最大容量
 	 */
-	protected final int maxBlockSize;
+	protected final int maxBlockCapacity;
 
 	public ChunkedByteBuffer() {
 		this(ArrayUtil.SAFE_MAX_ARRAY_SIZE);
@@ -51,7 +55,7 @@ public class ChunkedByteBuffer implements Serializable {
 		byte[] lastBlock = blocks.get(lastBlockIndex);
 		int lastBlockLength = lastBlock.length;
 		// 块已满，分配新块
-		if (lastBlockLength >= maxBlockSize) {
+		if (lastBlockLength >= maxBlockCapacity) {
 			byte[] block = new byte[1];
 			block[0] = b;
 			blocks.add(block);
@@ -96,7 +100,7 @@ public class ChunkedByteBuffer implements Serializable {
 		}
 		if (blocks.isEmpty()) {
 			// 一个数据块可以容纳，直接创建并写入
-			if (length <= maxBlockSize) {
+			if (length <= maxBlockCapacity) {
 				byte[] block = new byte[length];
 				System.arraycopy(bytes, offset, block, 0, length);
 				blocks.add(block);
@@ -104,7 +108,7 @@ public class ChunkedByteBuffer implements Serializable {
 			}
 			// 一个数据块无法容纳，持续创建新块分片存储，直到没有剩余
 			while (length > 0) {
-				int blockLength = Math.min(maxBlockSize, length);
+				int blockLength = Math.min(maxBlockCapacity, length);
 				byte[] block = new byte[blockLength];
 				System.arraycopy(bytes, offset, block, 0, blockLength);
 				blocks.add(block);
@@ -116,7 +120,7 @@ public class ChunkedByteBuffer implements Serializable {
 		int lastBlockIndex = blocks.size() - 1;
 		byte[] lastBlock = blocks.get(lastBlockIndex);
 		int lastBlockLength = lastBlock.length;
-		int lastBlockRemaining = maxBlockSize - lastBlockLength;
+		int lastBlockRemaining = maxBlockCapacity - lastBlockLength;
 		// 当前位置块可以容纳，扩容块并存储
 		if (length <= lastBlockRemaining) {
 			byte[] block = new byte[lastBlockLength + length];
@@ -127,7 +131,7 @@ public class ChunkedByteBuffer implements Serializable {
 		}
 		// 当前位置块无法容纳，将容量扩展到最大并写入一部分
 		if (lastBlockRemaining > 0) {
-			byte[] block = new byte[maxBlockSize];
+			byte[] block = new byte[maxBlockCapacity];
 			System.arraycopy(lastBlock, 0, block, 0, lastBlockLength);
 			System.arraycopy(bytes, offset, block, lastBlockLength, lastBlockRemaining);
 			blocks.set(lastBlockIndex, block);
@@ -136,7 +140,7 @@ public class ChunkedByteBuffer implements Serializable {
 		}
 		// 然后持续创建新的块，写入数据，直到没有剩余
 		while (length > 0) {
-			int blockLength = Math.min(maxBlockSize, length);
+			int blockLength = Math.min(maxBlockCapacity, length);
 			byte[] block = new byte[blockLength];
 			System.arraycopy(bytes, offset, block, 0, blockLength);
 			blocks.add(block);
@@ -257,8 +261,7 @@ public class ChunkedByteBuffer implements Serializable {
 		int currentBlockOffset = 0;
 		for (int i = 0; i < blocks.size(); i++) {
 			byte[] block = blocks.get(i);
-			BigInteger blockSize = BigInteger.valueOf(block.length);
-			BigInteger nextOffset = currentOffset.add(blockSize);
+			BigInteger nextOffset = currentOffset.add(BigInteger.valueOf(block.length));
 			if (offset.compareTo(currentOffset) >= 0 && offset.compareTo(nextOffset) < 0) {
 				currentBlockIndex = i;
 				currentBlockOffset = offset.subtract(currentOffset).intValue();
@@ -335,7 +338,7 @@ public class ChunkedByteBuffer implements Serializable {
 		if (Objects.isNull(length) || length.compareTo(BigInteger.ZERO) < 0) {
 			throw new IllegalArgumentException("Length must be non-negative");
 		}
-		ChunkedByteBuffer result = new ChunkedByteBuffer(maxBlockSize);
+		ChunkedByteBuffer result = new ChunkedByteBuffer(maxBlockCapacity);
 		if (blocks.isEmpty() || length.compareTo(BigInteger.ZERO) == 0) {
 			return result;
 		}
@@ -355,8 +358,7 @@ public class ChunkedByteBuffer implements Serializable {
 		int currentBlockOffset = 0;
 		for (int i = 0; i < blocks.size(); i++) {
 			byte[] block = blocks.get(i);
-			BigInteger blockSize = BigInteger.valueOf(block.length);
-			BigInteger nextOffset = currentOffset.add(blockSize);
+			BigInteger nextOffset = currentOffset.add(BigInteger.valueOf(block.length));
 			if (offset.compareTo(currentOffset) >= 0 && offset.compareTo(nextOffset) < 0) {
 				currentBlockIndex = i;
 				currentBlockOffset = offset.subtract(currentOffset).intValue();
@@ -591,18 +593,8 @@ public class ChunkedByteBuffer implements Serializable {
 	 *
 	 * @param in 输入流
 	 */
-	public void readFrom(InputStream in) throws IOException {
-		this.readFrom(in, -1);
-	}
-
-	/**
-	 * 从输入流中读取数据
-	 *
-	 * @param in       输入流
-	 * @param maxBytes 最大字节数
-	 */
-	public void readFrom(InputStream in, int maxBytes) throws IOException {
-		this.readFrom(in, maxBytes, true);
+	public BigInteger readFrom(InputStream in) throws IOException {
+		return this.readFrom(in, true);
 	}
 
 
@@ -612,29 +604,42 @@ public class ChunkedByteBuffer implements Serializable {
 	 * @param in       输入流
 	 * @param closedIn 是否关闭输入流
 	 */
-	public void readFrom(InputStream in, boolean closedIn) throws IOException {
-		this.readFrom(in, -1, closedIn);
+	public BigInteger readFrom(InputStream in, boolean closedIn) throws IOException {
+		return this.readFrom(in, BigInteger.ZERO, BigInteger.ONE.negate(), closedIn);
 	}
 
 	/**
 	 * 从输入流中读取数据
 	 *
-	 * @param in       输入流
-	 * @param maxBytes 最大字节数
-	 * @param closedIn 是否关闭输入流
+	 * @param in        输入流
+	 * @param skipBytes 跳过字节数
+	 * @param maxBytes  最大字节数
+	 * @param closedIn  是否关闭输入流
 	 */
-	public synchronized void readFrom(InputStream in, int maxBytes, boolean closedIn) throws IOException {
-		byte[] bytes = new byte[maxBlockSize];
+	public synchronized BigInteger readFrom(InputStream in, BigInteger skipBytes, BigInteger maxBytes, boolean closedIn) throws IOException {
 		int bytesRead;
-		int totalRead = 0;
-		while ((maxBytes < 0 || totalRead < maxBytes) &&
-			(bytesRead = in.read(bytes, 0, maxBytes < 0 ? bytes.length : Math.min(bytes.length, maxBytes - totalRead))) != -1) {
+		byte[] bytes = new byte[maxBlockCapacity];
+		// 跳过字节，不使用 skip 相关方法来跳过（虽然 skip 实现也是用的 read，但子类实现或许不太一样），在大数据流或者其他网络流时可能遇到问题
+		if (Objects.nonNull(skipBytes) && skipBytes.compareTo(BigInteger.ZERO) > 0) {
+			BigInteger totalSkipped = BigInteger.ZERO;
+			while (totalSkipped.compareTo(skipBytes) < 0 &&
+				(bytesRead = in.read(bytes, 0, Math.min(bytes.length, NumberUtil.toInt(skipBytes.subtract(totalSkipped))))) != -1) {
+				totalSkipped = totalSkipped.add(BigInteger.valueOf(bytesRead));
+			}
+		}
+		// 读取数据
+		boolean ignoreMaxBytes = Objects.isNull(maxBytes) || maxBytes.compareTo(BigInteger.ZERO) < 0;
+		BigInteger totalRead = BigInteger.ZERO;
+		while ((ignoreMaxBytes || totalRead.compareTo(maxBytes) < 0) &&
+			(bytesRead = in.read(bytes, 0, ignoreMaxBytes ? bytes.length : Math.min(bytes.length, NumberUtil.toInt(maxBytes.subtract(totalRead))))) != -1) {
 			this.put(bytes, 0, bytesRead);
-			totalRead += bytesRead;
+			totalRead = totalRead.add(BigInteger.valueOf(bytesRead));
 		}
+		// 关闭输入流
 		if (closedIn) {
-			in.close();
+			IoUtil.close(in);
 		}
+		return totalRead;
 	}
 
 	/**
@@ -651,7 +656,7 @@ public class ChunkedByteBuffer implements Serializable {
 		}
 		BigInteger thisSize = this.size();
 		BigInteger otherSize = other.size();
-		if (!thisSize.equals(otherSize)) {
+		if (thisSize.compareTo(otherSize) != 0) {
 			return false;
 		}
 
@@ -691,19 +696,19 @@ public class ChunkedByteBuffer implements Serializable {
 	}
 
 	/**
-	 * 创建缓冲区的副本
+	 * 创建缓冲区副本
 	 */
 	public synchronized ChunkedByteBuffer copy() {
-		return this.copy(maxBlockSize);
+		return this.copy(maxBlockCapacity);
 	}
 
 	/**
-	 * 创建缓冲区的副本
+	 * 创建缓冲区副本
 	 *
-	 * @param maxBlockSize 最大块大小
+	 * @param maxBlockCapacity 每块最大容量
 	 */
-	public synchronized ChunkedByteBuffer copy(int maxBlockSize) {
-		ChunkedByteBuffer copiedBuffer = new ChunkedByteBuffer(maxBlockSize);
+	public synchronized ChunkedByteBuffer copy(int maxBlockCapacity) {
+		ChunkedByteBuffer copiedBuffer = new ChunkedByteBuffer(maxBlockCapacity);
 		for (byte[] block : blocks) {
 			copiedBuffer.put(block.clone());
 		}
@@ -716,7 +721,7 @@ public class ChunkedByteBuffer implements Serializable {
 	 * @return 缓冲区是否为空
 	 */
 	public synchronized boolean isEmpty() {
-		return blocks.isEmpty();
+		return blocks.isEmpty() || this.size().compareTo(BigInteger.ZERO) == 0;
 	}
 
 	/**

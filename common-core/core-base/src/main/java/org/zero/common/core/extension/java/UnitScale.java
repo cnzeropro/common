@@ -6,14 +6,14 @@ import lombok.RequiredArgsConstructor;
 /**
  * 国际单位制 (SI) 词头 / 中国法定计量单位词头
  * <p>
- * 参考国际计量大会(CGPM)规范，包含 2022 年新增的四个词头
+ * 参考国际计量大会（CGPM）规范，包含 2022 年新增的四个词头
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2025/12/26
  */
 @Getter
 @RequiredArgsConstructor
-public enum SIUnitPrefix {
+public enum UnitScale {
 	/* ************************************* 极大数 (从大到小) ************************************* */
 
 	/**

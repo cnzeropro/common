@@ -1,8 +1,9 @@
 package org.zero.common.core.support.http.header;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.zero.common.core.util.java.lang.CharSequenceUtil;
 import org.zero.common.core.util.java.lang.StringUtil;
 import org.zero.common.data.constant.StringPool;
@@ -15,28 +16,26 @@ import java.util.Objects;
  * @since 2025/12/23
  */
 @Getter
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@EqualsAndHashCode
+@RequiredArgsConstructor
+@AllArgsConstructor
 public class HostValue {
-	public static final String HEADER_NAME = "Host";
+	public static final HttpHeader HEADER = HttpHeader.HOST;
 
 	/**
 	 * 主机名
 	 */
-	protected String host;
+	protected final String host;
 	/**
 	 * 端口（可选）
 	 */
 	protected Integer port;
 
-	protected HostValue(String host) {
-		this.host = host;
-	}
-
 	public static HostValue parse(CharSequence text) {
 		if (CharSequenceUtil.isEmpty(text)) {
 			throw new IllegalArgumentException("text is empty");
 		}
-		String[] parts = StringUtil.split(text.toString(), StringPool.COLON).toArray(new String[0]);
+		String[] parts = StringUtil.splitToArray(text.toString(), StringPool.COLON, true);
 		if (parts.length == 1) {
 			return new HostValue(parts[0]);
 		}

@@ -3,6 +3,7 @@ package org.zero.common.core.extension.java.io;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.zero.common.core.util.java.lang.ArrayUtil;
+import org.zero.common.core.util.java.lang.NumberUtil;
 import org.zero.common.core.util.java.util.CollectionUtil;
 
 import java.io.IOException;
@@ -199,7 +200,7 @@ public class DynamicByteArrayInputStream extends InputStream {
 	@Override
 	public int available() throws IOException {
 		BigInteger remaining = this.remaining();
-		return remaining.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) >= 0 ? Integer.MAX_VALUE : remaining.intValue();
+		return NumberUtil.toInt(remaining);
 	}
 
 	@Override
@@ -216,7 +217,7 @@ public class DynamicByteArrayInputStream extends InputStream {
 			if (remaining.compareTo(BigInteger.ZERO) <= 0) {
 				return 0;
 			}
-			long maxSkip = remaining.compareTo(BigInteger.valueOf(Long.MAX_VALUE)) >= 0 ? Long.MAX_VALUE : remaining.longValue();
+			long maxSkip = NumberUtil.toLong(remaining);
 			long bytesToSkip = Math.min(n, maxSkip);
 			if (bytesToSkip == 0) {
 				return 0;

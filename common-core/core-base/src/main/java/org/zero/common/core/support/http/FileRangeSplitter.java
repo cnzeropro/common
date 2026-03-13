@@ -2,6 +2,7 @@ package org.zero.common.core.support.http;
 
 import lombok.AllArgsConstructor;
 import lombok.Cleanup;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.zero.common.core.extension.java.DataSize;
@@ -16,7 +17,6 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +28,7 @@ import java.util.Objects;
  */
 @RequiredArgsConstructor
 @AllArgsConstructor
-public class RangeByteBuffer {
+public class FileRangeSplitter {
 	/**
 	 * 默认缓冲区大小，8M
 	 */
@@ -38,15 +38,14 @@ public class RangeByteBuffer {
 	protected final File file;
 	protected int bufferSize = DEFAULT_BUFFER_SIZE;
 
-	public Collection<ChunkedByteBuffer> getBuffers() {
-		return this.getBufferMap().values();
-	}
-
 	@SneakyThrows
-	public Map<RangeValue.Range, ChunkedByteBuffer> getBufferMap() {
+	public RangeChunkedBuffer getChunkedBuffer() {
+		@Cleanup InputStream inputStream = Files.newInputStream(file.toPath(), StandardOpenOption.READ);
+		BigInteger size = IoUtil.getBigSizeExact(inputStream);
 		DataUnit dataUnit = rangeValue.getDataUnit();
 		List<RangeValue.Range> ranges = rangeValue.getRanges();
-		Map<RangeValue.Range, ChunkedByteBuffer> resultMap = new LinkedHashMap<>(ranges.size(), 1.0F);
+		BigInteger total = size.divide(dataUnit.getSize());
+		RangeChunkedBuffer rangeChunkedBuffer = new RangeChunkedBuffer(dataUnit, total, ranges.size());
 		for (RangeValue.Range range : ranges) {
 			ChunkedByteBuffer chunkedByteBuffer;
 			RangeValue.Type rangeType = range.getType();
@@ -54,23 +53,25 @@ public class RangeByteBuffer {
 				BigInteger start = range.getStart();
 				BigInteger end = range.getEnd();
 				BigInteger between = end.subtract(start);
+				BigInteger offset = between.add(BigInteger.ONE);
 				BigInteger startBytes = DataSize.of(start, dataUnit).toBytes();
-				BigInteger offsetBytes = DataSize.of(between, dataUnit).toBytes();
-				chunkedByteBuffer = this.read(startBytes, offsetBytes);
+				BigInteger offsetBytes = DataSize.of(offset, dataUnit).toBytes();
+				chunkedByteBuffer = this.read(startBytes, offsetBytes, size);
 			} else if (rangeType == RangeValue.Type.FROM) {
 				BigInteger start = range.getStart();
 				BigInteger startBytes = DataSize.of(start, dataUnit).toBytes();
-				chunkedByteBuffer = this.read(startBytes, null);
+				chunkedByteBuffer = this.read(startBytes, null, size);
 			} else if (rangeType == RangeValue.Type.LAST) {
 				BigInteger offset = range.getOffset();
 				BigInteger suffixBytes = DataSize.of(offset, dataUnit).toBytes();
-				chunkedByteBuffer = this.read(suffixBytes);
+				chunkedByteBuffer = this.read(suffixBytes, size);
 			} else {
 				throw new IllegalArgumentException("Invalid slice type: " + rangeType);
 			}
-			resultMap.put(range, chunkedByteBuffer);
+			rangeChunkedBuffer.buffers.put(range, chunkedByteBuffer);
 		}
-		return resultMap;
+
+		return rangeChunkedBuffer;
 	}
 
 	/**
@@ -81,7 +82,13 @@ public class RangeByteBuffer {
 	 * @return 数据
 	 */
 	@SneakyThrows
-	protected ChunkedByteBuffer read(BigInteger start, BigInteger offset) {
+	protected ChunkedByteBuffer read(BigInteger start, BigInteger offset, BigInteger total) {
+		if (start.compareTo(total) > 0) {
+			throw new IndexOutOfBoundsException(String.format("Range start[%s] > total[%s]", start, total));
+		}
+		if (Objects.nonNull(offset) && start.add(offset).compareTo(total) > 0) {
+			throw new IndexOutOfBoundsException(String.format("Range start[%s] + offset[%s] > total[%s]", start, offset, total));
+		}
 		@Cleanup InputStream inputStream = Files.newInputStream(file.toPath(), StandardOpenOption.READ);
 		byte[] buffer = new byte[bufferSize];
 		int bytesRead;
@@ -91,7 +98,7 @@ public class RangeByteBuffer {
 			totalSkipped = totalSkipped.add(BigInteger.valueOf(bytesRead));
 		}
 		// 读取数据
-		ChunkedByteBuffer chunkedByteBuffer = new ChunkedByteBuffer(bufferSize);
+		ChunkedByteBuffer chunkedByteBuffer = new ChunkedByteBuffer();
 		BigInteger totalRead = BigInteger.ZERO;
 		while ((Objects.isNull(offset) || totalRead.compareTo(offset) < 0) && (bytesRead = inputStream.read(buffer, 0, Objects.isNull(offset) ? buffer.length : Math.min(buffer.length, NumberUtil.toInt(offset.subtract(totalRead))))) != -1) {
 			totalRead = totalRead.add(BigInteger.valueOf(bytesRead));
@@ -107,18 +114,24 @@ public class RangeByteBuffer {
 	 * @return 数据
 	 */
 	@SneakyThrows
-	protected ChunkedByteBuffer read(BigInteger suffix) {
-		@Cleanup InputStream inputStream = Files.newInputStream(file.toPath(), StandardOpenOption.READ);
-		BigInteger size = IoUtil.getBigSizeExact(inputStream);
-		BigInteger start = size.subtract(suffix);
+	protected ChunkedByteBuffer read(BigInteger suffix, BigInteger total) {
+		BigInteger start = total.subtract(suffix);
 		if (start.compareTo(BigInteger.ZERO) < 0) {
-			return new ChunkedByteBuffer(bufferSize);
+			throw new IndexOutOfBoundsException("Invalid range start: " + start);
 		}
-		return this.read(start, null);
+		return this.read(start, null, total);
 	}
 
-	public static class Range{
-		protected RangeValue.Range range;
-		protected
+	@Getter
+	public static class RangeChunkedBuffer {
+		protected final DataUnit dataUnit;
+		protected final BigInteger total;
+		protected final Map<RangeValue.Range, ChunkedByteBuffer> buffers;
+
+		protected RangeChunkedBuffer(DataUnit dataUnit, BigInteger total, int bufferSize) {
+			this.dataUnit = dataUnit;
+			this.total = total;
+			buffers = new LinkedHashMap<>(bufferSize, 1.0F);
+		}
 	}
 }

@@ -175,4 +175,13 @@ public enum DataUnit {
 		}
 		throw new IllegalArgumentException("Unknown data unit suffix '" + suffix + "'");
 	}
+
+	public static DataUnit fromName(String name) {
+		for (DataUnit unit : values()) {
+			if (StringUtil.equals(unit.name(), name, true)) {
+				return unit;
+			}
+		}
+		throw new IllegalArgumentException("Unknown data unit name '" + name + "'");
+	}
 }

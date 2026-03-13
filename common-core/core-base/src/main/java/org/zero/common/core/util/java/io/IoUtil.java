@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.zero.common.core.extension.java.io.NullOutputStream;
 import org.zero.common.core.extension.java.io.NullWriter;
+import org.zero.common.core.util.java.lang.NumberUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.CharArrayWriter;
@@ -13,6 +14,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.math.BigInteger;
 import java.util.Objects;
 import java.util.logging.Level;
 
@@ -50,51 +52,77 @@ public class IoUtil {
 	 * @param in         输入流
 	 * @param out        输出流
 	 * @param bufferSize 缓冲区大小
-	 * @param maxBytes   拷贝最大字节数
+	 * @param skipBytes  跳过的字节数
+	 * @param readBytes  拷贝的字节数
 	 * @param closeIn    是否关闭输入流
 	 * @return 实际拷贝的字节数
 	 */
 	@SneakyThrows
-	public static long copy(final InputStream in, final OutputStream out, int bufferSize, long maxBytes, boolean closeIn) {
-		long count = 0L;
+	public static BigInteger copy(InputStream in, OutputStream out, int bufferSize, BigInteger skipBytes, BigInteger readBytes, boolean closeIn) {
 		byte[] buffer = new byte[bufferSize];
-		int read;
-		if (maxBytes < 0) {
-			while ((read = in.read(buffer)) != EOF) {
-				out.write(buffer, 0, read);
-				count += read;
+		int bytesRead;
+		// 跳过数据
+		if (Objects.nonNull(skipBytes)) {
+			BigInteger totalSkipped = BigInteger.ZERO;
+			while (totalSkipped.compareTo(skipBytes) < 0 && (bytesRead = in.read(buffer, 0, Math.min(buffer.length, NumberUtil.toInt(skipBytes.subtract(totalSkipped))))) != EOF) {
+				totalSkipped = totalSkipped.add(BigInteger.valueOf(bytesRead));
 			}
-		} else {
-			while (count < maxBytes) {
-				int toRead = (int) Math.min(maxBytes - count, bufferSize);
-				if (toRead <= 0) {
-					break;
-				}
-				read = in.read(buffer, 0, toRead);
-				if (read == EOF) {
-					break;
-				}
-				out.write(buffer, 0, read);
-				count += read;
-			}
+		}
+		// 读取数据
+		BigInteger totalRead = BigInteger.ZERO;
+		while ((Objects.isNull(readBytes) || totalRead.compareTo(readBytes) < 0) &&
+			(bytesRead = in.read(buffer, 0, Objects.isNull(readBytes) ? buffer.length : Math.min(buffer.length, NumberUtil.toInt(readBytes.subtract(totalRead))))) != EOF) {
+			out.write(buffer, 0, bytesRead);
+			totalRead = totalRead.add(BigInteger.valueOf(bytesRead));
 		}
 		if (closeIn) {
-			close(in);
+			IoUtil.close(in);
 		}
-		return count;
+		return totalRead;
 	}
 
 	/**
 	 * 将输入流中的内容拷贝到输出流中
 	 *
-	 * @param in       输入流
-	 * @param out      输出流
-	 * @param maxBytes 拷贝最大字节数
-	 * @param closeIn  是否关闭输入流
+	 * @param in         输入流
+	 * @param out        输出流
+	 * @param bufferSize 缓冲区大小
+	 * @param skipBytes  跳过字节数
+	 * @param readBytes  拷贝字节数
+	 * @param closeIn    是否关闭输入流
 	 * @return 实际拷贝的字节数
 	 */
-	public static long copy(final InputStream in, final OutputStream out, long maxBytes, boolean closeIn) {
-		return copy(in, out, DEFAULT_BUFFER_SIZE, maxBytes, closeIn);
+	@SneakyThrows
+	public static long copy(InputStream in, OutputStream out, int bufferSize, long skipBytes, Long readBytes, boolean closeIn) {
+		return copy(in, out, bufferSize, BigInteger.valueOf(skipBytes), Objects.isNull(readBytes) ? null : BigInteger.valueOf(readBytes), closeIn).longValueExact();
+	}
+
+	/**
+	 * 将输入流中的内容拷贝到输出流中
+	 *
+	 * @param in         输入流
+	 * @param out        输出流
+	 * @param bufferSize 缓冲区大小
+	 * @param readBytes  拷贝最大字节数
+	 * @param closeIn    是否关闭输入流
+	 * @return 实际拷贝的字节数
+	 */
+	@SneakyThrows
+	public static long copy(final InputStream in, final OutputStream out, int bufferSize, Long readBytes, boolean closeIn) {
+		return copy(in, out, bufferSize, 0L, readBytes, closeIn);
+	}
+
+	/**
+	 * 将输入流中的内容拷贝到输出流中
+	 *
+	 * @param in        输入流
+	 * @param out       输出流
+	 * @param readBytes 拷贝最大字节数
+	 * @param closeIn   是否关闭输入流
+	 * @return 实际拷贝的字节数
+	 */
+	public static long copy(final InputStream in, final OutputStream out, Long readBytes, boolean closeIn) {
+		return copy(in, out, DEFAULT_BUFFER_SIZE, readBytes, closeIn);
 	}
 
 	/**
@@ -107,19 +135,19 @@ public class IoUtil {
 	 * @return 拷贝的字节数
 	 */
 	public static long copy(final InputStream in, final OutputStream out, int bufferSize, boolean closeIn) {
-		return copy(in, out, bufferSize, -1, closeIn);
+		return copy(in, out, bufferSize, null, closeIn);
 	}
 
 	/**
 	 * 将输入流中的内容拷贝到输出流中，默认不关闭输入流
 	 *
-	 * @param in       输入流
-	 * @param out      输出流
-	 * @param maxBytes 拷贝最大字节数
+	 * @param in        输入流
+	 * @param out       输出流
+	 * @param readBytes 拷贝最大字节数
 	 * @return 拷贝的字节数
 	 */
-	public static long copy(final InputStream in, final OutputStream out, long maxBytes) {
-		return copy(in, out, maxBytes, false);
+	public static long copy(final InputStream in, final OutputStream out, Long readBytes) {
+		return copy(in, out, readBytes, false);
 	}
 
 	/**
@@ -157,6 +185,136 @@ public class IoUtil {
 		return copy(in, out, DEFAULT_BUFFER_SIZE);
 	}
 
+	/**
+	 * 读取输入流的所有内容，并默认不关闭流
+	 *
+	 * @param in 输入流
+	 * @return 输入流的所有内容
+	 */
+	public static byte[] readAll(InputStream in) {
+		return readAll(in, false);
+	}
+
+	/**
+	 * 读取输入流的所有内容
+	 *
+	 * @param in    输入流
+	 * @param close 是否关闭输入流
+	 * @return 输入流的所有内容
+	 */
+	@SneakyThrows
+	public static byte[] readAll(InputStream in, boolean close) {
+		try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+			copy(in, out, close);
+			return out.toByteArray();
+		}
+	}
+
+	/**
+	 * 精准地获取输入流的大小（字节数）
+	 * <p>
+	 * 注意：<br>
+	 * 1、能正确获取流总字节数的大前提是该流未被提前读取过 <br>
+	 * 2、经此方法处理的输入流，再次使用可能会造成数据丢失
+	 *
+	 * @param in 输入流
+	 * @return 输入流的大小（字节数）
+	 */
+	public static BigInteger getBigSizeExact(InputStream in) {
+		return getBigSizeExact(in, true);
+	}
+
+	/**
+	 * 精准地获取输入流的大小（字节数）
+	 * <p>
+	 * 注意：<br>
+	 * 1、能正确获取流总字节数的大前提是该流未被提前读取过 <br>
+	 * 2、经此方法处理的输入流，再次使用可能会造成数据丢失
+	 *
+	 * @param in      输入流
+	 * @param closeIn 是否关闭输入流
+	 * @return 输入流的大小（字节数）
+	 */
+	public static BigInteger getBigSizeExact(InputStream in, boolean closeIn) {
+		return copy(in, NullOutputStream.INSTANCE, DEFAULT_BUFFER_SIZE, BigInteger.ZERO, null, closeIn);
+	}
+
+	/**
+	 * 精准地获取输入流的大小（字节数），并默认关闭
+	 * 注意：能正确获取流总字节数的大前提是该流未被提前读取过
+	 *
+	 * @param in 输入流
+	 * @return 输入流的大小（字节数）
+	 */
+	public static long getSizeExact(InputStream in) {
+		return getSizeExact(in, true);
+	}
+
+	/**
+	 * 精准地获取输入流的大小（字节数）
+	 * <p>
+	 * 注意：<br>
+	 * 1、能正确获取流总字节数的大前提是该流未被提前读取过 <br>
+	 * 2、经此方法处理的输入流，再次使用可能会造成数据丢失
+	 *
+	 * @param in      输入流
+	 * @param closeIn 是否关闭输入流
+	 * @return 输入流的大小（字节数）
+	 */
+	public static long getSizeExact(InputStream in, boolean closeIn) {
+		return copy(in, NullOutputStream.INSTANCE, closeIn);
+	}
+
+	/**
+	 * 尝试获取输入流的大小（字节数），默认不关闭
+	 * <p>
+	 * 注意：<br>
+	 * 1、能正确获取流总字节数的大前提是该流未被提前读取过 <br>
+	 * 2、此方法也有一定弊端，即传入的输入流不一定满足可以统计总字节数的要求，比如：网络流、Mark Not Supported 的流等等
+	 *
+	 * @param in 输入流
+	 * @return 输入流的大小（字节数）
+	 */
+	@SneakyThrows
+	public static long getSizeAvailable(InputStream in) {
+		// 使用 InputStream#available() 方法获取流中总字节数并不总是准确，与 available 方法具体实现有关，特别是网络流
+		// 但文件流可使用 available() 方法
+		if (in instanceof FileInputStream) {
+			return in.available();
+		}
+		// 读取流来统计总字节数，又会出现数据丢失的问题，与流的具体实现有关，特别是 Mark not Support 的流
+		if (!in.markSupported()) {
+			throw new IOException("Mark not supported");
+		}
+		// 注意，超出 2GB（实际为 Integer.MAX_VALUE = 2^31-1）的流可能会造成数据丢失，与 mark 和 reset 方法具体实现有关
+		in.mark(Integer.MAX_VALUE);
+		try {
+			return copy(in, NullOutputStream.INSTANCE);
+		} finally {
+			// 重置流
+			in.reset();
+		}
+	}
+
+	public static void close(InputStream inputStream) {
+		if (Objects.nonNull(inputStream)) {
+			try {
+				inputStream.close();
+			} catch (Exception e) {
+				log.log(Level.WARNING, String.format("Close InputStream[%s] error", inputStream.getClass()), e);
+			}
+		}
+	}
+
+	public static void close(OutputStream outputStream) {
+		if (Objects.nonNull(outputStream)) {
+			try {
+				outputStream.close();
+			} catch (Exception e) {
+				log.log(Level.WARNING, String.format("Close OutputStream[%s] error", outputStream.getClass()), e);
+			}
+		}
+	}
 
 	/**
 	 * 将输入流中的内容拷贝到输出流中
@@ -164,51 +322,77 @@ public class IoUtil {
 	 * @param in         输入流
 	 * @param out        输出流
 	 * @param bufferSize 缓冲区大小
-	 * @param maxChars   拷贝最大字符数
+	 * @param skipChars  跳过的字符数
+	 * @param readChars  拷贝最大字符数
 	 * @param closeIn    是否关闭输入流
 	 * @return 实际拷贝的字符数
 	 */
 	@SneakyThrows
-	public static long copy(final Reader in, final Writer out, int bufferSize, long maxChars, boolean closeIn) {
-		long count = 0L;
+	public static BigInteger copy(final Reader in, final Writer out, int bufferSize, BigInteger skipChars, BigInteger readChars, boolean closeIn) {
 		char[] buffer = new char[bufferSize];
-		int read;
-		if (maxChars < 0) {
-			while ((read = in.read(buffer)) != EOF) {
-				out.write(buffer, 0, read);
-				count += read;
+		int charsRead;
+		// 跳过数据
+		if (Objects.nonNull(skipChars)) {
+			BigInteger totalSkipped = BigInteger.ZERO;
+			while (totalSkipped.compareTo(skipChars) < 0 &&
+				(charsRead = in.read(buffer, 0, Math.min(buffer.length, NumberUtil.toInt(skipChars.subtract(totalSkipped))))) != EOF) {
+				totalSkipped = totalSkipped.add(BigInteger.valueOf(charsRead));
 			}
-		} else {
-			while (count < maxChars) {
-				int toRead = (int) Math.min(maxChars - count, bufferSize);
-				if (toRead <= 0) {
-					break;
-				}
-				read = in.read(buffer, 0, toRead);
-				if (read == EOF) {
-					break;
-				}
-				out.write(buffer, 0, read);
-				count += read;
-			}
+		}
+		// 读取数据
+		BigInteger totalRead = BigInteger.ZERO;
+		while ((Objects.isNull(readChars) || totalRead.compareTo(readChars) < 0) &&
+			(charsRead = in.read(buffer, 0, Objects.isNull(readChars) ? buffer.length : Math.min(buffer.length, NumberUtil.toInt(readChars.subtract(totalRead))))) != EOF) {
+			out.write(buffer, 0, charsRead);
+			totalRead = totalRead.add(BigInteger.valueOf(charsRead));
 		}
 		if (closeIn) {
-			close(in);
+			IoUtil.close(in);
 		}
-		return count;
+		return totalRead;
 	}
 
 	/**
 	 * 将输入流中的内容拷贝到输出流中
 	 *
-	 * @param in       输入流
-	 * @param out      输出流
-	 * @param maxChars 拷贝最大字符数
-	 * @param closeIn  是否关闭输入流
+	 * @param in         输入流
+	 * @param out        输出流
+	 * @param bufferSize 缓冲区大小
+	 * @param skipChars  跳过的字符数
+	 * @param readChars  拷贝最大字符数
+	 * @param closeIn    是否关闭输入流
 	 * @return 实际拷贝的字符数
 	 */
-	public static long copy(final Reader in, final Writer out, long maxChars, boolean closeIn) {
-		return copy(in, out, DEFAULT_BUFFER_SIZE, maxChars, closeIn);
+	public static long copy(Reader in, Writer out, int bufferSize, long skipChars, Long readChars, boolean closeIn) {
+		return copy(in, out, bufferSize, BigInteger.valueOf(skipChars), Objects.isNull(readChars) ? null : BigInteger.valueOf(readChars), closeIn).longValueExact();
+	}
+
+	/**
+	 * 将输入流中的内容拷贝到输出流中
+	 *
+	 * @param in         输入流
+	 * @param out        输出流
+	 * @param bufferSize 缓冲区大小
+	 * @param readChars  拷贝最大字符数
+	 * @param closeIn    是否关闭输入流
+	 * @return 实际拷贝的字符数
+	 */
+	@SneakyThrows
+	public static long copy(final Reader in, final Writer out, int bufferSize, Long readChars, boolean closeIn) {
+		return copy(in, out, bufferSize, 0L, readChars, closeIn);
+	}
+
+	/**
+	 * 将输入流中的内容拷贝到输出流中
+	 *
+	 * @param in        输入流
+	 * @param out       输出流
+	 * @param readChars 拷贝最大字符数
+	 * @param closeIn   是否关闭输入流
+	 * @return 实际拷贝的字符数
+	 */
+	public static long copy(final Reader in, final Writer out, Long readChars, boolean closeIn) {
+		return copy(in, out, DEFAULT_BUFFER_SIZE, readChars, closeIn);
 	}
 
 	/**
@@ -221,19 +405,19 @@ public class IoUtil {
 	 * @return 拷贝的字符数
 	 */
 	public static long copy(final Reader in, final Writer out, int bufferSize, boolean closeIn) {
-		return copy(in, out, bufferSize, -1, closeIn);
+		return copy(in, out, bufferSize, null, closeIn);
 	}
 
 	/**
 	 * 将输入流中的内容拷贝到输出流中，默认不关闭输入流
 	 *
-	 * @param in       输入流
-	 * @param out      输出流
-	 * @param maxChars 拷贝最大字符数
+	 * @param in        输入流
+	 * @param out       输出流
+	 * @param readChars 拷贝最大字符数
 	 * @return 拷贝的字符数
 	 */
-	public static long copy(final Reader in, final Writer out, long maxChars) {
-		return copy(in, out, maxChars, false);
+	public static long copy(final Reader in, final Writer out, Long readChars) {
+		return copy(in, out, readChars, false);
 	}
 
 	/**
@@ -271,30 +455,6 @@ public class IoUtil {
 		return copy(in, out, DEFAULT_BUFFER_SIZE);
 	}
 
-	/**
-	 * 读取输入流的所有内容，并默认不关闭流
-	 *
-	 * @param in 输入流
-	 * @return 输入流的所有内容
-	 */
-	public static byte[] readAll(InputStream in) {
-		return readAll(in, false);
-	}
-
-	/**
-	 * 读取输入流的所有内容
-	 *
-	 * @param in    输入流
-	 * @param close 是否关闭输入流
-	 * @return 输入流的所有内容
-	 */
-	@SneakyThrows
-	public static byte[] readAll(InputStream in, boolean close) {
-		try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-			copy(in, out, close);
-			return out.toByteArray();
-		}
-	}
 
 	/**
 	 * 读取输入流的所有内容，并默认不关闭流
@@ -321,60 +481,13 @@ public class IoUtil {
 	}
 
 	/**
-	 * 精准地获取输入流的大小（字节数）
-	 * <p>
-	 * 注意：<br>
-	 * 1、能正确获取流总字节数的大前提是该流未被提前读取过 <br>
-	 * 2、经此方法处理的输入流，再次使用可能会造成数据丢失
-	 *
-	 * @param in      输入流
-	 * @param closeIn 是否关闭输入流
-	 * @return 输入流的大小（字节数）
-	 */
-	public static long getSizeExact(InputStream in, boolean closeIn) {
-		return copy(in, NullOutputStream.INSTANCE, closeIn);
-	}
-
-	/**
-	 * 精准地获取输入流的大小（字节数），并默认关闭
-	 * 注意：能正确获取流总字节数的大前提是该流未被提前读取过
+	 * 精准地获取输入流的大小（字符数）
 	 *
 	 * @param in 输入流
-	 * @return 输入流的大小（字节数）
+	 * @return 输入流大小（字符数）
 	 */
-	public static long getSizeExact(InputStream in) {
+	public static long getSizeExact(Reader in) {
 		return getSizeExact(in, true);
-	}
-
-	/**
-	 * 尝试获取输入流的大小（字节数），默认不关闭
-	 * <p>
-	 * 注意：<br>
-	 * 1、能正确获取流总字节数的大前提是该流未被提前读取过 <br>
-	 * 2、此方法也有一定弊端，即传入的输入流不一定满足可以统计总字节数的要求，比如：网络流、Mark Not Supported 的流等等
-	 *
-	 * @param in 输入流
-	 * @return 输入流的大小（字节数）
-	 */
-	@SneakyThrows
-	private long getSizeAvailable(InputStream in) {
-		// 使用 InputStream#available() 方法获取流中总字节数并不总是准确，与 available 方法具体实现有关，特别是网络流
-		// 但文件流可使用 available() 方法
-		if (in instanceof FileInputStream) {
-			return in.available();
-		}
-		// 读取流来统计总字节数，又会出现数据丢失的问题，与流的具体实现有关，特别是 Mark not Support 的流
-		if (!in.markSupported()) {
-			throw new IOException("Mark not supported");
-		}
-		// 注意，超出 2GB（实际为 Integer.MAX_VALUE = 2^31-1）的流可能会造成数据丢失，与 mark 和 reset 方法具体实现有关
-		in.mark(Integer.MAX_VALUE);
-		try {
-			return copy(in, NullOutputStream.INSTANCE);
-		} finally {
-			// 重置流
-			in.reset();
-		}
 	}
 
 	/**
@@ -388,12 +501,8 @@ public class IoUtil {
 		return copy(in, NullWriter.INSTANCE, closeIn);
 	}
 
-	public static long getSizeExact(Reader in) {
-		return getSizeExact(in, true);
-	}
-
 	@SneakyThrows
-	private long getSizeAvailable(Reader in) {
+	public static long getSizeAvailable(Reader in) {
 		// 读取流来统计总字符数，又会出现数据丢失的问题，与流的具体实现有关，特别是 Mark not Support 的流
 		if (!in.markSupported()) {
 			throw new IOException("Mark not supported");
@@ -405,26 +514,6 @@ public class IoUtil {
 		} finally {
 			// 重置流
 			in.reset();
-		}
-	}
-
-	public static void close(InputStream inputStream) {
-		if (Objects.nonNull(inputStream)) {
-			try {
-				inputStream.close();
-			} catch (Exception e) {
-				log.log(Level.WARNING, String.format("Close InputStream[%s] error", inputStream.getClass()), e);
-			}
-		}
-	}
-
-	public static void close(OutputStream outputStream) {
-		if (Objects.nonNull(outputStream)) {
-			try {
-				outputStream.close();
-			} catch (Exception e) {
-				log.log(Level.WARNING, String.format("Close OutputStream[%s] error", outputStream.getClass()), e);
-			}
 		}
 	}
 

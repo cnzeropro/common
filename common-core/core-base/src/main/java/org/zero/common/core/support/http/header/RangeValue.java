@@ -1,25 +1,22 @@
 package org.zero.common.core.support.http.header;
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.util.StringUtils;
-import org.springframework.util.unit.DataSize;
+import org.zero.common.core.extension.java.DataUnit;
 import org.zero.common.core.util.java.lang.CharSequenceUtil;
 import org.zero.common.core.util.java.lang.StringUtil;
 import org.zero.common.data.constant.StringPool;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static org.springframework.util.unit.DataUnit.BYTES;
-import static org.springframework.util.unit.DataUnit.GIGABYTES;
-import static org.springframework.util.unit.DataUnit.KILOBYTES;
-import static org.springframework.util.unit.DataUnit.MEGABYTES;
-import static org.springframework.util.unit.DataUnit.TERABYTES;
 
 /**
  *
@@ -33,9 +30,10 @@ import static org.springframework.util.unit.DataUnit.TERABYTES;
  * @since 2022/11/21
  */
 @Getter
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+@EqualsAndHashCode
+@RequiredArgsConstructor
 public class RangeValue {
-	public static final String HEADER_NAME = "Range";
+	public static final HttpHeader HEADER = HttpHeader.RANGE;
 
 	protected static final String RANGE_REGEX = "^.*bytes\\s*=\\s*((?:\\d+-\\d*|-?\\d+)(?:,\\s*(?:\\d+-\\d*|-?\\d+))*)$";
 	protected static final Pattern RANGE_PATTERN = Pattern.compile(RANGE_REGEX);
@@ -43,156 +41,153 @@ public class RangeValue {
 	/**
 	 * 数据单位
 	 */
-	protected final String dataUnit;
-	/**
-	 * 资源总大小
-	 */
-	protected long total = 0L;
-	/**
-	 * 资源总大小（byte）
-	 */
-	protected long totalByte = 0L;
+	protected final DataUnit dataUnit;
 	/**
 	 * 切片列表
 	 */
-	protected List<Slice> slices = new ArrayList<>();
+	protected final List<Range> ranges;
+
+	public static Builder builder() {
+		return new Builder();
+	}
 
 	public static RangeValue parse(CharSequence text) {
 		if (CharSequenceUtil.isEmpty(text)) {
 			throw new IllegalArgumentException("text is empty");
 		}
-		// Range 请求头内容格式不匹配（如果前端按照 RFC 7233 规范传入则一般不会）
+		// Range 请求头内容格式不匹配（如果按照 RFC 7233 规范传入则一般不会）
 		if (!RANGE_PATTERN.matcher(text).matches()) {
 			throw new IllegalArgumentException("Invalid range: " + text);
 		}
-		String[] parts = StringUtil.split(text.toString(), StringPool.EQUAL, true).toArray(new String[0]);
+		String[] parts = StringUtil.splitToArray(text.toString(), StringPool.EQUAL, true);
 		if (parts.length != 2) {
 			throw new IllegalArgumentException(text + " is invalid");
 		}
-		String dataUnit = parts[0];
-		Collection<String> dataRanges = StringUtil.split(parts[1], StringPool.COMMA, true);
-		// 生成Range信息
-		RangeValue rangeValue = new RangeValue(dataUnit);
-		List<Slice> slices = dataRanges.stream()
+		// 去除后缀“s”以匹配数据单位
+		String dataUnitName = StringUtil.removeSuffix(parts[0], "s", true);
+		DataUnit dataUnit = DataUnit.fromName(dataUnitName);
+		List<Range> ranges = StringUtil.split(parts[1], StringPool.COMMA, true)
+			.stream()
 			.map(dataRange -> {
-				String[] ranges = StringUtil.split(dataRange, StringPool.HYPHEN, true).toArray(new String[0]);
-				if (ranges.length != 2) {
+				String[] dataRanges = StringUtil.splitToArray(dataRange, StringPool.HYPHEN, true);
+				if (dataRanges.length != 2) {
 					throw new IllegalArgumentException(dataRange + " is invalid");
 				}
-				// 开始位置
-				long start = 0L;
-				if (StringUtils.hasText(ranges[0])) {
-					start = Long.parseLong(ranges[0]);
+				if (CharSequenceUtil.nonBlank(dataRanges[0])) {
+					BigInteger start = new BigInteger(dataRanges[0]);
+					if (CharSequenceUtil.nonBlank(dataRanges[1])) {
+						BigInteger end = new BigInteger(dataRanges[1]);
+						if (start.compareTo(end) > 0) {
+							throw new IndexOutOfBoundsException(String.format("start[%s] > end[%s]", start, end));
+						}
+						return Range.ofBetween(start, end);
+					}
+					return Range.ofFrom(start);
 				}
-				// 结束位置
-				long end = -1L;
-				if (StringUtils.hasText(ranges[1])) {
-					end = Long.parseLong(ranges[1]);
+				if (CharSequenceUtil.nonBlank(dataRanges[1])) {
+					BigInteger offset = new BigInteger(dataRanges[1]);
+					return Range.ofLast(offset);
 				}
-				return rangeValue.new Slice(start, end);
+				throw new IllegalArgumentException("Invalid range: " + dataRange);
 			})
 			.collect(Collectors.toList());
-		rangeValue.setSlices(slices);
-		return rangeValue;
+		return new RangeValue(dataUnit, ranges);
 	}
 
-	private void setSlices(List<Slice> slices) {
-		this.slices = slices;
-	}
-
-	public RangeValue setTotalByte(long totalByte) {
-		this.totalByte = totalByte;
-		return setTotalFromByte(totalByte);
-	}
-
-	/**
-	 * 使用字节总数和单位来设置资源总大小
-	 */
-	private RangeValue setTotalFromByte(long totalByte) {
-		DataSize dataSize = DataSize.ofBytes(totalByte);
-		if (BYTES.name().equalsIgnoreCase(dataUnit)) {
-			this.total = dataSize.toBytes();
-		} else if (KILOBYTES.name().equalsIgnoreCase(dataUnit)) {
-			this.total = dataSize.toKilobytes();
-		} else if (MEGABYTES.name().equalsIgnoreCase(dataUnit)) {
-			this.total = dataSize.toGigabytes();
-		} else if (GIGABYTES.name().equalsIgnoreCase(dataUnit)) {
-			this.total = dataSize.toGigabytes();
-		} else if (TERABYTES.name().equalsIgnoreCase(dataUnit)) {
-			this.total = dataSize.toTerabytes();
-		} else {
-			throw new IllegalArgumentException("Unsupported unit: " + dataUnit);
-		}
-		return this;
+	@Override
+	public String toString() {
+		StringJoiner stringJoiner = new StringJoiner(StringPool.COMMA + StringPool.SPACE,
+			dataUnit.name().toLowerCase() + "s",
+			StringPool.EMPTY);
+		ranges.forEach(range -> stringJoiner.add(range.toString()));
+		return stringJoiner.toString();
 	}
 
 	/**
 	 * 切片
 	 */
-	public  class Slice {
-		/**
-		 * 开始位置
-		 */
-		@Getter
-		protected long start = 0L;
-		/**
-		 * 结束位置
-		 */
-		protected long end = -1L;
+	@Getter
+	@EqualsAndHashCode
+	@AllArgsConstructor(access = AccessLevel.PROTECTED)
+	public static class Range {
+		protected BigInteger start;
+		protected BigInteger offset;
+		protected BigInteger end;
+		protected Type type;
 
-		/**
-		 * 获取开始位置（byte）
-		 */
-		public long getStartByte() {
-			return getByte(start);
+		public static Range ofBetween(BigInteger start, BigInteger end) {
+			return new Range(start, null, end, Type.BETWEEN);
 		}
 
-		/**
-		 * 获取结束位置（byte）
-		 */
-		public long getEndByte() {
-			// 如果结束位置未指定，默认使用资源的总大小
-			if (end == -1L) {
-				return getTotalByte();
+		public static Range ofFrom(BigInteger start) {
+			return new Range(start, null, null, Type.FROM);
+		}
+
+		public static Range ofLast(BigInteger offset) {
+			return new Range(null, offset, null, Type.LAST);
+		}
+
+		@Override
+		public String toString() {
+			if (type == Type.BETWEEN) {
+				return start + StringPool.HYPHEN + end;
 			}
-			return getByte(end);
-		}
-
-		/**
-		 * 获取结束位置
-		 */
-		public long getEnd() {
-			// 如果结束位置未指定，默认使用资源的总大小
-			if (end == -1L) {
-				end = getTotal();
+			if (type == Type.FROM) {
+				return start + StringPool.HYPHEN;
 			}
-			return end;
-		}
-
-		/**
-		 * 根据数据长度和单位计算出字节数
-		 */
-		protected long getByte(long length) {
-			DataSize dataSize;
-			if (BYTES.name().equalsIgnoreCase(dataUnit)) {
-				dataSize = DataSize.ofBytes(length);
-			} else if (KILOBYTES.name().equalsIgnoreCase(dataUnit)) {
-				dataSize = DataSize.ofKilobytes(length);
-			} else if (MEGABYTES.name().equalsIgnoreCase(dataUnit)) {
-				dataSize = DataSize.ofMegabytes(length);
-			} else if (GIGABYTES.name().equalsIgnoreCase(dataUnit)) {
-				dataSize = DataSize.ofGigabytes(length);
-			} else if (TERABYTES.name().equalsIgnoreCase(dataUnit)) {
-				dataSize = DataSize.ofTerabytes(length);
-			} else {
-				throw new IllegalArgumentException("Unsupported DataUnit: " + dataUnit);
+			if (type == Type.LAST) {
+				return StringPool.HYPHEN + offset;
 			}
-			return dataSize.toBytes();
+			return StringPool.EMPTY;
+		}
+	}
+
+	/**
+	 * 范围类型
+	 */
+	public enum Type {
+		/**
+		 * 完整范围
+		 *
+		 * @see Range#start
+		 * @see Range#end
+		 */
+		BETWEEN,
+		/**
+		 * 从指定位置到结尾
+		 *
+		 * @see Range#start
+		 */
+		FROM,
+		/**
+		 * 最后 N 个字节
+		 *
+		 * @see Range#offset
+		 */
+		LAST,
+	}
+
+	public static class Builder {
+		protected DataUnit dataUnit;
+		protected final List<Range> ranges = new ArrayList<>();
+
+		public Builder dataUnit(DataUnit dataUnit) {
+			this.dataUnit = dataUnit;
+			return this;
 		}
 
-		protected Slice(long start, long end) {
-			this.start = start;
-			this.end = end;
+		public Builder ranges(Collection<Range> ranges) {
+			this.ranges.addAll(ranges);
+			return this;
+		}
+
+		public Builder range(Range range) {
+			this.ranges.add(range);
+			return this;
+		}
+
+		public RangeValue build() {
+			return new RangeValue(dataUnit, ranges);
 		}
 	}
 }

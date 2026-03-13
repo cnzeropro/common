@@ -15,7 +15,6 @@ import java.util.List;
  */
 @UtilityClass
 public class ServerWebExchangeHolder {
-    // 上下文键名（避免命名冲突）
     static final Class<ServerWebExchange> CONTEXT_KEY = ServerWebExchange.class;
 
     /**

@@ -1,12 +1,14 @@
 package org.zero.common.core.support.http.header;
 
 /**
- * HTTP 标头类别
+ * HTTP 标头类型
+ * <p>
+ * 未参考 MDN 文档，仅根据实际使用情况定义
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2026/1/9
  */
-public enum HeaderCategory {
+public enum HeaderType {
 	/**
 	 * 请求标头
 	 * <p>

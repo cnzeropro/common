@@ -24,7 +24,7 @@ public class StringUtil extends CharSequenceUtil implements StringPool {
 		if (ignoreCase) {
 			return str1.equalsIgnoreCase(str2);
 		}
-		return str1.contentEquals(str2);
+		return str1.equals(str2);
 	}
 
 	public static boolean subEquals(String str1, int from, String str2, boolean ignoreCase) {
@@ -78,6 +78,10 @@ public class StringUtil extends CharSequenceUtil implements StringPool {
 		return INDEX_NOT_FOUND;
 	}
 
+	public static boolean startWith(String string, String prefix) {
+		return startWith(string, prefix, false);
+	}
+
 	public static boolean startWith(String string, String prefix, boolean ignoreCase) {
 		if (Objects.equals(string, prefix)) {
 			return true;
@@ -86,6 +90,10 @@ public class StringUtil extends CharSequenceUtil implements StringPool {
 			return false;
 		}
 		return string.regionMatches(ignoreCase, 0, prefix, 0, prefix.length());
+	}
+
+	public static boolean endWith(String string, String suffix) {
+		return endWith(string, suffix, false);
 	}
 
 	public static boolean endWith(String string, String suffix, boolean ignoreCase) {
@@ -180,6 +188,40 @@ public class StringUtil extends CharSequenceUtil implements StringPool {
 		return firstToLower(removeSuffix(string, suffix, ignoreCase));
 	}
 
+	public static String stripWrappingQuotes(String string) {
+		if (isBlank(string) || string.length() < 2) {
+			return string;
+		}
+		String result = string;
+		if (startWith(result, DOUBLE_QUOTE) && endWith(result, DOUBLE_QUOTE)) {
+			result = sub(result, 1, result.length() - 1);
+		}
+		if (startWith(result, SINGLE_QUOTE) && endWith(result, SINGLE_QUOTE)) {
+			result = sub(result, 1, result.length() - 1);
+		}
+		if (Objects.equals(result, string)) {
+			return result;
+		}
+		return stripWrappingQuotes(result);
+	}
+
+	public static String stripQuotes(String string) {
+		if (isBlank(string)) {
+			return string;
+		}
+		String result = string;
+		if (startWith(result, DOUBLE_QUOTE) || startWith(result, SINGLE_QUOTE)) {
+			result = sub(result, 1);
+		}
+		if (endWith(result, DOUBLE_QUOTE) || endWith(result, SINGLE_QUOTE)) {
+			result = sub(result, 0, result.length() - 1);
+		}
+		if (Objects.equals(result, string)) {
+			return result;
+		}
+		return stripQuotes(result);
+	}
+
 	public static boolean contains(String string, String searchString, boolean ignoreCase) {
 		if (isNull(string) || isNull(searchString)) {
 			return false;
@@ -213,6 +255,14 @@ public class StringUtil extends CharSequenceUtil implements StringPool {
 		return true;
 	}
 
+	public static String[] splitToArray(String string, String delimiter) {
+		return split(string, delimiter).toArray(new String[0]);
+	}
+
+	public static String[] splitToArray(String string, String delimiter, boolean isTrim) {
+		return split(string, delimiter, isTrim).toArray(new String[0]);
+	}
+
 	public static Collection<String> split(String string, String delimiter) {
 		return split(string, delimiter, false);
 	}
@@ -231,19 +281,19 @@ public class StringUtil extends CharSequenceUtil implements StringPool {
 				String charStr = string.substring(i, i + 1);
 				result.add(isTrim ? charStr.trim() : charStr);
 			}
-		} else {
-			int delimiterLength = delimiter.length();
-			int fromIndex = 0;
-			int findIndex;
-			while ((findIndex = string.indexOf(delimiter, fromIndex)) != -1) {
-				String subStr = string.substring(fromIndex, findIndex);
-				result.add(isTrim ? subStr.trim() : subStr);
-				fromIndex = findIndex + delimiterLength;
-			}
-			if (!string.isEmpty() && fromIndex <= string.length()) {
-				String subStr = string.substring(fromIndex);
-				result.add(isTrim ? subStr.trim() : subStr);
-			}
+			return result;
+		}
+		int delimiterLength = delimiter.length();
+		int fromIndex = 0;
+		int findIndex;
+		while ((findIndex = string.indexOf(delimiter, fromIndex)) != -1) {
+			String subStr = string.substring(fromIndex, findIndex);
+			result.add(isTrim ? subStr.trim() : subStr);
+			fromIndex = findIndex + delimiterLength;
+		}
+		if (!string.isEmpty() && fromIndex <= string.length()) {
+			String subStr = string.substring(fromIndex);
+			result.add(isTrim ? subStr.trim() : subStr);
 		}
 		return result;
 	}

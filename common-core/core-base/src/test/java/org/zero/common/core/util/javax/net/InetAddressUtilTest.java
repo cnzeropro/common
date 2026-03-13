@@ -54,14 +54,14 @@ class InetAddressUtilTest {
     @Test
     void isIpv4() {
         // 有效地址
-        assertTrue(InetAddressUtil.isIpv4("0.0.0.0"));          // 全零地址
-        assertTrue(InetAddressUtil.isIpv4("192.168.1.1"));      // 常规地址
-        assertTrue(InetAddressUtil.isIpv4("255.255.255.255"));  // 最大地址
+        assertTrue(InetAddressUtil.isIPv4("0.0.0.0"));          // 全零地址
+        assertTrue(InetAddressUtil.isIPv4("192.168.1.1"));      // 常规地址
+        assertTrue(InetAddressUtil.isIPv4("255.255.255.255"));  // 最大地址
 
         // 无效地址
-        assertFalse(InetAddressUtil.isIpv4("192.168.01.1"));    // 含前导零
-        assertFalse(InetAddressUtil.isIpv4("256.0.0.0"));       // 超范围数值
-        assertFalse(InetAddressUtil.isIpv4("1.2.3.4.5"));       // 多段异常
-        assertFalse(InetAddressUtil.isIpv4("2001:db8::1"));     // IPv6地址干扰
+        assertFalse(InetAddressUtil.isIPv4("192.168.01.1"));    // 含前导零
+        assertFalse(InetAddressUtil.isIPv4("256.0.0.0"));       // 超范围数值
+        assertFalse(InetAddressUtil.isIPv4("1.2.3.4.5"));       // 多段异常
+        assertFalse(InetAddressUtil.isIPv4("2001:db8::1"));     // IPv6地址干扰
     }
 }
