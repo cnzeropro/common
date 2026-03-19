@@ -1,21 +1,50 @@
+import org.gradle.api.tasks.Delete
+import org.zero.build.BuildProfileSupport
+
 plugins {
     id('java-platform')
-//    id 'org.springframework.boot' version '2.7.18'
+    id('base')
 }
 
+/*
+ * build profile resolve - 统一解析当前构建 profile，并向子模块暴露结果
+ */
+def activeBuildProfile = BuildProfileSupport.resolveProfile(rootProject, findProperty('buildProfile'))
+ext.activeBuildProfile = activeBuildProfile
+
+/*
+ * build.revision guard - 运行期只依赖 Gradle 原生属性
+ */
+def revisionProvider = providers.gradleProperty('build.revision')
+if (!revisionProvider.isPresent()) {
+    throw new GradleException("Missing Gradle property 'build.revision'.")
+}
+def revision = revisionProvider.get()
+
+/*
+ * java platform config - root 仅作为 BOM 平台使用
+ */
 javaPlatform {
     allowDependencies()
 }
 
+group = 'org.zero'
+version = revision
+description = 'Common Project'
+
+/*
+ * shared BOM export - 统一导出公共依赖约束，版本由 version catalog / imported BOM 决定
+ */
 dependencies {
+    api(platform(libs.cn.dev33.sa.token.dependencies))
     api(platform(libs.com.alibaba.cloud.spring.cloud.alibaba.dependencies))
     api(platform(libs.com.google.cloud.libraries.bom))
     api(platform(libs.com.huaweicloud.spring.cloud.huawei.bom))
     api(platform(libs.com.querydsl.querydsl.bom))
     api(platform(libs.com.baomidou.mybatis.plus.bom))
     api(platform(libs.com.mybatis.flex.mybatis.flex.dependencies))
+    api(platform(libs.com.ctrip.framework.apollo.apollo))
     api(platform(libs.com.oracle.database.jdbc.ojdbc.bom))
-    api(platform(libs.org.zero.common.bom))
     api(platform(libs.org.apache.dubbo.dubbo.bom))
     api(platform(libs.org.apache.shiro.shiro.bom))
     api(platform(libs.org.apache.logging.log4j.log4j.bom))
@@ -33,98 +62,23 @@ dependencies {
     api(platform(libs.org.testcontainers.testcontainers.bom))
     api(platform(libs.io.projectreactor.reactor.bom))
     api(platform(libs.io.netty.netty.bom))
+    api(platform(libs.io.jsonwebtoken.jjwt.bom))
+    api(platform(libs.org.dromara.dynamictp.dynamic.tp.dependencies))
     api(platform(libs.cn.hutool.hutool.bom))
     api(platform(libs.jakarta.platform.jakarta.jakartaee.bom))
-    constraints {
-    }
 }
 
-// 所有项目通用配置（包括根项目）
-allprojects {
-    apply plugin: 'base'
-//    apply plugin: 'io.spring.dependency-management'
-
-    repositories {
-        maven { url 'https://maven.aliyun.com/repository/public/' }
-        mavenCentral()
-        mavenLocal {
-            content {
-                includeGroup("org.zero")
-            }
-        }
-    }
+/*
+ * clean task config - 允许 clean 处理符号链接目录
+ */
+tasks.named('clean', Delete).configure {
+    followSymlinks = true
 }
 
-// 所有子项目通用配置
-subprojects {
-    apply plugin: 'java-library'
-    apply plugin: 'application'
-    apply plugin: 'jvm-test-suite'
-    apply plugin: 'maven-publish'
-    apply plugin: 'org.zero.plugin.source.source-jar'
-
-    dependencies {
-        testImplementation 'org.junit.jupiter:junit-jupiter'
-    }
-
-    // https://docs.gradle.org/current/userguide/java_plugin.html#java_plugin
-    plugins.withId('java') {
-        tasks.named('compileJava', JavaCompile) {
-            options.compilerArgs += ["-parameters"]
-            options.encoding = "UTF-8"
-        }
-        tasks.named('compileTestJava', JavaCompile) {
-            options.compilerArgs += ["-parameters"]
-            options.encoding = "UTF-8"
-        }
-        tasks.named('javadoc', Javadoc) {
-            failOnError = false
-            options.addStringOption('Xdoclint:none', '-quiet')
-            options.encoding = "UTF-8"
-        }
-    }
-
-    // https://docs.gradle.org/current/userguide/base_plugin.html#base_plugin
-    plugins.withId('base') {
-        tasks.named('clean', Delete) {
-            followSymlinks = true
-            doFirst {
-                println "Cleaning..."
-            }
-        }
-    }
-
-//    tasks.named('sourcesJar', Jar) {
-//        doFirst {
-//            println "Generating sourcesJar..."
-//        }
-//    }
-//    tasks.named('javadocJar', Jar) {
-//        doFirst {
-//            println "Generating javadocJar..."
-//        }
-//    }
-
-    test {
-//        enabled = false
-        useJUnitPlatform()
-        filter {
-            includeTestsMatching("*Test")
-            includeTestsMatching("*Tests")
-            includeTestsMatching("*Spec")
-        }
-        testLogging {
-            showStandardStreams = true
-            events("passed", "skipped", "failed")
-        }
-    }
-}
-
-group = "org.zero"
-version = libs.versions.revison
-description = "Common Project"
-
+/*
+ * wrapper version lock - 固定团队统一的 Gradle Wrapper 版本
+ */
 wrapper {
-    gradleVersion = "8.14.3"
+    gradleVersion = '8.14.3'
     distributionType = Wrapper.DistributionType.ALL
 }

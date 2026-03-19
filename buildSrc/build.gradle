@@ -1,49 +1,100 @@
+import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.tasks.testing.Test
+
 plugins {
-    id('java')
     id('java-gradle-plugin')
-    id('groovy')
-    id('groovy-gradle-plugin')
 }
 
+/*
+ * plugin repositories - buildSrc 既要解析 Gradle API，也要解析自定义 plugin 的发布依赖。
+ */
 repositories {
     mavenLocal()
     mavenCentral()
     gradlePluginPortal()
 }
 
+/*
+ * Java 8 baseline - buildSrc 自身保持最低兼容版本，方便主仓库在低版本 JDK 场景下编译插件代码。
+ */
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-dependencies {
-    // 引入 Gradle API
-    implementation(gradleApi())
-    // 引入 Groovy 支持
-    implementation(localGroovy())
-
-    testImplementation(platform(libs.org.junit.junit.bom))
-    testImplementation(platform(libs.org.mockito.mockito.bom))
-    compileOnly(libs.org.projectlombok.lombok)
-    annotationProcessor(libs.org.projectlombok.lombok)
-    testCompileOnly(libs.org.projectlombok.lombok)
-    testAnnotationProcessor(libs.org.projectlombok.lombok)
-}
-
-gradlePlugin {
-    plugins {
-        sourceJar {
-            id = 'org.zero.plugin.source.source-jar'
-            implementationClass = 'org.zero.plugin.source.SourceJarPlugin'
+sourceSets {
+    test {
+        java {
+            srcDir('../scripts/build-metadata/src/main/java')
+            srcDir('../scripts/build-metadata/src/test/java')
         }
     }
 }
 
+dependencies {
+    implementation(gradleApi())
+    testImplementation(gradleTestKit())
+    testImplementation(platform(libs.org.junit.junit.bom))
+    testImplementation('org.junit.jupiter:junit-jupiter')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+}
+
+/*
+ * convention plugin registry - 根仓库 build.gradle 里使用的自定义插件都在这里声明入口实现类。
+ */
+gradlePlugin {
+    plugins {
+        java8LibraryConvention {
+            id = 'org.zero.conventions.java8-library'
+            implementationClass = 'org.zero.plugin.convention.Java8LibraryConventionPlugin'
+        }
+        java8ApplicationConvention {
+            id = 'org.zero.conventions.java8-application'
+            implementationClass = 'org.zero.plugin.convention.Java8ApplicationConventionPlugin'
+        }
+        java17ApplicationConvention {
+            id = 'org.zero.conventions.java17-application'
+            implementationClass = 'org.zero.plugin.convention.Java17ApplicationConventionPlugin'
+        }
+        java17LibraryConvention {
+            id = 'org.zero.conventions.java17-library'
+            implementationClass = 'org.zero.plugin.convention.Java17LibraryConventionPlugin'
+        }
+        multiReleaseJava8Convention {
+            id = 'org.zero.conventions.multi-release-java8'
+            implementationClass = 'org.zero.plugin.convention.MultiReleaseJava8ConventionPlugin'
+        }
+        aggregateDistributionConvention {
+            id = 'org.zero.conventions.aggregate-distribution'
+            implementationClass = 'org.zero.plugin.convention.AggregateDistributionConventionPlugin'
+        }
+    }
+}
+
+/*
+ * Java source of truth - 当前生效实现已经迁移到 src/main/java，禁用 Groovy 编译避免同名类重复打包。
+ */
+tasks.matching { it.name == 'compileGroovy' || it.name == 'compileTestGroovy' }.configureEach {
+    enabled = false
+}
+
+/*
+ * resource merge - 插件 descriptor 允许重复来源并入 resources，最终 jar 再做排重收口。
+ */
 tasks.named('processResources') {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
+tasks.named('jar') {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+def skipBuildSrcTests = providers.gradleProperty('buildSrc.skipTests')
+
+/*
+ * buildSrc test gate - 本地排查插件装配问题时，可通过 -PbuildSrc.skipTests 跳过 buildSrc 自测。
+ */
 tasks.named('test', Test).configure {
-    onlyIf { !project.hasProperty("buildSrc.skipTests") }
     useJUnitPlatform()
+    onlyIf { !skipBuildSrcTests.isPresent() }
 }

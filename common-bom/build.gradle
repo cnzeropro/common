@@ -1,0 +1,48 @@
+plugins {
+    id 'java-platform'
+    id 'maven-publish'
+}
+
+/*
+ * build.revision guard - common-bom 作为独立工程发布时，也必须复用根仓库同步出的 build.revision。
+ */
+def revisionProvider = providers.gradleProperty('build.revision')
+if (!revisionProvider.isPresent()) {
+    throw new GradleException("Missing Gradle property 'build.revision'.")
+}
+def revision = revisionProvider.get()
+
+group = 'org.zero'
+version = revision
+description = 'common-bom'
+
+/*
+ * platform-only module - 这里不打普通 jar，只导出对 common 系列模块的版本约束。
+ */
+javaPlatform {
+    allowDependencies()
+}
+
+dependencies {
+    /*
+     * internal coordinates - BOM 只约束仓库内公共模块版本，不声明业务实现依赖。
+     */
+    constraints {
+        api "org.zero:common-data:${version}"
+        api "org.zero:common-core:${version}"
+        api "org.zero:common-api:${version}"
+        api "org.zero:common-job:${version}"
+    }
+}
+
+/*
+ * mavenBom publication - 与根平台分离发布，方便外部工程单独按 org.zero:common-bom 引入。
+ */
+publishing {
+    publications {
+        mavenBom(MavenPublication) {
+            from components.javaPlatform
+            artifactId = 'common-bom'
+        }
+    }
+}

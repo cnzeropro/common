@@ -4,7 +4,9 @@ import lombok.Cleanup;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.Delegate;
+import org.lionsoul.ip2region.xdb.LongByteArray;
 import org.lionsoul.ip2region.xdb.Searcher;
+import org.lionsoul.ip2region.xdb.Version;
 import org.zero.common.core.util.java.io.IoUtil;
 import org.zero.common.core.util.java.net.UrlUtil;
 
@@ -18,23 +20,40 @@ import java.net.URL;
 @RequiredArgsConstructor(staticName = "of")
 public class Ip2regionHelper {
 	public static final String DEFAULT_REGION_FILE = "classpath:/ip2region.xdb";
+	public static final Version DEFAULT_VERSION = Version.IPv4;
 	@Delegate
 	protected final Searcher searcher;
 
 	public static Ip2regionHelper of() {
-		return of(DEFAULT_REGION_FILE);
+		return of(DEFAULT_VERSION);
+	}
+
+	public static Ip2regionHelper of(Version version) {
+		return of(DEFAULT_REGION_FILE, version);
 	}
 
 	@SneakyThrows
-	public static Ip2regionHelper of(String path) {
+	public static Ip2regionHelper of(String path, Version version) {
 		URL url = UrlUtil.fromPath(path);
 		@Cleanup InputStream inputStream = UrlUtil.openStream(url);
-		byte[] bytes = IoUtil.readAll(inputStream);
-		return of(bytes);
+		LongByteArray longByteArray = new LongByteArray();
+		byte[] bytes = new byte[IoUtil.DEFAULT_BUFFER_SIZE];
+		int read;
+		while ((read = inputStream.read(bytes)) != -1) {
+			if (read == bytes.length) {
+				longByteArray.append(bytes);
+			}
+			else {
+				byte[] chunk = new byte[read];
+				System.arraycopy(bytes, 0, chunk, 0, read);
+				longByteArray.append(chunk);
+			}
+		}
+		return of(longByteArray, version);
 	}
 
 	@SneakyThrows
-	public static Ip2regionHelper of(byte[] cBuff) {
-		return of(Searcher.newWithBuffer(cBuff));
+	public static Ip2regionHelper of(LongByteArray longByteArray, Version version) {
+		return of(Searcher.newWithBuffer(version, longByteArray));
 	}
 }

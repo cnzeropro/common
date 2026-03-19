@@ -1,12 +1,18 @@
-dependencies {
-    implementation(platform(project(":")))
-    implementation('org.zero:common-data')
-    implementation('jakarta.servlet:jakarta.servlet-api')
-    implementation('jakarta.validation:jakarta.validation-api')
-    implementation('jakarta.websocket:jakarta.websocket-api')
-    implementation('jakarta.annotation:jakarta.annotation-api')
-    implementation('jakarta.mail:jakarta.mail-api')
+plugins {
+    id 'org.zero.conventions.java8-library'
+}
 
+/*
+ * dependency layout - ip2region2 适配层非常薄，只在根平台之上补核心模块与查询库依赖。
+ */
+dependencies {
+    implementation(platform(project(':')))
+    implementation(project(':core-base'))
+    implementation(libs.org.lionsoul.ip2region)
+
+    /*
+     * Lombok compile support - 适配层源码继续沿用统一注解处理策略。
+     */
     compileOnly('org.projectlombok:lombok')
     annotationProcessor(libs.org.projectlombok.lombok)
     testCompileOnly('org.projectlombok:lombok')
@@ -14,8 +20,3 @@ dependencies {
 }
 
 description = 'common-core::ip2region2'
-
-java {
-    withJavadocJar()
-    withSourcesJar()
-}

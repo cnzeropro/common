@@ -1,0 +1,28 @@
+pluginManagement {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+/*
+ * standalone BOM repositories - 独立构建 common-bom 时复用主工程的解析策略。
+ */
+dependencyResolutionManagement {
+    repositoriesMode = org.gradle.api.initialization.resolve.RepositoriesMode.PREFER_SETTINGS
+    repositories {
+        maven { url 'https://maven.aliyun.com/repository/public/' }
+        mavenLocal {
+            content {
+                includeGroup('org.zero')
+            }
+        }
+        mavenCentral()
+    }
+}
+
+/*
+ * standalone BOM build - common-bom 支持单独构建与发布，因此保留独立 rootProject.name。
+ */
+rootProject.name = 'common-bom'

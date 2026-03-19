@@ -1,6 +1,20 @@
+plugins {
+    id 'org.zero.conventions.multi-release-java8'
+}
+
+/*
+ * version catalog fallback - 个别坐标缺失时保留旧兜底，避免历史脚本直接失效
+ */
+def libsCatalog = extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension).named('libs')
+def sentinelWebMvcDependency = libsCatalog.findLibrary('com-alibaba-csp_sentinel-spring-webmvc-adapter').orElse(null)
+    ?: 'com.alibaba.csp:sentinel-spring-webmvc-adapter:1.8.8'
+
+/*
+ * dependency layout - core-base 统一复用 root BOM，profile 差异依赖从 catalog 选择
+ */
 dependencies {
-    implementation(platform(project(":")))
-    implementation('org.zero:common-data')
+    implementation(platform(project(':')))
+    implementation(project(':common-data'))
     implementation('org.springframework:spring-web')
     implementation('org.springframework:spring-webmvc')
     implementation('org.springframework:spring-webflux')
@@ -29,11 +43,14 @@ dependencies {
     implementation(libs.org.lionsoul.ip2region)
     implementation(libs.org.openjdk.jol.jol.core)
     implementation('org.slf4j:slf4j-api')
-    implementation(libs.com.alibaba.transmittable.thread.local)
+    implementation('com.alibaba:transmittable-thread-local')
     implementation(libs.com.alibaba.easyexcel)
     implementation('com.alibaba.cloud:spring-cloud-starter-alibaba-sentinel')
     implementation('com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery')
-    implementation('com.alibaba.csp:sentinel-spring-webmvc-adapter')
+    /*
+     * sentinel adapter fallback - 优先走 catalog，缺项时回退历史稳定版本
+     */
+    implementation(sentinelWebMvcDependency)
     implementation('com.alibaba.csp:sentinel-parameter-flow-control')
     implementation(libs.com.alibaba.csp.sentinel.apache.dubbo.adapter)
     implementation(libs.com.alibaba.csp.sentinel.apache.dubbo3.adapter)
@@ -44,7 +61,7 @@ dependencies {
     implementation('com.google.code.gson:gson')
     implementation(libs.com.googlecode.juniversalchardet.juniversalchardet)
     implementation(libs.com.github.rholder.guava.retrying)
-    implementation('com.github.ben-manes.caffeine:caffeine')
+    implementation(libs.com.github.ben.manes.caffeine.caffeine)
     implementation(libs.com.github.ulisesbocchio.jasypt.spring.boot)
     implementation('com.baomidou:mybatis-plus-core')
     implementation('com.baomidou:mybatis-plus-generator')
@@ -62,9 +79,9 @@ dependencies {
     implementation('cn.hutool:hutool-crypto')
     implementation('io.github.openfeign:feign-core')
     implementation(libs.io.minio.minio)
-    implementation(libs.io.jsonwebtoken.jjwt.api)
-    testImplementation(libs.io.jsonwebtoken.jjwt.impl)
-    testImplementation(libs.io.jsonwebtoken.jjwt.jackson)
+    implementation('io.jsonwebtoken:jjwt-api')
+    testImplementation('io.jsonwebtoken:jjwt-impl')
+    testImplementation('io.jsonwebtoken:jjwt-jackson')
     implementation('ch.qos.logback:logback-classic')
     implementation('javax.servlet:javax.servlet-api')
     implementation(libs.javax.servlet.servlet.api)
@@ -79,6 +96,9 @@ dependencies {
     implementation('jakarta.mail:jakarta.mail-api')
     implementation(libs.xerces.xercesImpl)
 
+    /*
+     * Lombok compile support - 主线源码和测试都只在编译期使用注解处理
+     */
     compileOnly('org.projectlombok:lombok')
     annotationProcessor(libs.org.projectlombok.lombok)
     testCompileOnly('org.projectlombok:lombok')
@@ -86,8 +106,3 @@ dependencies {
 }
 
 description = 'common-core::base'
-
-java {
-    withJavadocJar()
-    withSourcesJar()
-}

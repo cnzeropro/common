@@ -52,12 +52,10 @@ public class CustomMDCAdapter implements MDCAdapter {
 		context.set(map);
 	}
 
-	@Override
 	public void pushByKey(String key, String value) {
 		this.getDequeContextMap().computeIfAbsent(key, ignored -> new LinkedList<>()).push(value);
 	}
 
-	@Override
 	public String popByKey(String key) {
 		Deque<String> deque = this.getDequeContextMap().get(key);
 		if (Objects.isNull(deque) || deque.isEmpty()) {
@@ -70,7 +68,6 @@ public class CustomMDCAdapter implements MDCAdapter {
 		return value;
 	}
 
-	@Override
 	public Deque<String> getCopyOfDequeByKey(String key) {
 		Deque<String> deque = this.getDequeContextMap().get(key);
 		if (Objects.isNull(deque) || deque.isEmpty()) {
@@ -79,7 +76,6 @@ public class CustomMDCAdapter implements MDCAdapter {
 		return new LinkedList<>(deque);
 	}
 
-	@Override
 	public void clearDequeByKey(String key) {
 		this.getDequeContextMap().remove(key);
 	}

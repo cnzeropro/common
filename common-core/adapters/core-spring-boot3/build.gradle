@@ -1,12 +1,40 @@
+import org.zero.build.BuildProfileSupport
+import org.gradle.api.artifacts.VersionCatalogsExtension
+
+plugins {
+    id 'org.zero.conventions.java17-library'
+}
+
+def dependencyBuildProfile = BuildProfileSupport.resolveProfileAtLeast(project, findProperty('buildProfile'), 'java17')
+def profileLibrary = { String alias -> BuildProfileSupport.selectLibrary(project, alias, dependencyBuildProfile) }
+def libsCatalog = extensions.getByType(VersionCatalogsExtension).named('libs')
+
+/*
+ * dependency layout - Boot 3 适配层在根平台基础上按 profile 叠加 Spring/Jakarta 高版本 BOM，隔离新生态依赖面。
+ */
 dependencies {
-    implementation(platform(project(":")))
-    implementation('org.zero:common-data')
+    implementation(platform(project(':')))
+    implementation(platform(profileLibrary('org.springframework_spring-framework-bom')))
+    implementation(platform(profileLibrary('org.springframework.boot_spring-boot-dependencies')))
+    implementation(platform(profileLibrary('org.springframework.cloud_spring-cloud-dependencies')))
+    implementation(platform(profileLibrary('com.alibaba.cloud_spring-cloud-alibaba-dependencies')))
+    implementation(platform(profileLibrary('jakarta.platform_jakarta.jakartaee-bom')))
+    implementation(project(':core-base'))
+    implementation(project(':core-jakarta'))
+    implementation(project(':common-data'))
+    implementation('org.springframework:spring-web')
+    implementation('org.springframework:spring-webmvc')
+    implementation('org.springframework.boot:spring-boot')
+    implementation('org.springframework.boot:spring-boot-autoconfigure')
+    implementation(libsCatalog.findLibrary('com-alibaba-csp_sentinel-spring-webmvc-6x-adapter').get())
     implementation('jakarta.servlet:jakarta.servlet-api')
     implementation('jakarta.validation:jakarta.validation-api')
-    implementation('jakarta.websocket:jakarta.websocket-api')
-    implementation('jakarta.annotation:jakarta.annotation-api')
-    implementation('jakarta.mail:jakarta.mail-api')
+    implementation('io.github.openfeign:feign-core')
+    implementation('org.slf4j:slf4j-api')
 
+    /*
+     * Lombok compile support - 仅保留编译期注解处理能力。
+     */
     compileOnly('org.projectlombok:lombok')
     annotationProcessor(libs.org.projectlombok.lombok)
     testCompileOnly('org.projectlombok:lombok')
@@ -14,8 +42,3 @@ dependencies {
 }
 
 description = 'common-core::spring-boot3'
-
-java {
-    withJavadocJar()
-    withSourcesJar()
-}

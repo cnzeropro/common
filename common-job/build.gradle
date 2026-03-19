@@ -1,9 +1,19 @@
+plugins {
+    id 'org.zero.conventions.java8-library'
+}
+
+/*
+ * dependency layout - common-job 只保留任务调度所需的最小 Spring/SLF4J 依赖面。
+ */
 dependencies {
-    implementation(platform(project(":")))
+    implementation(platform(project(':')))
     implementation('org.springframework:spring-context')
     implementation('org.slf4j:slf4j-api')
     implementation('ch.qos.logback:logback-classic')
 
+    /*
+     * Lombok compile support - 仅参与编译期代码生成。
+     */
     compileOnly('org.projectlombok:lombok')
     annotationProcessor(libs.org.projectlombok.lombok)
     testCompileOnly('org.projectlombok:lombok')
@@ -11,8 +21,3 @@ dependencies {
 }
 
 description = 'common-job'
-
-java {
-    withJavadocJar()
-    withSourcesJar()
-}

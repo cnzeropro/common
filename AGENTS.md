@@ -48,6 +48,23 @@ mvn -pl common-core/core-base -am test -Dtest=StringUtilTest  # 单测试类
 cd common-bom && mvn deploy
 ```
 
+### 元数据同步
+
+```bash
+powershell -ExecutionPolicy Bypass -File scripts/sync-build-metadata.ps1
+powershell -ExecutionPolicy Bypass -File scripts/verify-build-metadata.ps1
+./scripts/sync-build-metadata.sh
+./scripts/verify-build-metadata.sh
+```
+
+### JDK / Toolchains
+
+- `metadata/build-metadata.toml` 只作为脚本输入源；独立脚本会同步生成 Gradle 的 `gradle/libs.versions.toml`、root `gradle.properties` 与 Maven root `pom.xml`
+- Gradle 默认从 root `gradle.properties` 读取 `build.revision` 与 `build.profiles`，如需临时覆盖使用 `-Pbuild.revision=...`、`-PbuildProfile=...`；JDK 通过 `JAVA_HOME`、`JDK11_HOME`、`JDK17_HOME`、`JDK21_HOME` 自动发现
+- Maven 默认读取 root `pom.xml` 中的 `<revision>`，如需临时覆盖使用 `-Drevision=...`
+- Maven 不再读取仓库内 JDK 绝对路径；多版本编译依赖外部 toolchains，使用用户自带 `~/.m2/toolchains.xml` 或命令行 `mvn -t <toolchains.xml> ...`
+- 如需仓库内临时 toolchains 文件，可自行创建 `.mvn/toolchains.local.xml`，该路径不会纳入版本控制
+
 ---
 
 ## 代码风格
@@ -113,7 +130,7 @@ cd common-bom && mvn deploy
 
 | 方面 | 漂移 |
 |------|------|
-| 依赖版本 | `gradle/libs.versions.toml` ≠ root `pom.xml` |
+| 依赖版本 | `metadata/build-metadata.toml` 生成的 Gradle catalog / root `gradle.properties` ≠ root `pom.xml` |
 | Java 版本 | 主线 Java 8，adapter POM 更高 |
 | 聚合逻辑 | Gradle `:core-distribution` ≠ Maven `common-core` |
 

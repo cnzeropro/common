@@ -5,13 +5,31 @@
 	<parent>
 		<groupId>org.zero</groupId>
 		<artifactId>common</artifactId>
-		<version>1.0.0</version>
+		<version>${revision}</version>
+		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>core-base</artifactId>
 	<packaging>jar</packaging>
 
 	<name>common-core::base</name>
+
+	<properties>
+		<org.springframework_spring-framework-bom.version>5.3.39</org.springframework_spring-framework-bom.version>
+		<org.springframework.boot_spring-boot-dependencies.version>2.7.18</org.springframework.boot_spring-boot-dependencies.version>
+		<org.springframework.cloud_spring-cloud-dependencies.version>2021.0.9</org.springframework.cloud_spring-cloud-dependencies.version>
+		<com.alibaba.cloud_spring-cloud-alibaba-dependencies.version>2021.0.6.0</com.alibaba.cloud_spring-cloud-alibaba-dependencies.version>
+		<org.springframework.data_spring-data-bom.version>2021.2.18</org.springframework.data_spring-data-bom.version>
+		<org.springframework.security_spring-security-bom.version>5.8.16</org.springframework.security_spring-security-bom.version>
+		<org.springframework.integration_spring-integration-bom.version>5.5.20</org.springframework.integration_spring-integration-bom.version>
+		<org.springframework.shell_spring-shell-dependencies.version>2.1.15</org.springframework.shell_spring-shell-dependencies.version>
+		<org.springframework.session_spring-session-bom.version>2021.2.3</org.springframework.session_spring-session-bom.version>
+		<org.springframework.plugin_spring-plugin.version>2.0.0.RELEASE</org.springframework.plugin_spring-plugin.version>
+		<org.springframework.plugin_spring-plugin-core.version>2.0.0.RELEASE</org.springframework.plugin_spring-plugin-core.version>
+		<org.springframework.plugin_spring-plugin-metadata.version>2.0.0.RELEASE</org.springframework.plugin_spring-plugin-metadata.version>
+		<jakarta.platform_jakarta.jakartaee-bom.version>9.1.0</jakarta.platform_jakarta.jakartaee-bom.version>
+		<org.eclipse.jetty_jetty-bom.version>9.4.58.v20250814</org.eclipse.jetty_jetty-bom.version>
+	</properties>
 
 	<dependencies>
 		<dependency>
@@ -276,6 +294,11 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
+			<groupId>com.alibaba.fastjson2</groupId>
+			<artifactId>fastjson2</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
 			<groupId>io.github.openfeign</groupId>
 			<artifactId>feign-core</artifactId>
 			<optional>true</optional>
@@ -400,30 +423,6 @@
 			<artifactId>slf4j-api</artifactId>
 			<optional>true</optional>
 		</dependency>
-		<dependency>
-			<groupId>jakarta.servlet</groupId>
-			<artifactId>jakarta.servlet-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter</artifactId>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 
 	<build>
@@ -431,14 +430,83 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-toolchains-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>validate-jdk8-toolchain</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>toolchain</goal>
+						</goals>
+						<configuration>
+							<toolchains>
+								<jdk>
+									<version>8</version>
+								</jdk>
+							</toolchains>
+						</configuration>
+					</execution>
+					<execution>
+						<id>validate-jdk11-toolchain</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>toolchain</goal>
+						</goals>
+						<configuration>
+							<toolchains>
+								<jdk>
+									<version>11</version>
+								</jdk>
+							</toolchains>
+						</configuration>
+					</execution>
+					<execution>
+						<id>validate-jdk17-toolchain</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>toolchain</goal>
+						</goals>
+						<configuration>
+							<toolchains>
+								<jdk>
+									<version>17</version>
+								</jdk>
+							</toolchains>
+						</configuration>
+					</execution>
+					<execution>
+						<id>validate-jdk21-toolchain</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>toolchain</goal>
+						</goals>
+						<configuration>
+							<toolchains>
+								<jdk>
+									<version>21</version>
+								</jdk>
+							</toolchains>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<executions>
+					<execution>
+						<id>default-compile</id>
+						<phase>none</phase>
+					</execution>
 					<execution>
 						<id>compile-base</id>
 						<goals>
 							<goal>compile</goal>
 						</goals>
 						<configuration>
+							<jdkToolchain>
+								<version>8</version>
+							</jdkToolchain>
 							<source>8</source>
 							<target>8</target>
 						</configuration>
@@ -450,11 +518,14 @@
 							<goal>compile</goal>
 						</goals>
 						<configuration>
+							<jdkToolchain>
+								<version>11</version>
+							</jdkToolchain>
 							<release>9</release>
+							<multiReleaseOutput>true</multiReleaseOutput>
 							<compileSourceRoots>
 								<compileSourceRoot>${project.basedir}/src/main/java9</compileSourceRoot>
 							</compileSourceRoots>
-							<outputDirectory>${project.build.outputDirectory}/META-INF/versions/9</outputDirectory>
 						</configuration>
 					</execution>
 					<execution>
@@ -464,11 +535,14 @@
 							<goal>compile</goal>
 						</goals>
 						<configuration>
+							<jdkToolchain>
+								<version>11</version>
+							</jdkToolchain>
 							<release>11</release>
+							<multiReleaseOutput>true</multiReleaseOutput>
 							<compileSourceRoots>
 								<compileSourceRoot>${project.basedir}/src/main/java11</compileSourceRoot>
 							</compileSourceRoots>
-							<outputDirectory>${project.build.outputDirectory}/META-INF/versions/11</outputDirectory>
 						</configuration>
 					</execution>
 					<execution>
@@ -478,11 +552,14 @@
 							<goal>compile</goal>
 						</goals>
 						<configuration>
+							<jdkToolchain>
+								<version>17</version>
+							</jdkToolchain>
 							<release>17</release>
+							<multiReleaseOutput>true</multiReleaseOutput>
 							<compileSourceRoots>
 								<compileSourceRoot>${project.basedir}/src/main/java17</compileSourceRoot>
 							</compileSourceRoots>
-							<outputDirectory>${project.build.outputDirectory}/META-INF/versions/17</outputDirectory>
 						</configuration>
 					</execution>
 					<execution>
@@ -492,11 +569,14 @@
 							<goal>compile</goal>
 						</goals>
 						<configuration>
+							<jdkToolchain>
+								<version>21</version>
+							</jdkToolchain>
 							<release>21</release>
+							<multiReleaseOutput>true</multiReleaseOutput>
 							<compileSourceRoots>
 								<compileSourceRoot>${project.basedir}/src/main/java21</compileSourceRoot>
 							</compileSourceRoots>
-							<outputDirectory>${project.build.outputDirectory}/META-INF/versions/21</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
@@ -547,22 +627,6 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>com.github.github</groupId>
-				<artifactId>site-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>

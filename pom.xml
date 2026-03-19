@@ -38,226 +38,202 @@
 		<maven.clean.verbose>${maven.verbose}</maven.clean.verbose>
 		<maven.compiler.verbose>${maven.verbose}</maven.compiler.verbose>
 
-		<!-- ************************************ Artifact ************************************ -->
+		<!-- ************************************ Project ************************************ -->
 		<revision>1.0.0</revision>
-		<org.zero_common-bom.version>${revision}</org.zero_common-bom.version>
-		<!-- Java -->
-		<org.openjdk.jol_jol-core.version>0.17</org.openjdk.jol_jol-core.version>
-		<org.openjdk.jmh_jmh-core.version>1.37</org.openjdk.jmh_jmh-core.version>
-		<org.openjdk.jmh_jmh-generator-annprocess.version>${org.openjdk.jmh_jmh-core.version}
-		</org.openjdk.jmh_jmh-generator-annprocess.version>
-		<!-- Apache -->
-		<org.apache.maven_maven-model.version>3.9.11</org.apache.maven_maven-model.version>
-		<org.apache.commons_commons-text.version>1.14.0</org.apache.commons_commons-text.version>
-		<org.apache.commons_commons-compress.version>1.28.0</org.apache.commons_commons-compress.version>
-		<org.apache.poi_poi-ooxml.version>5.4.1</org.apache.poi_poi-ooxml.version>
-		<org.apache.dubbo_dubbo-bom.version>3.2.12</org.apache.dubbo_dubbo-bom.version>
-		<org.apache.logging.log4j_log4j-bom.version>2.24.3</org.apache.logging.log4j_log4j-bom.version>
-		<org.apache.shardingsphere.elasticjob_elasticjob.version>3.0.4
-		</org.apache.shardingsphere.elasticjob_elasticjob.version>
-		<org.apache.shardingsphere.elasticjob_elasticjob-lite-spring-boot-starter.version>
-			${org.apache.shardingsphere.elasticjob_elasticjob.version}
-		</org.apache.shardingsphere.elasticjob_elasticjob-lite-spring-boot-starter.version>
-		<org.apache.shiro_shiro-bom.version>1.13.0</org.apache.shiro_shiro-bom.version>
-		<!-- Spring -->
-		<org.springframework.session_spring-session-bom.version>2021.2.3
-		</org.springframework.session_spring-session-bom.version>
-		<org.springframework_spring-framework-bom.version>5.3.39
-		</org.springframework_spring-framework-bom.version>
-		<org.springframework.boot_spring-boot-dependencies.version>2.7.18
-		</org.springframework.boot_spring-boot-dependencies.version>
-		<!-- https://spring.io/projects/spring-cloud -->
-		<org.springframework.cloud_spring-cloud-dependencies.version>2021.0.9
-		</org.springframework.cloud_spring-cloud-dependencies.version>
-		<!-- https://github.com/spring-projects/spring-shell/wiki/Spring-Boot-compatibility -->
-		<org.springframework.shell_spring-shell-dependencies.version>2.1.15
-		</org.springframework.shell_spring-shell-dependencies.version>
-		<org.springframework.data_spring-data-bom.version>2021.2.18
-		</org.springframework.data_spring-data-bom.version>
-		<org.springframework.integration_spring-integration-bom.version>5.5.20
-		</org.springframework.integration_spring-integration-bom.version>
-		<org.springframework.security_spring-security-bom.version>5.8.16
-		</org.springframework.security_spring-security-bom.version>
-		<org.springframework.plugin_spring-plugin.version>2.0.0.RELEASE
-		</org.springframework.plugin_spring-plugin.version>
-		<org.springframework.plugin_spring-plugin-core.version>${org.springframework.plugin_spring-plugin.version}
-		</org.springframework.plugin_spring-plugin-core.version>
-		<org.springframework.plugin_spring-plugin-metadata.version>${org.springframework.plugin_spring-plugin.version}
-		</org.springframework.plugin_spring-plugin-metadata.version>
-		<!-- Eclipse -->
-		<jakarta.platform_jakarta.jakartaee-bom.version>9.1.0</jakarta.platform_jakarta.jakartaee-bom.version>
-		<jakarta.xml.bind_jakarta.xml.bind-api.version>3.0.1</jakarta.xml.bind_jakarta.xml.bind-api.version>
-		<com.sun.xml.bind_jaxb-impl.version>3.0.2</com.sun.xml.bind_jaxb-impl.version>
-		<org.glassfish.jaxb_jaxb-runtime.version>3.0.2</org.glassfish.jaxb_jaxb-runtime.version>
-		<org.eclipse.jetty_jetty-bom.version>9.4.58.v20250814</org.eclipse.jetty_jetty-bom.version>
-		<!-- Google -->
-		<com.google.cloud_libraries-bom.version>26.68.0</com.google.cloud_libraries-bom.version>
-		<com.google.guava_guava.version>33.5.0-jre</com.google.guava_guava.version>
-		<com.google.code.gson_gson.version>2.13.2</com.google.code.gson_gson.version>
-		<com.google.protobuf_protobuf-bom.version>4.32.1</com.google.protobuf_protobuf-bom.version>
-		<com.google.code_kaptcha.version>2.3.0</com.google.code_kaptcha.version>
-		<com.google.code.kaptcha_kaptcha.version>2.3</com.google.code.kaptcha_kaptcha.version>
-		<!-- Alibaba -->
-		<!-- https://sca.aliyun.com/docs/2023/overview/version-explain -->
+
+		<!-- ************************************ Dependencies ************************************ -->
+		<cn.dev33_sa-token-dependencies.version>1.44.0</cn.dev33_sa-token-dependencies.version>
+		<cn.hutool_hutool-all.version>5.8.40</cn.hutool_hutool-all.version>
+		<cn.hutool_hutool-bom.version>5.8.40</cn.hutool_hutool-bom.version>
+		<cn.idev.excel_fastexcel.version>1.3.0</cn.idev.excel_fastexcel.version>
 		<com.alibaba.cloud_spring-cloud-alibaba-dependencies.version>2021.0.6.0
 		</com.alibaba.cloud_spring-cloud-alibaba-dependencies.version>
-		<com.alibaba_easyexcel.version>4.0.3</com.alibaba_easyexcel.version>
 		<com.alibaba.csp_sentinel-apache-dubbo-adapter.version>1.8.8
 		</com.alibaba.csp_sentinel-apache-dubbo-adapter.version>
-		<com.alibaba.csp_sentinel-apache-dubbo3-adapter.version>
-			${com.alibaba.csp_sentinel-apache-dubbo-adapter.version}
+		<com.alibaba.csp_sentinel-apache-dubbo3-adapter.version>1.8.8
 		</com.alibaba.csp_sentinel-apache-dubbo3-adapter.version>
+		<com.alibaba.csp_sentinel-spring-webmvc-6x-adapter.version>1.8.6
+		</com.alibaba.csp_sentinel-spring-webmvc-6x-adapter.version>
+		<com.alibaba.csp_sentinel-spring-webmvc-adapter.version>1.8.8
+		</com.alibaba.csp_sentinel-spring-webmvc-adapter.version>
+		<com.alibaba_druid-spring-boot-starter.version>1.2.27</com.alibaba_druid-spring-boot-starter.version>
 		<com.alibaba_druid.version>1.2.27</com.alibaba_druid.version>
-		<com.alibaba_druid-spring-boot-starter.version>${com.alibaba_druid.version}
-		</com.alibaba_druid-spring-boot-starter.version>
-		<com.alibaba_fastjson.version>2.0.59</com.alibaba_fastjson.version>
-		<com.alibaba.fastjson2_fastjson2.version>2.0.59</com.alibaba.fastjson2_fastjson2.version>
-		<com.alibaba_transmittable-thread-local.version>2.14.5</com.alibaba_transmittable-thread-local.version>
+		<com.alibaba_easyexcel.version>4.0.3</com.alibaba_easyexcel.version>
 		<com.alicp.jetcache_jetcache-core.version>2.7.8</com.alicp.jetcache_jetcache-core.version>
-		<com.alicp.jetcache_jetcache-starter-redis.version>${com.alicp.jetcache_jetcache-core.version}
-		</com.alicp.jetcache_jetcache-starter-redis.version>
-		<com.alicp.jetcache_jetcache-starter-redis-lettuce.version>${com.alicp.jetcache_jetcache-core.version}
+		<com.alicp.jetcache_jetcache-starter-redis-lettuce.version>2.7.8
 		</com.alicp.jetcache_jetcache-starter-redis-lettuce.version>
-		<com.alicp.jetcache_jetcache-starter-redisson.version>${com.alicp.jetcache_jetcache-core.version}
+		<com.alicp.jetcache_jetcache-starter-redis.version>2.7.8</com.alicp.jetcache_jetcache-starter-redis.version>
+		<com.alicp.jetcache_jetcache-starter-redisson.version>2.7.8
 		</com.alicp.jetcache_jetcache-starter-redisson.version>
-		<com.taobao.arthas_arthas-core.version>4.0.5</com.taobao.arthas_arthas-core.version>
-		<com.taobao.arthas_arthas-spring-boot-starter.version>${com.taobao.arthas_arthas-core.version}
-		</com.taobao.arthas_arthas-spring-boot-starter.version>
-		<!-- Huawei -->
-		<!-- https://github.com/huaweicloud/spring-cloud-huawei/wiki/third-version-support-descriptions -->
-		<com.huaweicloud_spring-cloud-huawei-bom.version>1.11.12-2021.0.x
-		</com.huaweicloud_spring-cloud-huawei-bom.version>
-		<!-- Github -->
-		<com.github.ulisesbocchio_jasypt-spring-boot.version>3.0.5</com.github.ulisesbocchio_jasypt-spring-boot.version>
-		<com.github.ulisesbocchio_jasypt-spring-boot-starter.version>
-			${com.github.ulisesbocchio_jasypt-spring-boot.version}
-		</com.github.ulisesbocchio_jasypt-spring-boot-starter.version>
-		<!-- Dromara -->
-		<org.dromara.dynamictp_dynamic-tp-core.version>1.2.2</org.dromara.dynamictp_dynamic-tp-core.version>
-		<org.dromara.dynamictp_dynamic-tp-dependencies.version>${org.dromara.dynamictp_dynamic-tp-core.version}
-		</org.dromara.dynamictp_dynamic-tp-dependencies.version>
-		<org.dromara.x-file-storage_x-file-storage-core.version>2.3.0
-		</org.dromara.x-file-storage_x-file-storage-core.version>
-		<org.dromara.x-file-storage_x-file-storage-spring.version>
-			${org.dromara.x-file-storage_x-file-storage-core.version}
-		</org.dromara.x-file-storage_x-file-storage-spring.version>
-		<cn.dev33_sa-token-core.version>1.44.0</cn.dev33_sa-token-core.version>
-		<cn.dev33_sa-token-dependencies.version>${cn.dev33_sa-token-core.version}
-		</cn.dev33_sa-token-dependencies.version>
-		<cn.hutool_hutool-all.version>5.8.40</cn.hutool_hutool-all.version>
-		<cn.hutool_hutool-bom.version>${cn.hutool_hutool-all.version}</cn.hutool_hutool-bom.version>
-		<!-- Other -->
-		<com.mysql_mysql-connector-j.version>9.4.0</com.mysql_mysql-connector-j.version>
-		<com.redis_testcontainers-redis.version>1.7.0</com.redis_testcontainers-redis.version>
-		<com.mybatis-flex_mybatis-flex-dependencies.version>1.11.3</com.mybatis-flex_mybatis-flex-dependencies.version>
-		<com.baomidou_mybatis-plus-bom.version>3.5.14</com.baomidou_mybatis-plus-bom.version>
+		<com.auth0_java-jwt.version>4.5.0</com.auth0_java-jwt.version>
 		<com.baomidou_dynamic-datasource-spring-boot-starter.version>4.3.1
 		</com.baomidou_dynamic-datasource-spring-boot-starter.version>
 		<com.baomidou_lock4j-core.version>2.2.7</com.baomidou_lock4j-core.version>
-		<com.baomidou_lock4j-redisson-spring-boot-starter.version>${com.baomidou_lock4j-core.version}
-		</com.baomidou_lock4j-redisson-spring-boot-starter.version>
-		<com.baomidou_lock4j-redis-template-spring-boot-starter.version>${com.baomidou_lock4j-core.version}
+		<com.baomidou_lock4j-redis-template-spring-boot-starter.version>2.2.7
 		</com.baomidou_lock4j-redis-template-spring-boot-starter.version>
-		<com.baomidou_lock4j-zookeeper-spring-boot-starter.version>${com.baomidou_lock4j-core.version}
+		<com.baomidou_lock4j-redisson-spring-boot-starter.version>2.2.7
+		</com.baomidou_lock4j-redisson-spring-boot-starter.version>
+		<com.baomidou_lock4j-zookeeper-spring-boot-starter.version>2.2.7
 		</com.baomidou_lock4j-zookeeper-spring-boot-starter.version>
-		<com.xuxueli_xxl-job.version>3.2.0</com.xuxueli_xxl-job.version>
+		<com.baomidou_mybatis-plus-bom.version>3.5.14</com.baomidou_mybatis-plus-bom.version>
+		<com.baomidou_mybatis-plus.version>3.5.12</com.baomidou_mybatis-plus.version>
+		<com.ctrip.framework.apollo_apollo-client-config-data.version>2.4.0
+		</com.ctrip.framework.apollo_apollo-client-config-data.version>
 		<com.ctrip.framework.apollo_apollo.version>2.0.1</com.ctrip.framework.apollo_apollo.version>
 		<com.esotericsoftware_kryo.version>5.6.2</com.esotericsoftware_kryo.version>
-		<com.querydsl_querydsl-bom.version>5.0.0</com.querydsl_querydsl-bom.version>
-		<com.auth0_java-jwt.version>4.5.0</com.auth0_java-jwt.version>
+		<com.github.ben-manes.caffeine_caffeine.version>2.9.3</com.github.ben-manes.caffeine_caffeine.version>
+		<com.github.penggle_kaptcha.version>2.3.2</com.github.penggle_kaptcha.version>
+		<com.github.rholder_guava-retrying.version>2.0.0</com.github.rholder_guava-retrying.version>
+		<com.github.ulisesbocchio_jasypt-spring-boot-starter.version>3.0.5
+		</com.github.ulisesbocchio_jasypt-spring-boot-starter.version>
+		<com.github.ulisesbocchio_jasypt-spring-boot.version>3.0.5</com.github.ulisesbocchio_jasypt-spring-boot.version>
+		<com.google.cloud_libraries-bom.version>26.68.0</com.google.cloud_libraries-bom.version>
+		<com.google.code.kaptcha_kaptcha.version>2.3</com.google.code.kaptcha_kaptcha.version>
+		<com.google.code_kaptcha.version>2.3.0</com.google.code_kaptcha.version>
+		<com.google.protobuf_protobuf-bom.version>4.32.1</com.google.protobuf_protobuf-bom.version>
+		<com.googlecode.juniversalchardet_juniversalchardet.version>1.0.3
+		</com.googlecode.juniversalchardet_juniversalchardet.version>
+		<com.huaweicloud_spring-cloud-huawei-bom.version>1.11.12-2021.0.x
+		</com.huaweicloud_spring-cloud-huawei-bom.version>
+		<com.lmax_disruptor.version>3.4.4</com.lmax_disruptor.version>
+		<com.mybatis-flex_mybatis-flex-dependencies.version>1.11.3</com.mybatis-flex_mybatis-flex-dependencies.version>
 		<com.oracle.database.jdbc_ojdbc-bom.version>23.9.0.25.07</com.oracle.database.jdbc_ojdbc-bom.version>
-		<org.lionsoul_ip2region.version>3.1.0</org.lionsoul_ip2region.version>
-		<org.owasp.esapi_esapi.version>2.7.0.0</org.owasp.esapi_esapi.version>
-		<org.owasp.encoder_encoder.version>1.3.1</org.owasp.encoder_encoder.version>
-		<!-- https://www.jooq.org/download/support-matrix-jdk#oss -->
-		<org.jooq_jooq.version>3.14.16</org.jooq_jooq.version>
-		<org.liquibase_liquibase-core.version>4.33.0</org.liquibase_liquibase-core.version>
+		<com.querydsl_querydsl-bom.version>5.0.0</com.querydsl_querydsl-bom.version>
+		<com.redis_testcontainers-redis.version>1.7.0</com.redis_testcontainers-redis.version>
+		<com.taobao.arthas_arthas-core.version>4.0.5</com.taobao.arthas_arthas-core.version>
+		<com.taobao.arthas_arthas-spring-boot-starter.version>4.0.5
+		</com.taobao.arthas_arthas-spring-boot-starter.version>
+		<com.xuxueli_xxl-job-core.version>3.1.1</com.xuxueli_xxl-job-core.version>
+		<com.xuxueli_xxl-job.version>3.2.0</com.xuxueli_xxl-job.version>
+		<io.grpc_grpc-bom.version>1.75.0</io.grpc_grpc-bom.version>
+		<io.jsonwebtoken_jjwt-bom.version>0.13.0</io.jsonwebtoken_jjwt-bom.version>
+		<io.minio_minio.version>8.6.0</io.minio_minio.version>
+		<io.netty_netty-bom.version>4.2.6.Final</io.netty_netty-bom.version>
+		<io.projectreactor_reactor-bom.version>2024.0.10</io.projectreactor_reactor-bom.version>
+		<io.swagger.core.v3_swagger-core.version>2.2.35</io.swagger.core.v3_swagger-core.version>
+		<jakarta.platform_jakarta.jakartaee-bom.version>9.1.0</jakarta.platform_jakarta.jakartaee-bom.version>
+		<javax.inject_javax.inject.version>1</javax.inject_javax.inject.version>
+		<javax.servlet_servlet-api.version>2.5</javax.servlet_servlet-api.version>
+		<log4j_log4j.version>1.2.17</log4j_log4j.version>
+		<net.devh_grpc-client-spring-boot-starter.version>2.15.0.RELEASE
+		</net.devh_grpc-client-spring-boot-starter.version>
+		<net.devh_grpc-server-spring-boot-starter.version>2.15.0.RELEASE
+		</net.devh_grpc-server-spring-boot-starter.version>
+		<org.apache.commons_commons-compress.version>1.28.0</org.apache.commons_commons-compress.version>
+		<org.apache.commons_commons-text.version>1.14.0</org.apache.commons_commons-text.version>
+		<org.apache.dubbo_dubbo-bom.version>3.2.12</org.apache.dubbo_dubbo-bom.version>
+		<org.apache.logging.log4j_log4j-bom.version>2.24.3</org.apache.logging.log4j_log4j-bom.version>
+		<org.apache.maven_maven-model.version>3.9.11</org.apache.maven_maven-model.version>
+		<org.apache.poi_poi-ooxml.version>5.4.1</org.apache.poi_poi-ooxml.version>
+		<org.apache.shardingsphere.elasticjob_elasticjob-lite-spring-boot-starter.version>3.0.4
+		</org.apache.shardingsphere.elasticjob_elasticjob-lite-spring-boot-starter.version>
+		<org.apache.shardingsphere.elasticjob_elasticjob.version>3.0.4
+		</org.apache.shardingsphere.elasticjob_elasticjob.version>
+		<org.apache.shiro_shiro-bom.version>1.13.0</org.apache.shiro_shiro-bom.version>
+		<org.dromara.dynamictp_dynamic-tp-dependencies.version>1.2.2
+		</org.dromara.dynamictp_dynamic-tp-dependencies.version>
+		<org.dromara.x-file-storage_x-file-storage-core.version>2.3.0
+		</org.dromara.x-file-storage_x-file-storage-core.version>
+		<org.dromara.x-file-storage_x-file-storage-spring.version>2.3.0
+		</org.dromara.x-file-storage_x-file-storage-spring.version>
+		<org.eclipse.jetty_jetty-bom.version>9.4.58.v20250814</org.eclipse.jetty_jetty-bom.version>
+		<org.jasypt_jasypt.version>1.9.3</org.jasypt_jasypt.version>
+		<org.jctools_jctools-core.version>4.0.5</org.jctools_jctools-core.version>
 		<org.jetbrains.kotlin_kotlin-bom.version>2.2.20</org.jetbrains.kotlin_kotlin-bom.version>
-		<org.flywaydb_flyway-core.version>9.22.3</org.flywaydb_flyway-core.version>
-		<org.testcontainers_testcontainers-bom.version>1.21.3</org.testcontainers_testcontainers-bom.version>
-		<org.mybatis_mybatis.version>3.5.19</org.mybatis_mybatis.version>
-		<org.mybatis_mybatis-spring.version>2.1.2</org.mybatis_mybatis-spring.version>
+		<org.junit_junit-bom.version>5.13.4</org.junit_junit-bom.version>
+		<org.lionsoul_ip2region.version>3.1.0</org.lionsoul_ip2region.version>
+		<org.mapstruct_mapstruct.version>1.6.3</org.mapstruct_mapstruct.version>
+		<org.mockito_mockito-bom.version>4.11.0</org.mockito_mockito-bom.version>
 		<org.mybatis.spring.boot_mybatis-spring-boot-starter.version>2.3.2
 		</org.mybatis.spring.boot_mybatis-spring-boot-starter.version>
-		<org.redisson_redisson.version>3.52.0</org.redisson_redisson.version>
-		<org.redisson_redisson-spring-boot-starter.version>${org.redisson_redisson.version}
-		</org.redisson_redisson-spring-boot-starter.version>
+		<org.mybatis_mybatis-spring.version>2.1.2</org.mybatis_mybatis-spring.version>
+		<org.mybatis_mybatis.version>3.5.19</org.mybatis_mybatis.version>
+		<org.openjdk.jol_jol-core.version>0.17</org.openjdk.jol_jol-core.version>
+		<org.owasp.encoder_encoder.version>1.3.1</org.owasp.encoder_encoder.version>
+		<org.owasp.esapi_esapi.version>2.7.0.0</org.owasp.esapi_esapi.version>
 		<org.projectlombok_lombok-mapstruct-binding.version>0.2.0</org.projectlombok_lombok-mapstruct-binding.version>
-		<org.mapstruct_mapstruct.version>1.6.3</org.mapstruct_mapstruct.version>
+		<org.projectlombok_lombok.version>1.18.42</org.projectlombok_lombok.version>
+		<org.redisson_redisson-spring-boot-starter.version>3.52.0</org.redisson_redisson-spring-boot-starter.version>
+		<org.redisson_redisson.version>3.52.0</org.redisson_redisson.version>
 		<org.slf4j_slf4j-bom.version>2.0.17</org.slf4j_slf4j-bom.version>
-		<org.junit_junit-bom.version>5.13.4</org.junit_junit-bom.version>
-		<org.mockito_mockito-bom.version>4.11.0</org.mockito_mockito-bom.version>
-		<io.minio_minio.version>8.6.0</io.minio_minio.version>
-		<io.grpc_grpc-bom.version>1.75.0</io.grpc_grpc-bom.version>
-		<io.projectreactor_reactor-bom.version>2024.0.10</io.projectreactor_reactor-bom.version>
-		<io.netty_netty-bom.version>4.2.6.Final</io.netty_netty-bom.version>
-		<net.devh_grpc-spring-boot-starter.version>2.15.0.RELEASE</net.devh_grpc-spring-boot-starter.version>
-		<net.devh_grpc-server-spring-boot-starter.version>${net.devh_grpc-spring-boot-starter.version}
-		</net.devh_grpc-server-spring-boot-starter.version>
-		<net.devh_grpc-client-spring-boot-starter.version>${net.devh_grpc-spring-boot-starter.version}
-		</net.devh_grpc-client-spring-boot-starter.version>
-		<cn.idev.excel_fastexcel.version>1.3.0</cn.idev.excel_fastexcel.version>
+		<org.springdoc_springdoc-openapi-bom.version>2.8.9</org.springdoc_springdoc-openapi-bom.version>
+		<org.springframework.boot_spring-boot-dependencies.version>2.7.18
+		</org.springframework.boot_spring-boot-dependencies.version>
+		<org.springframework.cloud_spring-cloud-dependencies.version>2021.0.9
+		</org.springframework.cloud_spring-cloud-dependencies.version>
+		<org.springframework.data_spring-data-bom.version>2021.2.18</org.springframework.data_spring-data-bom.version>
+		<org.springframework.integration_spring-integration-bom.version>5.5.20
+		</org.springframework.integration_spring-integration-bom.version>
+		<org.springframework.plugin_spring-plugin-core.version>2.0.0.RELEASE
+		</org.springframework.plugin_spring-plugin-core.version>
+		<org.springframework.plugin_spring-plugin-metadata.version>2.0.0.RELEASE
+		</org.springframework.plugin_spring-plugin-metadata.version>
+		<org.springframework.plugin_spring-plugin.version>2.0.0.RELEASE
+		</org.springframework.plugin_spring-plugin.version>
+		<org.springframework.security_spring-security-bom.version>5.8.16
+		</org.springframework.security_spring-security-bom.version>
+		<org.springframework.session_spring-session-bom.version>2021.2.3
+		</org.springframework.session_spring-session-bom.version>
+		<org.springframework.shell_spring-shell-dependencies.version>2.1.15
+		</org.springframework.shell_spring-shell-dependencies.version>
+		<org.springframework_spring-framework-bom.version>5.3.39</org.springframework_spring-framework-bom.version>
+		<org.testcontainers_testcontainers-bom.version>1.21.3</org.testcontainers_testcontainers-bom.version>
+		<org.zero_common-bom.version>${revision}</org.zero_common-bom.version>
 		<tech.powerjob_powerjob-worker-spring-boot-starter.version>5.1.2
 		</tech.powerjob_powerjob-worker-spring-boot-starter.version>
+		<xerces_xercesImpl.version>2.12.2</xerces_xercesImpl.version>
 
-		<!-- ************************************ Plugin ************************************ -->
-		<!-- Maven -->
+		<!-- ************************************ Plugins ************************************ -->
+		<com.github.github_site-maven-plugin.version>0.12</com.github.github_site-maven-plugin.version>
+		<io.github.git-commit-id_git-commit-id-maven-plugin.version>9.0.2
+		</io.github.git-commit-id_git-commit-id-maven-plugin.version>
+		<org.apache.maven.plugins_maven-antrun-plugin.version>3.1.0
+		</org.apache.maven.plugins_maven-antrun-plugin.version>
+		<org.apache.maven.plugins_maven-assembly-plugin.version>3.7.1
+		</org.apache.maven.plugins_maven-assembly-plugin.version>
 		<org.apache.maven.plugins_maven-clean-plugin.version>3.5.0</org.apache.maven.plugins_maven-clean-plugin.version>
 		<org.apache.maven.plugins_maven-compiler-plugin.version>3.14.0
 		</org.apache.maven.plugins_maven-compiler-plugin.version>
-		<org.apache.maven.plugins_maven-source-plugin.version>3.3.1
-		</org.apache.maven.plugins_maven-source-plugin.version>
-		<org.apache.maven.plugins_maven-resources-plugin.version>3.3.1
-		</org.apache.maven.plugins_maven-resources-plugin.version>
 		<org.apache.maven.plugins_maven-dependency-plugin.version>3.8.1
 		</org.apache.maven.plugins_maven-dependency-plugin.version>
-		<org.apache.maven.plugins_maven-javadoc-plugin.version>3.11.2
-		</org.apache.maven.plugins_maven-javadoc-plugin.version>
-		<org.apache.maven.plugins_maven-jar-plugin.version>3.3.0</org.apache.maven.plugins_maven-jar-plugin.version>
-		<org.apache.maven.plugins_maven-war-plugin.version>3.4.0</org.apache.maven.plugins_maven-war-plugin.version>
-		<org.apache.maven.plugins_maven-shade-plugin.version>3.6.0</org.apache.maven.plugins_maven-shade-plugin.version>
-		<org.apache.maven.plugins_maven-assembly-plugin.version>3.7.1
-		</org.apache.maven.plugins_maven-assembly-plugin.version>
-		<org.apache.maven.plugins_maven-wrapper-plugin.version>3.3.2
-		</org.apache.maven.plugins_maven-wrapper-plugin.version>
-		<org.apache.maven.plugins_maven-install-plugin.version>3.1.4
-		</org.apache.maven.plugins_maven-install-plugin.version>
-		<org.apache.maven.plugins_maven-antrun-plugin.version>3.1.0
-		</org.apache.maven.plugins_maven-antrun-plugin.version>
 		<org.apache.maven.plugins_maven-deploy-plugin.version>3.1.4
 		</org.apache.maven.plugins_maven-deploy-plugin.version>
 		<org.apache.maven.plugins_maven-enforcer-plugin.version>3.5.0
 		</org.apache.maven.plugins_maven-enforcer-plugin.version>
 		<org.apache.maven.plugins_maven-failsafe-plugin.version>3.5.3
 		</org.apache.maven.plugins_maven-failsafe-plugin.version>
+		<org.apache.maven.plugins_maven-gpg-plugin.version>3.2.8</org.apache.maven.plugins_maven-gpg-plugin.version>
 		<org.apache.maven.plugins_maven-help-plugin.version>3.5.1</org.apache.maven.plugins_maven-help-plugin.version>
+		<org.apache.maven.plugins_maven-install-plugin.version>3.1.4
+		</org.apache.maven.plugins_maven-install-plugin.version>
 		<org.apache.maven.plugins_maven-invoker-plugin.version>3.9.0
 		</org.apache.maven.plugins_maven-invoker-plugin.version>
+		<org.apache.maven.plugins_maven-jar-plugin.version>3.3.0</org.apache.maven.plugins_maven-jar-plugin.version>
+		<org.apache.maven.plugins_maven-javadoc-plugin.version>3.11.2
+		</org.apache.maven.plugins_maven-javadoc-plugin.version>
+		<org.apache.maven.plugins_maven-resources-plugin.version>3.3.1
+		</org.apache.maven.plugins_maven-resources-plugin.version>
+		<org.apache.maven.plugins_maven-shade-plugin.version>3.6.0</org.apache.maven.plugins_maven-shade-plugin.version>
+		<org.apache.maven.plugins_maven-source-plugin.version>3.3.1
+		</org.apache.maven.plugins_maven-source-plugin.version>
 		<org.apache.maven.plugins_maven-surefire-plugin.version>3.5.3
 		</org.apache.maven.plugins_maven-surefire-plugin.version>
-		<org.apache.maven.plugins_maven-gpg-plugin.version>3.2.8</org.apache.maven.plugins_maven-gpg-plugin.version>
-		<!-- Spring -->
-		<org.springframework.boot_spring-boot-maven-plugin.version>
-			${org.springframework.boot_spring-boot-dependencies.version}
-		</org.springframework.boot_spring-boot-maven-plugin.version>
-		<!-- Codehaus -->
+		<org.apache.maven.plugins_maven-toolchains-plugin.version>3.2.0
+		</org.apache.maven.plugins_maven-toolchains-plugin.version>
+		<org.apache.maven.plugins_maven-war-plugin.version>3.4.0</org.apache.maven.plugins_maven-war-plugin.version>
+		<org.apache.maven.plugins_maven-wrapper-plugin.version>3.3.2
+		</org.apache.maven.plugins_maven-wrapper-plugin.version>
 		<org.codehaus.mojo_build-helper-maven-plugin.version>3.6.1</org.codehaus.mojo_build-helper-maven-plugin.version>
 		<org.codehaus.mojo_versions-maven-plugin.version>2.18.0</org.codehaus.mojo_versions-maven-plugin.version>
 		<org.codehaus.mojo_xml-maven-plugin.version>1.1.0</org.codehaus.mojo_xml-maven-plugin.version>
-		<!-- Github -->
-		<com.github.github_site-maven-plugin.version>0.12</com.github.github_site-maven-plugin.version>
-		<io.github.git-commit-id_git-commit-id-maven-plugin.version>9.0.2
-		</io.github.git-commit-id_git-commit-id-maven-plugin.version>
-		<!-- Other -->
 		<org.cyclonedx_cyclonedx-maven-plugin.version>2.9.1</org.cyclonedx_cyclonedx-maven-plugin.version>
-		<org.flywaydb_flyway-maven-plugin.version>${org.flywaydb_flyway-core.version}
-		</org.flywaydb_flyway-maven-plugin.version>
-		<org.jooq_jooq-codegen-maven.version>${org.jooq_jooq.version}</org.jooq_jooq-codegen-maven.version>
-		<org.jetbrains.kotlin_kotlin-maven-plugin.version>${org.jetbrains.kotlin_kotlin-bom.version}
-		</org.jetbrains.kotlin_kotlin-maven-plugin.version>
-		<org.liquibase_liquibase-maven-plugin.version>${org.liquibase_liquibase-core.version}
-		</org.liquibase_liquibase-maven-plugin.version>
+		<org.flywaydb_flyway-maven-plugin.version>9.22.3</org.flywaydb_flyway-maven-plugin.version>
 		<org.graalvm.buildtools_native-maven-plugin.version>0.10.6</org.graalvm.buildtools_native-maven-plugin.version>
+		<org.jetbrains.kotlin_kotlin-maven-plugin.version>2.2.20</org.jetbrains.kotlin_kotlin-maven-plugin.version>
+		<org.jooq_jooq-codegen-maven.version>3.14.16</org.jooq_jooq-codegen-maven.version>
+		<org.liquibase_liquibase-maven-plugin.version>4.33.0</org.liquibase_liquibase-maven-plugin.version>
+		<org.springframework.boot_spring-boot-maven-plugin.version>2.7.18
+		</org.springframework.boot_spring-boot-maven-plugin.version>
 	</properties>
 
 	<dependencies>
@@ -270,54 +246,412 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<!-- generated dependency-management:start -->
+			<!-- https://mvnrepository.com/artifact/cn.dev33/sa-token-dependencies -->
 			<dependency>
-				<groupId>org.zero</groupId>
-				<artifactId>common-bom</artifactId>
-				<version>${org.zero_common-bom.version}</version>
+				<groupId>cn.dev33</groupId>
+				<artifactId>sa-token-dependencies</artifactId>
+				<version>${cn.dev33_sa-token-dependencies.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-
-			<!-- ******************************************** Java ******************************************** -->
-			<!-- https://mvnrepository.com/artifact/org.openjdk.jol/jol-core -->
+			<!-- https://mvnrepository.com/artifact/cn.hutool/hutool-all -->
 			<dependency>
-				<groupId>org.openjdk.jol</groupId>
-				<artifactId>jol-core</artifactId>
-				<version>${org.openjdk.jol_jol-core.version}</version>
+				<groupId>cn.hutool</groupId>
+				<artifactId>hutool-all</artifactId>
+				<version>${cn.hutool_hutool-all.version}</version>
 			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.openjdk.jmh/jmh-core -->
+			<!-- https://mvnrepository.com/artifact/cn.hutool/hutool-bom -->
 			<dependency>
-				<groupId>org.openjdk.jmh</groupId>
-				<artifactId>jmh-core</artifactId>
-				<version>${org.openjdk.jmh_jmh-core.version}</version>
+				<groupId>cn.hutool</groupId>
+				<artifactId>hutool-bom</artifactId>
+				<version>${cn.hutool_hutool-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.openjdk.jmh/jmh-generator-annprocess  -->
+			<!-- https://mvnrepository.com/artifact/cn.idev.excel/fastexcel -->
 			<dependency>
-				<groupId>org.openjdk.jmh</groupId>
-				<artifactId>jmh-generator-annprocess</artifactId>
-				<version>${org.openjdk.jmh_jmh-generator-annprocess.version}</version>
+				<groupId>cn.idev.excel</groupId>
+				<artifactId>fastexcel</artifactId>
+				<version>${cn.idev.excel_fastexcel.version}</version>
 			</dependency>
-
-			<!-- ******************************************** Apache ******************************************** -->
-			<!-- https://mvnrepository.com/artifact/org.apache.maven/maven-model -->
+			<!-- https://mvnrepository.com/artifact/com.alibaba.cloud/spring-cloud-alibaba-dependencies -->
 			<dependency>
-				<groupId>org.apache.maven</groupId>
-				<artifactId>maven-model</artifactId>
-				<version>${org.apache.maven_maven-model.version}</version>
+				<groupId>com.alibaba.cloud</groupId>
+				<artifactId>spring-cloud-alibaba-dependencies</artifactId>
+				<version>${com.alibaba.cloud_spring-cloud-alibaba-dependencies.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.alibaba.csp/sentinel-apache-dubbo-adapter -->
+			<dependency>
+				<groupId>com.alibaba.csp</groupId>
+				<artifactId>sentinel-apache-dubbo-adapter</artifactId>
+				<version>${com.alibaba.csp_sentinel-apache-dubbo-adapter.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.alibaba.csp/sentinel-apache-dubbo3-adapter -->
+			<dependency>
+				<groupId>com.alibaba.csp</groupId>
+				<artifactId>sentinel-apache-dubbo3-adapter</artifactId>
+				<version>${com.alibaba.csp_sentinel-apache-dubbo3-adapter.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.alibaba.csp/sentinel-spring-webmvc-6x-adapter -->
+			<dependency>
+				<groupId>com.alibaba.csp</groupId>
+				<artifactId>sentinel-spring-webmvc-6x-adapter</artifactId>
+				<version>${com.alibaba.csp_sentinel-spring-webmvc-6x-adapter.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.alibaba.csp/sentinel-spring-webmvc-adapter -->
+			<dependency>
+				<groupId>com.alibaba.csp</groupId>
+				<artifactId>sentinel-spring-webmvc-adapter</artifactId>
+				<version>${com.alibaba.csp_sentinel-spring-webmvc-adapter.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.alibaba/druid -->
+			<dependency>
+				<groupId>com.alibaba</groupId>
+				<artifactId>druid</artifactId>
+				<version>${com.alibaba_druid.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.alibaba/druid-spring-boot-starter -->
+			<dependency>
+				<groupId>com.alibaba</groupId>
+				<artifactId>druid-spring-boot-starter</artifactId>
+				<version>${com.alibaba_druid-spring-boot-starter.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.alibaba/easyexcel -->
+			<dependency>
+				<groupId>com.alibaba</groupId>
+				<artifactId>easyexcel</artifactId>
+				<version>${com.alibaba_easyexcel.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.alicp.jetcache/jetcache-core -->
+			<dependency>
+				<groupId>com.alicp.jetcache</groupId>
+				<artifactId>jetcache-core</artifactId>
+				<version>${com.alicp.jetcache_jetcache-core.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.alicp.jetcache/jetcache-starter-redis -->
+			<dependency>
+				<groupId>com.alicp.jetcache</groupId>
+				<artifactId>jetcache-starter-redis</artifactId>
+				<version>${com.alicp.jetcache_jetcache-starter-redis.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.alicp.jetcache/jetcache-starter-redis-lettuce -->
+			<dependency>
+				<groupId>com.alicp.jetcache</groupId>
+				<artifactId>jetcache-starter-redis-lettuce</artifactId>
+				<version>${com.alicp.jetcache_jetcache-starter-redis-lettuce.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.alicp.jetcache/jetcache-starter-redisson -->
+			<dependency>
+				<groupId>com.alicp.jetcache</groupId>
+				<artifactId>jetcache-starter-redisson</artifactId>
+				<version>${com.alicp.jetcache_jetcache-starter-redisson.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.auth0/java-jwt -->
+			<dependency>
+				<groupId>com.auth0</groupId>
+				<artifactId>java-jwt</artifactId>
+				<version>${com.auth0_java-jwt.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.baomidou/dynamic-datasource-spring-boot-starter -->
+			<dependency>
+				<groupId>com.baomidou</groupId>
+				<artifactId>dynamic-datasource-spring-boot-starter</artifactId>
+				<version>${com.baomidou_dynamic-datasource-spring-boot-starter.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.baomidou/lock4j-core -->
+			<dependency>
+				<groupId>com.baomidou</groupId>
+				<artifactId>lock4j-core</artifactId>
+				<version>${com.baomidou_lock4j-core.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.baomidou/lock4j-redis-template-spring-boot-starter -->
+			<dependency>
+				<groupId>com.baomidou</groupId>
+				<artifactId>lock4j-redis-template-spring-boot-starter</artifactId>
+				<version>${com.baomidou_lock4j-redis-template-spring-boot-starter.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.baomidou/lock4j-redisson-spring-boot-starter -->
+			<dependency>
+				<groupId>com.baomidou</groupId>
+				<artifactId>lock4j-redisson-spring-boot-starter</artifactId>
+				<version>${com.baomidou_lock4j-redisson-spring-boot-starter.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.baomidou/lock4j-zookeeper-spring-boot-starter -->
+			<dependency>
+				<groupId>com.baomidou</groupId>
+				<artifactId>lock4j-zookeeper-spring-boot-starter</artifactId>
+				<version>${com.baomidou_lock4j-zookeeper-spring-boot-starter.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.baomidou/mybatis-plus -->
+			<dependency>
+				<groupId>com.baomidou</groupId>
+				<artifactId>mybatis-plus</artifactId>
+				<version>${com.baomidou_mybatis-plus.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.baomidou/mybatis-plus-bom -->
+			<dependency>
+				<groupId>com.baomidou</groupId>
+				<artifactId>mybatis-plus-bom</artifactId>
+				<version>${com.baomidou_mybatis-plus-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.ctrip.framework.apollo/apollo -->
+			<dependency>
+				<groupId>com.ctrip.framework.apollo</groupId>
+				<artifactId>apollo</artifactId>
+				<version>${com.ctrip.framework.apollo_apollo.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.ctrip.framework.apollo/apollo-client-config-data -->
+			<dependency>
+				<groupId>com.ctrip.framework.apollo</groupId>
+				<artifactId>apollo-client-config-data</artifactId>
+				<version>${com.ctrip.framework.apollo_apollo-client-config-data.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.esotericsoftware/kryo -->
+			<dependency>
+				<groupId>com.esotericsoftware</groupId>
+				<artifactId>kryo</artifactId>
+				<version>${com.esotericsoftware_kryo.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.github.ben-manes.caffeine/caffeine -->
+			<dependency>
+				<groupId>com.github.ben-manes.caffeine</groupId>
+				<artifactId>caffeine</artifactId>
+				<version>${com.github.ben-manes.caffeine_caffeine.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.github.penggle/kaptcha -->
+			<dependency>
+				<groupId>com.github.penggle</groupId>
+				<artifactId>kaptcha</artifactId>
+				<version>${com.github.penggle_kaptcha.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.github.rholder/guava-retrying -->
+			<dependency>
+				<groupId>com.github.rholder</groupId>
+				<artifactId>guava-retrying</artifactId>
+				<version>${com.github.rholder_guava-retrying.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.github.ulisesbocchio/jasypt-spring-boot -->
+			<dependency>
+				<groupId>com.github.ulisesbocchio</groupId>
+				<artifactId>jasypt-spring-boot</artifactId>
+				<version>${com.github.ulisesbocchio_jasypt-spring-boot.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.github.ulisesbocchio/jasypt-spring-boot-starter -->
+			<dependency>
+				<groupId>com.github.ulisesbocchio</groupId>
+				<artifactId>jasypt-spring-boot-starter</artifactId>
+				<version>${com.github.ulisesbocchio_jasypt-spring-boot-starter.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.google.cloud/libraries-bom -->
+			<dependency>
+				<groupId>com.google.cloud</groupId>
+				<artifactId>libraries-bom</artifactId>
+				<version>${com.google.cloud_libraries-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.google.code.kaptcha/kaptcha -->
+			<dependency>
+				<groupId>com.google.code.kaptcha</groupId>
+				<artifactId>kaptcha</artifactId>
+				<version>${com.google.code.kaptcha_kaptcha.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.google.code/kaptcha -->
+			<dependency>
+				<groupId>com.google.code</groupId>
+				<artifactId>kaptcha</artifactId>
+				<version>${com.google.code_kaptcha.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.google.protobuf/protobuf-bom -->
+			<dependency>
+				<groupId>com.google.protobuf</groupId>
+				<artifactId>protobuf-bom</artifactId>
+				<version>${com.google.protobuf_protobuf-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.googlecode.juniversalchardet/juniversalchardet -->
+			<dependency>
+				<groupId>com.googlecode.juniversalchardet</groupId>
+				<artifactId>juniversalchardet</artifactId>
+				<version>${com.googlecode.juniversalchardet_juniversalchardet.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.huaweicloud/spring-cloud-huawei-bom -->
+			<dependency>
+				<groupId>com.huaweicloud</groupId>
+				<artifactId>spring-cloud-huawei-bom</artifactId>
+				<version>${com.huaweicloud_spring-cloud-huawei-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.lmax/disruptor -->
+			<dependency>
+				<groupId>com.lmax</groupId>
+				<artifactId>disruptor</artifactId>
+				<version>${com.lmax_disruptor.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.mybatis-flex/mybatis-flex-dependencies -->
+			<dependency>
+				<groupId>com.mybatis-flex</groupId>
+				<artifactId>mybatis-flex-dependencies</artifactId>
+				<version>${com.mybatis-flex_mybatis-flex-dependencies.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.oracle.database.jdbc/ojdbc-bom -->
+			<dependency>
+				<groupId>com.oracle.database.jdbc</groupId>
+				<artifactId>ojdbc-bom</artifactId>
+				<version>${com.oracle.database.jdbc_ojdbc-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.querydsl/querydsl-bom -->
+			<dependency>
+				<groupId>com.querydsl</groupId>
+				<artifactId>querydsl-bom</artifactId>
+				<version>${com.querydsl_querydsl-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.redis/testcontainers-redis -->
+			<dependency>
+				<groupId>com.redis</groupId>
+				<artifactId>testcontainers-redis</artifactId>
+				<version>${com.redis_testcontainers-redis.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.taobao.arthas/arthas-core -->
+			<dependency>
+				<groupId>com.taobao.arthas</groupId>
+				<artifactId>arthas-core</artifactId>
+				<version>${com.taobao.arthas_arthas-core.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.taobao.arthas/arthas-spring-boot-starter -->
+			<dependency>
+				<groupId>com.taobao.arthas</groupId>
+				<artifactId>arthas-spring-boot-starter</artifactId>
+				<version>${com.taobao.arthas_arthas-spring-boot-starter.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.xuxueli/xxl-job -->
+			<dependency>
+				<groupId>com.xuxueli</groupId>
+				<artifactId>xxl-job</artifactId>
+				<version>${com.xuxueli_xxl-job.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.xuxueli/xxl-job-core -->
+			<dependency>
+				<groupId>com.xuxueli</groupId>
+				<artifactId>xxl-job-core</artifactId>
+				<version>${com.xuxueli_xxl-job-core.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/io.grpc/grpc-bom -->
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-bom</artifactId>
+				<version>${io.grpc_grpc-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-bom -->
+			<dependency>
+				<groupId>io.jsonwebtoken</groupId>
+				<artifactId>jjwt-bom</artifactId>
+				<version>${io.jsonwebtoken_jjwt-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/io.minio/minio -->
+			<dependency>
+				<groupId>io.minio</groupId>
+				<artifactId>minio</artifactId>
+				<version>${io.minio_minio.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/io.netty/netty-bom -->
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-bom</artifactId>
+				<version>${io.netty_netty-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/io.projectreactor/reactor-bom -->
+			<dependency>
+				<groupId>io.projectreactor</groupId>
+				<artifactId>reactor-bom</artifactId>
+				<version>${io.projectreactor_reactor-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/io.swagger.core.v3/swagger-core -->
+			<dependency>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-core</artifactId>
+				<version>${io.swagger.core.v3_swagger-core.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/jakarta.platform/jakarta.jakartaee-bom -->
+			<dependency>
+				<groupId>jakarta.platform</groupId>
+				<artifactId>jakarta.jakartaee-bom</artifactId>
+				<version>${jakarta.platform_jakarta.jakartaee-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/javax.inject/javax.inject -->
+			<dependency>
+				<groupId>javax.inject</groupId>
+				<artifactId>javax.inject</artifactId>
+				<version>${javax.inject_javax.inject.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/javax.servlet/servlet-api -->
+			<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>servlet-api</artifactId>
+				<version>${javax.servlet_servlet-api.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/log4j/log4j -->
+			<dependency>
+				<groupId>log4j</groupId>
+				<artifactId>log4j</artifactId>
+				<version>${log4j_log4j.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/net.devh/grpc-client-spring-boot-starter -->
+			<dependency>
+				<groupId>net.devh</groupId>
+				<artifactId>grpc-client-spring-boot-starter</artifactId>
+				<version>${net.devh_grpc-client-spring-boot-starter.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/net.devh/grpc-server-spring-boot-starter -->
+			<dependency>
+				<groupId>net.devh</groupId>
+				<artifactId>grpc-server-spring-boot-starter</artifactId>
+				<version>${net.devh_grpc-server-spring-boot-starter.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-compress</artifactId>
+				<version>${org.apache.commons_commons-compress.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-text</artifactId>
+				<version>${org.apache.commons_commons-text.version}</version>
 			</dependency>
 			<!-- https://mvnrepository.com/artifact/org.apache.dubbo/dubbo-bom -->
 			<dependency>
 				<groupId>org.apache.dubbo</groupId>
 				<artifactId>dubbo-bom</artifactId>
 				<version>${org.apache.dubbo_dubbo-bom.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.apache.shiro/shiro-bom -->
-			<dependency>
-				<groupId>org.apache.shiro</groupId>
-				<artifactId>shiro-bom</artifactId>
-				<version>${org.apache.shiro_shiro-bom.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -329,12 +663,11 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-			<!-- https://mvnrepository.com/artifact/log4j/log4j -->
+			<!-- https://mvnrepository.com/artifact/org.apache.maven/maven-model -->
 			<dependency>
-				<groupId>log4j</groupId>
-				<artifactId>log4j</artifactId>
-				<!-- no longer maintained -->
-				<version>1.2.17</version>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-model</artifactId>
+				<version>${org.apache.maven_maven-model.version}</version>
 			</dependency>
 			<!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml -->
 			<dependency>
@@ -342,25 +675,173 @@
 				<artifactId>poi-ooxml</artifactId>
 				<version>${org.apache.poi_poi-ooxml.version}</version>
 			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
+			<!-- https://mvnrepository.com/artifact/org.apache.shardingsphere.elasticjob/elasticjob -->
 			<dependency>
-				<groupId>org.apache.commons</groupId>
-				<artifactId>commons-text</artifactId>
-				<version>${org.apache.commons_commons-text.version}</version>
+				<groupId>org.apache.shardingsphere.elasticjob</groupId>
+				<artifactId>elasticjob</artifactId>
+				<version>${org.apache.shardingsphere.elasticjob_elasticjob.version}</version>
 			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
+			<!-- https://mvnrepository.com/artifact/org.apache.shardingsphere.elasticjob/elasticjob-lite-spring-boot-starter -->
 			<dependency>
-				<groupId>org.apache.commons</groupId>
-				<artifactId>commons-compress</artifactId>
-				<version>${org.apache.commons_commons-compress.version}</version>
+				<groupId>org.apache.shardingsphere.elasticjob</groupId>
+				<artifactId>elasticjob-lite-spring-boot-starter</artifactId>
+				<version>${org.apache.shardingsphere.elasticjob_elasticjob-lite-spring-boot-starter.version}</version>
 			</dependency>
-
-			<!-- ******************************************** Spring ******************************************** -->
-			<!-- https://mvnrepository.com/artifact/org.springframework/spring-framework-bom -->
+			<!-- https://mvnrepository.com/artifact/org.apache.shiro/shiro-bom -->
 			<dependency>
-				<groupId>org.springframework</groupId>
-				<artifactId>spring-framework-bom</artifactId>
-				<version>${org.springframework_spring-framework-bom.version}</version>
+				<groupId>org.apache.shiro</groupId>
+				<artifactId>shiro-bom</artifactId>
+				<version>${org.apache.shiro_shiro-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.dromara.dynamictp/dynamic-tp-dependencies -->
+			<dependency>
+				<groupId>org.dromara.dynamictp</groupId>
+				<artifactId>dynamic-tp-dependencies</artifactId>
+				<version>${org.dromara.dynamictp_dynamic-tp-dependencies.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.dromara.x-file-storage/x-file-storage-core -->
+			<dependency>
+				<groupId>org.dromara.x-file-storage</groupId>
+				<artifactId>x-file-storage-core</artifactId>
+				<version>${org.dromara.x-file-storage_x-file-storage-core.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.dromara.x-file-storage/x-file-storage-spring -->
+			<dependency>
+				<groupId>org.dromara.x-file-storage</groupId>
+				<artifactId>x-file-storage-spring</artifactId>
+				<version>${org.dromara.x-file-storage_x-file-storage-spring.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-bom -->
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-bom</artifactId>
+				<version>${org.eclipse.jetty_jetty-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.jasypt/jasypt -->
+			<dependency>
+				<groupId>org.jasypt</groupId>
+				<artifactId>jasypt</artifactId>
+				<version>${org.jasypt_jasypt.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.jctools/jctools-core -->
+			<dependency>
+				<groupId>org.jctools</groupId>
+				<artifactId>jctools-core</artifactId>
+				<version>${org.jctools_jctools-core.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-bom -->
+			<dependency>
+				<groupId>org.jetbrains.kotlin</groupId>
+				<artifactId>kotlin-bom</artifactId>
+				<version>${org.jetbrains.kotlin_kotlin-bom.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.junit/junit-bom -->
+			<dependency>
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
+				<version>${org.junit_junit-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.lionsoul/ip2region -->
+			<dependency>
+				<groupId>org.lionsoul</groupId>
+				<artifactId>ip2region</artifactId>
+				<version>${org.lionsoul_ip2region.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.mapstruct/mapstruct -->
+			<dependency>
+				<groupId>org.mapstruct</groupId>
+				<artifactId>mapstruct</artifactId>
+				<version>${org.mapstruct_mapstruct.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.mockito/mockito-bom -->
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-bom</artifactId>
+				<version>${org.mockito_mockito-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.mybatis.spring.boot/mybatis-spring-boot-starter -->
+			<dependency>
+				<groupId>org.mybatis.spring.boot</groupId>
+				<artifactId>mybatis-spring-boot-starter</artifactId>
+				<version>${org.mybatis.spring.boot_mybatis-spring-boot-starter.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.mybatis/mybatis -->
+			<dependency>
+				<groupId>org.mybatis</groupId>
+				<artifactId>mybatis</artifactId>
+				<version>${org.mybatis_mybatis.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.mybatis/mybatis-spring -->
+			<dependency>
+				<groupId>org.mybatis</groupId>
+				<artifactId>mybatis-spring</artifactId>
+				<version>${org.mybatis_mybatis-spring.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.openjdk.jol/jol-core -->
+			<dependency>
+				<groupId>org.openjdk.jol</groupId>
+				<artifactId>jol-core</artifactId>
+				<version>${org.openjdk.jol_jol-core.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.owasp.encoder/encoder -->
+			<dependency>
+				<groupId>org.owasp.encoder</groupId>
+				<artifactId>encoder</artifactId>
+				<version>${org.owasp.encoder_encoder.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.owasp.esapi/esapi -->
+			<dependency>
+				<groupId>org.owasp.esapi</groupId>
+				<artifactId>esapi</artifactId>
+				<version>${org.owasp.esapi_esapi.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>${org.projectlombok_lombok.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok-mapstruct-binding -->
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok-mapstruct-binding</artifactId>
+				<version>${org.projectlombok_lombok-mapstruct-binding.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.redisson/redisson -->
+			<dependency>
+				<groupId>org.redisson</groupId>
+				<artifactId>redisson</artifactId>
+				<version>${org.redisson_redisson.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.redisson/redisson-spring-boot-starter -->
+			<dependency>
+				<groupId>org.redisson</groupId>
+				<artifactId>redisson-spring-boot-starter</artifactId>
+				<version>${org.redisson_redisson-spring-boot-starter.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-bom -->
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-bom</artifactId>
+				<version>${org.slf4j_slf4j-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-bom -->
+			<dependency>
+				<groupId>org.springdoc</groupId>
+				<artifactId>springdoc-openapi-bom</artifactId>
+				<version>${org.springdoc_springdoc-openapi-bom.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -388,35 +869,11 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-bom -->
-			<dependency>
-				<groupId>org.springframework.security</groupId>
-				<artifactId>spring-security-bom</artifactId>
-				<version>${org.springframework.security_spring-security-bom.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
 			<!-- https://mvnrepository.com/artifact/org.springframework.integration/spring-integration-bom -->
 			<dependency>
 				<groupId>org.springframework.integration</groupId>
 				<artifactId>spring-integration-bom</artifactId>
 				<version>${org.springframework.integration_spring-integration-bom.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.springframework.shell/spring-shell-dependencies -->
-			<dependency>
-				<groupId>org.springframework.shell</groupId>
-				<artifactId>spring-shell-dependencies</artifactId>
-				<version>${org.springframework.shell_spring-shell-dependencies.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.springframework.session/spring-session-bom -->
-			<dependency>
-				<groupId>org.springframework.session</groupId>
-				<artifactId>spring-session-bom</artifactId>
-				<version>${org.springframework.session_spring-session-bom.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -440,231 +897,35 @@
 				<artifactId>spring-plugin-metadata</artifactId>
 				<version>${org.springframework.plugin_spring-plugin-metadata.version}</version>
 			</dependency>
-
-			<!-- ******************************************** Eclipse ******************************************** -->
-			<!-- https://mvnrepository.com/artifact/jakarta.platform/jakarta.jakartaee-bom -->
+			<!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-bom -->
 			<dependency>
-				<groupId>jakarta.platform</groupId>
-				<artifactId>jakarta.jakartaee-bom</artifactId>
-				<version>${jakarta.platform_jakarta.jakartaee-bom.version}</version>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-bom</artifactId>
+				<version>${org.springframework.security_spring-security-bom.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-			<!-- https://mvnrepository.com/artifact/jakarta.xml.bind/jakarta.xml.bind-api -->
+			<!-- https://mvnrepository.com/artifact/org.springframework.session/spring-session-bom -->
 			<dependency>
-				<groupId>jakarta.xml.bind</groupId>
-				<artifactId>jakarta.xml.bind-api</artifactId>
-				<version>${jakarta.xml.bind_jakarta.xml.bind-api.version}</version>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/com.sun.xml.bind/jaxb-impl -->
-			<dependency>
-				<groupId>com.sun.xml.bind</groupId>
-				<artifactId>jaxb-impl</artifactId>
-				<version>${com.sun.xml.bind_jaxb-impl.version}</version>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime -->
-			<dependency>
-				<groupId>org.glassfish.jaxb</groupId>
-				<artifactId>jaxb-runtime</artifactId>
-				<version>${org.glassfish.jaxb_jaxb-runtime.version}</version>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-bom -->
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-bom</artifactId>
-				<version>${org.eclipse.jetty_jetty-bom.version}</version>
+				<groupId>org.springframework.session</groupId>
+				<artifactId>spring-session-bom</artifactId>
+				<version>${org.springframework.session_spring-session-bom.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-
-			<!-- ******************************************** Google ******************************************** -->
-			<!-- https://mvnrepository.com/artifact/com.google.cloud/libraries-bom -->
+			<!-- https://mvnrepository.com/artifact/org.springframework.shell/spring-shell-dependencies -->
 			<dependency>
-				<groupId>com.google.cloud</groupId>
-				<artifactId>libraries-bom</artifactId>
-				<version>${com.google.cloud_libraries-bom.version}</version>
+				<groupId>org.springframework.shell</groupId>
+				<artifactId>spring-shell-dependencies</artifactId>
+				<version>${org.springframework.shell_spring-shell-dependencies.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-			<!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+			<!-- https://mvnrepository.com/artifact/org.springframework/spring-framework-bom -->
 			<dependency>
-				<groupId>com.google.guava</groupId>
-				<artifactId>guava</artifactId>
-				<version>${com.google.guava_guava.version}</version>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
-			<dependency>
-				<groupId>com.google.code.gson</groupId>
-				<artifactId>gson</artifactId>
-				<version>${com.google.code.gson_gson.version}</version>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/com.google.protobuf/protobuf-bom -->
-			<dependency>
-				<groupId>com.google.protobuf</groupId>
-				<artifactId>protobuf-bom</artifactId>
-				<version>${com.google.protobuf_protobuf-bom.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/com.googlecode.juniversalchardet/juniversalchardet -->
-			<dependency>
-				<groupId>com.googlecode.juniversalchardet</groupId>
-				<artifactId>juniversalchardet</artifactId>
-				<version>${com.googlecode.juniversalchardet_juniversalchardet.version}</version>
-			</dependency>
-
-			<!-- ******************************************** Alibaba ******************************************** -->
-			<!-- https://mvnrepository.com/artifact/com.alibaba/easyexcel -->
-			<dependency>
-				<groupId>com.alibaba</groupId>
-				<artifactId>easyexcel</artifactId>
-				<version>${com.alibaba_easyexcel.version}</version>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/com.alibaba/transmittable-thread-local -->
-			<dependency>
-				<groupId>com.alibaba</groupId>
-				<artifactId>transmittable-thread-local</artifactId>
-				<version>${com.alibaba_transmittable-thread-local.version}</version>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/com.alibaba.cloud/spring-cloud-alibaba-dependencies -->
-			<dependency>
-				<groupId>com.alibaba.cloud</groupId>
-				<artifactId>spring-cloud-alibaba-dependencies</artifactId>
-				<version>${com.alibaba.cloud_spring-cloud-alibaba-dependencies.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/com.alibaba.csp/sentinel-apache-dubbo-adapter -->
-			<dependency>
-				<groupId>com.alibaba.csp</groupId>
-				<artifactId>sentinel-apache-dubbo-adapter</artifactId>
-				<version>${com.alibaba.csp_sentinel-apache-dubbo-adapter.version}</version>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/com.alibaba.csp/sentinel-apache-dubbo3-adapter -->
-			<dependency>
-				<groupId>com.alibaba.csp</groupId>
-				<artifactId>sentinel-apache-dubbo3-adapter</artifactId>
-				<version>${com.alibaba.csp_sentinel-apache-dubbo3-adapter.version}</version>
-			</dependency>
-
-			<!-- ******************************************** Huawei ******************************************** -->
-			<!-- https://mvnrepository.com/artifact/com.huaweicloud/spring-cloud-huawei-bom -->
-			<dependency>
-				<groupId>com.huaweicloud</groupId>
-				<artifactId>spring-cloud-huawei-bom</artifactId>
-				<version>${com.huaweicloud_spring-cloud-huawei-bom.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-
-			<!-- ******************************************** Github ******************************************** -->
-			<!-- https://mvnrepository.com/artifact/com.github.ulisesbocchio/jasypt-spring-boot -->
-			<dependency>
-				<groupId>com.github.ulisesbocchio</groupId>
-				<artifactId>jasypt-spring-boot</artifactId>
-				<version>${com.github.ulisesbocchio_jasypt-spring-boot.version}</version>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/com.github.ulisesbocchio/jasypt-spring-boot-starter -->
-			<dependency>
-				<groupId>com.github.ulisesbocchio</groupId>
-				<artifactId>jasypt-spring-boot-starter</artifactId>
-				<version>${com.github.ulisesbocchio_jasypt-spring-boot-starter.version}</version>
-			</dependency>
-
-			<!-- ******************************************** Dromara ******************************************** -->
-			<!-- https://mvnrepository.com/artifact/org.dromara.dynamictp/dynamic-tp-dependencies -->
-			<dependency>
-				<groupId>org.dromara.dynamictp</groupId>
-				<artifactId>dynamic-tp-dependencies</artifactId>
-				<version>${org.dromara.dynamictp_dynamic-tp-dependencies.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/cn.dev33/sa-token-dependencies -->
-			<dependency>
-				<groupId>cn.dev33</groupId>
-				<artifactId>sa-token-dependencies</artifactId>
-				<version>${cn.dev33_sa-token-dependencies.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/cn.hutool/hutool-bom -->
-			<dependency>
-				<groupId>cn.hutool</groupId>
-				<artifactId>hutool-bom</artifactId>
-				<version>${cn.hutool_hutool-bom.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/cn.hutool/hutool-all -->
-			<dependency>
-				<groupId>cn.hutool</groupId>
-				<artifactId>hutool-all</artifactId>
-				<version>${cn.hutool_hutool-all.version}</version>
-			</dependency>
-
-			<!-- ******************************************** Other ******************************************** -->
-			<!-- https://mvnrepository.com/artifact/com.oracle.database.jdbc/ojdbc-bom -->
-			<dependency>
-				<groupId>com.oracle.database.jdbc</groupId>
-				<artifactId>ojdbc-bom</artifactId>
-				<version>${com.oracle.database.jdbc_ojdbc-bom.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/io.projectreactor/reactor-bom -->
-			<dependency>
-				<groupId>io.projectreactor</groupId>
-				<artifactId>reactor-bom</artifactId>
-				<version>${io.projectreactor_reactor-bom.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/io.grpc/grpc-bom -->
-			<dependency>
-				<groupId>io.grpc</groupId>
-				<artifactId>grpc-bom</artifactId>
-				<version>${io.grpc_grpc-bom.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/io.netty/netty-bom -->
-			<dependency>
-				<groupId>io.netty</groupId>
-				<artifactId>netty-bom</artifactId>
-				<version>${io.netty_netty-bom.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/com.ctrip.framework.apollo/apollo -->
-			<dependency>
-				<groupId>com.ctrip.framework.apollo</groupId>
-				<artifactId>apollo</artifactId>
-				<version>${com.ctrip.framework.apollo_apollo.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-bom -->
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-bom</artifactId>
-				<version>${org.slf4j_slf4j-bom.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.junit/junit-bom -->
-			<dependency>
-				<groupId>org.junit</groupId>
-				<artifactId>junit-bom</artifactId>
-				<version>${org.junit_junit-bom.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.mockito/mockito-bom -->
-			<dependency>
-				<groupId>org.mockito</groupId>
-				<artifactId>mockito-bom</artifactId>
-				<version>${org.mockito_mockito-bom.version}</version>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-framework-bom</artifactId>
+				<version>${org.springframework_spring-framework-bom.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -676,55 +937,19 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-			<!-- https://mvnrepository.com/artifact/com.querydsl/querydsl-bom -->
+			<!-- https://mvnrepository.com/artifact/org.zero/common-bom -->
 			<dependency>
-				<groupId>com.querydsl</groupId>
-				<artifactId>querydsl-bom</artifactId>
-				<version>${com.querydsl_querydsl-bom.version}</version>
+				<groupId>org.zero</groupId>
+				<artifactId>common-bom</artifactId>
+				<version>${org.zero_common-bom.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.mybatis.spring.boot/mybatis-spring-boot-starter -->
+			<!-- https://mvnrepository.com/artifact/tech.powerjob/powerjob-worker-spring-boot-starter -->
 			<dependency>
-				<groupId>org.mybatis.spring.boot</groupId>
-				<artifactId>mybatis-spring-boot-starter</artifactId>
-				<version>${org.mybatis.spring.boot_mybatis-spring-boot-starter.version}</version>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/com.baomidou/mybatis-plus-bom -->
-			<dependency>
-				<groupId>com.baomidou</groupId>
-				<artifactId>mybatis-plus-bom</artifactId>
-				<version>${com.baomidou_mybatis-plus-bom.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/com.mybatis-flex/mybatis-flex-dependencies -->
-			<dependency>
-				<groupId>com.mybatis-flex</groupId>
-				<artifactId>mybatis-flex-dependencies</artifactId>
-				<version>${com.mybatis-flex_mybatis-flex-dependencies.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/cn.idev.excel/fastexcel -->
-			<dependency>
-				<groupId>cn.idev.excel</groupId>
-				<artifactId>fastexcel</artifactId>
-				<version>${cn.idev.excel_fastexcel.version}</version>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/com.xuxueli/xxl-job -->
-			<dependency>
-				<groupId>com.xuxueli</groupId>
-				<artifactId>xxl-job</artifactId>
-				<version>${com.xuxueli_xxl-job.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/io.minio/minio -->
-			<dependency>
-				<groupId>io.minio</groupId>
-				<artifactId>minio</artifactId>
-				<version>${io.minio_minio.version}</version>
+				<groupId>tech.powerjob</groupId>
+				<artifactId>powerjob-worker-spring-boot-starter</artifactId>
+				<version>${tech.powerjob_powerjob-worker-spring-boot-starter.version}</version>
 			</dependency>
 			<!-- https://mvnrepository.com/artifact/xerces/xercesImpl -->
 			<dependency>
@@ -732,73 +957,7 @@
 				<artifactId>xercesImpl</artifactId>
 				<version>${xerces_xercesImpl.version}</version>
 			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.redisson/redisson -->
-			<dependency>
-				<groupId>org.redisson</groupId>
-				<artifactId>redisson</artifactId>
-				<version>${org.redisson_redisson.version}</version>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.redisson/redisson-spring-boot-starter -->
-			<dependency>
-				<groupId>org.redisson</groupId>
-				<artifactId>redisson-spring-boot-starter</artifactId>
-				<version>${org.redisson_redisson-spring-boot-starter.version}</version>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.jctools/jctools-core -->
-			<dependency>
-				<groupId>org.jctools</groupId>
-				<artifactId>jctools-core</artifactId>
-				<version>${org.jctools_jctools-core.version}</version>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/com.lmax/disruptor -->
-			<dependency>
-				<groupId>com.lmax</groupId>
-				<artifactId>disruptor</artifactId>
-				<version>${com.lmax_disruptor.version}</version>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/com.esotericsoftware/kryo -->
-			<dependency>
-				<groupId>com.esotericsoftware</groupId>
-				<artifactId>kryo</artifactId>
-				<version>${com.esotericsoftware_kryo.version}</version>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.lionsoul/ip2region -->
-			<dependency>
-				<groupId>org.lionsoul</groupId>
-				<artifactId>ip2region</artifactId>
-				<version>${org.lionsoul_ip2region.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jasypt</groupId>
-				<artifactId>jasypt</artifactId>
-				<version>${org.jasypt_jasypt.version}</version>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.owasp.esapi/esapi -->
-			<dependency>
-				<groupId>org.owasp.esapi</groupId>
-				<artifactId>esapi</artifactId>
-				<version>${org.owasp.esapi_esapi.version}</version>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.owasp.encoder/encoder -->
-			<dependency>
-				<groupId>org.owasp.encoder</groupId>
-				<artifactId>encoder</artifactId>
-				<version>${org.owasp.encoder_encoder.version}</version>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-bom -->
-			<dependency>
-				<groupId>io.jsonwebtoken</groupId>
-				<artifactId>jjwt-bom</artifactId>
-				<version>${io.jsonwebtoken_jjwt-bom.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/com.auth0/java-jwt -->
-			<dependency>
-				<groupId>com.auth0</groupId>
-				<artifactId>java-jwt</artifactId>
-				<version>${com.auth0_java-jwt.version}</version>
-			</dependency>
+			<!-- generated dependency-management:end -->
 		</dependencies>
 	</dependencyManagement>
 
@@ -834,7 +993,31 @@
 		</resources>
 		<pluginManagement>
 			<plugins>
-				<!-- ******************************************** Maven ******************************************** -->
+				<!-- generated plugin-management:start -->
+				<!-- https://mvnrepository.com/artifact/com.github.github/site-maven-plugin -->
+				<plugin>
+					<groupId>com.github.github</groupId>
+					<artifactId>site-maven-plugin</artifactId>
+					<version>${com.github.github_site-maven-plugin.version}</version>
+				</plugin>
+				<!-- https://mvnrepository.com/artifact/io.github.git-commit-id/git-commit-id-maven-plugin -->
+				<plugin>
+					<groupId>io.github.git-commit-id</groupId>
+					<artifactId>git-commit-id-maven-plugin</artifactId>
+					<version>${io.github.git-commit-id_git-commit-id-maven-plugin.version}</version>
+				</plugin>
+				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-antrun-plugin -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>${org.apache.maven.plugins_maven-antrun-plugin.version}</version>
+				</plugin>
+				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-assembly-plugin -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>${org.apache.maven.plugins_maven-assembly-plugin.version}</version>
+				</plugin>
 				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-clean-plugin -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -847,98 +1030,11 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>${org.apache.maven.plugins_maven-compiler-plugin.version}</version>
 				</plugin>
-				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-source-plugin -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-source-plugin</artifactId>
-					<version>${org.apache.maven.plugins_maven-source-plugin.version}</version>
-				</plugin>
-				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-javadoc-plugin -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>${org.apache.maven.plugins_maven-javadoc-plugin.version}</version>
-				</plugin>
 				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-dependency-plugin -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
 					<version>${org.apache.maven.plugins_maven-dependency-plugin.version}</version>
-				</plugin>
-				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-resources-plugin -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-resources-plugin</artifactId>
-					<version>${org.apache.maven.plugins_maven-resources-plugin.version}</version>
-				</plugin>
-				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-jar-plugin -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-jar-plugin</artifactId>
-					<version>${org.apache.maven.plugins_maven-jar-plugin.version}</version>
-					<configuration>
-						<archive>
-							<manifest>
-								<mainClass>${main-class}</mainClass>
-								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-							</manifest>
-							<manifestEntries>
-								<Multi-Release>true</Multi-Release>
-							</manifestEntries>
-						</archive>
-					</configuration>
-				</plugin>
-				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-war-plugin -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-war-plugin</artifactId>
-					<version>${org.apache.maven.plugins_maven-war-plugin.version}</version>
-					<configuration>
-						<archive>
-							<manifest>
-								<mainClass>${main-class}</mainClass>
-								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-							</manifest>
-						</archive>
-					</configuration>
-				</plugin>
-				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-shade-plugin -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-shade-plugin</artifactId>
-					<version>${org.apache.maven.plugins_maven-shade-plugin.version}</version>
-					<configuration>
-						<keepDependenciesWithProvidedScope>true</keepDependenciesWithProvidedScope>
-						<createDependencyReducedPom>true</createDependencyReducedPom>
-						<filters>
-							<filter>
-								<artifact>*:*</artifact>
-								<excludes>
-									<exclude>META-INF/*.SF</exclude>
-									<exclude>META-INF/*.DSA</exclude>
-									<exclude>META-INF/*.RSA</exclude>
-								</excludes>
-							</filter>
-						</filters>
-					</configuration>
-				</plugin>
-				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-assembly-plugin -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-assembly-plugin</artifactId>
-					<version>${org.apache.maven.plugins_maven-assembly-plugin.version}</version>
-				</plugin>
-				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-wrapper-plugin -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-wrapper-plugin</artifactId>
-					<version>${org.apache.maven.plugins_maven-wrapper-plugin.version}</version>
-				</plugin>
-				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-antrun-plugin -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-antrun-plugin</artifactId>
-					<version>${org.apache.maven.plugins_maven-antrun-plugin.version}</version>
 				</plugin>
 				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-deploy-plugin -->
 				<plugin>
@@ -952,30 +1048,17 @@
 					<artifactId>maven-enforcer-plugin</artifactId>
 					<version>${org.apache.maven.plugins_maven-enforcer-plugin.version}</version>
 				</plugin>
-				<!-- 单元测试（Unit Tests） -->
-				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>${org.apache.maven.plugins_maven-surefire-plugin.version}</version>
-				</plugin>
-				<!-- 集成测试（Integration Tests） -->
 				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-failsafe-plugin -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
 					<version>${org.apache.maven.plugins_maven-failsafe-plugin.version}</version>
-					<executions>
-						<execution>
-							<goals>
-								<goal>integration-test</goal>
-								<goal>verify</goal>
-							</goals>
-						</execution>
-					</executions>
-					<configuration>
-						<classesDirectory>${project.build.outputDirectory}</classesDirectory>
-					</configuration>
+				</plugin>
+				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-gpg-plugin -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<version>${org.apache.maven.plugins_maven-gpg-plugin.version}</version>
 				</plugin>
 				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-help-plugin -->
 				<plugin>
@@ -995,49 +1078,60 @@
 					<artifactId>maven-invoker-plugin</artifactId>
 					<version>${org.apache.maven.plugins_maven-invoker-plugin.version}</version>
 				</plugin>
-				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-gpg-plugin -->
+				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-jar-plugin -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-gpg-plugin</artifactId>
-					<version>${org.apache.maven.plugins_maven-gpg-plugin.version}</version>
-					<extensions>true</extensions>
-					<configuration>
-						<gpgArguments>
-							<arg>--pinentry-mode</arg>
-							<arg>loopback</arg>
-						</gpgArguments>
-					</configuration>
-					<executions>
-						<execution>
-							<id>sign-artifacts</id>
-							<phase>verify</phase>
-							<goals>
-								<goal>sign</goal>
-							</goals>
-						</execution>
-					</executions>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>${org.apache.maven.plugins_maven-jar-plugin.version}</version>
 				</plugin>
-
-				<!-- ******************************************** Spring ******************************************** -->
-				<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-maven-plugin -->
+				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-javadoc-plugin -->
 				<plugin>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-maven-plugin</artifactId>
-					<version>${org.springframework.boot_spring-boot-maven-plugin.version}</version>
-					<executions>
-						<execution>
-							<id>repackage</id>
-							<goals>
-								<goal>repackage</goal>
-							</goals>
-						</execution>
-					</executions>
-					<configuration>
-						<mainClass>${main-class}</mainClass>
-					</configuration>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>${org.apache.maven.plugins_maven-javadoc-plugin.version}</version>
 				</plugin>
-
-				<!-- ******************************************** Codehaus ******************************************** -->
+				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-resources-plugin -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>${org.apache.maven.plugins_maven-resources-plugin.version}</version>
+				</plugin>
+				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-shade-plugin -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-shade-plugin</artifactId>
+					<version>${org.apache.maven.plugins_maven-shade-plugin.version}</version>
+				</plugin>
+				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-source-plugin -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>${org.apache.maven.plugins_maven-source-plugin.version}</version>
+				</plugin>
+				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>${org.apache.maven.plugins_maven-surefire-plugin.version}</version>
+				</plugin>
+				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-toolchains-plugin -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-toolchains-plugin</artifactId>
+					<version>${org.apache.maven.plugins_maven-toolchains-plugin.version}</version>
+				</plugin>
+				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-war-plugin -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>${org.apache.maven.plugins_maven-war-plugin.version}</version>
+				</plugin>
+				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-wrapper-plugin -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-wrapper-plugin</artifactId>
+					<version>${org.apache.maven.plugins_maven-wrapper-plugin.version}</version>
+				</plugin>
 				<!-- https://mvnrepository.com/artifact/org.codehaus.mojo/build-helper-maven-plugin -->
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -1056,55 +1150,11 @@
 					<artifactId>xml-maven-plugin</artifactId>
 					<version>${org.codehaus.mojo_xml-maven-plugin.version}</version>
 				</plugin>
-
-				<!-- ******************************************** Github ******************************************** -->
-				<!-- https://mvnrepository.com/artifact/io.github.git-commit-id/git-commit-id-maven-plugin -->
-				<plugin>
-					<groupId>io.github.git-commit-id</groupId>
-					<artifactId>git-commit-id-maven-plugin</artifactId>
-					<version>${io.github.git-commit-id_git-commit-id-maven-plugin.version}</version>
-					<executions>
-						<execution>
-							<goals>
-								<goal>revision</goal>
-							</goals>
-						</execution>
-					</executions>
-					<configuration>
-						<verbose>true</verbose>
-						<generateGitPropertiesFile>true</generateGitPropertiesFile>
-						<generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties
-						</generateGitPropertiesFilename>
-					</configuration>
-				</plugin>
-				<!-- https://mvnrepository.com/artifact/com.github.github/site-maven-plugin -->
-				<!-- https://github.com/github/maven-plugins -->
-				<plugin>
-					<groupId>com.github.github</groupId>
-					<artifactId>site-maven-plugin</artifactId>
-					<version>${com.github.github_site-maven-plugin.version}</version>
-				</plugin>
-
-				<!-- ******************************************** Other ******************************************** -->
 				<!-- https://mvnrepository.com/artifact/org.cyclonedx/cyclonedx-maven-plugin -->
 				<plugin>
 					<groupId>org.cyclonedx</groupId>
 					<artifactId>cyclonedx-maven-plugin</artifactId>
 					<version>${org.cyclonedx_cyclonedx-maven-plugin.version}</version>
-					<executions>
-						<execution>
-							<phase>generate-resources</phase>
-							<goals>
-								<goal>makeAggregateBom</goal>
-							</goals>
-							<configuration>
-								<projectType>application</projectType>
-								<outputDirectory>${project.build.outputDirectory}/META-INF/sbom</outputDirectory>
-								<outputFormat>json</outputFormat>
-								<outputName>application.cdx</outputName>
-							</configuration>
-						</execution>
-					</executions>
 				</plugin>
 				<!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-maven-plugin -->
 				<plugin>
@@ -1112,37 +1162,23 @@
 					<artifactId>flyway-maven-plugin</artifactId>
 					<version>${org.flywaydb_flyway-maven-plugin.version}</version>
 				</plugin>
-				<!-- https://mvnrepository.com/artifact/org.jooq/jooq-codegen-maven -->
+				<!-- https://mvnrepository.com/artifact/org.graalvm.buildtools/native-maven-plugin -->
 				<plugin>
-					<groupId>org.jooq</groupId>
-					<artifactId>jooq-codegen-maven</artifactId>
-					<version>${org.jooq_jooq-codegen-maven.version}</version>
+					<groupId>org.graalvm.buildtools</groupId>
+					<artifactId>native-maven-plugin</artifactId>
+					<version>${org.graalvm.buildtools_native-maven-plugin.version}</version>
 				</plugin>
 				<!-- https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-maven-plugin -->
 				<plugin>
 					<groupId>org.jetbrains.kotlin</groupId>
 					<artifactId>kotlin-maven-plugin</artifactId>
 					<version>${org.jetbrains.kotlin_kotlin-maven-plugin.version}</version>
-					<configuration>
-						<jvmTarget>${java.version}</jvmTarget>
-						<javaParameters>true</javaParameters>
-					</configuration>
-					<executions>
-						<execution>
-							<id>compile</id>
-							<phase>compile</phase>
-							<goals>
-								<goal>compile</goal>
-							</goals>
-						</execution>
-						<execution>
-							<id>test-compile</id>
-							<phase>test-compile</phase>
-							<goals>
-								<goal>test-compile</goal>
-							</goals>
-						</execution>
-					</executions>
+				</plugin>
+				<!-- https://mvnrepository.com/artifact/org.jooq/jooq-codegen-maven -->
+				<plugin>
+					<groupId>org.jooq</groupId>
+					<artifactId>jooq-codegen-maven</artifactId>
+					<version>${org.jooq_jooq-codegen-maven.version}</version>
 				</plugin>
 				<!-- https://mvnrepository.com/artifact/org.liquibase/liquibase-maven-plugin -->
 				<plugin>
@@ -1150,13 +1186,13 @@
 					<artifactId>liquibase-maven-plugin</artifactId>
 					<version>${org.liquibase_liquibase-maven-plugin.version}</version>
 				</plugin>
-				<!-- https://mvnrepository.com/artifact/org.graalvm.buildtools/native-maven-plugin -->
+				<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-maven-plugin -->
 				<plugin>
-					<groupId>org.graalvm.buildtools</groupId>
-					<artifactId>native-maven-plugin</artifactId>
-					<version>${org.graalvm.buildtools_native-maven-plugin.version}</version>
-					<extensions>true</extensions>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-maven-plugin</artifactId>
+					<version>${org.springframework.boot_spring-boot-maven-plugin.version}</version>
 				</plugin>
+				<!-- generated plugin-management:end -->
 			</plugins>
 		</pluginManagement>
 
@@ -1302,193 +1338,6 @@
 			</properties>
 		</profile>
 		<profile>
-			<id>java9-higher</id>
-			<activation>
-				<jdk>[9,)</jdk>
-			</activation>
-			<properties>
-				<maven.compiler.release>${java.version}</maven.compiler.release>
-			</properties>
-		</profile>
-		<profile>
-			<id>java8-lower</id>
-			<activation>
-				<jdk>(,1.8]</jdk>
-			</activation>
-			<properties>
-				<maven.compiler.source>${java.version}</maven.compiler.source>
-				<maven.compiler.target>${java.version}</maven.compiler.target>
-			</properties>
-		</profile>
-		<profile>
-			<id>java5-higher</id>
-			<activation>
-				<jdk>[1.5,)</jdk>
-			</activation>
-			<properties>
-				<com.googlecode.juniversalchardet_juniversalchardet.version>1.0.3
-				</com.googlecode.juniversalchardet_juniversalchardet.version>
-			</properties>
-			<dependencyManagement>
-				<dependencies>
-					<!-- https://mvnrepository.com/artifact/javax.servlet/servlet-api -->
-					<dependency>
-						<groupId>javax.servlet</groupId>
-						<artifactId>servlet-api</artifactId>
-						<version>2.5</version>
-					</dependency>
-					<!-- https://mvnrepository.com/artifact/javax.inject/javax.inject -->
-					<dependency>
-						<groupId>javax.inject</groupId>
-						<artifactId>javax.inject</artifactId>
-						<version>1</version>
-					</dependency>
-				</dependencies>
-			</dependencyManagement>
-		</profile>
-		<profile>
-			<id>java6-higher</id>
-			<activation>
-				<jdk>[1.6,)</jdk>
-			</activation>
-			<properties>
-				<org.jasypt_jasypt.version>1.9.3</org.jasypt_jasypt.version>
-				<org.projectlombok_lombok.version>1.18.42</org.projectlombok_lombok.version>
-				<org.jctools_jctools-core.version>4.0.5</org.jctools_jctools-core.version>
-			</properties>
-		</profile>
-		<profile>
-			<id>java7-higher</id>
-			<activation>
-				<jdk>[1.7,)</jdk>
-			</activation>
-			<properties>
-				<com.lmax_disruptor.version>3.4.4</com.lmax_disruptor.version>
-				<io.jsonwebtoken_jjwt-bom.version>0.13.0</io.jsonwebtoken_jjwt-bom.version>
-				<xerces_xercesImpl.version>2.12.2</xerces_xercesImpl.version>
-			</properties>
-		</profile>
-		<profile>
-			<id>java8-higher</id>
-			<activation>
-				<jdk>[1.8,)</jdk>
-			</activation>
-			<dependencyManagement>
-				<dependencies>
-					<!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
-					<dependency>
-						<groupId>javax.servlet</groupId>
-						<artifactId>javax.servlet-api</artifactId>
-						<version>4.0.1</version>
-					</dependency>
-					<!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
-					<dependency>
-						<groupId>javax.xml.bind</groupId>
-						<artifactId>jaxb-api</artifactId>
-						<version>2.3.1</version>
-					</dependency>
-				</dependencies>
-			</dependencyManagement>
-		</profile>
-		<profile>
-			<id>java11-higher</id>
-			<activation>
-				<jdk>[11,)</jdk>
-			</activation>
-			<properties>
-				<jakarta.platform_jakarta.jakartaee-bom.version>10.0.0</jakarta.platform_jakarta.jakartaee-bom.version>
-				<org.apache.shiro_shiro-bom.version>2.0.5</org.apache.shiro_shiro-bom.version>
-				<org.eclipse.jetty_jetty-bom.version>11.0.26</org.eclipse.jetty_jetty-bom.version>
-				<jakarta.xml.bind_jakarta.xml.bind-api.version>4.0.4</jakarta.xml.bind_jakarta.xml.bind-api.version>
-				<com.sun.xml.bind_jaxb-impl.version>4.0.6</com.sun.xml.bind_jaxb-impl.version>
-				<org.glassfish.jaxb_jaxb-runtime.version>4.0.6</org.glassfish.jaxb_jaxb-runtime.version>
-				<com.lmax_disruptor.version>4.0.0</com.lmax_disruptor.version>
-				<com.querydsl_querydsl-bom.version>5.1.0</com.querydsl_querydsl-bom.version>
-				<org.jooq_jooq.version>3.16.23</org.jooq_jooq.version>
-				<org.mockito_mockito-bom.version>5.20.0</org.mockito_mockito-bom.version>
-			</properties>
-		</profile>
-		<profile>
-			<id>java17-higher</id>
-			<activation>
-				<jdk>[17,)</jdk>
-			</activation>
-			<properties>
-				<org.springframework_spring-framework-bom.version>6.2.11
-				</org.springframework_spring-framework-bom.version>
-				<org.springframework.boot_spring-boot-dependencies.version>3.5.6
-				</org.springframework.boot_spring-boot-dependencies.version>
-				<org.springframework.cloud_spring-cloud-dependencies.version>2025.0.0
-				</org.springframework.cloud_spring-cloud-dependencies.version>
-				<com.alibaba.cloud_spring-cloud-alibaba-dependencies.version>2023.0.1.0
-				</com.alibaba.cloud_spring-cloud-alibaba-dependencies.version>
-				<com.huaweicloud_spring-cloud-huawei-bom.version>1.11.12-2024.0.x
-				</com.huaweicloud_spring-cloud-huawei-bom.version>
-				<org.springframework.shell_spring-shell-dependencies.version>3.4.1
-				</org.springframework.shell_spring-shell-dependencies.version>
-				<org.springframework.data_spring-data-bom.version>2025.0.4
-				</org.springframework.data_spring-data-bom.version>
-				<org.springframework.integration_spring-integration-bom.version>6.5.2
-				</org.springframework.integration_spring-integration-bom.version>
-				<org.springframework.security_spring-security-bom.version>6.5.5
-				</org.springframework.security_spring-security-bom.version>
-				<org.springframework.plugin_spring-plugin.version>3.0.0
-				</org.springframework.plugin_spring-plugin.version>
-				<jakarta.platform_jakarta.jakartaee-bom.version>11.0.0</jakarta.platform_jakarta.jakartaee-bom.version>
-				<org.eclipse.jetty_jetty-bom.version>12.1.1</org.eclipse.jetty_jetty-bom.version>
-				<com.alibaba_druid-spring-boot-3-starter.version>${com.alibaba_druid.version}
-				</com.alibaba_druid-spring-boot-3-starter.version>
-				<com.redis_testcontainers-redis.version>2.2.4</com.redis_testcontainers-redis.version>
-				<com.baomidou_dynamic-datasource-spring-boot3-starter.version>
-					${com.baomidou_dynamic-datasource-spring-boot-starter.version}
-				</com.baomidou_dynamic-datasource-spring-boot3-starter.version>
-				<org.jooq_jooq.version>3.19.26</org.jooq_jooq.version>
-				<org.jooq_jooq-bom.version>3.19.26</org.jooq_jooq-bom.version>
-				<org.flywaydb_flyway-core.version>11.13.2</org.flywaydb_flyway-core.version>
-				<org.mybatis.spring.boot_mybatis-spring-boot-starter.version>3.0.5
-				</org.mybatis.spring.boot_mybatis-spring-boot-starter.version>
-				<org.springdoc_springdoc-openapi-bom.version>2.8.13</org.springdoc_springdoc-openapi-bom.version>
-				<net.devh_grpc-spring-boot-starter.version>3.1.0.RELEASE</net.devh_grpc-spring-boot-starter.version>
-			</properties>
-			<dependencyManagement>
-				<dependencies>
-					<!-- https://mvnrepository.com/artifact/org.jooq/jooq-bom -->
-					<dependency>
-						<groupId>org.jooq</groupId>
-						<artifactId>jooq-bom</artifactId>
-						<version>${org.jooq_jooq-bom.version}</version>
-						<type>pom</type>
-						<scope>import</scope>
-					</dependency>
-					<!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-bom -->
-					<dependency>
-						<groupId>org.springdoc</groupId>
-						<artifactId>springdoc-openapi-bom</artifactId>
-						<version>${org.springdoc_springdoc-openapi-bom.version}</version>
-						<type>pom</type>
-						<scope>import</scope>
-					</dependency>
-					<!-- https://mvnrepository.com/artifact/com.alibaba/druid-spring-boot-3-starter -->
-					<dependency>
-						<groupId>com.alibaba</groupId>
-						<artifactId>druid-spring-boot-3-starter</artifactId>
-						<version>{com.alibaba_druid-spring-boot-3-starter.version}</version>
-					</dependency>
-				</dependencies>
-			</dependencyManagement>
-		</profile>
-		<profile>
-			<id>java21-higher</id>
-			<activation>
-				<jdk>[21,)</jdk>
-			</activation>
-			<properties>
-				<com.redis_testcontainers-redis.version>2.1.0</com.redis_testcontainers-redis.version>
-				<org.jooq_jooq.version>3.20.7</org.jooq_jooq.version>
-				<org.jooq_jooq-bom.version>3.20.7</org.jooq_jooq-bom.version>
-			</properties>
-		</profile>
-		<profile>
 			<id>native</id>
 			<build>
 				<pluginManagement>
@@ -1580,6 +1429,193 @@
 				</pluginManagement>
 			</build>
 		</profile>
+		<profile>
+			<id>java9-higher</id>
+			<activation>
+				<jdk>[9,)</jdk>
+			</activation>
+			<properties>
+				<maven.compiler.release>${java.version}</maven.compiler.release>
+			</properties>
+		</profile>
+		<profile>
+			<id>java8-lower</id>
+			<activation>
+				<jdk>(,1.8]</jdk>
+			</activation>
+			<properties>
+				<maven.compiler.source>${java.version}</maven.compiler.source>
+				<maven.compiler.target>${java.version}</maven.compiler.target>
+			</properties>
+		</profile>
+		<profile>
+			<id>java5-higher</id>
+			<activation>
+				<jdk>[1.5,)</jdk>
+			</activation>
+			<properties>
+				<com.googlecode.juniversalchardet_juniversalchardet.version>1.0.3
+				</com.googlecode.juniversalchardet_juniversalchardet.version>
+			</properties>
+			<dependencyManagement>
+				<dependencies>
+					<!-- https://mvnrepository.com/artifact/javax.servlet/servlet-api -->
+					<dependency>
+						<groupId>javax.servlet</groupId>
+						<artifactId>servlet-api</artifactId>
+						<version>2.5</version>
+					</dependency>
+					<!-- https://mvnrepository.com/artifact/javax.inject/javax.inject -->
+					<dependency>
+						<groupId>javax.inject</groupId>
+						<artifactId>javax.inject</artifactId>
+						<version>1</version>
+					</dependency>
+				</dependencies>
+			</dependencyManagement>
+		</profile>
+		<profile>
+			<id>java6-higher</id>
+			<activation>
+				<jdk>[1.6,)</jdk>
+			</activation>
+			<properties>
+				<org.jasypt_jasypt.version>1.9.3</org.jasypt_jasypt.version>
+				<org.projectlombok_lombok.version>1.18.42</org.projectlombok_lombok.version>
+				<org.jctools_jctools-core.version>4.0.5</org.jctools_jctools-core.version>
+			</properties>
+		</profile>
+		<profile>
+			<id>java7-higher</id>
+			<activation>
+				<jdk>[1.7,)</jdk>
+			</activation>
+			<properties>
+				<com.lmax_disruptor.version>3.4.4</com.lmax_disruptor.version>
+				<io.jsonwebtoken_jjwt-bom.version>0.13.0</io.jsonwebtoken_jjwt-bom.version>
+				<xerces_xercesImpl.version>2.12.2</xerces_xercesImpl.version>
+			</properties>
+		</profile>
+		<profile>
+			<id>java8-higher</id>
+			<activation>
+				<jdk>[1.8,)</jdk>
+			</activation>
+			<dependencyManagement>
+				<dependencies>
+					<!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
+					<dependency>
+						<groupId>javax.servlet</groupId>
+						<artifactId>javax.servlet-api</artifactId>
+						<version>4.0.1</version>
+					</dependency>
+					<!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
+					<dependency>
+						<groupId>javax.xml.bind</groupId>
+						<artifactId>jaxb-api</artifactId>
+						<version>2.3.1</version>
+					</dependency>
+				</dependencies>
+			</dependencyManagement>
+		</profile>
+		<!-- generated higher-build-profiles:start -->
+		<profile>
+			<id>java11-higher</id>
+			<activation>
+				<jdk>[11,)</jdk>
+			</activation>
+			<properties>
+				<com.github.ben-manes.caffeine_caffeine.version>3.2.0</com.github.ben-manes.caffeine_caffeine.version>
+				<com.lmax_disruptor.version>4.0.0</com.lmax_disruptor.version>
+				<com.querydsl_querydsl-bom.version>5.1.0</com.querydsl_querydsl-bom.version>
+				<jakarta.platform_jakarta.jakartaee-bom.version>10.0.0</jakarta.platform_jakarta.jakartaee-bom.version>
+				<org.apache.shiro_shiro-bom.version>2.0.5</org.apache.shiro_shiro-bom.version>
+				<org.eclipse.jetty_jetty-bom.version>11.0.26</org.eclipse.jetty_jetty-bom.version>
+				<org.mockito_mockito-bom.version>5.20.0</org.mockito_mockito-bom.version>
+			</properties>
+		</profile>
+		<profile>
+			<id>java17-higher</id>
+			<activation>
+				<jdk>[17,)</jdk>
+			</activation>
+			<properties>
+				<com.alibaba.cloud_spring-cloud-alibaba-dependencies.version>2023.0.1.0
+				</com.alibaba.cloud_spring-cloud-alibaba-dependencies.version>
+				<com.alibaba_druid-spring-boot-3-starter.version>1.2.27
+				</com.alibaba_druid-spring-boot-3-starter.version>
+				<com.baomidou_dynamic-datasource-spring-boot3-starter.version>4.3.1
+				</com.baomidou_dynamic-datasource-spring-boot3-starter.version>
+				<com.huaweicloud_spring-cloud-huawei-bom.version>1.11.12-2024.0.x
+				</com.huaweicloud_spring-cloud-huawei-bom.version>
+				<com.redis_testcontainers-redis.version>2.2.4</com.redis_testcontainers-redis.version>
+				<jakarta.platform_jakarta.jakartaee-bom.version>11.0.0</jakarta.platform_jakarta.jakartaee-bom.version>
+				<org.eclipse.jetty_jetty-bom.version>12.1.1</org.eclipse.jetty_jetty-bom.version>
+				<org.jooq_jooq-bom.version>3.19.26</org.jooq_jooq-bom.version>
+				<org.mybatis.spring.boot_mybatis-spring-boot-starter.version>3.0.5
+				</org.mybatis.spring.boot_mybatis-spring-boot-starter.version>
+				<org.springdoc_springdoc-openapi-bom.version>2.8.13</org.springdoc_springdoc-openapi-bom.version>
+				<org.springframework.boot_spring-boot-dependencies.version>3.5.6
+				</org.springframework.boot_spring-boot-dependencies.version>
+				<org.springframework.cloud_spring-cloud-dependencies.version>2025.0.0
+				</org.springframework.cloud_spring-cloud-dependencies.version>
+				<org.springframework.data_spring-data-bom.version>2025.0.4
+				</org.springframework.data_spring-data-bom.version>
+				<org.springframework.integration_spring-integration-bom.version>6.5.2
+				</org.springframework.integration_spring-integration-bom.version>
+				<org.springframework.plugin_spring-plugin.version>3.0.0
+				</org.springframework.plugin_spring-plugin.version>
+				<org.springframework.security_spring-security-bom.version>6.5.5
+				</org.springframework.security_spring-security-bom.version>
+				<org.springframework.shell_spring-shell-dependencies.version>3.4.1
+				</org.springframework.shell_spring-shell-dependencies.version>
+				<org.springframework_spring-framework-bom.version>6.2.11
+				</org.springframework_spring-framework-bom.version>
+				<org.springframework.boot_spring-boot-maven-plugin.version>3.1.5
+				</org.springframework.boot_spring-boot-maven-plugin.version>
+			</properties>
+			<dependencyManagement>
+				<dependencies>
+					<!-- https://mvnrepository.com/artifact/com.alibaba/druid-spring-boot-3-starter -->
+					<dependency>
+						<groupId>com.alibaba</groupId>
+						<artifactId>druid-spring-boot-3-starter</artifactId>
+						<version>${com.alibaba_druid-spring-boot-3-starter.version}</version>
+					</dependency>
+					<!-- https://mvnrepository.com/artifact/com.baomidou/dynamic-datasource-spring-boot3-starter -->
+					<dependency>
+						<groupId>com.baomidou</groupId>
+						<artifactId>dynamic-datasource-spring-boot3-starter</artifactId>
+						<version>${com.baomidou_dynamic-datasource-spring-boot3-starter.version}</version>
+					</dependency>
+					<!-- https://mvnrepository.com/artifact/org.jooq/jooq-bom -->
+					<dependency>
+						<groupId>org.jooq</groupId>
+						<artifactId>jooq-bom</artifactId>
+						<version>${org.jooq_jooq-bom.version}</version>
+						<type>pom</type>
+						<scope>import</scope>
+					</dependency>
+				</dependencies>
+			</dependencyManagement>
+		</profile>
+		<profile>
+			<id>java21-higher</id>
+			<activation>
+				<jdk>[21,)</jdk>
+			</activation>
+			<properties>
+				<com.redis_testcontainers-redis.version>2.1.0</com.redis_testcontainers-redis.version>
+				<org.jooq_jooq-bom.version>3.20.7</org.jooq_jooq-bom.version>
+			</properties>
+		</profile>
+		<profile>
+			<id>java25-higher</id>
+			<activation>
+				<jdk>[25,)</jdk>
+			</activation>
+		</profile>
+		<!-- generated higher-build-profiles:end -->
 	</profiles>
 
 	<distributionManagement>

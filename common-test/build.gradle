@@ -1,9 +1,20 @@
+plugins {
+    id 'org.zero.conventions.java8-application'
+}
+
+/*
+ * dependency layout - 演示应用需要同时拉起公共模块与应用侧 starter 依赖做集成验证。
+ */
 dependencies {
-    implementation(platform(project(":")))
-    implementation('org.zero:common-core')
-    implementation('org.zero:common-data')
-    implementation('org.zero:common-api')
-    implementation('org.zero:common-job')
+    implementation(platform(project(':')))
+    implementation(project(':common-core'))
+    /*
+     * compileOnly core-base - 复用基础能力声明，但运行时仍以聚合后的 common-core 为准。
+     */
+    compileOnly(project(':core-base'))
+    implementation(project(':common-data'))
+    implementation(project(':common-api'))
+    implementation(project(':common-job'))
     implementation('org.springframework:spring-aspects')
     implementation('org.springframework.boot:spring-boot-starter-jdbc')
     implementation('org.springframework.boot:spring-boot-starter-web')
@@ -19,13 +30,13 @@ dependencies {
     implementation('org.springframework.cloud:spring-cloud-starter-openfeign')
     implementation(libs.org.mybatis.spring.boot.mybatis.spring.boot.starter)
     implementation(libs.org.apache.poi.poi.ooxml)
-    testImplementation(libs.org.openjdk.jmh.jmh.core)
-    testImplementation(libs.org.openjdk.jmh.jmh.generator.annprocess)
+    testImplementation('org.openjdk.jmh:jmh-core')
+    testImplementation('org.openjdk.jmh:jmh-generator-annprocess')
     implementation('org.slf4j:slf4j-api')
     implementation('com.querydsl:querydsl-core')
     implementation('com.querydsl:querydsl-jpa')
     implementation(libs.com.alibaba.easyexcel)
-    implementation(libs.com.alibaba.transmittable.thread.local)
+    implementation('com.alibaba:transmittable-thread-local')
     runtimeOnly('com.h2database:h2')
     implementation('cn.hutool:hutool-core')
     implementation('cn.hutool:hutool-json')
@@ -34,19 +45,20 @@ dependencies {
     implementation(libs.javax.inject.javax.inject)
     implementation('jakarta.inject:jakarta.inject-api')
 
+    /*
+     * Lombok compile support - 测试与示例代码共享同一套注解处理器配置。
+     */
     compileOnly('org.projectlombok:lombok')
     annotationProcessor(libs.org.projectlombok.lombok)
     testCompileOnly('org.projectlombok:lombok')
     testAnnotationProcessor(libs.org.projectlombok.lombok)
 }
 
-description = 'common-test'
-
+/*
+ * application entrypoint - common-test 通过固定 mainClass 作为本地联调与集成演示启动入口。
+ */
 application {
     mainClass = 'org.zero.common.test.Application'
 }
 
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
+description = 'common-test'

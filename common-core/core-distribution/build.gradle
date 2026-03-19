@@ -1,1 +1,66 @@
+import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.tasks.bundling.Jar
+import org.zero.build.BuildProfileSupport
+
+plugins {
+    id 'org.zero.conventions.aggregate-distribution'
+}
+
+/*
+ * active profile bridge - 聚合分发模块直接读取根工程推导后的 profile，决定是否纳入高版本适配层。
+ */
+def activeBuildProfile = rootProject.ext.activeBuildProfile as String
+
+/*
+ * aggregated projects - Java 8 基线始终打入，Jakarta/Boot3 仅在高版本 profile 下参与聚合。
+ */
+def aggregatedProjects = [
+    project(':core-base'),
+    project(':core-ip2region2')
+]
+if (BuildProfileSupport.isAtLeast(project, activeBuildProfile, 'java17')) {
+    aggregatedProjects.add(project(':core-jakarta'))
+    aggregatedProjects.add(project(':core-spring-boot3'))
+}
+
+/*
+ * distribution jar assemble - 当前模块自身不编译源码，只把被聚合模块的 main 输出打进同一个 jar。
+ */
+tasks.named('jar', Jar) {
+    aggregatedProjects.each { Project dependencyProject ->
+        dependsOn(dependencyProject.tasks.named('classes'))
+        from(dependencyProject.extensions.getByType(org.gradle.api.tasks.SourceSetContainer).getByName('main').output)
+    }
+}
+
+/*
+ * aggregated source archive - sourcesJar 合并被聚合模块的 sources jar，避免发布空附件。
+ */
+tasks.named('sourcesJar', Jar) {
+    enabled = true
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    aggregatedProjects.each { Project dependencyProject ->
+        def sourceJarTask = dependencyProject.tasks.named('sourcesJar', Jar)
+        dependsOn(sourceJarTask)
+        from({
+            zipTree(sourceJarTask.get().archiveFile.get().asFile)
+        })
+    }
+}
+
+/*
+ * aggregated javadoc archive - javadocJar 合并被聚合模块的 javadoc jar，保持主 jar 与附件语义一致。
+ */
+tasks.named('javadocJar', Jar) {
+    enabled = true
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    aggregatedProjects.each { Project dependencyProject ->
+        def javadocJarTask = dependencyProject.tasks.named('javadocJar', Jar)
+        dependsOn(javadocJarTask)
+        from({
+            zipTree(javadocJarTask.get().archiveFile.get().asFile)
+        })
+    }
+}
+
 description = 'common-core::distribution'

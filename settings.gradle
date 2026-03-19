@@ -1,3 +1,7 @@
+/*
+ * 插件仓库管理
+ * 作用：配置 settings 阶段解析 Gradle plugin 所使用的仓库。
+ */
 pluginManagement {
     repositories {
         mavenLocal()
@@ -6,46 +10,197 @@ pluginManagement {
     }
 }
 
+/*
+ * profile property bootstrap - 作用：通过 Gradle 原生属性读取脚本预生成的 profile 列表，避免运行期依赖 metadata 文件。
+ */
+def resolveProfileMetadata = {
+    def rawProfiles = providers.gradleProperty('build.profiles').orNull
+    if (!rawProfiles?.trim()) {
+        throw new GradleException("Missing Gradle property 'build.profiles'.")
+    }
+
+    def profiles = rawProfiles.split(',')
+        .collect { String item -> item.trim() }
+        .findAll { String item -> !item.isEmpty() }
+    if (!profiles) {
+        throw new GradleException("Gradle property 'build.profiles' is empty.")
+    }
+
+    return [baseProfile: profiles[0], supportedProfiles: profiles]
+}
+def profileMetadata = resolveProfileMetadata()
+def baseProfile = profileMetadata.baseProfile
+def supportedProfiles = profileMetadata.supportedProfiles
+def explicitProfile = gradle.startParameter.projectProperties.get('buildProfile')
+if (explicitProfile && !supportedProfiles.contains(explicitProfile)) {
+    throw new GradleException("Unsupported buildProfile '${explicitProfile}'. Supported values: ${supportedProfiles}")
+}
+
+/*
+ * 当前构建档位推导
+ * 作用：未显式传入 buildProfile 时，按当前运行 JDK 推导可兼容的最高 profile。
+ */
+def profileJavaVersion = { String profile ->
+    def matcher = (profile =~ /^java(\d+)$/)
+    if (!matcher.matches()) {
+        throw new GradleException("Unsupported build profile naming '${profile}'. Supported values: ${supportedProfiles}")
+    }
+    Integer.parseInt(matcher[0][1])
+}
+def detectJavaVersion = { String javaVersionText ->
+    if (!javaVersionText?.trim()) {
+        return 8
+    }
+    def trimmed = javaVersionText.trim()
+    if (trimmed.startsWith('1.')) {
+        return Integer.parseInt(trimmed.split('\\.')[1])
+    }
+    Integer.parseInt(trimmed.split('[-+_.]')[0])
+}
+def activeBuildProfile = explicitProfile ?: {
+    int currentJavaVersion = detectJavaVersion(System.getProperty('java.version'))
+    def resolvedProfile = baseProfile
+    supportedProfiles.each { String profile ->
+        if (profileJavaVersion(profile) <= currentJavaVersion) {
+            resolvedProfile = profile
+        }
+    }
+    return resolvedProfile
+}.call()
+def isAtLeastProfile = { String currentProfile, String baselineProfile ->
+    int currentIndex = supportedProfiles.indexOf(currentProfile)
+    int baselineIndex = supportedProfiles.indexOf(baselineProfile)
+    currentIndex >= 0 && baselineIndex >= 0 && currentIndex >= baselineIndex
+}
+
+/*
+ * 版本目录文件校验
+ * 作用：确认 gradle/libs.versions.toml 已同步生成，避免后续依赖解析失败。
+ */
+def versionCatalogFile = file('gradle/libs.versions.toml')
+if (!versionCatalogFile.exists()) {
+    throw new GradleException("Missing Gradle version catalog file: ${versionCatalogFile}.")
+}
+
+/*
+ * 依赖解析与仓库配置
+ * 作用：统一声明依赖仓库，并指定优先采用 settings 中的仓库策略。
+ */
 dependencyResolutionManagement {
+    repositoriesMode = org.gradle.api.initialization.resolve.RepositoriesMode.PREFER_SETTINGS
     repositories {
-        mavenLocal()
+        maven { url = 'https://maven.aliyun.com/repository/public/' }
+        mavenLocal {
+            content {
+                includeGroup('org.zero')
+            }
+        }
         mavenCentral()
     }
 }
 
+/*
+ * 根项目标识
+ * 作用：设置多模块工程的根项目名称。
+ */
 rootProject.name = 'common'
 
-String rootDirPath = rootDir.absolutePath + File.separator
-FileTree buildFiles = fileTree(rootDir) {
-    List excludes = gradle.startParameter.projectProperties.get("excludeProjects")?.split(",")
-    include '**/*.gradle', '**/*.gradle.kts'
-    exclude 'common-bom'
-    exclude 'build', '**/gradle', 'settings.gradle', 'buildSrc', '/build.gradle', '.*', 'out'
-    exclude '**/grails3'
-    if (excludes) {
-        exclude excludes
-    }
+/*
+ * 模块注册表
+ * 作用：维护模块路径、目录与项目依赖映射，供后续筛选和装载逻辑使用。
+ */
+def projects = [
+    ':core-base'        : [name: 'core-base',         dir: 'common-core/core-base',                 dependencies: [':common-data']],
+    ':core-jakarta'     : [name: 'core-jakarta',      dir: 'common-core/adapters/core-jakarta',     dependencies: [':core-base', ':common-data']],
+    ':core-spring-boot3': [name: 'core-spring-boot3', dir: 'common-core/adapters/core-spring-boot3', dependencies: [':core-base', ':core-jakarta', ':common-data']],
+    ':core-ip2region2'  : [name: 'core-ip2region2',   dir: 'common-core/adapters/core-ip2region2',  dependencies: [':core-base']],
+    ':core-distribution': [name: 'common-core',       dir: 'common-core/core-distribution',          dependencies: [':core-base', ':core-ip2region2']],
+    ':common-data'      : [name: 'common-data',       dir: 'common-data',                            dependencies: []],
+    ':common-api'       : [name: 'common-api',        dir: 'common-api',                             dependencies: [':core-distribution', ':core-base', ':common-data']],
+    ':common-job'       : [name: 'common-job',        dir: 'common-job',                             dependencies: []],
+    ':common-test'      : [name: 'common-test',       dir: 'common-test',                            dependencies: [':core-distribution', ':core-base', ':common-data', ':common-api', ':common-job']]
+]
+if (isAtLeastProfile(activeBuildProfile, 'java17')) {
+    projects[':core-distribution'].dependencies.addAll([':core-jakarta', ':core-spring-boot3'])
 }
-buildFiles.each { File buildFile ->
-    boolean isDefaultName = 'build.gradle' == buildFile.name || 'build.gradle.kts' == buildFile.name
-    String projectName
-    if (isDefaultName) {
-        String buildFilePath = buildFile.parentFile.absolutePath
-        projectName = buildFilePath.tokenize(File.separator)[-1]
-    } else {
-        boolean isKotlin = buildFile.name.endsWith(".kts")
-        if (isKotlin) {
-            projectName = buildFile.name.replace('.gradle.kts', '')
-        } else {
-            projectName = buildFile.name.replace('.gradle', '')
+
+/*
+ * 模块筛选参数解析
+ * 作用：校验 includeProjects / excludeProjects，并统一转换为内部项目路径。
+ */
+def projectTokenIndex = [:]
+projects.each { String path, Map config ->
+    [path, path.substring(1), config.name].unique().each { String token ->
+        def previousPath = projectTokenIndex.put(token, path)
+        if (previousPath != null && previousPath != path) {
+            throw new GradleException("Duplicate project token '${token}' for ${previousPath} and ${path}")
         }
     }
-    configureProject(':' + projectName, projectName, buildFile)
 }
-def configureProject(String projectPath, String projectName, File buildFile) {
-    include(projectPath)
-    def project = findProject(projectPath)
-    project.name = projectName
-    project.projectDir = buildFile.parentFile
-    project.buildFileName = buildFile.name
+def supportedProjectTokens = new TreeSet<String>(projectTokenIndex.keySet())
+def parseProjectSelection = { String propertyName ->
+    def raw = gradle.startParameter.projectProperties.get(propertyName)
+    if (!raw) {
+        return new LinkedHashSet<String>()
+    }
+    def tokens = raw.split(',')
+        .collect { it.trim() }
+        .findAll { !it.isEmpty() }
+    def unknownTokens = tokens.findAll { String token -> !projectTokenIndex.containsKey(token) }.unique()
+    if (!unknownTokens.isEmpty()) {
+        throw new GradleException("Unsupported ${propertyName} values ${unknownTokens}. Supported values: ${supportedProjectTokens}")
+    }
+    return new LinkedHashSet<String>(tokens.collect { String token -> projectTokenIndex[token] })
+}
+def includeProjects = parseProjectSelection('includeProjects')
+def excludeProjects = parseProjectSelection('excludeProjects')
+
+/*
+ * 动态模块装载
+ * 作用：对 includeProjects 递归补齐项目依赖，并在 excludeProjects 破坏依赖闭包时提前报错。
+ */
+def resolveProjectClosure = { Set<String> initialProjects ->
+    def resolvedProjects = new LinkedHashSet<String>()
+    def pendingProjects = new ArrayDeque<String>()
+    initialProjects.each { String path ->
+        if (resolvedProjects.add(path)) {
+            pendingProjects.addLast(path)
+        }
+    }
+    while (!pendingProjects.isEmpty()) {
+        def currentPath = pendingProjects.removeFirst()
+        projects[currentPath].dependencies.each { String dependencyPath ->
+            if (resolvedProjects.add(dependencyPath)) {
+                pendingProjects.addLast(dependencyPath)
+            }
+        }
+    }
+    return resolvedProjects
+}
+def selectedProjects = includeProjects.isEmpty()
+    ? new LinkedHashSet<String>(projects.keySet())
+    : resolveProjectClosure(includeProjects)
+selectedProjects.removeAll(excludeProjects)
+
+def missingDependencies = []
+selectedProjects.each { String path ->
+    projects[path].dependencies.each { String dependencyPath ->
+        if (!selectedProjects.contains(dependencyPath)) {
+            missingDependencies.add("${projects[path].name} -> ${projects[dependencyPath].name}")
+        }
+    }
+}
+if (!missingDependencies.isEmpty()) {
+    throw new GradleException(
+        "Current includeProjects/excludeProjects selection removes required project dependencies: ${missingDependencies.unique()}"
+    )
+}
+
+projects.each { String path, Map config ->
+    if (selectedProjects.contains(path)) {
+        include(path)
+        def includedProject = project(path)
+        includedProject.projectDir = file(config.dir)
+        includedProject.name = config.name
+    }
 }

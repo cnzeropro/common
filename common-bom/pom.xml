@@ -5,7 +5,7 @@
 
     <groupId>org.zero</groupId>
     <artifactId>common-bom</artifactId>
-    <version>1.0.0</version>
+    <version>${revision}</version>
 
     <packaging>pom</packaging>
 
@@ -13,6 +13,7 @@
     <description>Common Bom</description>
 
     <properties>
+        <revision>1.0.0</revision>
         <common-data.version>${project.version}</common-data.version>
         <common-core.version>${project.version}</common-core.version>
         <common-api.version>${project.version}</common-api.version>

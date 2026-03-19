@@ -40,8 +40,8 @@ cd common-bom && mvn deploy              # 发布 BOM
 | `:common-job` | `common-job/` | 任务调度与 cron |
 | `:common-test` | `common-test/` | Spring Boot 集成/演示应用（端口 34567，H2） |
 
-其他：`buildSrc/` 含自定义插件 `org.zero.plugin.source.source-jar`；`common-bom/` 独立发布 BOM。
-`settings.gradle` 动态扫描 `build.gradle` 注册子项目，支持 `-PexcludeProjects=...` 过滤。
+其他：`buildSrc/` 含自定义 convention 插件；`common-bom/` 独立发布 BOM。
+`settings.gradle` 显式声明子项目映射，支持 `-PincludeProjects=...` 与 `-PexcludeProjects=...` 过滤。
 
 ## core-base 包架构
 
@@ -59,7 +59,7 @@ Multi-release 源码目录：`src/main/java9`、`java11`、`java17`、`java21`�
 
 Spring 核心一致（Framework 5.3.39、Boot 2.7.18、Cloud 2021.0.9），但以下存在漂移：
 
-| 依赖 | Gradle (`libs.versions.toml`) | Maven (`pom.xml`) |
+| 依赖 | Gradle（`gradle/libs.versions.toml`） | Maven (`pom.xml`) |
 |---|---|---|
 | Jetty | 12.0.19 | 9.4.58.v20250814 |
 | Jakarta EE | 11.0.0 | 9.1.0 |
@@ -67,6 +67,7 @@ Spring 核心一致（Framework 5.3.39、Boot 2.7.18、Cloud 2021.0.9），但�
 | ip2region | 2.7.0 | 3.1.0 |
 
 改动依赖版本、发布坐标、adapter 兼容层、聚合逻辑、Java 版本配置时，必须同时检查 Gradle 与 Maven。
+中立版本清单位于 `metadata/build-metadata.toml`，通过独立脚本同步到 `gradle/libs.versions.toml`、root `gradle.properties` 与 Maven POM。
 不要把 Gradle project path、Maven artifactId、目录名视为一一对应。
 
 ## 依赖生态
@@ -118,3 +119,14 @@ JUnit 5，Gradle 匹配 `*Test`、`*Tests`、`*Spec`。优先定向验证，不�
 ## 验收口径
 
 完成改动后回答：改动影响哪个模块、需要修改 Gradle/Maven 还是两者、实际执行了哪些验证、哪些验证因环境限制未执行。
+
+## Metadata
+
+```bash
+powershell -ExecutionPolicy Bypass -File scripts/sync-build-metadata.ps1
+powershell -ExecutionPolicy Bypass -File scripts/verify-build-metadata.ps1
+./scripts/sync-build-metadata.sh
+./scripts/verify-build-metadata.sh
+```
+
+Gradle 与 Maven 已完全解耦：`metadata/build-metadata.toml` 只在 `sync/verify-build-metadata` 脚本中读取，普通构建运行期只消费 Gradle `gradle.properties`、`gradle/libs.versions.toml` 与 Maven root `pom.xml`；临时覆盖分别使用 `-Pbuild.revision=...`、`-PbuildProfile=...` 和 `-Drevision=...`。Gradle 通过环境变量自动发现 JDK，Maven 多版本编译依赖用户自带 `toolchains.xml` 或命令行 `mvn -t <toolchains.xml> ...`。

@@ -1,7 +1,18 @@
+plugins {
+    id 'org.zero.conventions.java8-library'
+}
+
+/*
+ * dependency layout - 先继承根平台版本，再声明对 common-core/common-data 的 API 契约依赖。
+ */
 dependencies {
-    implementation(platform(project(":")))
-    implementation('org.zero:common-core')
-    implementation('org.zero:common-data')
+    implementation(platform(project(':')))
+    implementation(project(':common-core'))
+    /*
+     * compileOnly core-base - 只复用基础类型，不把核心实现重复打进当前产物。
+     */
+    compileOnly(project(':core-base'))
+    implementation(project(':common-data'))
     implementation('org.springframework.cloud:spring-cloud-openfeign-core')
     implementation('org.slf4j:slf4j-api')
     implementation('com.fasterxml.jackson.core:jackson-databind')
@@ -10,7 +21,9 @@ dependencies {
     implementation('io.github.openfeign:feign-core')
     implementation('jakarta.validation:jakarta.validation-api')
 
-
+    /*
+     * Lombok compile support - 只参与编译期生成代码，不进入发布产物。
+     */
     compileOnly('org.projectlombok:lombok')
     annotationProcessor(libs.org.projectlombok.lombok)
     testCompileOnly('org.projectlombok:lombok')
@@ -18,8 +31,3 @@ dependencies {
 }
 
 description = 'common-api'
-
-java {
-    withJavadocJar()
-    withSourcesJar()
-}

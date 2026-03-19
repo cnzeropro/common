@@ -1,0 +1,9 @@
+[versions]
+org-junit_junit-bom = "5.13.4"
+org-mockito_mockito-bom = "4.11.0"
+org-projectlombok_lombok = "1.18.42"
+
+[libraries]
+org-junit_junit-bom = { module = "org.junit:junit-bom", version.ref = "org-junit_junit-bom" }
+org-mockito_mockito-bom = { module = "org.mockito:mockito-bom", version.ref = "org-mockito_mockito-bom" }
+org-projectlombok_lombok = { module = "org.projectlombok:lombok", version.ref = "org-projectlombok_lombok" }

@@ -13,6 +13,7 @@
 
 # Maven/Gradle Wrapper 与构建元数据
 .mvn/timing.properties
+.mvn/toolchains.local.xml
 .mvn/wrapper/maven-wrapper.jar
 .gradle/
 .gradle-user-home/
@@ -20,6 +21,8 @@ gradle/gradle-wrapper.jar
 
 # 构建输出目录
 build/
+# 允许 src 目录中的 build 源码包，例如 org/zero/build
+!**/src/**/build/
 out/
 **/target/
 

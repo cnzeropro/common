@@ -1,12 +1,30 @@
+import org.zero.build.BuildProfileSupport
+
+plugins {
+    id 'org.zero.conventions.java17-library'
+}
+
+def dependencyBuildProfile = BuildProfileSupport.resolveProfileAtLeast(project, findProperty('buildProfile'), 'java17')
+def profileLibrary = { String alias -> BuildProfileSupport.selectLibrary(project, alias, dependencyBuildProfile) }
+
+/*
+ * dependency layout - Jakarta 适配层需要在根平台之上按 profile 选择 Jakarta BOM，再统一替换 javax API。
+ */
 dependencies {
-    implementation(platform(project(":")))
-    implementation('org.zero:common-data')
+    implementation(platform(project(':')))
+    implementation(platform(profileLibrary('jakarta.platform_jakarta.jakartaee-bom')))
+    implementation(project(':core-base'))
+    implementation(project(':common-data'))
     implementation('jakarta.servlet:jakarta.servlet-api')
     implementation('jakarta.validation:jakarta.validation-api')
     implementation('jakarta.websocket:jakarta.websocket-api')
     implementation('jakarta.annotation:jakarta.annotation-api')
     implementation('jakarta.mail:jakarta.mail-api')
+    implementation('org.slf4j:slf4j-api')
 
+    /*
+     * Lombok compile support - 适配层源码同样只在编译期使用 Lombok。
+     */
     compileOnly('org.projectlombok:lombok')
     annotationProcessor(libs.org.projectlombok.lombok)
     testCompileOnly('org.projectlombok:lombok')
@@ -14,8 +32,3 @@ dependencies {
 }
 
 description = 'common-core::jakarta'
-
-java {
-    withJavadocJar()
-    withSourcesJar()
-}

@@ -1,0 +1,316 @@
+[metadata]
+revision = "1.0.0"
+profiles = ["java8", "java11", "java17", "java21", "java25"]
+java = 8
+
+[properties.maven]
+"project.encoding" = "UTF-8"
+"resource.delimiter" = "@"
+"maven.compiler.encoding" = "${project.encoding}"
+"project.build.sourceEncoding" = "${project.encoding}"
+"project.reporting.outputEncoding" = "${project.encoding}"
+"maven.verbose" = "false"
+"maven.clean.verbose" = "${maven.verbose}"
+"maven.compiler.verbose" = "${maven.verbose}"
+
+[libraries]
+# https://mvnrepository.com/artifact/cn.dev33/sa-token-dependencies
+"cn.dev33_sa-token-dependencies" = { java8 = "1.45.0", scope = "import" }
+# https://mvnrepository.com/artifact/cn.hutool/hutool-all
+"cn.hutool_hutool-all" = { java8 = "5.8.40" }
+# https://mvnrepository.com/artifact/cn.hutool/hutool-bom
+"cn.hutool_hutool-bom" = { java8 = "5.8.40", scope = "import" }
+# https://mvnrepository.com/artifact/cn.idev.excel/fastexcel
+"cn.idev.excel_fastexcel" = { java8 = "1.3.0" }
+# https://mvnrepository.com/artifact/com.alibaba.cloud/spring-cloud-alibaba-dependencies
+"com.alibaba.cloud_spring-cloud-alibaba-dependencies" = { java8 = "2021.0.6.0", java17 = "2023.0.1.0", scope = "import" }
+# https://mvnrepository.com/artifact/com.alibaba.csp/sentinel-apache-dubbo-adapter
+"com.alibaba.csp_sentinel-apache-dubbo-adapter" = { java8 = "1.8.8" }
+# https://mvnrepository.com/artifact/com.alibaba.csp/sentinel-apache-dubbo3-adapter
+"com.alibaba.csp_sentinel-apache-dubbo3-adapter" = { java8 = "1.8.8" }
+# https://mvnrepository.com/artifact/com.alibaba.csp/sentinel-spring-webmvc-6x-adapter
+"com.alibaba.csp_sentinel-spring-webmvc-6x-adapter" = { java8 = "1.8.6" }
+# https://mvnrepository.com/artifact/com.alibaba.csp/sentinel-spring-webmvc-adapter
+"com.alibaba.csp_sentinel-spring-webmvc-adapter" = { java8 = "1.8.8" }
+# https://mvnrepository.com/artifact/com.alibaba/druid
+"com.alibaba_druid" = { java8 = "1.2.27" }
+# https://mvnrepository.com/artifact/com.alibaba/druid-spring-boot-3-starter
+"com.alibaba_druid-spring-boot-3-starter" = { java17 = "1.2.27" }
+# https://mvnrepository.com/artifact/com.alibaba/druid-spring-boot-starter
+"com.alibaba_druid-spring-boot-starter" = { java8 = "1.2.27" }
+# https://mvnrepository.com/artifact/com.alibaba/easyexcel
+"com.alibaba_easyexcel" = { java8 = "4.0.3" }
+# https://mvnrepository.com/artifact/com.alicp.jetcache/jetcache-core
+"com.alicp.jetcache_jetcache-core" = { java8 = "2.7.8" }
+# https://mvnrepository.com/artifact/com.alicp.jetcache/jetcache-starter-redis
+"com.alicp.jetcache_jetcache-starter-redis" = { java8 = "2.7.8" }
+# https://mvnrepository.com/artifact/com.alicp.jetcache/jetcache-starter-redis-lettuce
+"com.alicp.jetcache_jetcache-starter-redis-lettuce" = { java8 = "2.7.8" }
+# https://mvnrepository.com/artifact/com.alicp.jetcache/jetcache-starter-redisson
+"com.alicp.jetcache_jetcache-starter-redisson" = { java8 = "2.7.8" }
+# https://mvnrepository.com/artifact/com.auth0/java-jwt
+"com.auth0_java-jwt" = { java8 = "4.5.0" }
+# https://mvnrepository.com/artifact/com.baomidou/dynamic-datasource-spring-boot-starter
+"com.baomidou_dynamic-datasource-spring-boot-starter" = { java8 = "4.3.1" }
+# https://mvnrepository.com/artifact/com.baomidou/dynamic-datasource-spring-boot3-starter
+"com.baomidou_dynamic-datasource-spring-boot3-starter" = { java17 = "4.3.1" }
+# https://mvnrepository.com/artifact/com.baomidou/lock4j-core
+"com.baomidou_lock4j-core" = { java8 = "2.2.7" }
+# https://mvnrepository.com/artifact/com.baomidou/lock4j-redis-template-spring-boot-starter
+"com.baomidou_lock4j-redis-template-spring-boot-starter" = { java8 = "2.2.7" }
+# https://mvnrepository.com/artifact/com.baomidou/lock4j-redisson-spring-boot-starter
+"com.baomidou_lock4j-redisson-spring-boot-starter" = { java8 = "2.2.7" }
+# https://mvnrepository.com/artifact/com.baomidou/lock4j-zookeeper-spring-boot-starter
+"com.baomidou_lock4j-zookeeper-spring-boot-starter" = { java8 = "2.2.7" }
+# https://mvnrepository.com/artifact/com.baomidou/mybatis-plus
+"com.baomidou_mybatis-plus" = { java8 = "3.5.12" }
+# https://mvnrepository.com/artifact/com.baomidou/mybatis-plus-bom
+"com.baomidou_mybatis-plus-bom" = { java8 = "3.5.14", scope = "import" }
+# https://mvnrepository.com/artifact/com.ctrip.framework.apollo/apollo
+"com.ctrip.framework.apollo_apollo" = { java8 = "2.0.1", scope = "import" }
+# https://mvnrepository.com/artifact/com.ctrip.framework.apollo/apollo-client-config-data
+"com.ctrip.framework.apollo_apollo-client-config-data" = { java8 = "2.4.0" }
+# https://mvnrepository.com/artifact/com.esotericsoftware/kryo
+"com.esotericsoftware_kryo" = { java8 = "5.6.2" }
+# https://mvnrepository.com/artifact/com.github.ben-manes.caffeine/caffeine
+"com.github.ben-manes.caffeine_caffeine" = { java8 = "2.9.3", java11 = "3.2.3", strict = true }
+# https://mvnrepository.com/artifact/com.github.penggle/kaptcha
+"com.github.penggle_kaptcha" = { java8 = "2.3.2" }
+# https://mvnrepository.com/artifact/com.github.rholder/guava-retrying
+"com.github.rholder_guava-retrying" = { java8 = "2.0.0" }
+# https://mvnrepository.com/artifact/com.github.ulisesbocchio/jasypt-spring-boot
+"com.github.ulisesbocchio_jasypt-spring-boot" = { java8 = "3.0.5" }
+# https://mvnrepository.com/artifact/com.github.ulisesbocchio/jasypt-spring-boot-starter
+"com.github.ulisesbocchio_jasypt-spring-boot-starter" = { java8 = "3.0.5" }
+# https://mvnrepository.com/artifact/com.google.cloud/libraries-bom
+"com.google.cloud_libraries-bom" = { java8 = "26.68.0", scope = "import" }
+# https://mvnrepository.com/artifact/com.google.code.kaptcha/kaptcha
+"com.google.code.kaptcha_kaptcha" = { java8 = "2.3" }
+# https://mvnrepository.com/artifact/com.google.code/kaptcha
+"com.google.code_kaptcha" = { java8 = "2.3.0" }
+# https://mvnrepository.com/artifact/com.google.protobuf/protobuf-bom
+"com.google.protobuf_protobuf-bom" = { java8 = "4.32.1", scope = "import" }
+# https://mvnrepository.com/artifact/com.googlecode.juniversalchardet/juniversalchardet
+"com.googlecode.juniversalchardet_juniversalchardet" = { java8 = "1.0.3" }
+# https://mvnrepository.com/artifact/com.huaweicloud/spring-cloud-huawei-bom
+"com.huaweicloud_spring-cloud-huawei-bom" = { java8 = "1.11.12-2021.0.x", java17 = "1.11.12-2024.0.x", scope = "import" }
+# https://mvnrepository.com/artifact/com.lmax/disruptor
+"com.lmax_disruptor" = { java8 = "3.4.4", java11 = "4.0.0" }
+# https://mvnrepository.com/artifact/com.mybatis-flex/mybatis-flex-dependencies
+"com.mybatis-flex_mybatis-flex-dependencies" = { java8 = "1.11.3", scope = "import" }
+# https://mvnrepository.com/artifact/com.oracle.database.jdbc/ojdbc-bom
+"com.oracle.database.jdbc_ojdbc-bom" = { java8 = "23.9.0.25.07", scope = "import" }
+# https://mvnrepository.com/artifact/com.querydsl/querydsl-bom
+"com.querydsl_querydsl-bom" = { java8 = "5.0.0", java11 = "5.1.0", scope = "import" }
+# https://mvnrepository.com/artifact/com.redis/testcontainers-redis
+"com.redis_testcontainers-redis" = { java8 = "1.7.0", java17 = "2.2.4", java21 = "2.1.0" }
+# https://mvnrepository.com/artifact/com.taobao.arthas/arthas-core
+"com.taobao.arthas_arthas-core" = { java8 = "4.0.5" }
+# https://mvnrepository.com/artifact/com.taobao.arthas/arthas-spring-boot-starter
+"com.taobao.arthas_arthas-spring-boot-starter" = { java8 = "4.0.5" }
+# https://mvnrepository.com/artifact/com.xuxueli/xxl-job
+"com.xuxueli_xxl-job" = { java8 = "3.2.0", scope = "import" }
+# https://mvnrepository.com/artifact/com.xuxueli/xxl-job-core
+"com.xuxueli_xxl-job-core" = { java8 = "3.1.1" }
+# https://mvnrepository.com/artifact/io.grpc/grpc-bom
+"io.grpc_grpc-bom" = { java8 = "1.75.0", scope = "import" }
+# https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-bom
+"io.jsonwebtoken_jjwt-bom" = { java8 = "0.13.0", scope = "import" }
+# https://mvnrepository.com/artifact/io.minio/minio
+"io.minio_minio" = { java8 = "8.6.0" }
+# https://mvnrepository.com/artifact/io.netty/netty-bom
+"io.netty_netty-bom" = { java8 = "4.2.6.Final", scope = "import" }
+# https://mvnrepository.com/artifact/io.projectreactor/reactor-bom
+"io.projectreactor_reactor-bom" = { java8 = "2024.0.10", scope = "import" }
+# https://mvnrepository.com/artifact/io.swagger.core.v3/swagger-core
+"io.swagger.core.v3_swagger-core" = { java8 = "2.2.35" }
+# https://mvnrepository.com/artifact/jakarta.platform/jakarta.jakartaee-bom
+"jakarta.platform_jakarta.jakartaee-bom" = { java8 = "9.1.0", java11 = "10.0.0", java17 = "11.0.0", scope = "import" }
+# https://mvnrepository.com/artifact/javax.inject/javax.inject
+"javax.inject_javax.inject" = { java8 = "1" }
+# https://mvnrepository.com/artifact/javax.servlet/servlet-api
+"javax.servlet_servlet-api" = { java8 = "2.5" }
+# https://mvnrepository.com/artifact/log4j/log4j
+"log4j_log4j" = { java8 = "1.2.17" }
+# https://mvnrepository.com/artifact/net.devh/grpc-client-spring-boot-starter
+"net.devh_grpc-client-spring-boot-starter" = { java8 = "2.15.0.RELEASE" }
+# https://mvnrepository.com/artifact/net.devh/grpc-server-spring-boot-starter
+"net.devh_grpc-server-spring-boot-starter" = { java8 = "2.15.0.RELEASE" }
+# https://mvnrepository.com/artifact/org.apache.commons/commons-compress
+"org.apache.commons_commons-compress" = { java8 = "1.28.0" }
+# https://mvnrepository.com/artifact/org.apache.commons/commons-text
+"org.apache.commons_commons-text" = { java8 = "1.14.0" }
+# https://mvnrepository.com/artifact/org.apache.dubbo/dubbo-bom
+"org.apache.dubbo_dubbo-bom" = { java8 = "3.2.12", scope = "import" }
+# https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-bom
+"org.apache.logging.log4j_log4j-bom" = { java8 = "2.24.3", scope = "import" }
+# https://mvnrepository.com/artifact/org.apache.maven/maven-model
+"org.apache.maven_maven-model" = { java8 = "3.9.11" }
+# https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
+"org.apache.poi_poi-ooxml" = { java8 = "5.4.1" }
+# https://mvnrepository.com/artifact/org.apache.shardingsphere.elasticjob/elasticjob
+"org.apache.shardingsphere.elasticjob_elasticjob" = { java8 = "3.0.4" }
+# https://mvnrepository.com/artifact/org.apache.shardingsphere.elasticjob/elasticjob-lite-spring-boot-starter
+"org.apache.shardingsphere.elasticjob_elasticjob-lite-spring-boot-starter" = { java8 = "3.0.4" }
+# https://mvnrepository.com/artifact/org.apache.shiro/shiro-bom
+"org.apache.shiro_shiro-bom" = { java8 = "1.13.0", java11 = "2.0.5", scope = "import" }
+# https://mvnrepository.com/artifact/org.dromara.dynamictp/dynamic-tp-dependencies
+"org.dromara.dynamictp_dynamic-tp-dependencies" = { java8 = "1.2.2", scope = "import" }
+# https://mvnrepository.com/artifact/org.dromara.x-file-storage/x-file-storage-core
+"org.dromara.x-file-storage_x-file-storage-core" = { java8 = "2.3.0" }
+# https://mvnrepository.com/artifact/org.dromara.x-file-storage/x-file-storage-spring
+"org.dromara.x-file-storage_x-file-storage-spring" = { java8 = "2.3.0" }
+# https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-bom
+"org.eclipse.jetty_jetty-bom" = { java8 = "9.4.58.v20250814", java11 = "11.0.26", java17 = "12.1.1", scope = "import" }
+# https://mvnrepository.com/artifact/org.jasypt/jasypt
+"org.jasypt_jasypt" = { java8 = "1.9.3" }
+# https://mvnrepository.com/artifact/org.jctools/jctools-core
+"org.jctools_jctools-core" = { java8 = "4.0.5" }
+# https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-bom
+"org.jetbrains.kotlin_kotlin-bom" = { java8 = "2.2.20" }
+# https://mvnrepository.com/artifact/org.jooq/jooq-bom
+"org.jooq_jooq-bom" = { java17 = "3.19.26", java21 = "3.20.7", scope = "import" }
+# https://mvnrepository.com/artifact/org.junit/junit-bom
+"org.junit_junit-bom" = { java8 = "5.13.4", scope = "import" }
+# https://mvnrepository.com/artifact/org.lionsoul/ip2region
+"org.lionsoul_ip2region" = { java8 = "3.1.0" }
+# https://mvnrepository.com/artifact/org.mapstruct/mapstruct
+"org.mapstruct_mapstruct" = { java8 = "1.6.3" }
+# https://mvnrepository.com/artifact/org.mockito/mockito-bom
+"org.mockito_mockito-bom" = { java8 = "4.11.0", java11 = "5.20.0", scope = "import" }
+# https://mvnrepository.com/artifact/org.mybatis.spring.boot/mybatis-spring-boot-starter
+"org.mybatis.spring.boot_mybatis-spring-boot-starter" = { java8 = "2.3.2", java17 = "3.0.5" }
+# https://mvnrepository.com/artifact/org.mybatis/mybatis
+"org.mybatis_mybatis" = { java8 = "3.5.19" }
+# https://mvnrepository.com/artifact/org.mybatis/mybatis-spring
+"org.mybatis_mybatis-spring" = { java8 = "2.1.2" }
+# https://mvnrepository.com/artifact/org.openjdk.jol/jol-core
+"org.openjdk.jol_jol-core" = { java8 = "0.17" }
+# https://mvnrepository.com/artifact/org.owasp.encoder/encoder
+"org.owasp.encoder_encoder" = { java8 = "1.3.1" }
+# https://mvnrepository.com/artifact/org.owasp.esapi/esapi
+"org.owasp.esapi_esapi" = { java8 = "2.7.0.0" }
+# https://mvnrepository.com/artifact/org.projectlombok/lombok
+"org.projectlombok_lombok" = { java8 = "1.18.42" }
+# https://mvnrepository.com/artifact/org.projectlombok/lombok-mapstruct-binding
+"org.projectlombok_lombok-mapstruct-binding" = { java8 = "0.2.0" }
+# https://mvnrepository.com/artifact/org.redisson/redisson
+"org.redisson_redisson" = { java8 = "3.52.0" }
+# https://mvnrepository.com/artifact/org.redisson/redisson-spring-boot-starter
+"org.redisson_redisson-spring-boot-starter" = { java8 = "3.52.0" }
+# https://mvnrepository.com/artifact/org.slf4j/slf4j-bom
+"org.slf4j_slf4j-bom" = { java8 = "2.0.17", scope = "import" }
+# https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-bom
+"org.springdoc_springdoc-openapi-bom" = { java8 = "2.8.9", java17 = "2.8.13", scope = "import" }
+# https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies
+"org.springframework.boot_spring-boot-dependencies" = { java8 = "2.7.18", java17 = "3.5.6", scope = "import" }
+# https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-dependencies
+"org.springframework.cloud_spring-cloud-dependencies" = { java8 = "2021.0.9", java17 = "2025.0.0", scope = "import" }
+# https://mvnrepository.com/artifact/org.springframework.data/spring-data-bom
+"org.springframework.data_spring-data-bom" = { java8 = "2021.2.18", java17 = "2025.0.4", scope = "import" }
+# https://mvnrepository.com/artifact/org.springframework.integration/spring-integration-bom
+"org.springframework.integration_spring-integration-bom" = { java8 = "5.5.20", java17 = "6.5.2", scope = "import" }
+# https://mvnrepository.com/artifact/org.springframework.plugin/spring-plugin
+"org.springframework.plugin_spring-plugin" = { java8 = "2.0.0.RELEASE", java17 = "3.0.0", scope = "import" }
+# https://mvnrepository.com/artifact/org.springframework.plugin/spring-plugin-core
+"org.springframework.plugin_spring-plugin-core" = { java8 = "2.0.0.RELEASE" }
+# https://mvnrepository.com/artifact/org.springframework.plugin/spring-plugin-metadata
+"org.springframework.plugin_spring-plugin-metadata" = { java8 = "2.0.0.RELEASE" }
+# https://mvnrepository.com/artifact/org.springframework.security/spring-security-bom
+"org.springframework.security_spring-security-bom" = { java8 = "5.8.16", java17 = "6.5.5", scope = "import" }
+# https://mvnrepository.com/artifact/org.springframework.session/spring-session-bom
+"org.springframework.session_spring-session-bom" = { java8 = "2021.2.3", scope = "import" }
+# https://mvnrepository.com/artifact/org.springframework.shell/spring-shell-dependencies
+"org.springframework.shell_spring-shell-dependencies" = { java8 = "2.1.15", java17 = "3.4.1", scope = "import" }
+# https://mvnrepository.com/artifact/org.springframework/spring-framework-bom
+"org.springframework_spring-framework-bom" = { java8 = "5.3.39", java17 = "6.2.11", scope = "import" }
+# https://mvnrepository.com/artifact/org.testcontainers/testcontainers-bom
+"org.testcontainers_testcontainers-bom" = { java8 = "1.21.3", scope = "import" }
+# https://mvnrepository.com/artifact/org.zero/common-bom
+"org.zero_common-bom" = { java8 = "1.0.0", scope = "import" }
+# https://mvnrepository.com/artifact/tech.powerjob/powerjob-worker-spring-boot-starter
+"tech.powerjob_powerjob-worker-spring-boot-starter" = { java8 = "5.1.2" }
+# https://mvnrepository.com/artifact/xerces/xercesImpl
+"xerces_xercesImpl" = { java8 = "2.12.2" }
+
+[plugins.maven]
+# https://mvnrepository.com/artifact/com.github.github/site-maven-plugin
+"com.github.github_site-maven-plugin" = { java8 = "0.12" }
+# https://mvnrepository.com/artifact/io.github.git-commit-id/git-commit-id-maven-plugin
+"io.github.git-commit-id_git-commit-id-maven-plugin" = { java8 = "9.0.2" }
+# https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-antrun-plugin
+"org.apache.maven.plugins_maven-antrun-plugin" = { java8 = "3.1.0" }
+# https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-assembly-plugin
+"org.apache.maven.plugins_maven-assembly-plugin" = { java8 = "3.7.1" }
+# https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-clean-plugin
+"org.apache.maven.plugins_maven-clean-plugin" = { java8 = "3.5.0" }
+# https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin
+"org.apache.maven.plugins_maven-compiler-plugin" = { java8 = "3.14.0" }
+# https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-dependency-plugin
+"org.apache.maven.plugins_maven-dependency-plugin" = { java8 = "3.8.1" }
+# https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-deploy-plugin
+"org.apache.maven.plugins_maven-deploy-plugin" = { java8 = "3.1.4" }
+# https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-enforcer-plugin
+"org.apache.maven.plugins_maven-enforcer-plugin" = { java8 = "3.5.0" }
+# https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-failsafe-plugin
+"org.apache.maven.plugins_maven-failsafe-plugin" = { java8 = "3.5.3" }
+# https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-gpg-plugin
+"org.apache.maven.plugins_maven-gpg-plugin" = { java8 = "3.2.8" }
+# https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-help-plugin
+"org.apache.maven.plugins_maven-help-plugin" = { java8 = "3.5.1" }
+# https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-install-plugin
+"org.apache.maven.plugins_maven-install-plugin" = { java8 = "3.1.4" }
+# https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-invoker-plugin
+"org.apache.maven.plugins_maven-invoker-plugin" = { java8 = "3.9.0" }
+# https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-jar-plugin
+"org.apache.maven.plugins_maven-jar-plugin" = { java8 = "3.3.0" }
+# https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-javadoc-plugin
+"org.apache.maven.plugins_maven-javadoc-plugin" = { java8 = "3.11.2" }
+# https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-resources-plugin
+"org.apache.maven.plugins_maven-resources-plugin" = { java8 = "3.3.1" }
+# https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-shade-plugin
+"org.apache.maven.plugins_maven-shade-plugin" = { java8 = "3.6.0" }
+# https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-source-plugin
+"org.apache.maven.plugins_maven-source-plugin" = { java8 = "3.3.1" }
+# https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin
+"org.apache.maven.plugins_maven-surefire-plugin" = { java8 = "3.5.3" }
+# https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-toolchains-plugin
+"org.apache.maven.plugins_maven-toolchains-plugin" = { java8 = "3.2.0" }
+# https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-war-plugin
+"org.apache.maven.plugins_maven-war-plugin" = { java8 = "3.4.0" }
+# https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-wrapper-plugin
+"org.apache.maven.plugins_maven-wrapper-plugin" = { java8 = "3.3.2" }
+# https://mvnrepository.com/artifact/org.codehaus.mojo/build-helper-maven-plugin
+"org.codehaus.mojo_build-helper-maven-plugin" = { java8 = "3.6.1" }
+# https://mvnrepository.com/artifact/org.codehaus.mojo/versions-maven-plugin
+"org.codehaus.mojo_versions-maven-plugin" = { java8 = "2.18.0" }
+# https://mvnrepository.com/artifact/org.codehaus.mojo/xml-maven-plugin
+"org.codehaus.mojo_xml-maven-plugin" = { java8 = "1.1.0" }
+# https://mvnrepository.com/artifact/org.cyclonedx/cyclonedx-maven-plugin
+"org.cyclonedx_cyclonedx-maven-plugin" = { java8 = "2.9.1" }
+# https://mvnrepository.com/artifact/org.flywaydb/flyway-maven-plugin
+"org.flywaydb_flyway-maven-plugin" = { java8 = "9.22.3" }
+# https://mvnrepository.com/artifact/org.graalvm.buildtools/native-maven-plugin
+"org.graalvm.buildtools_native-maven-plugin" = { java8 = "0.10.6" }
+# https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-maven-plugin
+"org.jetbrains.kotlin_kotlin-maven-plugin" = { java8 = "2.2.20" }
+# https://mvnrepository.com/artifact/org.jooq/jooq-codegen-maven
+"org.jooq_jooq-codegen-maven" = { java8 = "3.14.16" }
+# https://mvnrepository.com/artifact/org.liquibase/liquibase-maven-plugin
+"org.liquibase_liquibase-maven-plugin" = { java8 = "4.33.0" }
+# https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-maven-plugin
+"org.springframework.boot_spring-boot-maven-plugin" = { java8 = "2.7.18", java17 = "3.1.5" }
+
+[plugins.gradle]
+"base" = { }
+"java-gradle-plugin" = { }
+"java-platform" = { }
+"maven-publish" = { }
+"org.zero.conventions.aggregate-distribution" = { }
+"org.zero.conventions.java17-application" = { }
+"org.zero.conventions.java17-library" = { }
+"org.zero.conventions.java8-application" = { }
+"org.zero.conventions.java8-library" = { }
+"org.zero.conventions.multi-release-java8" = { }
+# https://plugins.gradle.org/plugin/org.springframework.boot
+"org.springframework.boot" = { java8 = "2.7.18", java17 = "3.1.5" }

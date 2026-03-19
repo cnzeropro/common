@@ -1,7 +1,5 @@
 package org.zero.common.core.extension.java.util;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Objects;
@@ -21,7 +19,6 @@ public class EnumerationIterable<E> implements Iterable<E> {
         return new EnumerationIterable<>(enumeration);
     }
 
-    @NotNull
     @Override
     public Iterator<E> iterator() {
         return EnumerationIterator.of(this.enumeration);

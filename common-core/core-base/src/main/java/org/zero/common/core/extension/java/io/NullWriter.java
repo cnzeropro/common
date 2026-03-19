@@ -1,7 +1,5 @@
 package org.zero.common.core.extension.java.io;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.Writer;
 
 /**
@@ -12,7 +10,7 @@ public class NullWriter extends Writer {
     public static final NullWriter INSTANCE = new NullWriter();
 
     @Override
-    public void write(@NotNull char[] cbuf, int off, int len) {
+    public void write(char[] cbuf, int off, int len) {
         // to /dev/null
     }
 
@@ -35,17 +33,17 @@ public class NullWriter extends Writer {
     }
 
     @Override
-    public void write(@NotNull String str, int off, int len) {
+    public void write(String str, int off, int len) {
         // to /dev/null
     }
 
     @Override
-    public void write(@NotNull String str) {
+    public void write(String str) {
         // to /dev/null
     }
 
     @Override
-    public void write(@NotNull char[] cbuf) {
+    public void write(char[] cbuf) {
         // to /dev/null
     }
 

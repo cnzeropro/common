@@ -1,5 +1,12 @@
+plugins {
+    id 'org.zero.conventions.java8-library'
+}
+
+/*
+ * dependency layout - common-data 提供通用模型与常量，依赖保持在基础 Spring/Jackson/Hutool 层。
+ */
 dependencies {
-    implementation(platform(project(":")))
+    implementation(platform(project(':')))
     implementation('org.springframework:spring-web')
     implementation('org.springframework:spring-jdbc')
     implementation('org.springframework:spring-context')
@@ -13,6 +20,9 @@ dependencies {
     implementation('javax.validation:validation-api')
     implementation('jakarta.validation:jakarta.validation-api')
 
+    /*
+     * Lombok compile support - 保持 DTO/模型生成体验，同时不污染运行时依赖。
+     */
     compileOnly('org.projectlombok:lombok')
     annotationProcessor(libs.org.projectlombok.lombok)
     testCompileOnly('org.projectlombok:lombok')
@@ -20,8 +30,3 @@ dependencies {
 }
 
 description = 'common-data'
-
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
