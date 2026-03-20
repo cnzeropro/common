@@ -80,6 +80,14 @@ public final class ConventionSupport {
             project.getDependencies().platform(junitBom.get())
         );
         project.getDependencies().add(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME, "org.junit.jupiter:junit-jupiter");
+        project.getDependencies().add(
+            JavaPlugin.TEST_RUNTIME_ONLY_CONFIGURATION_NAME,
+            project.getDependencies().platform(junitBom.get())
+        );
+        /*
+         * JUnit platform launcher alignment - 显式补齐与 Jupiter/Engine 同版本的 launcher，避免 Gradle 内置旧版本导致发现阶段错配。
+         */
+        project.getDependencies().add(JavaPlugin.TEST_RUNTIME_ONLY_CONFIGURATION_NAME, "org.junit.platform:junit-platform-launcher");
     }
 
     private static void configureCompileTask(JavaCompile task, int languageVersion) {
