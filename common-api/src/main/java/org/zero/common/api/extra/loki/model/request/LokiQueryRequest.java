@@ -5,11 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import org.zero.common.api.extra.loki.constant.Direction;
-
-import java.math.BigInteger;
+import org.zero.common.api.extra.loki.constant.LokiDirection;
 
 /**
+ * Loki 瞬时查询请求。
+ * <p>
+ * 对应 {@code GET /loki/api/v1/query} 的查询参数。
+ *
  * @author zero
  * @since 2023/8/28
  */
@@ -20,23 +22,27 @@ import java.math.BigInteger;
 @Accessors(chain = true)
 public class LokiQueryRequest {
     /**
-     * 日志排序顺序。可选：backward, forward。默认：backward
+     * {@code direction} - 日志返回顺序。
+     * <p>
+     * 可选值为 {@code backward}、{@code forward}，默认值为 {@code backward}。
      */
     @Builder.Default
-    private Direction direction = Direction.BACKWARD;
+    private LokiDirection direction = LokiDirection.BACKWARD;
     /**
-     * 查询日志条数。默认：100
+     * {@code limit} - 返回的最大日志条数。
      */
     @Builder.Default
     private Integer limit = 100;
     /**
-     * 要执行的 LogQL 查询。
+     * {@code query} - 要执行的 LogQL 查询语句。
      *
      * @see <a href="https://grafana.com/docs/loki/latest/query/">LogQL</a>
      */
     private String query;
     /**
-     * 查询的评估时间。Unix 纪元纳秒值。默认：当前时间
+     * {@code time} - 瞬时查询评估时间。
+     * <p>
+     * 支持纳秒级 Unix 时间戳、浮点秒时间戳、{@code RFC3339}、{@code RFC3339Nano}。
      */
-    private BigInteger time;
+    private String time;
 }

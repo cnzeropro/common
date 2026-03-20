@@ -5,11 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import org.zero.common.api.extra.loki.constant.Direction;
-
-import java.math.BigInteger;
+import org.zero.common.api.extra.loki.constant.LokiDirection;
 
 /**
+ * Loki 区间查询请求。
+ * <p>
+ * 对应 {@code GET /loki/api/v1/query_range} 的查询参数。
+ *
  * @author zero
  * @since 2023/8/28
  */
@@ -20,39 +22,49 @@ import java.math.BigInteger;
 @Accessors(chain = true)
 public class LokiQueryRangeRequest {
     /**
-     * 日志排序顺序。可选：backward, forward。默认：backward
+     * {@code direction} - 日志返回顺序。
+     * <p>
+     * 可选值为 {@code backward}、{@code forward}，默认值为 {@code backward}。
      */
     @Builder.Default
-    private Direction direction = Direction.BACKWARD;
+    private LokiDirection direction = LokiDirection.BACKWARD;
     /**
-     * 查询日志条数。默认：100
+     * {@code limit} - 返回的最大日志条数。
      */
     @Builder.Default
     private Integer limit = 100;
     /**
-     * 要执行的 LogQL 查询。
+     * {@code query} - 要执行的 LogQL 查询语句。
      *
      * @see <a href="https://grafana.com/docs/loki/latest/query/">LogQL</a>
      */
     private String query;
     /**
-     * 查询的开始时间。Unix 纪元纳秒值。默认：1小时前
+     * {@code start} - 查询开始时间。
+     * <p>
+     * 支持纳秒级 Unix 时间戳、浮点秒时间戳、{@code RFC3339}、{@code RFC3339Nano}。
      */
-    private BigInteger start;
+    private String start;
     /**
-     * 查询的结束时间。Unix 纪元纳秒值。默认：当前时间
+     * {@code end} - 查询结束时间。
+     * <p>
+     * 支持纳秒级 Unix 时间戳、浮点秒时间戳、{@code RFC3339}、{@code RFC3339Nano}。
      */
-    private BigInteger end;
+    private String end;
     /**
-     * 用于计算开始时间（start）相对于结束时间（end）的持续时间
+     * {@code since} - 相对 {@code end} 反推 {@code start} 的 duration - 持续时间。
      */
-    private BigInteger since;
+    private String since;
     /**
-     * 查询的步长
+     * {@code step} - 指标查询步长。
+     * <p>
+     * 支持 Prometheus duration 字符串或浮点秒字符串。
      */
-    private Integer step;
+    private String step;
     /**
-     * 查询的间隔
+     * {@code interval} - 日志流采样间隔。
+     * <p>
+     * 支持 duration 字符串或浮点秒字符串。
      */
-    private Integer interval;
+    private String interval;
 }

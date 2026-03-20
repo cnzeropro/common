@@ -12,6 +12,10 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
+ * Loki 区间指标结果。
+ * <p>
+ * 对应 {@code resultType=matrix} 的单个结果项，包含指标标签和多个时间点的指标值。
+ *
  * @author Zero (cnzeropro@163.com)
  * @since 2024/11/27
  */
@@ -21,24 +25,51 @@ import java.util.Map;
 @Builder(toBuilder = true)
 @EqualsAndHashCode(callSuper = true)
 public class LokiMatrix extends LokiResult {
+    /**
+     * {@code metric} - 当前区间指标结果对应的标签集合。
+     */
     private Map<String, Object> metric;
+    /**
+     * {@code values} - 多个时间点的指标值数组列表。
+     */
     @Singular
     private Collection<Value> values;
 
+    /**
+     * Loki 区间指标值对象。
+     * <p>
+     * 对应矩阵结果中的单个值数组，结构为 {@code [epochSecond, metricValue]}。
+     */
     @NoArgsConstructor(access = AccessLevel.PACKAGE)
     @EqualsAndHashCode(callSuper = true)
     public static class Value extends LokiValue {
-        public Value(Long epochSecond, String logLine) {
+        /**
+         * 使用时间戳和指标值构造区间指标值。
+         *
+         * @param epochSecond Unix 秒级时间戳
+         * @param metricValue 指标值字符串
+         */
+        public Value(Long epochSecond, String metricValue) {
             super();
             this.add(epochSecond);
-            this.add(logLine);
+            this.add(metricValue);
         }
 
+        /**
+         * 获取第 1 段 {@code epochSecond}。
+         *
+         * @return Unix 秒级时间戳
+         */
         public Long getEpochSecond() {
             return (Long) this.get(0);
         }
 
-        public String getLogLine() {
+        /**
+         * 获取第 2 段 {@code metricValue}。
+         *
+         * @return 指标值字符串
+         */
+        public String getMetricValue() {
             return (String) this.get(1);
         }
     }

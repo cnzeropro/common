@@ -10,6 +10,10 @@ import lombok.experimental.SuperBuilder;
 import java.io.Serializable;
 
 /**
+ * Loki ingester 关闭请求参数。
+ * <p>
+ * 对应 {@code GET/POST /ingester/shutdown} 的查询参数或表单参数。
+ *
  * @author zero
  * @since 2023/8/28
  */
@@ -20,19 +24,19 @@ import java.io.Serializable;
 @Accessors(chain = true)
 public class LokiIngesterShutdownRequest implements Serializable {
     /**
-     * 是否刷新数据
+     * {@code flush} - 关闭前是否先执行 flush - 刷盘。
      */
     @Builder.Default
     private Boolean flush = Boolean.TRUE;
     /**
-     * delete_ring_tokens
+     * {@code delete_ring_tokens} - 是否删除当前 ingester 对应的 ring token 文件。
      * <p>
-     * 如果指定了 {@code -ingester.token-file-path}，是否删除包含该实例 ingester 的 ring_tokens 的文件
+     * Java 字段名为 {@code deleteRingTokens}，编码时会转换为官方参数 {@code delete_ring_tokens}。
      */
     @Builder.Default
     private Boolean deleteRingTokens = Boolean.FALSE;
     /**
-     * 在服务关闭后是否终止 Loki 进程
+     * {@code terminate} - 服务关闭后是否终止 Loki 进程。
      */
     @Builder.Default
     private Boolean terminate = Boolean.TRUE;

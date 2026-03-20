@@ -8,6 +8,11 @@ import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
 
 /**
+ * Loki 标签值查询请求。
+ * <p>
+ * 对应 {@code GET /loki/api/v1/label/{name}/values} 的查询参数，
+ * 结构与 {@link LokiLabelsRequest} 一致。
+ *
  * @author zero
  * @since 2023/8/28
  */

@@ -8,6 +8,10 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 /**
+ * Loki 日志级别接口响应。
+ * <p>
+ * 对应 {@code /log_level} 接口返回的消息体。
+ *
  * @author zero
  * @since 2023/8/28
  */
@@ -16,5 +20,8 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class LokiLogLevelResponse implements Serializable {
+    /**
+     * {@code message} - 日志级别查询或修改结果消息。
+     */
     private String message;
 }

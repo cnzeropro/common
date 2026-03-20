@@ -10,6 +10,10 @@ import java.io.Serializable;
 import java.math.BigInteger;
 
 /**
+ * Loki 索引统计查询请求。
+ * <p>
+ * 对应 {@code GET/POST /loki/api/v1/index/stats} 的查询参数或表单参数。
+ *
  * @author zero
  * @since 2023/8/28
  */
@@ -20,17 +24,17 @@ import java.math.BigInteger;
 @Accessors(chain = true)
 public class LokiIndexStatsRequest implements Serializable {
     /**
-     * LogQL 查询语句。
+     * {@code query} - 用于过滤统计范围的 LogQL 语句。
      *
      * @see <a href="https://grafana.com/docs/loki/latest/query/">LogQL</a>
      */
     private String query;
     /**
-     * 开始时间。Unix 纪元纳秒值。
+     * {@code start} - 统计开始时间，单位为纳秒级 Unix 时间戳。
      */
     private BigInteger start;
     /**
-     * 结束时间。Unix 纪元纳秒值。
+     * {@code end} - 统计结束时间，单位为纳秒级 Unix 时间戳。
      */
     private BigInteger end;
 }

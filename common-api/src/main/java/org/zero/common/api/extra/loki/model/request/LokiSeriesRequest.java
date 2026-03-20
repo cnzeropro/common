@@ -10,6 +10,10 @@ import java.io.Serializable;
 import java.math.BigInteger;
 
 /**
+ * Loki Series 查询请求。
+ * <p>
+ * 对应 {@code GET/POST /loki/api/v1/series} 的查询参数或表单参数。
+ *
  * @author zero
  * @since 2023/8/28
  */
@@ -20,19 +24,21 @@ import java.math.BigInteger;
 @Accessors(chain = true)
 public class LokiSeriesRequest implements Serializable {
     /**
-     * 重复的日志流选择器参数，用于选择要返回的流。至少提供一个
+     * {@code match[]} - 重复出现的日志流选择器参数。
+     * <p>
+     * Java 字段名为 {@code match}，编码时会转换为官方要求的 {@code match[]}。
      */
     private String[] match;
     /**
-     * 开始时间。Unix 纪元纳秒值。
+     * {@code start} - 查询开始时间，单位为纳秒级 Unix 时间戳。
      */
     private BigInteger start;
     /**
-     * 结束时间。Unix 纪元纳秒值。
+     * {@code end} - 查询结束时间，单位为纳秒级 Unix 时间戳。
      */
     private BigInteger end;
     /**
-     * 用于计算开始时间（start）相对于结束时间（end）的持续时间
+     * {@code since} - 相对 {@code end} 反推 {@code start} 的 duration - 持续时间。
      */
-    private BigInteger since;
+    private String since;
 }

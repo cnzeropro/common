@@ -7,8 +7,6 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.TypeFactory;
@@ -21,19 +19,20 @@ import feign.codec.Decoder;
 import feign.codec.EncodeException;
 import feign.codec.Encoder;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.ResolvableType;
 import org.springframework.util.TypeUtils;
-import org.zero.common.api.extra.loki.constant.ResultType;
+import org.zero.common.api.extra.loki.constant.LokiResultType;
 import org.zero.common.api.extra.loki.model.common.LokiMatrix;
 import org.zero.common.api.extra.loki.model.common.LokiResult;
 import org.zero.common.api.extra.loki.model.common.LokiStats;
 import org.zero.common.api.extra.loki.model.common.LokiStream;
 import org.zero.common.api.extra.loki.model.common.LokiVector;
+import org.zero.common.api.extra.loki.model.request.LokiDeleteCancelRequest;
 import org.zero.common.api.extra.loki.model.request.LokiDeleteRequest;
 import org.zero.common.api.extra.loki.model.request.LokiIngesterShutdownRequest;
 import org.zero.common.api.extra.loki.model.request.LokiLogLevelRequest;
+import org.zero.common.api.extra.loki.model.request.LokiSeriesRequest;
 import org.zero.common.api.extra.loki.model.response.LokiQueryRangeResponse;
 import org.zero.common.api.extra.loki.model.response.LokiQueryResponse;
 import org.zero.common.api.extra.loki.model.response.LokiResponse;
@@ -44,16 +43,24 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
 /**
+ * Loki Feign 自定义配置。
+ * <p>
+ * 用于处理 Loki HTTP API 中的特殊 query/form 参数名，以及 {@code resultType} 驱动的自定义响应反序列化。
+ *
  * @author Zero (cnzeropro@163.com)
  * @since 2024/11/25
  */
 @RequiredArgsConstructor
 public class LokiFeignConfig extends AbstractFeignConfig {
+    private static final TypeReference<Map<String, Object>> MAP_TYPE_REFERENCE = new TypeReference<Map<String, Object>>() {
+    };
+
     final ObjectMapper objectMapper;
 
     @Bean
@@ -74,6 +81,32 @@ public class LokiFeignConfig extends AbstractFeignConfig {
         return new LokiQueryMapEncoder(defaultQueryMapEncoder);
     }
 
+    private static void remapField(Map<String, Object> map, String sourceField, String targetField) {
+        if (map.containsKey(sourceField)) {
+            map.put(targetField, map.remove(sourceField));
+        }
+    }
+
+    private static Map<String, Object> remapLokiFields(Object object, Map<String, Object> originalMap) {
+        Map<String, Object> map = new LinkedHashMap<>(originalMap);
+        if (object instanceof LokiLogLevelRequest) {
+            remapField(map, "logLevel", "log_level");
+        }
+        if (object instanceof LokiIngesterShutdownRequest) {
+            remapField(map, "deleteRingTokens", "delete_ring_tokens");
+        }
+        if (object instanceof LokiDeleteRequest) {
+            remapField(map, "maxInterval", "max_interval");
+        }
+        if (object instanceof LokiDeleteCancelRequest) {
+            remapField(map, "requestId", "request_id");
+        }
+        if (object instanceof LokiSeriesRequest) {
+            remapField(map, "match", "match[]");
+        }
+        return map;
+    }
+
     @RequiredArgsConstructor
     static class LokiFeignEncoder implements Encoder {
         final Encoder encoder;
@@ -81,16 +114,18 @@ public class LokiFeignConfig extends AbstractFeignConfig {
 
         @Override
         public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
-            if (TypeUtils.isAssignable(LokiLogLevelRequest.class, bodyType)) {
-                Map<String, Object> map = objectMapper.convertValue(object, new TypeReference<Map<String, Object>>() {
-                });
-                if (map.containsKey("logLevel")) {
-                    map.put("log_level", map.remove("logLevel"));
-                }
-                encoder.encode(map, MAP_STRING_WILDCARD, template);
+            if (requiresCustomFormEncoding(bodyType)) {
+                Map<String, Object> map = objectMapper.convertValue(object, MAP_TYPE_REFERENCE);
+                encoder.encode(remapLokiFields(object, map), MAP_STRING_WILDCARD, template);
                 return;
             }
             encoder.encode(object, bodyType, template);
+        }
+
+        private boolean requiresCustomFormEncoding(Type bodyType) {
+            return TypeUtils.isAssignable(LokiLogLevelRequest.class, bodyType)
+                    || TypeUtils.isAssignable(LokiIngesterShutdownRequest.class, bodyType)
+                    || TypeUtils.isAssignable(LokiSeriesRequest.class, bodyType);
         }
     }
 
@@ -103,25 +138,20 @@ public class LokiFeignConfig extends AbstractFeignConfig {
             SimpleModule module = new SimpleModule();
             module.addDeserializer(LokiQueryResponse.class, new LokiQueryResponseDeserializer(objectMapper));
             module.addDeserializer(LokiQueryRangeResponse.class, new LokiQueryRangeResponseDeserializer(objectMapper));
-            this.objectMapper = objectMapper.copy()
-                    .addMixIn(LokiSeriesResponse.class, LokiSeriesResponseMixIn.class)
-                    .registerModule(module);
+            this.objectMapper = objectMapper.copy().registerModule(module);
         }
 
         @Override
         public Object decode(Response response, Type type) throws IOException, DecodeException, FeignException {
-            if (TypeUtils
-                    .isAssignable(ResolvableType
+            if (TypeUtils.isAssignable(ResolvableType
                             .forClassWithGenerics(LokiResponse.class,
                                     ResolvableType.forClassWithGenerics(Collection.class, LokiSeriesResponse.class))
                             .getType(), type)
-                    ||
-                    TypeUtils.isAssignable(
-                            ResolvableType.forClassWithGenerics(LokiResponse.class, LokiQueryResponse.class).getType(),
-                            type)
-                    ||
-                    TypeUtils.isAssignable(ResolvableType
-                            .forClassWithGenerics(LokiResponse.class, LokiQueryRangeResponse.class).getType(), type)) {
+                    || TypeUtils.isAssignable(
+                    ResolvableType.forClassWithGenerics(LokiResponse.class, LokiQueryResponse.class).getType(), type)
+                    || TypeUtils.isAssignable(
+                    ResolvableType.forClassWithGenerics(LokiResponse.class, LokiQueryRangeResponse.class).getType(),
+                    type)) {
                 Response.Body body = response.body();
                 if (Objects.nonNull(body)) {
                     InputStream inputStream = body.asInputStream();
@@ -143,28 +173,21 @@ public class LokiFeignConfig extends AbstractFeignConfig {
             public LokiQueryResponse deserialize(JsonParser p, DeserializationContext ctxt)
                     throws IOException, JacksonException {
                 JsonNode root = p.getCodec().readTree(p);
-                ResultType resultType = Optional.ofNullable(root.get("resultType"))
+                LokiResultType resultType = Optional.ofNullable(root.get("resultType"))
                         .map(JsonNode::asText)
-                        .map(ResultType::of)
+                        .map(LokiResultType::of)
                         .orElse(null);
-                // 根据 resultType 构造 result 字段对应的 JavaType
                 TypeFactory typeFactory = ctxt.getTypeFactory();
                 JavaType javaType;
-                if (ResultType.VECTOR == resultType) {
-                    javaType = typeFactory.constructCollectionType(Collection.class,
-                            typeFactory.constructType(LokiVector.class));
-                } else if (ResultType.STREAMS == resultType) {
-                    javaType = typeFactory.constructCollectionType(Collection.class,
-                            typeFactory.constructType(LokiStream.class));
+                if (LokiResultType.VECTOR == resultType) {
+                    javaType = typeFactory.constructCollectionType(Collection.class, typeFactory.constructType(LokiVector.class));
+                } else if (LokiResultType.STREAMS == resultType) {
+                    javaType = typeFactory.constructCollectionType(Collection.class, typeFactory.constructType(LokiStream.class));
                 } else {
-                    // never
                     throw new IllegalArgumentException("Unknown resultType: " + resultType);
                 }
-                // 反序列化 result 字段
                 Collection<? extends LokiResult> result = mapper.treeToValue(root.get("result"), javaType);
-                // 反序列化 stats 字段
                 LokiStats stats = mapper.treeToValue(root.get("stats"), LokiStats.class);
-                // 构造 LokiQueryRangeResponse 对象
                 return LokiQueryResponse.builder()
                         .resultType(resultType)
                         .result(result)
@@ -185,38 +208,27 @@ public class LokiFeignConfig extends AbstractFeignConfig {
             public LokiQueryRangeResponse deserialize(JsonParser p, DeserializationContext ctxt)
                     throws IOException, JacksonException {
                 JsonNode root = p.getCodec().readTree(p);
-                ResultType resultType = Optional.ofNullable(root.get("resultType"))
+                LokiResultType resultType = Optional.ofNullable(root.get("resultType"))
                         .map(JsonNode::asText)
-                        .map(ResultType::of)
+                        .map(LokiResultType::of)
                         .orElse(null);
-                // 根据 resultType 构造 result 字段对应的 JavaType
                 TypeFactory typeFactory = ctxt.getTypeFactory();
                 JavaType javaType;
-                if (ResultType.MATRIX == resultType) {
-                    javaType = typeFactory.constructCollectionType(Collection.class,
-                            typeFactory.constructType(LokiMatrix.class));
-                } else if (ResultType.STREAMS == resultType) {
-                    javaType = typeFactory.constructCollectionType(Collection.class,
-                            typeFactory.constructType(LokiStream.class));
+                if (LokiResultType.MATRIX == resultType) {
+                    javaType = typeFactory.constructCollectionType(Collection.class, typeFactory.constructType(LokiMatrix.class));
+                } else if (LokiResultType.STREAMS == resultType) {
+                    javaType = typeFactory.constructCollectionType(Collection.class, typeFactory.constructType(LokiStream.class));
                 } else {
-                    // never
                     throw new IllegalArgumentException("Unknown resultType: " + resultType);
                 }
-                // 反序列化 result 字段
                 Collection<? extends LokiResult> result = mapper.treeToValue(root.get("result"), javaType);
-                // 反序列化 stats 字段
                 LokiStats stats = mapper.treeToValue(root.get("stats"), LokiStats.class);
-                // 构造 LokiQueryRangeResponse 对象
                 return LokiQueryRangeResponse.builder()
                         .resultType(resultType)
                         .result(result)
                         .stats(stats)
                         .build();
             }
-        }
-
-        @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-        abstract static class LokiSeriesResponseMixIn {
         }
     }
 
@@ -226,19 +238,7 @@ public class LokiFeignConfig extends AbstractFeignConfig {
 
         @Override
         public Map<String, Object> encode(Object object) {
-            Map<String, Object> map = queryMapEncoder.encode(object);
-            // 不使用 @feign.Param 注解，此处单独处理，让实体和逻辑层解耦
-            if (object instanceof LokiIngesterShutdownRequest) {
-                if (map.containsKey("deleteRingTokens")) {
-                    map.put("delete_ring_tokens", map.remove("deleteRingTokens"));
-                }
-            }
-            if (object instanceof LokiDeleteRequest) {
-                if (map.containsKey("maxInterval")) {
-                    map.put("max_interval", map.remove("maxInterval"));
-                }
-            }
-            return map;
+            return remapLokiFields(object, queryMapEncoder.encode(object));
         }
     }
 }

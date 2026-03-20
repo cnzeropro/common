@@ -12,6 +12,10 @@ import java.io.Serializable;
 import java.util.Collection;
 
 /**
+ * Loki 日志推送请求。
+ * <p>
+ * 对应 {@code POST /loki/api/v1/push} 的 JSON 请求体。
+ *
  * @author zero
  * @since 2023/9/14
  */
@@ -21,6 +25,9 @@ import java.util.Collection;
 @Builder(toBuilder = true)
 @Accessors(chain = true)
 public class LokiPushRequest implements Serializable {
+    /**
+     * {@code streams} - 需要推送到 Loki 的日志流集合。
+     */
     @Singular
     private Collection<LokiStream> streams;
 }

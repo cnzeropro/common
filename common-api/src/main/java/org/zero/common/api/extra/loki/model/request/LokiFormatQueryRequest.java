@@ -9,6 +9,10 @@ import lombok.experimental.SuperBuilder;
 import java.io.Serializable;
 
 /**
+ * Loki LogQL 格式化请求。
+ * <p>
+ * 对应 {@code POST /loki/api/v1/format_query} 的表单参数。
+ *
  * @author zero
  * @since 2023/8/28
  */
@@ -19,7 +23,7 @@ import java.io.Serializable;
 @Accessors(chain = true)
 public class LokiFormatQueryRequest implements Serializable {
     /**
-     * LogQL 查询语句。
+     * {@code query} - 需要格式化的 LogQL 查询语句。
      *
      * @see <a href="https://grafana.com/docs/loki/latest/query/">LogQL</a>
      */

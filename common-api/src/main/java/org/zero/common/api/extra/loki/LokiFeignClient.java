@@ -7,8 +7,11 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.zero.common.api.extra.loki.model.request.LokiConfigRequest;
+import org.zero.common.api.extra.loki.model.request.LokiDeleteCancelRequest;
 import org.zero.common.api.extra.loki.model.request.LokiDeleteRequest;
 import org.zero.common.api.extra.loki.model.request.LokiFormatQueryRequest;
 import org.zero.common.api.extra.loki.model.request.LokiIndexStatsRequest;
@@ -33,7 +36,7 @@ import java.util.Collection;
 /**
  * Loki Client
  * <p>
- * 封装 <a href="https://grafana.com/docs/loki/latest/reference/api/">Grafana Loki HTTP API</a>
+ * 封装 <a href="https://grafana.com/docs/enterprise-logs/latest/reference/loki-http-api/">Grafana Loki HTTP API</a>
  */
 @FeignClient(name = "loki", url = "${api.loki.url:}",
         configuration = LokiFeignConfig.class,
@@ -44,7 +47,7 @@ public interface LokiFeignClient {
     /* **************************************************** Ingest endpoints **************************************************** */
 
     /**
-     * 向 Loki 发送日志数据
+     * 向 Loki 推送日志数据。
      */
     @PostMapping(API_V1_PATH + "/push")
     LokiResponse<Void> push(@RequestBody LokiPushRequest pushRequest);
@@ -52,93 +55,100 @@ public interface LokiFeignClient {
     /* **************************************************** Query endpoints **************************************************** */
 
     /**
-     * 查询单个时间节点的日志数据
+     * 查询单个时间点的日志或指标结果。
      */
     @GetMapping(API_V1_PATH + "/query")
     LokiResponse<LokiQueryResponse> query(@SpringQueryMap LokiQueryRequest queryRequest);
 
     /**
-     * 查询时间范围内的日志数据
+     * 查询时间范围内的日志或指标结果。
      */
     @GetMapping(API_V1_PATH + "/query_range")
     LokiResponse<LokiQueryRangeResponse> queryRange(@SpringQueryMap LokiQueryRangeRequest queryRangeRequest);
 
     /**
-     * 查询标签
+     * 查询标签名称。
      */
     @GetMapping(API_V1_PATH + "/labels")
     LokiResponse<Collection<String>> labels(@SpringQueryMap LokiLabelsRequest labelsRequest);
 
     /**
-     * 查询标签值
+     * 查询指定标签的可选值。
      */
     @GetMapping(API_V1_PATH + "/label/{name}/values")
-    LokiResponse<Collection<String>> labelValues(@PathVariable("name") String name, @SpringQueryMap LokiLabelValuesRequest labelValuesRequest);
+    LokiResponse<Collection<String>> labelValues(@PathVariable("name") String name,
+                                                 @SpringQueryMap LokiLabelValuesRequest labelValuesRequest);
 
     /**
-     * 查询 Series（GET）
+     * 通过 GET 查询 Series 标签集合。
      */
     @GetMapping(API_V1_PATH + "/series")
     LokiResponse<Collection<LokiSeriesResponse>> seriesGet(@SpringQueryMap LokiSeriesRequest seriesRequest);
 
     /**
-     * 查询 Series（POST）
+     * 通过 POST 查询 Series 标签集合。
      */
-    @PostMapping(path = API_V1_PATH + "/series", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @PostMapping(value = API_V1_PATH + "/series", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     LokiResponse<Collection<LokiSeriesResponse>> seriesPost(@RequestBody LokiSeriesRequest seriesRequest);
 
     /**
-     * 查询索引统计信息（GET）
+     * 通过 GET 查询索引统计信息。
      */
     @GetMapping(API_V1_PATH + "/index/stats")
     LokiIndexStatsResponse indexStatsGet(@SpringQueryMap LokiIndexStatsRequest indexStatsRequest);
 
     /**
-     * 索引统计信息（POST）
+     * 通过 POST 查询索引统计信息。
      */
-    @PostMapping(path = API_V1_PATH + "/index/stats", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @PostMapping(value = API_V1_PATH + "/index/stats", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     LokiIndexStatsResponse indexStatsPost(@RequestBody LokiIndexStatsRequest indexStatsRequest);
 
     /* **************************************************** Status endpoints **************************************************** */
 
     /**
-     * 检查服务是否可用
+     * 检查服务是否就绪。
      */
     @GetMapping("/ready")
     String ready();
 
     /**
-     * 更改日志级别（GET）
+     * 获取当前日志级别。
      */
     @GetMapping("/log_level")
-    LokiLogLevelResponse logLevelGet(@RequestParam("log_level") String logLevel);
+    LokiLogLevelResponse logLevelGet();
 
     /**
-     * 更改日志级别（POST）
+     * 修改日志级别。
      */
-    @PostMapping(path = "/log_level", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @PostMapping(value = "/log_level", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     LokiLogLevelResponse logLevelPost(@RequestBody LokiLogLevelRequest logLevelRequest);
 
     /**
-     * 获取服务指标
+     * 获取 Prometheus 指标。
      */
     @GetMapping("/metrics")
     String metrics();
 
     /**
-     * 获取当前配置
+     * 获取当前配置。
      */
     @GetMapping("/config")
     String config();
 
     /**
-     * 列出当前服务
+     * 按指定模式获取配置。
+     */
+    @GetMapping("/config")
+    String config(@SpringQueryMap LokiConfigRequest configRequest);
+
+    /**
+     * 列出当前服务。
      */
     @GetMapping("/services")
     String services();
 
     /**
-     * 显示构建信息
+     * 获取构建信息。
      */
     @GetMapping(API_V1_PATH + "/status/buildinfo")
     LokiStatusBuildInfoResponse statusBuildInfo();
@@ -148,54 +158,81 @@ public interface LokiFeignClient {
     /* **************************************************** Flush/shutdown endpoints **************************************************** */
 
     /**
-     * 刷新数据
+     * 执行 flush。
      */
     @PostMapping("/flush")
     String flush();
 
     /**
-     * ingester 准备关闭（GET）
+     * 查询 ingester 预关闭状态。
      */
     @GetMapping("/ingester/prepare_shutdown")
     String ingesterPrepareShutdownGet();
 
     /**
-     * ingester 准备关闭（POST）
+     * 标记 ingester 准备关闭。
      */
     @PostMapping("/ingester/prepare_shutdown")
     String ingesterPrepareShutdownPost();
 
     /**
-     * ingester 准备关闭（DELETE）
+     * 取消 ingester 预关闭状态。
      */
     @DeleteMapping("/ingester/prepare_shutdown")
     String ingesterPrepareShutdownDelete();
 
     /**
-     * ingester 关闭（GET）
+     * 通过 GET 关闭 ingester。
      */
     @GetMapping("/ingester/shutdown")
     String ingesterShutdown(@SpringQueryMap LokiIngesterShutdownRequest ingesterShutdownRequest);
+
+    /**
+     * 通过 POST 关闭 ingester。
+     */
+    @PostMapping(value = "/ingester/shutdown", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    String ingesterShutdownPost(@RequestBody LokiIngesterShutdownRequest ingesterShutdownRequest);
 
     /* **************************************************** Rule endpoints **************************************************** */
 
 
     /* **************************************************** Log deletion endpoints **************************************************** */
 
+    /**
+     * 创建删除请求。
+     */
     @PostMapping(API_V1_PATH + "/delete")
     String delete(@SpringQueryMap LokiDeleteRequest deleteRequest);
+
+    /**
+     * 以幂等方式创建或更新删除请求。
+     */
+    @PutMapping(API_V1_PATH + "/delete")
+    String deletePut(@SpringQueryMap LokiDeleteRequest deleteRequest);
+
+    /**
+     * 查询当前删除请求列表。
+     */
+    @GetMapping(API_V1_PATH + "/delete")
+    String deleteGet();
+
+    /**
+     * 取消指定删除请求。
+     */
+    @DeleteMapping(API_V1_PATH + "/delete")
+    String deleteCancel(@SpringQueryMap LokiDeleteCancelRequest deleteCancelRequest);
 
     /* **************************************************** Other endpoints **************************************************** */
 
     /**
-     * 格式化 LogQL 查询语句（GET）
+     * 通过 GET 格式化 LogQL 语句。
      */
     @GetMapping(API_V1_PATH + "/format_query")
     LokiResponse<String> formatQueryGet(@RequestParam("query") String query);
 
     /**
-     * 格式化 LogQL 查询语句（POST）
+     * 通过 POST 格式化 LogQL 语句。
      */
-    @PostMapping(path = API_V1_PATH + "/format_query", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @PostMapping(value = API_V1_PATH + "/format_query", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     LokiResponse<String> formatQueryPost(@RequestBody LokiFormatQueryRequest formatQueryRequest);
 }

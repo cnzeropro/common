@@ -3,6 +3,8 @@ package org.zero.common.api.extra.loki;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.openfeign.FallbackFactory;
 import org.springframework.stereotype.Component;
+import org.zero.common.api.extra.loki.model.request.LokiConfigRequest;
+import org.zero.common.api.extra.loki.model.request.LokiDeleteCancelRequest;
 import org.zero.common.api.extra.loki.model.request.LokiDeleteRequest;
 import org.zero.common.api.extra.loki.model.request.LokiFormatQueryRequest;
 import org.zero.common.api.extra.loki.model.request.LokiIndexStatsRequest;
@@ -82,7 +84,7 @@ public class LokiFeignFallbackFactory implements FallbackFactory<LokiFeignClient
             }
 
             @Override
-            public LokiLogLevelResponse logLevelGet(String logLevel) {
+            public LokiLogLevelResponse logLevelGet() {
                 return LokiLogLevelResponse.builder().build();
             }
 
@@ -98,6 +100,11 @@ public class LokiFeignFallbackFactory implements FallbackFactory<LokiFeignClient
 
             @Override
             public String config() {
+                return "";
+            }
+
+            @Override
+            public String config(LokiConfigRequest configRequest) {
                 return "";
             }
 
@@ -137,7 +144,27 @@ public class LokiFeignFallbackFactory implements FallbackFactory<LokiFeignClient
             }
 
             @Override
+            public String ingesterShutdownPost(LokiIngesterShutdownRequest ingesterShutdownRequest) {
+                return "";
+            }
+
+            @Override
             public String delete(LokiDeleteRequest deleteRequest) {
+                return "";
+            }
+
+            @Override
+            public String deletePut(LokiDeleteRequest deleteRequest) {
+                return "";
+            }
+
+            @Override
+            public String deleteGet() {
+                return "";
+            }
+
+            @Override
+            public String deleteCancel(LokiDeleteCancelRequest deleteCancelRequest) {
                 return "";
             }
 

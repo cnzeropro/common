@@ -1,47 +1,30 @@
 package org.zero.common.api.extra.loki.model.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
+ * Loki Series 响应项。
+ * <p>
+ * 对应 {@code /loki/api/v1/series} 返回数组中的单个标签集合对象。
+ * Loki 的标签键是动态的，因此该模型使用 {@code Map<String, String>} 直接承载所有标签。
+ *
  * @author Zero (cnzeropro@163.com)
  * @since 2025/6/30
  */
-@Data
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder(toBuilder = true)
-public class LokiSeriesResponse implements Serializable {
-    private String chart;
+@EqualsAndHashCode(callSuper = true)
+public class LokiSeriesResponse extends LinkedHashMap<String, String> implements Serializable {
     /**
-     * controller_revision_hash
+     * 使用已有标签集合构造响应对象。
+     *
+     * @param labels 动态标签集合
      */
-    private String controllerRevisionHash;
-    /**
-     * statefulset_kubernetes_io_pod_name
-     */
-    private String statefulsetKubernetesIoPodName;
-    /**
-     * pod-template-hash
-     */
-    private String podTemplateHash;
-    private String component;
-    private String heritage;
-    private String release;
-    private String namespace;
-    private String instance;
-    /**
-     * container_name
-     */
-    private String containerName;
-    private String app;
-    private String stream;
-    private String filename;
-    private String name;
-    private String job;
-
+    public LokiSeriesResponse(Map<String, String> labels) {
+        super(labels);
+    }
 }

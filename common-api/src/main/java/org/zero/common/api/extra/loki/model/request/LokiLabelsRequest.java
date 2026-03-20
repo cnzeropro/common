@@ -10,6 +10,10 @@ import java.io.Serializable;
 import java.math.BigInteger;
 
 /**
+ * Loki 标签查询请求。
+ * <p>
+ * 对应 {@code GET /loki/api/v1/labels} 的查询参数。
+ *
  * @author zero
  * @since 2023/8/28
  */
@@ -20,19 +24,19 @@ import java.math.BigInteger;
 @Accessors(chain = true)
 public class LokiLabelsRequest implements Serializable {
     /**
-     * 查询的开始时间戳。单位为纳秒。默认：6小时前
+     * {@code start} - 查询开始时间，单位为纳秒级 Unix 时间戳。
      */
     private BigInteger start;
     /**
-     * 查询的结束时间戳。单位为纳秒。默认：当前时间
+     * {@code end} - 查询结束时间，单位为纳秒级 Unix 时间戳。
      */
     private BigInteger end;
     /**
-     * 用于计算开始时间（start）相对于结束时间（end）的持续时间
+     * {@code since} - 相对 {@code end} 反推 {@code start} 的 duration - 持续时间。
      */
-    private BigInteger since;
+    private String since;
     /**
-     * 日志流选择器，用于选择要匹配的流并返回标签名称
+     * {@code query} - 日志流选择器，用于限制需要返回标签名的日志流范围。
      */
     private String query;
 }
