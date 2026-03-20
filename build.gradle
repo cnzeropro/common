@@ -1,19 +1,24 @@
+import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.Delete
 import org.zero.build.BuildProfileSupport
 
 plugins {
     id('java-platform')
     id('base')
+    id('maven-publish')
 }
 
 /*
- * build profile resolve - 统一解析当前构建 profile，并向子模块暴露结果
+ * 构建 profile 解析。
+ * 作用：统一解析当前构建使用的 profile，并向子模块暴露结果。
  */
 def activeBuildProfile = BuildProfileSupport.resolveProfile(rootProject, findProperty('buildProfile'))
 ext.activeBuildProfile = activeBuildProfile
 
 /*
- * build.revision guard - 运行期只依赖 Gradle 原生属性
+ * 构建版本属性校验。
+ * 作用：确保运行期只依赖 Gradle 原生属性中的 build.revision。
  */
 def revisionProvider = providers.gradleProperty('build.revision')
 if (!revisionProvider.isPresent()) {
@@ -22,7 +27,8 @@ if (!revisionProvider.isPresent()) {
 def revision = revisionProvider.get()
 
 /*
- * java platform config - root 仅作为 BOM 平台使用
+ * Java 平台配置。
+ * 作用：将 root 项目作为 BOM 平台使用，并允许声明平台依赖。
  */
 javaPlatform {
     allowDependencies()
@@ -31,52 +37,161 @@ javaPlatform {
 group = 'org.zero'
 version = revision
 description = 'Common Project'
+def libsCatalog = extensions.getByType(VersionCatalogsExtension).named('libs')
 
 /*
- * shared BOM export - 统一导出公共依赖约束，版本由 version catalog / imported BOM 决定
+ * 统一依赖管理。
+ * 作用：对齐 root pom.xml 中的 dependencyManagement，并按当前 profile 输出对应约束。
  */
 dependencies {
     api(platform(libs.cn.dev33.sa.token.dependencies))
+    api(platform(libs.cn.hutool.hutool.bom))
     api(platform(libs.com.alibaba.cloud.spring.cloud.alibaba.dependencies))
-    api(platform(libs.com.google.cloud.libraries.bom))
-    api(platform(libs.com.huaweicloud.spring.cloud.huawei.bom))
-    api(platform(libs.com.querydsl.querydsl.bom))
     api(platform(libs.com.baomidou.mybatis.plus.bom))
-    api(platform(libs.com.mybatis.flex.mybatis.flex.dependencies))
     api(platform(libs.com.ctrip.framework.apollo.apollo))
+    api(platform(libs.com.google.cloud.libraries.bom))
+    api(platform(libs.com.google.protobuf.protobuf.bom))
+    api(platform(libs.com.huaweicloud.spring.cloud.huawei.bom))
+    api(platform(libs.com.mybatis.flex.mybatis.flex.dependencies))
     api(platform(libs.com.oracle.database.jdbc.ojdbc.bom))
+    api(platform(libs.com.querydsl.querydsl.bom))
+    api(platform(libs.com.xuxueli.xxl.job))
+    api(platform(libs.io.grpc.grpc.bom))
+    api(platform(libs.io.jsonwebtoken.jjwt.bom))
+    api(platform(libs.io.netty.netty.bom))
+    api(platform(libs.io.projectreactor.reactor.bom))
+    api(platform(libs.jakarta.platform.jakarta.jakartaee.bom))
     api(platform(libs.org.apache.dubbo.dubbo.bom))
-    api(platform(libs.org.apache.shiro.shiro.bom))
     api(platform(libs.org.apache.logging.log4j.log4j.bom))
-    api(platform(libs.org.springframework.spring.framework.bom))
+    api(platform(libs.org.apache.shiro.shiro.bom))
+    api(platform(libs.org.dromara.dynamictp.dynamic.tp.dependencies))
+    api(platform(libs.org.eclipse.jetty.jetty.bom))
+    if (BuildProfileSupport.isAtLeast(project, activeBuildProfile, 'java17')) {
+        api(platform(libsCatalog.findLibrary('org-jooq_jooq-bom').get().get()))
+    }
+    api(platform(libs.org.junit.junit.bom))
+    api(platform(libs.org.mockito.mockito.bom))
+    api(platform(libs.org.slf4j.slf4j.bom))
+    api(platform(libs.org.springdoc.springdoc.openapi.bom))
     api(platform(libs.org.springframework.boot.spring.boot.dependencies))
     api(platform(libs.org.springframework.cloud.spring.cloud.dependencies))
     api(platform(libs.org.springframework.data.spring.data.bom))
-    api(platform(libs.org.springframework.security.spring.security.bom))
     api(platform(libs.org.springframework.integration.spring.integration.bom))
-    api(platform(libs.org.springframework.shell.spring.shell.dependencies))
+    api(platform(libs.org.springframework.plugin.spring.plugin))
+    api(platform(libs.org.springframework.security.spring.security.bom))
     api(platform(libs.org.springframework.session.spring.session.bom))
-    api(platform(libs.org.eclipse.jetty.jetty.bom))
-    api(platform(libs.org.slf4j.slf4j.bom))
-    api(platform(libs.org.junit.junit.bom))
+    api(platform(libs.org.springframework.shell.spring.shell.dependencies))
+    api(platform(libs.org.springframework.spring.framework.bom))
     api(platform(libs.org.testcontainers.testcontainers.bom))
-    api(platform(libs.io.projectreactor.reactor.bom))
-    api(platform(libs.io.netty.netty.bom))
-    api(platform(libs.io.jsonwebtoken.jjwt.bom))
-    api(platform(libs.org.dromara.dynamictp.dynamic.tp.dependencies))
-    api(platform(libs.cn.hutool.hutool.bom))
-    api(platform(libs.jakarta.platform.jakarta.jakartaee.bom))
+    api(platform(libs.org.zero.common.bom))
+
+    constraints {
+        api(libs.cn.hutool.hutool.all)
+        api(libs.cn.idev.excel.fastexcel)
+        api(libs.com.alibaba.csp.sentinel.apache.dubbo.adapter)
+        api(libs.com.alibaba.csp.sentinel.apache.dubbo3.adapter)
+        api(libsCatalog.findLibrary('com-alibaba-csp_sentinel-spring-webmvc-6x-adapter').get().get())
+        api(libs.com.alibaba.csp.sentinel.spring.webmvc.adapter)
+        api(libs.com.alibaba.druid)
+        if (BuildProfileSupport.isAtLeast(project, activeBuildProfile, 'java17')) {
+            api(libsCatalog.findLibrary('com-alibaba_druid-spring-boot-3-starter').get().get())
+        }
+        api(libs.com.alibaba.druid.spring.boot.starter)
+        api(libs.com.alibaba.easyexcel)
+        api(libs.com.alicp.jetcache.jetcache.core)
+        api(libs.com.alicp.jetcache.jetcache.starter.redis)
+        api(libs.com.alicp.jetcache.jetcache.starter.redis.lettuce)
+        api(libs.com.alicp.jetcache.jetcache.starter.redisson)
+        api(libs.com.auth0.java.jwt)
+        api(libs.com.baomidou.dynamic.datasource.spring.boot.starter)
+        if (BuildProfileSupport.isAtLeast(project, activeBuildProfile, 'java17')) {
+            api(libsCatalog.findLibrary('com-baomidou_dynamic-datasource-spring-boot3-starter').get().get())
+        }
+        api(libs.com.baomidou.lock4j.core)
+        api(libs.com.baomidou.lock4j.redis.template.spring.boot.starter)
+        api(libs.com.baomidou.lock4j.redisson.spring.boot.starter)
+        api(libs.com.baomidou.lock4j.zookeeper.spring.boot.starter)
+        api(libs.com.baomidou.mybatis.plus)
+        api(libs.com.ctrip.framework.apollo.apollo.client.config.data)
+        api(libs.com.esotericsoftware.kryo)
+        api(libs.com.github.ben.manes.caffeine.caffeine)
+        api(libs.com.github.penggle.kaptcha)
+        api(libs.com.github.rholder.guava.retrying)
+        api(libs.com.github.ulisesbocchio.jasypt.spring.boot)
+        api(libs.com.github.ulisesbocchio.jasypt.spring.boot.starter)
+        api(libs.com.google.code.kaptcha)
+        api(libs.com.google.code.kaptcha.kaptcha)
+        api(libs.com.googlecode.juniversalchardet.juniversalchardet)
+        api(libs.com.lmax.disruptor)
+        api(libs.com.redis.testcontainers.redis)
+        api(libs.com.taobao.arthas.arthas.core)
+        api(libs.com.taobao.arthas.arthas.spring.boot.starter)
+        api(libs.com.xuxueli.xxl.job.core)
+        api(libs.io.minio.minio)
+        api(libs.io.swagger.core.v3.swagger.core)
+        api(libs.javax.inject.javax.inject)
+        api(libs.javax.servlet.servlet.api)
+        api(libs.log4j.log4j)
+        api(libs.net.devh.grpc.client.spring.boot.starter)
+        api(libs.net.devh.grpc.server.spring.boot.starter)
+        api(libs.org.apache.commons.commons.compress)
+        api(libs.org.apache.commons.commons.text)
+        api(libs.org.apache.maven.maven.model)
+        api(libs.org.apache.poi.poi.ooxml)
+        api(libs.org.apache.shardingsphere.elasticjob.elasticjob)
+        api(libs.org.apache.shardingsphere.elasticjob.elasticjob.lite.spring.boot.starter)
+        api(libs.org.dromara.x.file.storage.x.file.storage.core)
+        api(libs.org.dromara.x.file.storage.x.file.storage.spring)
+        api(libs.org.jasypt.jasypt)
+        api(libs.org.jctools.jctools.core)
+        api(libs.org.jetbrains.kotlin.kotlin.bom)
+        api(libs.org.lionsoul.ip2region)
+        api(libs.org.mapstruct.mapstruct)
+        api(libs.org.mybatis.mybatis)
+        api(libs.org.mybatis.mybatis.spring)
+        api(libs.org.mybatis.spring.boot.mybatis.spring.boot.starter)
+        api(libs.org.openjdk.jol.jol.core)
+        api(libs.org.owasp.encoder.encoder)
+        api(libs.org.owasp.esapi.esapi)
+        api(libs.org.projectlombok.lombok)
+        api(libs.org.projectlombok.lombok.mapstruct.binding)
+        api(libs.org.redisson.redisson)
+        api(libs.org.redisson.redisson.spring.boot.starter)
+        api(libs.org.springframework.plugin.spring.plugin.core)
+        api(libs.org.springframework.plugin.spring.plugin.metadata)
+        api(libs.tech.powerjob.powerjob.worker.spring.boot.starter)
+        api(libs.xerces.xercesImpl)
+    }
 }
 
 /*
- * clean task config - 允许 clean 处理符号链接目录
+ * Root 发布配置。
+ * 作用：发布 org.zero:common，并输出当前 profile 对应的 dependencyManagement。
+ */
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.javaPlatform
+            artifactId = rootProject.name
+            pom {
+                name = rootProject.name
+                description = project.description
+            }
+        }
+    }
+}
+
+/*
+ * clean 任务配置。
+ * 作用：允许 clean 处理符号链接目录。
  */
 tasks.named('clean', Delete).configure {
     followSymlinks = true
 }
 
 /*
- * wrapper version lock - 固定团队统一的 Gradle Wrapper 版本
+ * Wrapper 版本锁定。
+ * 作用：固定团队统一使用的 Gradle Wrapper 版本。
  */
 wrapper {
     gradleVersion = '8.14.3'

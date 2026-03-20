@@ -1,18 +1,13 @@
-import org.zero.build.BuildProfileSupport
-
 plugins {
     id 'org.zero.conventions.java17-library'
 }
 
-def dependencyBuildProfile = BuildProfileSupport.resolveProfileAtLeast(project, findProperty('buildProfile'), 'java17')
-def profileLibrary = { String alias -> BuildProfileSupport.selectLibrary(project, alias, dependencyBuildProfile) }
-
 /*
- * dependency layout - Jakarta 适配层需要在根平台之上按 profile 选择 Jakarta BOM，再统一替换 javax API。
+ * dependency layout - Jakarta 适配层在根平台之上叠加 Jakarta BOM，再统一替换 javax API。
  */
 dependencies {
     implementation(platform(project(':')))
-    implementation(platform(profileLibrary('jakarta.platform_jakarta.jakartaee-bom')))
+    implementation(platform(libs.jakarta.platform.jakarta.jakartaee.bom))
     implementation(project(':core-base'))
     implementation(project(':common-data'))
     implementation('jakarta.servlet:jakarta.servlet-api')

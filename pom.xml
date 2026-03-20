@@ -42,67 +42,51 @@
 		<revision>1.0.0</revision>
 
 		<!-- ************************************ Dependencies ************************************ -->
-		<cn.dev33_sa-token-dependencies.version>1.44.0</cn.dev33_sa-token-dependencies.version>
+		<cn.dev33_sa-token-dependencies.version>1.45.0</cn.dev33_sa-token-dependencies.version>
 		<cn.hutool_hutool-all.version>5.8.40</cn.hutool_hutool-all.version>
 		<cn.hutool_hutool-bom.version>5.8.40</cn.hutool_hutool-bom.version>
 		<cn.idev.excel_fastexcel.version>1.3.0</cn.idev.excel_fastexcel.version>
-		<com.alibaba.cloud_spring-cloud-alibaba-dependencies.version>2021.0.6.0
-		</com.alibaba.cloud_spring-cloud-alibaba-dependencies.version>
-		<com.alibaba.csp_sentinel-apache-dubbo-adapter.version>1.8.8
-		</com.alibaba.csp_sentinel-apache-dubbo-adapter.version>
-		<com.alibaba.csp_sentinel-apache-dubbo3-adapter.version>1.8.8
-		</com.alibaba.csp_sentinel-apache-dubbo3-adapter.version>
-		<com.alibaba.csp_sentinel-spring-webmvc-6x-adapter.version>1.8.6
-		</com.alibaba.csp_sentinel-spring-webmvc-6x-adapter.version>
-		<com.alibaba.csp_sentinel-spring-webmvc-adapter.version>1.8.8
-		</com.alibaba.csp_sentinel-spring-webmvc-adapter.version>
+		<com.alibaba.cloud_spring-cloud-alibaba-dependencies.version>2021.0.6.0</com.alibaba.cloud_spring-cloud-alibaba-dependencies.version>
+		<com.alibaba.csp_sentinel-apache-dubbo-adapter.version>1.8.8</com.alibaba.csp_sentinel-apache-dubbo-adapter.version>
+		<com.alibaba.csp_sentinel-apache-dubbo3-adapter.version>1.8.8</com.alibaba.csp_sentinel-apache-dubbo3-adapter.version>
+		<com.alibaba.csp_sentinel-spring-webmvc-6x-adapter.version>1.8.6</com.alibaba.csp_sentinel-spring-webmvc-6x-adapter.version>
+		<com.alibaba.csp_sentinel-spring-webmvc-adapter.version>1.8.8</com.alibaba.csp_sentinel-spring-webmvc-adapter.version>
 		<com.alibaba_druid-spring-boot-starter.version>1.2.27</com.alibaba_druid-spring-boot-starter.version>
 		<com.alibaba_druid.version>1.2.27</com.alibaba_druid.version>
 		<com.alibaba_easyexcel.version>4.0.3</com.alibaba_easyexcel.version>
 		<com.alicp.jetcache_jetcache-core.version>2.7.8</com.alicp.jetcache_jetcache-core.version>
-		<com.alicp.jetcache_jetcache-starter-redis-lettuce.version>2.7.8
-		</com.alicp.jetcache_jetcache-starter-redis-lettuce.version>
+		<com.alicp.jetcache_jetcache-starter-redis-lettuce.version>2.7.8</com.alicp.jetcache_jetcache-starter-redis-lettuce.version>
 		<com.alicp.jetcache_jetcache-starter-redis.version>2.7.8</com.alicp.jetcache_jetcache-starter-redis.version>
-		<com.alicp.jetcache_jetcache-starter-redisson.version>2.7.8
-		</com.alicp.jetcache_jetcache-starter-redisson.version>
+		<com.alicp.jetcache_jetcache-starter-redisson.version>2.7.8</com.alicp.jetcache_jetcache-starter-redisson.version>
 		<com.auth0_java-jwt.version>4.5.0</com.auth0_java-jwt.version>
-		<com.baomidou_dynamic-datasource-spring-boot-starter.version>4.3.1
-		</com.baomidou_dynamic-datasource-spring-boot-starter.version>
+		<com.baomidou_dynamic-datasource-spring-boot-starter.version>4.3.1</com.baomidou_dynamic-datasource-spring-boot-starter.version>
 		<com.baomidou_lock4j-core.version>2.2.7</com.baomidou_lock4j-core.version>
-		<com.baomidou_lock4j-redis-template-spring-boot-starter.version>2.2.7
-		</com.baomidou_lock4j-redis-template-spring-boot-starter.version>
-		<com.baomidou_lock4j-redisson-spring-boot-starter.version>2.2.7
-		</com.baomidou_lock4j-redisson-spring-boot-starter.version>
-		<com.baomidou_lock4j-zookeeper-spring-boot-starter.version>2.2.7
-		</com.baomidou_lock4j-zookeeper-spring-boot-starter.version>
+		<com.baomidou_lock4j-redis-template-spring-boot-starter.version>2.2.7</com.baomidou_lock4j-redis-template-spring-boot-starter.version>
+		<com.baomidou_lock4j-redisson-spring-boot-starter.version>2.2.7</com.baomidou_lock4j-redisson-spring-boot-starter.version>
+		<com.baomidou_lock4j-zookeeper-spring-boot-starter.version>2.2.7</com.baomidou_lock4j-zookeeper-spring-boot-starter.version>
 		<com.baomidou_mybatis-plus-bom.version>3.5.14</com.baomidou_mybatis-plus-bom.version>
 		<com.baomidou_mybatis-plus.version>3.5.12</com.baomidou_mybatis-plus.version>
-		<com.ctrip.framework.apollo_apollo-client-config-data.version>2.4.0
-		</com.ctrip.framework.apollo_apollo-client-config-data.version>
+		<com.ctrip.framework.apollo_apollo-client-config-data.version>2.4.0</com.ctrip.framework.apollo_apollo-client-config-data.version>
 		<com.ctrip.framework.apollo_apollo.version>2.0.1</com.ctrip.framework.apollo_apollo.version>
 		<com.esotericsoftware_kryo.version>5.6.2</com.esotericsoftware_kryo.version>
 		<com.github.ben-manes.caffeine_caffeine.version>2.9.3</com.github.ben-manes.caffeine_caffeine.version>
 		<com.github.penggle_kaptcha.version>2.3.2</com.github.penggle_kaptcha.version>
 		<com.github.rholder_guava-retrying.version>2.0.0</com.github.rholder_guava-retrying.version>
-		<com.github.ulisesbocchio_jasypt-spring-boot-starter.version>3.0.5
-		</com.github.ulisesbocchio_jasypt-spring-boot-starter.version>
+		<com.github.ulisesbocchio_jasypt-spring-boot-starter.version>3.0.5</com.github.ulisesbocchio_jasypt-spring-boot-starter.version>
 		<com.github.ulisesbocchio_jasypt-spring-boot.version>3.0.5</com.github.ulisesbocchio_jasypt-spring-boot.version>
 		<com.google.cloud_libraries-bom.version>26.68.0</com.google.cloud_libraries-bom.version>
 		<com.google.code.kaptcha_kaptcha.version>2.3</com.google.code.kaptcha_kaptcha.version>
 		<com.google.code_kaptcha.version>2.3.0</com.google.code_kaptcha.version>
 		<com.google.protobuf_protobuf-bom.version>4.32.1</com.google.protobuf_protobuf-bom.version>
-		<com.googlecode.juniversalchardet_juniversalchardet.version>1.0.3
-		</com.googlecode.juniversalchardet_juniversalchardet.version>
-		<com.huaweicloud_spring-cloud-huawei-bom.version>1.11.12-2021.0.x
-		</com.huaweicloud_spring-cloud-huawei-bom.version>
+		<com.googlecode.juniversalchardet_juniversalchardet.version>1.0.3</com.googlecode.juniversalchardet_juniversalchardet.version>
+		<com.huaweicloud_spring-cloud-huawei-bom.version>1.11.12-2021.0.x</com.huaweicloud_spring-cloud-huawei-bom.version>
 		<com.lmax_disruptor.version>3.4.4</com.lmax_disruptor.version>
 		<com.mybatis-flex_mybatis-flex-dependencies.version>1.11.3</com.mybatis-flex_mybatis-flex-dependencies.version>
 		<com.oracle.database.jdbc_ojdbc-bom.version>23.9.0.25.07</com.oracle.database.jdbc_ojdbc-bom.version>
 		<com.querydsl_querydsl-bom.version>5.0.0</com.querydsl_querydsl-bom.version>
 		<com.redis_testcontainers-redis.version>1.7.0</com.redis_testcontainers-redis.version>
 		<com.taobao.arthas_arthas-core.version>4.0.5</com.taobao.arthas_arthas-core.version>
-		<com.taobao.arthas_arthas-spring-boot-starter.version>4.0.5
-		</com.taobao.arthas_arthas-spring-boot-starter.version>
+		<com.taobao.arthas_arthas-spring-boot-starter.version>4.0.5</com.taobao.arthas_arthas-spring-boot-starter.version>
 		<com.xuxueli_xxl-job-core.version>3.1.1</com.xuxueli_xxl-job-core.version>
 		<com.xuxueli_xxl-job.version>3.2.0</com.xuxueli_xxl-job.version>
 		<io.grpc_grpc-bom.version>1.75.0</io.grpc_grpc-bom.version>
@@ -115,27 +99,20 @@
 		<javax.inject_javax.inject.version>1</javax.inject_javax.inject.version>
 		<javax.servlet_servlet-api.version>2.5</javax.servlet_servlet-api.version>
 		<log4j_log4j.version>1.2.17</log4j_log4j.version>
-		<net.devh_grpc-client-spring-boot-starter.version>2.15.0.RELEASE
-		</net.devh_grpc-client-spring-boot-starter.version>
-		<net.devh_grpc-server-spring-boot-starter.version>2.15.0.RELEASE
-		</net.devh_grpc-server-spring-boot-starter.version>
+		<net.devh_grpc-client-spring-boot-starter.version>2.15.0.RELEASE</net.devh_grpc-client-spring-boot-starter.version>
+		<net.devh_grpc-server-spring-boot-starter.version>2.15.0.RELEASE</net.devh_grpc-server-spring-boot-starter.version>
 		<org.apache.commons_commons-compress.version>1.28.0</org.apache.commons_commons-compress.version>
 		<org.apache.commons_commons-text.version>1.14.0</org.apache.commons_commons-text.version>
 		<org.apache.dubbo_dubbo-bom.version>3.2.12</org.apache.dubbo_dubbo-bom.version>
 		<org.apache.logging.log4j_log4j-bom.version>2.24.3</org.apache.logging.log4j_log4j-bom.version>
 		<org.apache.maven_maven-model.version>3.9.11</org.apache.maven_maven-model.version>
 		<org.apache.poi_poi-ooxml.version>5.4.1</org.apache.poi_poi-ooxml.version>
-		<org.apache.shardingsphere.elasticjob_elasticjob-lite-spring-boot-starter.version>3.0.4
-		</org.apache.shardingsphere.elasticjob_elasticjob-lite-spring-boot-starter.version>
-		<org.apache.shardingsphere.elasticjob_elasticjob.version>3.0.4
-		</org.apache.shardingsphere.elasticjob_elasticjob.version>
+		<org.apache.shardingsphere.elasticjob_elasticjob-lite-spring-boot-starter.version>3.0.4</org.apache.shardingsphere.elasticjob_elasticjob-lite-spring-boot-starter.version>
+		<org.apache.shardingsphere.elasticjob_elasticjob.version>3.0.4</org.apache.shardingsphere.elasticjob_elasticjob.version>
 		<org.apache.shiro_shiro-bom.version>1.13.0</org.apache.shiro_shiro-bom.version>
-		<org.dromara.dynamictp_dynamic-tp-dependencies.version>1.2.2
-		</org.dromara.dynamictp_dynamic-tp-dependencies.version>
-		<org.dromara.x-file-storage_x-file-storage-core.version>2.3.0
-		</org.dromara.x-file-storage_x-file-storage-core.version>
-		<org.dromara.x-file-storage_x-file-storage-spring.version>2.3.0
-		</org.dromara.x-file-storage_x-file-storage-spring.version>
+		<org.dromara.dynamictp_dynamic-tp-dependencies.version>1.2.2</org.dromara.dynamictp_dynamic-tp-dependencies.version>
+		<org.dromara.x-file-storage_x-file-storage-core.version>2.3.0</org.dromara.x-file-storage_x-file-storage-core.version>
+		<org.dromara.x-file-storage_x-file-storage-spring.version>2.3.0</org.dromara.x-file-storage_x-file-storage-spring.version>
 		<org.eclipse.jetty_jetty-bom.version>9.4.58.v20250814</org.eclipse.jetty_jetty-bom.version>
 		<org.jasypt_jasypt.version>1.9.3</org.jasypt_jasypt.version>
 		<org.jctools_jctools-core.version>4.0.5</org.jctools_jctools-core.version>
@@ -144,8 +121,7 @@
 		<org.lionsoul_ip2region.version>3.1.0</org.lionsoul_ip2region.version>
 		<org.mapstruct_mapstruct.version>1.6.3</org.mapstruct_mapstruct.version>
 		<org.mockito_mockito-bom.version>4.11.0</org.mockito_mockito-bom.version>
-		<org.mybatis.spring.boot_mybatis-spring-boot-starter.version>2.3.2
-		</org.mybatis.spring.boot_mybatis-spring-boot-starter.version>
+		<org.mybatis.spring.boot_mybatis-spring-boot-starter.version>2.3.2</org.mybatis.spring.boot_mybatis-spring-boot-starter.version>
 		<org.mybatis_mybatis-spring.version>2.1.2</org.mybatis_mybatis-spring.version>
 		<org.mybatis_mybatis.version>3.5.19</org.mybatis_mybatis.version>
 		<org.openjdk.jol_jol-core.version>0.17</org.openjdk.jol_jol-core.version>
@@ -157,72 +133,46 @@
 		<org.redisson_redisson.version>3.52.0</org.redisson_redisson.version>
 		<org.slf4j_slf4j-bom.version>2.0.17</org.slf4j_slf4j-bom.version>
 		<org.springdoc_springdoc-openapi-bom.version>2.8.9</org.springdoc_springdoc-openapi-bom.version>
-		<org.springframework.boot_spring-boot-dependencies.version>2.7.18
-		</org.springframework.boot_spring-boot-dependencies.version>
-		<org.springframework.cloud_spring-cloud-dependencies.version>2021.0.9
-		</org.springframework.cloud_spring-cloud-dependencies.version>
+		<org.springframework.boot_spring-boot-dependencies.version>2.7.18</org.springframework.boot_spring-boot-dependencies.version>
+		<org.springframework.cloud_spring-cloud-dependencies.version>2021.0.9</org.springframework.cloud_spring-cloud-dependencies.version>
 		<org.springframework.data_spring-data-bom.version>2021.2.18</org.springframework.data_spring-data-bom.version>
-		<org.springframework.integration_spring-integration-bom.version>5.5.20
-		</org.springframework.integration_spring-integration-bom.version>
-		<org.springframework.plugin_spring-plugin-core.version>2.0.0.RELEASE
-		</org.springframework.plugin_spring-plugin-core.version>
-		<org.springframework.plugin_spring-plugin-metadata.version>2.0.0.RELEASE
-		</org.springframework.plugin_spring-plugin-metadata.version>
-		<org.springframework.plugin_spring-plugin.version>2.0.0.RELEASE
-		</org.springframework.plugin_spring-plugin.version>
-		<org.springframework.security_spring-security-bom.version>5.8.16
-		</org.springframework.security_spring-security-bom.version>
-		<org.springframework.session_spring-session-bom.version>2021.2.3
-		</org.springframework.session_spring-session-bom.version>
-		<org.springframework.shell_spring-shell-dependencies.version>2.1.15
-		</org.springframework.shell_spring-shell-dependencies.version>
+		<org.springframework.integration_spring-integration-bom.version>5.5.20</org.springframework.integration_spring-integration-bom.version>
+		<org.springframework.plugin_spring-plugin-core.version>2.0.0.RELEASE</org.springframework.plugin_spring-plugin-core.version>
+		<org.springframework.plugin_spring-plugin-metadata.version>2.0.0.RELEASE</org.springframework.plugin_spring-plugin-metadata.version>
+		<org.springframework.plugin_spring-plugin.version>2.0.0.RELEASE</org.springframework.plugin_spring-plugin.version>
+		<org.springframework.security_spring-security-bom.version>5.8.16</org.springframework.security_spring-security-bom.version>
+		<org.springframework.session_spring-session-bom.version>2021.2.3</org.springframework.session_spring-session-bom.version>
+		<org.springframework.shell_spring-shell-dependencies.version>2.1.15</org.springframework.shell_spring-shell-dependencies.version>
 		<org.springframework_spring-framework-bom.version>5.3.39</org.springframework_spring-framework-bom.version>
 		<org.testcontainers_testcontainers-bom.version>1.21.3</org.testcontainers_testcontainers-bom.version>
 		<org.zero_common-bom.version>${revision}</org.zero_common-bom.version>
-		<tech.powerjob_powerjob-worker-spring-boot-starter.version>5.1.2
-		</tech.powerjob_powerjob-worker-spring-boot-starter.version>
+		<tech.powerjob_powerjob-worker-spring-boot-starter.version>5.1.2</tech.powerjob_powerjob-worker-spring-boot-starter.version>
 		<xerces_xercesImpl.version>2.12.2</xerces_xercesImpl.version>
 
 		<!-- ************************************ Plugins ************************************ -->
 		<com.github.github_site-maven-plugin.version>0.12</com.github.github_site-maven-plugin.version>
-		<io.github.git-commit-id_git-commit-id-maven-plugin.version>9.0.2
-		</io.github.git-commit-id_git-commit-id-maven-plugin.version>
-		<org.apache.maven.plugins_maven-antrun-plugin.version>3.1.0
-		</org.apache.maven.plugins_maven-antrun-plugin.version>
-		<org.apache.maven.plugins_maven-assembly-plugin.version>3.7.1
-		</org.apache.maven.plugins_maven-assembly-plugin.version>
+		<io.github.git-commit-id_git-commit-id-maven-plugin.version>9.0.2</io.github.git-commit-id_git-commit-id-maven-plugin.version>
+		<org.apache.maven.plugins_maven-antrun-plugin.version>3.1.0</org.apache.maven.plugins_maven-antrun-plugin.version>
+		<org.apache.maven.plugins_maven-assembly-plugin.version>3.7.1</org.apache.maven.plugins_maven-assembly-plugin.version>
 		<org.apache.maven.plugins_maven-clean-plugin.version>3.5.0</org.apache.maven.plugins_maven-clean-plugin.version>
-		<org.apache.maven.plugins_maven-compiler-plugin.version>3.14.0
-		</org.apache.maven.plugins_maven-compiler-plugin.version>
-		<org.apache.maven.plugins_maven-dependency-plugin.version>3.8.1
-		</org.apache.maven.plugins_maven-dependency-plugin.version>
-		<org.apache.maven.plugins_maven-deploy-plugin.version>3.1.4
-		</org.apache.maven.plugins_maven-deploy-plugin.version>
-		<org.apache.maven.plugins_maven-enforcer-plugin.version>3.5.0
-		</org.apache.maven.plugins_maven-enforcer-plugin.version>
-		<org.apache.maven.plugins_maven-failsafe-plugin.version>3.5.3
-		</org.apache.maven.plugins_maven-failsafe-plugin.version>
+		<org.apache.maven.plugins_maven-compiler-plugin.version>3.14.0</org.apache.maven.plugins_maven-compiler-plugin.version>
+		<org.apache.maven.plugins_maven-dependency-plugin.version>3.8.1</org.apache.maven.plugins_maven-dependency-plugin.version>
+		<org.apache.maven.plugins_maven-deploy-plugin.version>3.1.4</org.apache.maven.plugins_maven-deploy-plugin.version>
+		<org.apache.maven.plugins_maven-enforcer-plugin.version>3.5.0</org.apache.maven.plugins_maven-enforcer-plugin.version>
+		<org.apache.maven.plugins_maven-failsafe-plugin.version>3.5.3</org.apache.maven.plugins_maven-failsafe-plugin.version>
 		<org.apache.maven.plugins_maven-gpg-plugin.version>3.2.8</org.apache.maven.plugins_maven-gpg-plugin.version>
 		<org.apache.maven.plugins_maven-help-plugin.version>3.5.1</org.apache.maven.plugins_maven-help-plugin.version>
-		<org.apache.maven.plugins_maven-install-plugin.version>3.1.4
-		</org.apache.maven.plugins_maven-install-plugin.version>
-		<org.apache.maven.plugins_maven-invoker-plugin.version>3.9.0
-		</org.apache.maven.plugins_maven-invoker-plugin.version>
+		<org.apache.maven.plugins_maven-install-plugin.version>3.1.4</org.apache.maven.plugins_maven-install-plugin.version>
+		<org.apache.maven.plugins_maven-invoker-plugin.version>3.9.0</org.apache.maven.plugins_maven-invoker-plugin.version>
 		<org.apache.maven.plugins_maven-jar-plugin.version>3.3.0</org.apache.maven.plugins_maven-jar-plugin.version>
-		<org.apache.maven.plugins_maven-javadoc-plugin.version>3.11.2
-		</org.apache.maven.plugins_maven-javadoc-plugin.version>
-		<org.apache.maven.plugins_maven-resources-plugin.version>3.3.1
-		</org.apache.maven.plugins_maven-resources-plugin.version>
+		<org.apache.maven.plugins_maven-javadoc-plugin.version>3.11.2</org.apache.maven.plugins_maven-javadoc-plugin.version>
+		<org.apache.maven.plugins_maven-resources-plugin.version>3.3.1</org.apache.maven.plugins_maven-resources-plugin.version>
 		<org.apache.maven.plugins_maven-shade-plugin.version>3.6.0</org.apache.maven.plugins_maven-shade-plugin.version>
-		<org.apache.maven.plugins_maven-source-plugin.version>3.3.1
-		</org.apache.maven.plugins_maven-source-plugin.version>
-		<org.apache.maven.plugins_maven-surefire-plugin.version>3.5.3
-		</org.apache.maven.plugins_maven-surefire-plugin.version>
-		<org.apache.maven.plugins_maven-toolchains-plugin.version>3.2.0
-		</org.apache.maven.plugins_maven-toolchains-plugin.version>
+		<org.apache.maven.plugins_maven-source-plugin.version>3.3.1</org.apache.maven.plugins_maven-source-plugin.version>
+		<org.apache.maven.plugins_maven-surefire-plugin.version>3.5.3</org.apache.maven.plugins_maven-surefire-plugin.version>
+		<org.apache.maven.plugins_maven-toolchains-plugin.version>3.2.0</org.apache.maven.plugins_maven-toolchains-plugin.version>
 		<org.apache.maven.plugins_maven-war-plugin.version>3.4.0</org.apache.maven.plugins_maven-war-plugin.version>
-		<org.apache.maven.plugins_maven-wrapper-plugin.version>3.3.2
-		</org.apache.maven.plugins_maven-wrapper-plugin.version>
+		<org.apache.maven.plugins_maven-wrapper-plugin.version>3.3.2</org.apache.maven.plugins_maven-wrapper-plugin.version>
 		<org.codehaus.mojo_build-helper-maven-plugin.version>3.6.1</org.codehaus.mojo_build-helper-maven-plugin.version>
 		<org.codehaus.mojo_versions-maven-plugin.version>2.18.0</org.codehaus.mojo_versions-maven-plugin.version>
 		<org.codehaus.mojo_xml-maven-plugin.version>1.1.0</org.codehaus.mojo_xml-maven-plugin.version>
@@ -232,8 +182,7 @@
 		<org.jetbrains.kotlin_kotlin-maven-plugin.version>2.2.20</org.jetbrains.kotlin_kotlin-maven-plugin.version>
 		<org.jooq_jooq-codegen-maven.version>3.14.16</org.jooq_jooq-codegen-maven.version>
 		<org.liquibase_liquibase-maven-plugin.version>4.33.0</org.liquibase_liquibase-maven-plugin.version>
-		<org.springframework.boot_spring-boot-maven-plugin.version>2.7.18
-		</org.springframework.boot_spring-boot-maven-plugin.version>
+		<org.springframework.boot_spring-boot-maven-plugin.version>2.7.18</org.springframework.boot_spring-boot-maven-plugin.version>
 	</properties>
 
 	<dependencies>
@@ -1525,7 +1474,7 @@
 				<jdk>[11,)</jdk>
 			</activation>
 			<properties>
-				<com.github.ben-manes.caffeine_caffeine.version>3.2.0</com.github.ben-manes.caffeine_caffeine.version>
+				<com.github.ben-manes.caffeine_caffeine.version>3.2.3</com.github.ben-manes.caffeine_caffeine.version>
 				<com.lmax_disruptor.version>4.0.0</com.lmax_disruptor.version>
 				<com.querydsl_querydsl-bom.version>5.1.0</com.querydsl_querydsl-bom.version>
 				<jakarta.platform_jakarta.jakartaee-bom.version>10.0.0</jakarta.platform_jakarta.jakartaee-bom.version>
@@ -1540,39 +1489,25 @@
 				<jdk>[17,)</jdk>
 			</activation>
 			<properties>
-				<com.alibaba.cloud_spring-cloud-alibaba-dependencies.version>2023.0.1.0
-				</com.alibaba.cloud_spring-cloud-alibaba-dependencies.version>
-				<com.alibaba_druid-spring-boot-3-starter.version>1.2.27
-				</com.alibaba_druid-spring-boot-3-starter.version>
-				<com.baomidou_dynamic-datasource-spring-boot3-starter.version>4.3.1
-				</com.baomidou_dynamic-datasource-spring-boot3-starter.version>
-				<com.huaweicloud_spring-cloud-huawei-bom.version>1.11.12-2024.0.x
-				</com.huaweicloud_spring-cloud-huawei-bom.version>
+				<com.alibaba.cloud_spring-cloud-alibaba-dependencies.version>2023.0.1.0</com.alibaba.cloud_spring-cloud-alibaba-dependencies.version>
+				<com.alibaba_druid-spring-boot-3-starter.version>1.2.27</com.alibaba_druid-spring-boot-3-starter.version>
+				<com.baomidou_dynamic-datasource-spring-boot3-starter.version>4.3.1</com.baomidou_dynamic-datasource-spring-boot3-starter.version>
+				<com.huaweicloud_spring-cloud-huawei-bom.version>1.11.12-2024.0.x</com.huaweicloud_spring-cloud-huawei-bom.version>
 				<com.redis_testcontainers-redis.version>2.2.4</com.redis_testcontainers-redis.version>
 				<jakarta.platform_jakarta.jakartaee-bom.version>11.0.0</jakarta.platform_jakarta.jakartaee-bom.version>
 				<org.eclipse.jetty_jetty-bom.version>12.1.1</org.eclipse.jetty_jetty-bom.version>
 				<org.jooq_jooq-bom.version>3.19.26</org.jooq_jooq-bom.version>
-				<org.mybatis.spring.boot_mybatis-spring-boot-starter.version>3.0.5
-				</org.mybatis.spring.boot_mybatis-spring-boot-starter.version>
+				<org.mybatis.spring.boot_mybatis-spring-boot-starter.version>3.0.5</org.mybatis.spring.boot_mybatis-spring-boot-starter.version>
 				<org.springdoc_springdoc-openapi-bom.version>2.8.13</org.springdoc_springdoc-openapi-bom.version>
-				<org.springframework.boot_spring-boot-dependencies.version>3.5.6
-				</org.springframework.boot_spring-boot-dependencies.version>
-				<org.springframework.cloud_spring-cloud-dependencies.version>2025.0.0
-				</org.springframework.cloud_spring-cloud-dependencies.version>
-				<org.springframework.data_spring-data-bom.version>2025.0.4
-				</org.springframework.data_spring-data-bom.version>
-				<org.springframework.integration_spring-integration-bom.version>6.5.2
-				</org.springframework.integration_spring-integration-bom.version>
-				<org.springframework.plugin_spring-plugin.version>3.0.0
-				</org.springframework.plugin_spring-plugin.version>
-				<org.springframework.security_spring-security-bom.version>6.5.5
-				</org.springframework.security_spring-security-bom.version>
-				<org.springframework.shell_spring-shell-dependencies.version>3.4.1
-				</org.springframework.shell_spring-shell-dependencies.version>
-				<org.springframework_spring-framework-bom.version>6.2.11
-				</org.springframework_spring-framework-bom.version>
-				<org.springframework.boot_spring-boot-maven-plugin.version>3.1.5
-				</org.springframework.boot_spring-boot-maven-plugin.version>
+				<org.springframework.boot_spring-boot-dependencies.version>3.5.6</org.springframework.boot_spring-boot-dependencies.version>
+				<org.springframework.cloud_spring-cloud-dependencies.version>2025.0.0</org.springframework.cloud_spring-cloud-dependencies.version>
+				<org.springframework.data_spring-data-bom.version>2025.0.4</org.springframework.data_spring-data-bom.version>
+				<org.springframework.integration_spring-integration-bom.version>6.5.2</org.springframework.integration_spring-integration-bom.version>
+				<org.springframework.plugin_spring-plugin.version>3.0.0</org.springframework.plugin_spring-plugin.version>
+				<org.springframework.security_spring-security-bom.version>6.5.5</org.springframework.security_spring-security-bom.version>
+				<org.springframework.shell_spring-shell-dependencies.version>3.4.1</org.springframework.shell_spring-shell-dependencies.version>
+				<org.springframework_spring-framework-bom.version>6.2.11</org.springframework_spring-framework-bom.version>
+				<org.springframework.boot_spring-boot-maven-plugin.version>3.1.5</org.springframework.boot_spring-boot-maven-plugin.version>
 			</properties>
 			<dependencyManagement>
 				<dependencies>

@@ -5,19 +5,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.MinimalExternalModuleDependency;
-import org.gradle.api.artifacts.VersionCatalog;
-import org.gradle.api.artifacts.VersionCatalogsExtension;
-import org.gradle.api.provider.Provider;
 
 /**
- * Build profile support - 统一处理 effective profile 解析、active higher chain 构造与 catalog alias 回退。
+ * Build profile support - 统一处理 effective profile 解析、active higher chain 构造与 profile 比较能力。
  */
 public final class BuildProfileSupport {
 	private static final String SUPPORTED_PROFILES_PROPERTY = "build.profiles";
@@ -92,21 +87,6 @@ public final class BuildProfileSupport {
 		 */
 		String major = trimmed.split("[-+_.]")[0];
 		return Integer.parseInt(major);
-	}
-
-	public static Provider<MinimalExternalModuleDependency> selectLibrary(Project project, String baseAlias, Object explicitProfile) {
-		VersionCatalog catalog = project.getExtensions().getByType(VersionCatalogsExtension.class).named("libs");
-		List<String> activeProfileChain = resolveActiveProfileChain(project, explicitProfile);
-		String effectiveProfile = lastActiveProfile(activeProfileChain);
-		for (String alias : profileAliasCandidates(baseAlias, activeProfileChain)) {
-			Optional<Provider<MinimalExternalModuleDependency>> library = catalog.findLibrary(alias);
-			if (library.isPresent()) {
-				return library.get();
-			}
-		}
-		throw new IllegalArgumentException(
-			"Missing Gradle catalog alias '" + baseAlias + "' for effective build profile '" + effectiveProfile + "'."
-		);
 	}
 
 	public static boolean isAtLeast(Project project, String profile, String baselineProfile) {
@@ -201,19 +181,6 @@ public final class BuildProfileSupport {
 
 	private static String lastActiveProfile(List<String> activeProfileChain) {
 		return activeProfileChain.get(activeProfileChain.size() - 1);
-	}
-
-	private static List<String> profileAliasCandidates(String baseAlias, List<String> activeProfileChain) {
-		String baseProfile = activeProfileChain.get(0);
-		List<String> aliases = new ArrayList<String>();
-		for (int index = activeProfileChain.size() - 1; index >= 0; index--) {
-			aliases.add(profileAlias(baseAlias, activeProfileChain.get(index), baseProfile));
-		}
-		return aliases;
-	}
-
-	private static String profileAlias(String baseAlias, String profile, String baseProfile) {
-		return baseProfile.equals(profile) ? baseAlias : baseAlias + "_" + profile;
 	}
 
 	private static int profileJavaVersion(String profile) {

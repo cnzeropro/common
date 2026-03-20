@@ -1,24 +1,21 @@
-import org.zero.build.BuildProfileSupport
 import org.gradle.api.artifacts.VersionCatalogsExtension
 
 plugins {
     id 'org.zero.conventions.java17-library'
 }
 
-def dependencyBuildProfile = BuildProfileSupport.resolveProfileAtLeast(project, findProperty('buildProfile'), 'java17')
-def profileLibrary = { String alias -> BuildProfileSupport.selectLibrary(project, alias, dependencyBuildProfile) }
 def libsCatalog = extensions.getByType(VersionCatalogsExtension).named('libs')
 
 /*
- * dependency layout - Boot 3 适配层在根平台基础上按 profile 叠加 Spring/Jakarta 高版本 BOM，隔离新生态依赖面。
+ * dependency layout - Boot 3 适配层在根平台基础上叠加 Spring/Jakarta 高版本 BOM，隔离新生态依赖面。
  */
 dependencies {
     implementation(platform(project(':')))
-    implementation(platform(profileLibrary('org.springframework_spring-framework-bom')))
-    implementation(platform(profileLibrary('org.springframework.boot_spring-boot-dependencies')))
-    implementation(platform(profileLibrary('org.springframework.cloud_spring-cloud-dependencies')))
-    implementation(platform(profileLibrary('com.alibaba.cloud_spring-cloud-alibaba-dependencies')))
-    implementation(platform(profileLibrary('jakarta.platform_jakarta.jakartaee-bom')))
+    implementation(platform(libs.org.springframework.spring.framework.bom))
+    implementation(platform(libs.org.springframework.boot.spring.boot.dependencies))
+    implementation(platform(libs.org.springframework.cloud.spring.cloud.dependencies))
+    implementation(platform(libs.com.alibaba.cloud.spring.cloud.alibaba.dependencies))
+    implementation(platform(libs.jakarta.platform.jakarta.jakartaee.bom))
     implementation(project(':core-base'))
     implementation(project(':core-jakarta'))
     implementation(project(':common-data'))
@@ -26,7 +23,7 @@ dependencies {
     implementation('org.springframework:spring-webmvc')
     implementation('org.springframework.boot:spring-boot')
     implementation('org.springframework.boot:spring-boot-autoconfigure')
-    implementation(libsCatalog.findLibrary('com-alibaba-csp_sentinel-spring-webmvc-6x-adapter').get())
+    implementation(libsCatalog.findLibrary('com-alibaba-csp_sentinel-spring-webmvc-6x-adapter').get().get())
     implementation('jakarta.servlet:jakarta.servlet-api')
     implementation('jakarta.validation:jakarta.validation-api')
     implementation('io.github.openfeign:feign-core')

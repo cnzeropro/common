@@ -3,12 +3,13 @@ cn-dev33_sa-token-dependencies = "1.45.0"
 cn-hutool_hutool-all = "5.8.40"
 cn-hutool_hutool-bom = "5.8.40"
 cn-idev-excel_fastexcel = "1.3.0"
-com-alibaba-cloud_spring-cloud-alibaba-dependencies = "2021.0.6.0"
+com-alibaba-cloud_spring-cloud-alibaba-dependencies = "2023.0.1.0"
 com-alibaba-csp_sentinel-apache-dubbo-adapter = "1.8.8"
 com-alibaba-csp_sentinel-apache-dubbo3-adapter = "1.8.8"
 com-alibaba-csp_sentinel-spring-webmvc-6x-adapter = "1.8.6"
 com-alibaba-csp_sentinel-spring-webmvc-adapter = "1.8.8"
 com-alibaba_druid = "1.2.27"
+com-alibaba_druid-spring-boot-3-starter = "1.2.27"
 com-alibaba_druid-spring-boot-starter = "1.2.27"
 com-alibaba_easyexcel = "4.0.3"
 com-alicp-jetcache_jetcache-core = "2.7.8"
@@ -17,6 +18,7 @@ com-alicp-jetcache_jetcache-starter-redis-lettuce = "2.7.8"
 com-alicp-jetcache_jetcache-starter-redisson = "2.7.8"
 com-auth0_java-jwt = "4.5.0"
 com-baomidou_dynamic-datasource-spring-boot-starter = "4.3.1"
+com-baomidou_dynamic-datasource-spring-boot3-starter = "4.3.1"
 com-baomidou_lock4j-core = "2.2.7"
 com-baomidou_lock4j-redis-template-spring-boot-starter = "2.2.7"
 com-baomidou_lock4j-redisson-spring-boot-starter = "2.2.7"
@@ -26,7 +28,7 @@ com-baomidou_mybatis-plus-bom = "3.5.14"
 com-ctrip-framework-apollo_apollo = "2.0.1"
 com-ctrip-framework-apollo_apollo-client-config-data = "2.4.0"
 com-esotericsoftware_kryo = "5.6.2"
-com-github-ben-manes-caffeine_caffeine = { strictly = "2.9.3" }
+com-github-ben-manes-caffeine_caffeine = { strictly = "3.2.3" }
 com-github-penggle_kaptcha = "2.3.2"
 com-github-rholder_guava-retrying = "2.0.0"
 com-github-ulisesbocchio_jasypt-spring-boot = "3.0.5"
@@ -36,12 +38,12 @@ com-google-code-kaptcha_kaptcha = "2.3"
 com-google-code_kaptcha = "2.3.0"
 com-google-protobuf_protobuf-bom = "4.32.1"
 com-googlecode-juniversalchardet_juniversalchardet = "1.0.3"
-com-huaweicloud_spring-cloud-huawei-bom = "1.11.12-2021.0.x"
-com-lmax_disruptor = "3.4.4"
+com-huaweicloud_spring-cloud-huawei-bom = "1.11.12-2024.0.x"
+com-lmax_disruptor = "4.0.0"
 com-mybatis-flex_mybatis-flex-dependencies = "1.11.3"
 com-oracle-database-jdbc_ojdbc-bom = "23.9.0.25.07"
-com-querydsl_querydsl-bom = "5.0.0"
-com-redis_testcontainers-redis = "1.7.0"
+com-querydsl_querydsl-bom = "5.1.0"
+com-redis_testcontainers-redis = "2.1.0"
 com-taobao-arthas_arthas-core = "4.0.5"
 com-taobao-arthas_arthas-spring-boot-starter = "4.0.5"
 com-xuxueli_xxl-job = "3.2.0"
@@ -52,7 +54,7 @@ io-minio_minio = "8.6.0"
 io-netty_netty-bom = "4.2.6.Final"
 io-projectreactor_reactor-bom = "2024.0.10"
 io-swagger-core-v3_swagger-core = "2.2.35"
-jakarta-platform_jakarta-jakartaee-bom = "9.1.0"
+jakarta-platform_jakarta-jakartaee-bom = "11.0.0"
 javax-inject_javax-inject = "1"
 javax-servlet_servlet-api = "2.5"
 log4j_log4j = "1.2.17"
@@ -66,19 +68,20 @@ org-apache-maven_maven-model = "3.9.11"
 org-apache-poi_poi-ooxml = "5.4.1"
 org-apache-shardingsphere-elasticjob_elasticjob = "3.0.4"
 org-apache-shardingsphere-elasticjob_elasticjob-lite-spring-boot-starter = "3.0.4"
-org-apache-shiro_shiro-bom = "1.13.0"
+org-apache-shiro_shiro-bom = "2.0.5"
 org-dromara-dynamictp_dynamic-tp-dependencies = "1.2.2"
 org-dromara-x-file-storage_x-file-storage-core = "2.3.0"
 org-dromara-x-file-storage_x-file-storage-spring = "2.3.0"
-org-eclipse-jetty_jetty-bom = "9.4.58.v20250814"
+org-eclipse-jetty_jetty-bom = "12.1.1"
 org-jasypt_jasypt = "1.9.3"
 org-jctools_jctools-core = "4.0.5"
 org-jetbrains-kotlin_kotlin-bom = "2.2.20"
+org-jooq_jooq-bom = "3.20.7"
 org-junit_junit-bom = "5.13.4"
 org-lionsoul_ip2region = "3.1.0"
 org-mapstruct_mapstruct = "1.6.3"
-org-mockito_mockito-bom = "4.11.0"
-org-mybatis-spring-boot_mybatis-spring-boot-starter = "2.3.2"
+org-mockito_mockito-bom = "5.20.0"
+org-mybatis-spring-boot_mybatis-spring-boot-starter = "3.0.5"
 org-mybatis_mybatis = "3.5.19"
 org-mybatis_mybatis-spring = "2.1.2"
 org-openjdk-jol_jol-core = "0.17"
@@ -89,23 +92,23 @@ org-projectlombok_lombok-mapstruct-binding = "0.2.0"
 org-redisson_redisson = "3.52.0"
 org-redisson_redisson-spring-boot-starter = "3.52.0"
 org-slf4j_slf4j-bom = "2.0.17"
-org-springdoc_springdoc-openapi-bom = "2.8.9"
-org-springframework-boot_spring-boot-dependencies = "2.7.18"
-org-springframework-cloud_spring-cloud-dependencies = "2021.0.9"
-org-springframework-data_spring-data-bom = "2021.2.18"
-org-springframework-integration_spring-integration-bom = "5.5.20"
-org-springframework-plugin_spring-plugin = "2.0.0.RELEASE"
+org-springdoc_springdoc-openapi-bom = "2.8.13"
+org-springframework-boot_spring-boot-dependencies = "3.5.6"
+org-springframework-cloud_spring-cloud-dependencies = "2025.0.0"
+org-springframework-data_spring-data-bom = "2025.0.4"
+org-springframework-integration_spring-integration-bom = "6.5.2"
+org-springframework-plugin_spring-plugin = "3.0.0"
 org-springframework-plugin_spring-plugin-core = "2.0.0.RELEASE"
 org-springframework-plugin_spring-plugin-metadata = "2.0.0.RELEASE"
-org-springframework-security_spring-security-bom = "5.8.16"
+org-springframework-security_spring-security-bom = "6.5.5"
 org-springframework-session_spring-session-bom = "2021.2.3"
-org-springframework-shell_spring-shell-dependencies = "2.1.15"
-org-springframework_spring-framework-bom = "5.3.39"
+org-springframework-shell_spring-shell-dependencies = "3.4.1"
+org-springframework_spring-framework-bom = "6.2.11"
 org-testcontainers_testcontainers-bom = "1.21.3"
 org-zero_common-bom = "1.0.0"
 tech-powerjob_powerjob-worker-spring-boot-starter = "5.1.2"
 xerces_xercesImpl = "2.12.2"
-org-springframework-boot = "2.7.18"
+org-springframework-boot = "3.1.5"
 
 [libraries]
 cn-dev33_sa-token-dependencies = { module = "cn.dev33:sa-token-dependencies", version.ref = "cn-dev33_sa-token-dependencies" }
@@ -118,6 +121,7 @@ com-alibaba-csp_sentinel-apache-dubbo3-adapter = { module = "com.alibaba.csp:sen
 com-alibaba-csp_sentinel-spring-webmvc-6x-adapter = { module = "com.alibaba.csp:sentinel-spring-webmvc-6x-adapter", version.ref = "com-alibaba-csp_sentinel-spring-webmvc-6x-adapter" }
 com-alibaba-csp_sentinel-spring-webmvc-adapter = { module = "com.alibaba.csp:sentinel-spring-webmvc-adapter", version.ref = "com-alibaba-csp_sentinel-spring-webmvc-adapter" }
 com-alibaba_druid = { module = "com.alibaba:druid", version.ref = "com-alibaba_druid" }
+com-alibaba_druid-spring-boot-3-starter = { module = "com.alibaba:druid-spring-boot-3-starter", version.ref = "com-alibaba_druid-spring-boot-3-starter" }
 com-alibaba_druid-spring-boot-starter = { module = "com.alibaba:druid-spring-boot-starter", version.ref = "com-alibaba_druid-spring-boot-starter" }
 com-alibaba_easyexcel = { module = "com.alibaba:easyexcel", version.ref = "com-alibaba_easyexcel" }
 com-alicp-jetcache_jetcache-core = { module = "com.alicp.jetcache:jetcache-core", version.ref = "com-alicp-jetcache_jetcache-core" }
@@ -126,6 +130,7 @@ com-alicp-jetcache_jetcache-starter-redis-lettuce = { module = "com.alicp.jetcac
 com-alicp-jetcache_jetcache-starter-redisson = { module = "com.alicp.jetcache:jetcache-starter-redisson", version.ref = "com-alicp-jetcache_jetcache-starter-redisson" }
 com-auth0_java-jwt = { module = "com.auth0:java-jwt", version.ref = "com-auth0_java-jwt" }
 com-baomidou_dynamic-datasource-spring-boot-starter = { module = "com.baomidou:dynamic-datasource-spring-boot-starter", version.ref = "com-baomidou_dynamic-datasource-spring-boot-starter" }
+com-baomidou_dynamic-datasource-spring-boot3-starter = { module = "com.baomidou:dynamic-datasource-spring-boot3-starter", version.ref = "com-baomidou_dynamic-datasource-spring-boot3-starter" }
 com-baomidou_lock4j-core = { module = "com.baomidou:lock4j-core", version.ref = "com-baomidou_lock4j-core" }
 com-baomidou_lock4j-redis-template-spring-boot-starter = { module = "com.baomidou:lock4j-redis-template-spring-boot-starter", version.ref = "com-baomidou_lock4j-redis-template-spring-boot-starter" }
 com-baomidou_lock4j-redisson-spring-boot-starter = { module = "com.baomidou:lock4j-redisson-spring-boot-starter", version.ref = "com-baomidou_lock4j-redisson-spring-boot-starter" }
@@ -183,6 +188,7 @@ org-eclipse-jetty_jetty-bom = { module = "org.eclipse.jetty:jetty-bom", version.
 org-jasypt_jasypt = { module = "org.jasypt:jasypt", version.ref = "org-jasypt_jasypt" }
 org-jctools_jctools-core = { module = "org.jctools:jctools-core", version.ref = "org-jctools_jctools-core" }
 org-jetbrains-kotlin_kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "org-jetbrains-kotlin_kotlin-bom" }
+org-jooq_jooq-bom = { module = "org.jooq:jooq-bom", version.ref = "org-jooq_jooq-bom" }
 org-junit_junit-bom = { module = "org.junit:junit-bom", version.ref = "org-junit_junit-bom" }
 org-lionsoul_ip2region = { module = "org.lionsoul:ip2region", version.ref = "org-lionsoul_ip2region" }
 org-mapstruct_mapstruct = { module = "org.mapstruct:mapstruct", version.ref = "org-mapstruct_mapstruct" }

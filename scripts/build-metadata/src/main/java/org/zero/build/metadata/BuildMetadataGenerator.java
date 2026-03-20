@@ -18,7 +18,9 @@ import java.util.regex.Pattern;
  * Build metadata generator - 生成 Gradle/Maven 元数据。
  */
 public final class BuildMetadataGenerator {
-	private static final String VERSION_CATALOG_PATH = "gradle/libs.versions.toml";
+	private static final String VERSION_CATALOG_DIRECTORY = "gradle";
+	private static final String VERSION_CATALOG_BASENAME = "libs.versions";
+	private static final String VERSION_CATALOG_PATH = VERSION_CATALOG_DIRECTORY + "/" + VERSION_CATALOG_BASENAME + ".toml";
 	private static final String BUILD_REVISION_PROPERTY = "build.revision";
 	private static final String LEGACY_REVISION_PROPERTY = "revision";
 	private static final String REVISION_EXPRESSION = "${revision}";
@@ -53,6 +55,7 @@ public final class BuildMetadataGenerator {
 	private final File rootDir;
 	private final File metadataDir;
 	private final File buildMetadataFile;
+	private final File versionCatalogDirectory;
 	private final File versionCatalogFile;
 	private final File rootPomFile;
 	private final File commonBomPomFile;
@@ -63,6 +66,7 @@ public final class BuildMetadataGenerator {
 		this.rootDir = rootDir;
 		this.metadataDir = new File(rootDir, "metadata");
 		this.buildMetadataFile = new File(metadataDir, "build-metadata.toml");
+		this.versionCatalogDirectory = new File(rootDir, VERSION_CATALOG_DIRECTORY);
 		this.versionCatalogFile = new File(rootDir, VERSION_CATALOG_PATH);
 		this.rootPomFile = new File(rootDir, "pom.xml");
 		this.commonBomPomFile = new File(rootDir, "common-bom/pom.xml");
@@ -73,7 +77,7 @@ public final class BuildMetadataGenerator {
 	public void sync() {
 		BuildMetadataModel metadata = loadMetadata();
 		deleteLegacyCatalogFiles(metadata);
-		writeIfChanged(versionCatalogFile, renderCatalog(metadata));
+		writeVersionCatalogFiles(metadata);
 		writeIfChanged(rootPomFile, renderRootPom(metadata));
 		writeIfChanged(commonBomPomFile, renderCommonBomPom(metadata));
 		writeIfChanged(gradlePropertiesFile, renderGradleProperties(gradlePropertiesFile, metadata, true));
@@ -87,7 +91,7 @@ public final class BuildMetadataGenerator {
 	public void verify() {
 		BuildMetadataModel metadata = loadMetadata();
 		List<String> mismatches = new ArrayList<String>();
-		assertMatches(versionCatalogFile, renderCatalog(metadata), mismatches);
+		assertVersionCatalogFiles(metadata, mismatches);
 		assertMatches(rootPomFile, renderRootPom(metadata), mismatches);
 		assertMatches(commonBomPomFile, renderCommonBomPom(metadata), mismatches);
 		assertMatches(gradlePropertiesFile, renderGradleProperties(gradlePropertiesFile, metadata, true), mismatches);
@@ -111,36 +115,39 @@ public final class BuildMetadataGenerator {
 		return BuildMetadataParser.parse(buildMetadataFile);
 	}
 
-	private String renderCatalog(BuildMetadataModel metadata) {
+	private String renderCatalog(BuildMetadataModel metadata, String profile) {
 		StringBuilder builder = new StringBuilder();
 		builder.append("[versions]\n");
 		for (VersionedEntry entry : metadata.getCatalogVersionEntries()) {
-			String baseVersion = entry.resolveVersion(metadata, metadata.getBaseProfile());
-			if (baseVersion != null) {
+			String resolvedVersion = entry.resolveVersion(metadata, profile);
+			if (resolvedVersion != null) {
 				builder.append(renderCatalogKey(entry.getAlias()))
 					.append(" = ")
-					.append(renderCatalogVersionValue(entry, baseVersion))
-					.append("\n");
-			}
-		}
-		for (String profile : higherProfiles(metadata)) {
-			for (Map.Entry<String, String> entry : metadata.resolveChangedVersions(metadata.getCatalogVersionEntries(), profile).entrySet()) {
-				VersionedEntry versionEntry = metadata.getReferenceableEntry(entry.getKey());
-				builder.append(renderCatalogKey(profileAlias(entry.getKey(), profile)))
-					.append(" = ")
-					.append(renderCatalogVersionValue(versionEntry, entry.getValue()))
+					.append(renderCatalogVersionValue(entry, resolvedVersion))
 					.append("\n");
 			}
 		}
 
 		builder.append('\n').append("[libraries]\n");
-		renderCatalogLibraries(builder, metadata);
+		renderCatalogLibraries(builder, metadata, profile);
 
 		builder.append('\n').append("[bundles]\n");
 		builder.append('\n').append("[plugins]\n");
-		renderCatalogPlugins(builder, metadata);
+		renderCatalogPlugins(builder, metadata, profile);
 		builder.append('\n');
 		return builder.toString();
+	}
+
+	private void writeVersionCatalogFiles(BuildMetadataModel metadata) {
+		for (String profile : metadata.getSupportedProfiles()) {
+			writeIfChanged(catalogFile(profile, metadata), renderCatalog(metadata, profile));
+		}
+	}
+
+	private void assertVersionCatalogFiles(BuildMetadataModel metadata, List<String> mismatches) {
+		for (String profile : metadata.getSupportedProfiles()) {
+			assertMatches(catalogFile(profile, metadata), renderCatalog(metadata, profile), mismatches);
+		}
 	}
 
 	private void deleteLegacyCatalogFiles(BuildMetadataModel metadata) {
@@ -154,48 +161,40 @@ public final class BuildMetadataGenerator {
 				legacyCatalogDirectory.delete();
 			}
 		}
-	}
 
-	private void renderCatalogLibraries(StringBuilder builder, BuildMetadataModel metadata) {
-		for (LibraryEntry library : metadata.getCatalogLibraries()) {
-			String baseVersion = library.resolveVersion(metadata, metadata.getBaseProfile());
-			if (baseVersion != null) {
-				appendCatalogLibraryEntry(builder, library.getAlias(), library.getCoordinate(), library.getAlias());
+		Set<String> expectedCatalogFiles = new LinkedHashSet<String>();
+		for (String profile : higherProfiles(metadata)) {
+			expectedCatalogFiles.add(catalogFileName(profile));
+		}
+		File[] generatedCatalogFiles = versionCatalogDirectory.listFiles();
+		if (generatedCatalogFiles == null) {
+			return;
+		}
+		for (File generatedCatalogFile : generatedCatalogFiles) {
+			String fileName = generatedCatalogFile.getName();
+			if (!fileName.matches("^libs\\.versions-java\\d+\\.toml$")) {
+				continue;
 			}
-			for (String profile : higherProfiles(metadata)) {
-				String currentVersion = library.resolveVersion(metadata, profile);
-				String previousVersion = library.resolveVersion(metadata, metadata.previousProfile(profile));
-				if (currentVersion == null || currentVersion.equals(previousVersion)) {
-					continue;
-				}
-				appendCatalogLibraryEntry(
-					builder,
-					profileAlias(library.getAlias(), profile),
-					library.getCoordinate(),
-					profileAlias(library.getAlias(), profile)
-				);
+			if (!expectedCatalogFiles.contains(fileName)) {
+				deleteIfExists(generatedCatalogFile);
 			}
 		}
 	}
 
-	private void renderCatalogPlugins(StringBuilder builder, BuildMetadataModel metadata) {
-		for (GradlePluginEntry plugin : metadata.getVersionedGradlePlugins()) {
-			String baseVersion = plugin.resolveVersion(metadata, metadata.getBaseProfile());
-			if (baseVersion != null) {
-				appendCatalogPluginEntry(builder, plugin.getAlias(), plugin.getPluginId(), plugin.getAlias());
+	private void renderCatalogLibraries(StringBuilder builder, BuildMetadataModel metadata, String profile) {
+		for (LibraryEntry library : metadata.getCatalogLibraries()) {
+			String resolvedVersion = library.resolveVersion(metadata, profile);
+			if (resolvedVersion != null) {
+				appendCatalogLibraryEntry(builder, library.getAlias(), library.getCoordinate(), library.getAlias());
 			}
-			for (String profile : higherProfiles(metadata)) {
-				String currentVersion = plugin.resolveVersion(metadata, profile);
-				String previousVersion = plugin.resolveVersion(metadata, metadata.previousProfile(profile));
-				if (currentVersion == null || currentVersion.equals(previousVersion)) {
-					continue;
-				}
-				appendCatalogPluginEntry(
-					builder,
-					profileAlias(plugin.getAlias(), profile),
-					plugin.getPluginId(),
-					profileAlias(plugin.getAlias(), profile)
-				);
+		}
+	}
+
+	private void renderCatalogPlugins(StringBuilder builder, BuildMetadataModel metadata, String profile) {
+		for (GradlePluginEntry plugin : metadata.getVersionedGradlePlugins()) {
+			String resolvedVersion = plugin.resolveVersion(metadata, profile);
+			if (resolvedVersion != null) {
+				appendCatalogPluginEntry(builder, plugin.getAlias(), plugin.getPluginId(), plugin.getAlias());
 			}
 		}
 	}
@@ -222,8 +221,14 @@ public final class BuildMetadataGenerator {
 		return metadata.getSupportedProfiles().subList(1, metadata.getSupportedProfiles().size());
 	}
 
-	private static String profileAlias(String alias, String profile) {
-		return alias + "_" + profile;
+	private File catalogFile(String profile, BuildMetadataModel metadata) {
+		return metadata.getBaseProfile().equals(profile)
+			? versionCatalogFile
+			: new File(versionCatalogDirectory, catalogFileName(profile));
+	}
+
+	private static String catalogFileName(String profile) {
+		return VERSION_CATALOG_BASENAME + "-" + profile + ".toml";
 	}
 
 	private String renderRootPom(BuildMetadataModel metadata) {
