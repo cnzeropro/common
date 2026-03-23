@@ -115,7 +115,6 @@ dependencies {
         api(libs.com.ctrip.framework.apollo.apollo.client.config.data)
         api(libs.com.esotericsoftware.kryo)
         api(libs.com.github.ben.manes.caffeine.caffeine)
-        api(libs.com.github.penggle.kaptcha)
         api(libs.com.github.rholder.guava.retrying)
         api(libs.com.github.ulisesbocchio.jasypt.spring.boot)
         api(libs.com.github.ulisesbocchio.jasypt.spring.boot.starter)

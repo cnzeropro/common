@@ -8,30 +8,24 @@ com-alibaba-csp_sentinel-apache-dubbo-adapter = "1.8.8"
 com-alibaba-csp_sentinel-apache-dubbo3-adapter = "1.8.8"
 com-alibaba-csp_sentinel-spring-webmvc-6x-adapter = "1.8.6"
 com-alibaba-csp_sentinel-spring-webmvc-adapter = "1.8.8"
-com-alibaba_druid = "1.2.27"
-com-alibaba_druid-spring-boot-starter = "1.2.27"
+com-alibaba_druid-spring-boot-starter = "1.2.28"
 com-alibaba_easyexcel = "4.0.3"
-com-alicp-jetcache_jetcache-core = "2.7.8"
-com-alicp-jetcache_jetcache-starter-redis = "2.7.8"
-com-alicp-jetcache_jetcache-starter-redis-lettuce = "2.7.8"
-com-alicp-jetcache_jetcache-starter-redisson = "2.7.8"
-com-auth0_java-jwt = "4.5.0"
-com-baomidou_dynamic-datasource-spring-boot-starter = "4.3.1"
+com-alicp-jetcache_jetcache-bom = "2.7.8"
+com-auth0_java-jwt = "4.5.1"
+com-baomidou_dynamic-datasource-spring-boot-starter = "4.5.0"
 com-baomidou_lock4j-core = "2.2.7"
 com-baomidou_lock4j-redis-template-spring-boot-starter = "2.2.7"
 com-baomidou_lock4j-redisson-spring-boot-starter = "2.2.7"
 com-baomidou_lock4j-zookeeper-spring-boot-starter = "2.2.7"
-com-baomidou_mybatis-plus = "3.5.12"
-com-baomidou_mybatis-plus-bom = "3.5.14"
+com-baomidou_mybatis-plus-bom = "3.5.16"
 com-ctrip-framework-apollo_apollo = "2.0.1"
-com-ctrip-framework-apollo_apollo-client-config-data = "2.4.0"
+com-ctrip-framework-apollo_apollo-client-config-data = "2.5.0"
 com-esotericsoftware_kryo = "5.6.2"
 com-github-ben-manes-caffeine_caffeine = { strictly = "2.9.3" }
-com-github-penggle_kaptcha = "2.3.2"
 com-github-rholder_guava-retrying = "2.0.0"
 com-github-ulisesbocchio_jasypt-spring-boot = "3.0.5"
 com-github-ulisesbocchio_jasypt-spring-boot-starter = "3.0.5"
-com-google-cloud_libraries-bom = "26.68.0"
+com-google-cloud_libraries-bom = "26.78.0"
 com-google-code-kaptcha_kaptcha = "2.3"
 com-google-code_kaptcha = "2.3.0"
 com-google-protobuf_protobuf-bom = "4.32.1"
@@ -117,26 +111,20 @@ com-alibaba-csp_sentinel-apache-dubbo-adapter = { module = "com.alibaba.csp:sent
 com-alibaba-csp_sentinel-apache-dubbo3-adapter = { module = "com.alibaba.csp:sentinel-apache-dubbo3-adapter", version.ref = "com-alibaba-csp_sentinel-apache-dubbo3-adapter" }
 com-alibaba-csp_sentinel-spring-webmvc-6x-adapter = { module = "com.alibaba.csp:sentinel-spring-webmvc-6x-adapter", version.ref = "com-alibaba-csp_sentinel-spring-webmvc-6x-adapter" }
 com-alibaba-csp_sentinel-spring-webmvc-adapter = { module = "com.alibaba.csp:sentinel-spring-webmvc-adapter", version.ref = "com-alibaba-csp_sentinel-spring-webmvc-adapter" }
-com-alibaba_druid = { module = "com.alibaba:druid", version.ref = "com-alibaba_druid" }
 com-alibaba_druid-spring-boot-starter = { module = "com.alibaba:druid-spring-boot-starter", version.ref = "com-alibaba_druid-spring-boot-starter" }
 com-alibaba_easyexcel = { module = "com.alibaba:easyexcel", version.ref = "com-alibaba_easyexcel" }
-com-alicp-jetcache_jetcache-core = { module = "com.alicp.jetcache:jetcache-core", version.ref = "com-alicp-jetcache_jetcache-core" }
-com-alicp-jetcache_jetcache-starter-redis = { module = "com.alicp.jetcache:jetcache-starter-redis", version.ref = "com-alicp-jetcache_jetcache-starter-redis" }
-com-alicp-jetcache_jetcache-starter-redis-lettuce = { module = "com.alicp.jetcache:jetcache-starter-redis-lettuce", version.ref = "com-alicp-jetcache_jetcache-starter-redis-lettuce" }
-com-alicp-jetcache_jetcache-starter-redisson = { module = "com.alicp.jetcache:jetcache-starter-redisson", version.ref = "com-alicp-jetcache_jetcache-starter-redisson" }
+com-alicp-jetcache_jetcache-bom = { module = "com.alicp.jetcache:jetcache-bom", version.ref = "com-alicp-jetcache_jetcache-bom" }
 com-auth0_java-jwt = { module = "com.auth0:java-jwt", version.ref = "com-auth0_java-jwt" }
 com-baomidou_dynamic-datasource-spring-boot-starter = { module = "com.baomidou:dynamic-datasource-spring-boot-starter", version.ref = "com-baomidou_dynamic-datasource-spring-boot-starter" }
 com-baomidou_lock4j-core = { module = "com.baomidou:lock4j-core", version.ref = "com-baomidou_lock4j-core" }
 com-baomidou_lock4j-redis-template-spring-boot-starter = { module = "com.baomidou:lock4j-redis-template-spring-boot-starter", version.ref = "com-baomidou_lock4j-redis-template-spring-boot-starter" }
 com-baomidou_lock4j-redisson-spring-boot-starter = { module = "com.baomidou:lock4j-redisson-spring-boot-starter", version.ref = "com-baomidou_lock4j-redisson-spring-boot-starter" }
 com-baomidou_lock4j-zookeeper-spring-boot-starter = { module = "com.baomidou:lock4j-zookeeper-spring-boot-starter", version.ref = "com-baomidou_lock4j-zookeeper-spring-boot-starter" }
-com-baomidou_mybatis-plus = { module = "com.baomidou:mybatis-plus", version.ref = "com-baomidou_mybatis-plus" }
 com-baomidou_mybatis-plus-bom = { module = "com.baomidou:mybatis-plus-bom", version.ref = "com-baomidou_mybatis-plus-bom" }
 com-ctrip-framework-apollo_apollo = { module = "com.ctrip.framework.apollo:apollo", version.ref = "com-ctrip-framework-apollo_apollo" }
 com-ctrip-framework-apollo_apollo-client-config-data = { module = "com.ctrip.framework.apollo:apollo-client-config-data", version.ref = "com-ctrip-framework-apollo_apollo-client-config-data" }
 com-esotericsoftware_kryo = { module = "com.esotericsoftware:kryo", version.ref = "com-esotericsoftware_kryo" }
 com-github-ben-manes-caffeine_caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "com-github-ben-manes-caffeine_caffeine" }
-com-github-penggle_kaptcha = { module = "com.github.penggle:kaptcha", version.ref = "com-github-penggle_kaptcha" }
 com-github-rholder_guava-retrying = { module = "com.github.rholder:guava-retrying", version.ref = "com-github-rholder_guava-retrying" }
 com-github-ulisesbocchio_jasypt-spring-boot = { module = "com.github.ulisesbocchio:jasypt-spring-boot", version.ref = "com-github-ulisesbocchio_jasypt-spring-boot" }
 com-github-ulisesbocchio_jasypt-spring-boot-starter = { module = "com.github.ulisesbocchio:jasypt-spring-boot-starter", version.ref = "com-github-ulisesbocchio_jasypt-spring-boot-starter" }
