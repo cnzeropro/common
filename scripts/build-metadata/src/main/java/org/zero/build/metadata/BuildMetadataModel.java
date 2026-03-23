@@ -16,9 +16,7 @@ public final class BuildMetadataModel {
 	private static final Pattern JAVA_PROFILE_PATTERN = Pattern.compile("^java(\\d+)$");
 
 	private String revision;
-	private String javaVersion;
 	private final List<String> supportedProfiles = new ArrayList<String>();
-	private final Map<String, String> mavenProperties = new LinkedHashMap<String, String>();
 	private final Map<String, ValueEntry> values = new LinkedHashMap<String, ValueEntry>();
 	private final Map<String, LibraryEntry> libraries = new LinkedHashMap<String, LibraryEntry>();
 	private final Map<String, MavenPluginEntry> mavenPlugins = new LinkedHashMap<String, MavenPluginEntry>();
@@ -31,14 +29,6 @@ public final class BuildMetadataModel {
 
 	public void setRevision(String revision) {
 		this.revision = revision;
-	}
-
-	public String getJavaVersion() {
-		return javaVersion;
-	}
-
-	public void setJavaVersion(String javaVersion) {
-		this.javaVersion = javaVersion;
 	}
 
 	public void setSupportedProfiles(List<String> profiles) {
@@ -57,14 +47,6 @@ public final class BuildMetadataModel {
 
 	public List<String> getSupportedProfiles() {
 		return Collections.unmodifiableList(supportedProfiles);
-	}
-
-	public Map<String, String> getMavenProperties() {
-		return mavenProperties;
-	}
-
-	public void putMavenProperty(String name, String value) {
-		mavenProperties.put(name, value);
 	}
 
 	public Map<String, ValueEntry> getValues() {
@@ -248,15 +230,11 @@ public final class BuildMetadataModel {
 		if (revision == null || revision.isEmpty()) {
 			throw new IllegalArgumentException("Missing revision");
 		}
-		if (javaVersion == null || javaVersion.isEmpty()) {
-			throw new IllegalArgumentException("Missing metadata java");
-		}
 		if (supportedProfiles.isEmpty()) {
 			throw new IllegalArgumentException("Missing metadata profiles");
 		}
 
 		validateProfiles();
-		validateMavenProperties();
 		referenceableEntries.clear();
 
 		Map<String, String> aliases = new LinkedHashMap<String, String>();
@@ -287,17 +265,6 @@ public final class BuildMetadataModel {
 				throw new IllegalArgumentException(
 					"Unsupported build profile naming '" + profile + "'. Expected metadata profile 'java<version>'."
 				);
-			}
-		}
-	}
-
-	private void validateMavenProperties() {
-		for (Map.Entry<String, String> entry : mavenProperties.entrySet()) {
-			if (entry.getKey() == null || entry.getKey().trim().isEmpty()) {
-				throw new IllegalArgumentException("Maven property key must not be blank");
-			}
-			if (entry.getValue() == null || entry.getValue().isEmpty()) {
-				throw new IllegalArgumentException("Maven property '" + entry.getKey() + "' must not be blank");
 			}
 		}
 	}

@@ -28,10 +28,10 @@ public final class BuildMetadataGenerator {
 	private static final String LEGACY_SUPPORTED_PROFILES_PROPERTY = "zero.build.supportedProfiles";
 	private static final String COMMON_BOM_ALIAS = "org.zero_common-bom";
 	private static final String COMMON_BOM_PROPERTY = "org.zero_common-bom.version";
-	private static final String CONFIG_COMMENT = "************************************ Config ************************************";
-	private static final String PROJECT_COMMENT = "************************************ Project ************************************";
-	private static final String DEPENDENCIES_COMMENT = "************************************ Dependencies ************************************";
-	private static final String PLUGINS_COMMENT = "************************************ Plugins ************************************";
+	private static final String GENERATED_DEPENDENCY_PROPERTIES_START = "<!-- generated dependency-properties:start -->";
+	private static final String GENERATED_DEPENDENCY_PROPERTIES_END = "<!-- generated dependency-properties:end -->";
+	private static final String GENERATED_PLUGIN_PROPERTIES_START = "<!-- generated plugin-properties:start -->";
+	private static final String GENERATED_PLUGIN_PROPERTIES_END = "<!-- generated plugin-properties:end -->";
 	private static final String GENERATED_DEPENDENCY_MANAGEMENT_START = "<!-- generated dependency-management:start -->";
 	private static final String GENERATED_DEPENDENCY_MANAGEMENT_END = "<!-- generated dependency-management:end -->";
 	private static final String GENERATED_PLUGIN_MANAGEMENT_START = "<!-- generated plugin-management:start -->";
@@ -234,7 +234,9 @@ public final class BuildMetadataGenerator {
 	private String renderRootPom(BuildMetadataModel metadata) {
 		String xml = readUtf8(rootPomFile);
 		xml = replaceFirst(xml, ROOT_VERSION_PATTERN, REVISION_EXPRESSION);
-		xml = replaceFirstPropertiesSection(xml, renderRootProperties(metadata));
+		xml = replaceOrInsertPomProperty(xml, "revision", metadata.getRevision(), "\t\t");
+		xml = replaceGeneratedDependencyProperties(xml, metadata);
+		xml = replaceGeneratedPluginProperties(xml, metadata);
 		xml = replaceGeneratedDependencyManagement(xml, metadata);
 		xml = replaceGeneratedPluginManagement(xml, metadata);
 		xml = replaceGeneratedHigherProfiles(xml, metadata);
@@ -346,6 +348,31 @@ public final class BuildMetadataGenerator {
 			GENERATED_DEPENDENCY_MANAGEMENT_END,
 			renderGeneratedDependencyManagement(metadata, libraries),
 			"\t\t\t"
+		);
+	}
+
+	private static String replaceGeneratedDependencyProperties(String xml, BuildMetadataModel metadata) {
+		Map<String, String> dependencyVersions = sortResolvedVersions(
+			metadata,
+			joinVersionedEntries(metadata.getValues().values(), metadata.getLibraries().values())
+		);
+		return replaceGeneratedBlock(
+			xml,
+			GENERATED_DEPENDENCY_PROPERTIES_START,
+			GENERATED_DEPENDENCY_PROPERTIES_END,
+			renderGeneratedDependencyProperties(dependencyVersions),
+			"\t\t"
+		);
+	}
+
+	private static String replaceGeneratedPluginProperties(String xml, BuildMetadataModel metadata) {
+		Map<String, String> pluginVersions = sortResolvedVersions(metadata, metadata.getMavenPlugins().values());
+		return replaceGeneratedBlock(
+			xml,
+			GENERATED_PLUGIN_PROPERTIES_START,
+			GENERATED_PLUGIN_PROPERTIES_END,
+			renderGeneratedPluginProperties(pluginVersions),
+			"\t\t"
 		);
 	}
 
@@ -517,21 +544,6 @@ public final class BuildMetadataGenerator {
 		return Integer.parseInt(profile.substring("java".length()));
 	}
 
-	private static String replaceFirstPropertiesSection(String xml, String content) {
-		Pattern pattern = Pattern.compile("(?s)(<properties>)(.*?)(</properties>)");
-		Matcher matcher = pattern.matcher(xml);
-		if (!matcher.find()) {
-			return xml;
-		}
-		StringBuilder builder = new StringBuilder();
-		builder.append('\n');
-		if (!content.isEmpty()) {
-			builder.append(content).append('\n');
-		}
-		builder.append('\t');
-		return xml.substring(0, matcher.start(2)) + builder + xml.substring(matcher.end(2));
-	}
-
 	private static String replaceOrInsertPomProperty(String xml, String propertyName, String value, String indent) {
 		String propertyTag = "<" + propertyName + ">";
 		String propertyEndTag = "</" + propertyName + ">";
@@ -548,40 +560,22 @@ public final class BuildMetadataGenerator {
 		return xml.substring(0, insertIndex) + propertyLine + xml.substring(insertIndex);
 	}
 
-	private static String renderRootProperties(BuildMetadataModel metadata) {
+	private static String renderGeneratedDependencyProperties(Map<String, String> dependencyVersions) {
 		StringBuilder builder = new StringBuilder();
-		appendXmlComment(builder, "\t\t", CONFIG_COMMENT);
-		appendPropertyElement(builder, "java.version", metadata.getJavaVersion());
-		for (Map.Entry<String, String> entry : metadata.getMavenProperties().entrySet()) {
-			appendPropertyElement(builder, entry.getKey(), entry.getValue());
-		}
-		builder.append('\n');
-		appendXmlComment(builder, "\t\t", PROJECT_COMMENT);
-		appendPropertyElement(builder, "revision", metadata.getRevision());
-
-		Map<String, String> dependencyVersions = sortResolvedVersions(
-			metadata,
-			joinVersionedEntries(metadata.getValues().values(), metadata.getLibraries().values())
-		);
-		if (!dependencyVersions.isEmpty()) {
-			builder.append('\n');
-			appendXmlComment(builder, "\t\t", DEPENDENCIES_COMMENT);
-			for (Map.Entry<String, String> entry : dependencyVersions.entrySet()) {
-				if (COMMON_BOM_ALIAS.equals(entry.getKey())) {
-					appendPropertyElement(builder, COMMON_BOM_PROPERTY, REVISION_EXPRESSION);
-					continue;
-				}
-				appendPropertyElement(builder, metadata.propertyName(entry.getKey()), entry.getValue());
+		for (Map.Entry<String, String> entry : dependencyVersions.entrySet()) {
+			if (COMMON_BOM_ALIAS.equals(entry.getKey())) {
+				appendPropertyElement(builder, COMMON_BOM_PROPERTY, REVISION_EXPRESSION);
+				continue;
 			}
+			appendPropertyElement(builder, entry.getKey() + ".version", entry.getValue());
 		}
+		return trimTrailingNewline(builder.toString());
+	}
 
-		Map<String, String> pluginVersions = sortResolvedVersions(metadata, metadata.getMavenPlugins().values());
-		if (!pluginVersions.isEmpty()) {
-			builder.append('\n');
-			appendXmlComment(builder, "\t\t", PLUGINS_COMMENT);
-			for (Map.Entry<String, String> entry : pluginVersions.entrySet()) {
-				appendPropertyElement(builder, metadata.propertyName(entry.getKey()), entry.getValue());
-			}
+	private static String renderGeneratedPluginProperties(Map<String, String> pluginVersions) {
+		StringBuilder builder = new StringBuilder();
+		for (Map.Entry<String, String> entry : pluginVersions.entrySet()) {
+			appendPropertyElement(builder, entry.getKey() + ".version", entry.getValue());
 		}
 		return trimTrailingNewline(builder.toString());
 	}
@@ -613,10 +607,6 @@ public final class BuildMetadataGenerator {
 			list.add(entry);
 		}
 		return list;
-	}
-
-	private static void appendXmlComment(StringBuilder builder, String indent, String comment) {
-		builder.append(indent).append("<!-- ").append(comment).append(" -->\n");
 	}
 
 	private static void appendPropertyElement(StringBuilder builder, String propertyName, String value) {

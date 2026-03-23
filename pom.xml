@@ -42,6 +42,7 @@
 		<revision>1.0.0</revision>
 
 		<!-- ************************************ Dependencies ************************************ -->
+		<!-- generated dependency-properties:start -->
 		<cn.dev33_sa-token-dependencies.version>1.45.0</cn.dev33_sa-token-dependencies.version>
 		<cn.hutool_hutool-all.version>5.8.40</cn.hutool_hutool-all.version>
 		<cn.hutool_hutool-bom.version>5.8.40</cn.hutool_hutool-bom.version>
@@ -148,8 +149,10 @@
 		<org.zero_common-bom.version>${revision}</org.zero_common-bom.version>
 		<tech.powerjob_powerjob-worker-spring-boot-starter.version>5.1.2</tech.powerjob_powerjob-worker-spring-boot-starter.version>
 		<xerces_xercesImpl.version>2.12.2</xerces_xercesImpl.version>
+		<!-- generated dependency-properties:end -->
 
 		<!-- ************************************ Plugins ************************************ -->
+		<!-- generated plugin-properties:start -->
 		<com.github.github_site-maven-plugin.version>0.12</com.github.github_site-maven-plugin.version>
 		<io.github.git-commit-id_git-commit-id-maven-plugin.version>9.0.2</io.github.git-commit-id_git-commit-id-maven-plugin.version>
 		<org.apache.maven.plugins_maven-antrun-plugin.version>3.1.0</org.apache.maven.plugins_maven-antrun-plugin.version>
@@ -183,6 +186,7 @@
 		<org.jooq_jooq-codegen-maven.version>3.14.16</org.jooq_jooq-codegen-maven.version>
 		<org.liquibase_liquibase-maven-plugin.version>4.33.0</org.liquibase_liquibase-maven-plugin.version>
 		<org.springframework.boot_spring-boot-maven-plugin.version>2.7.18</org.springframework.boot_spring-boot-maven-plugin.version>
+		<!-- generated plugin-properties:end -->
 	</properties>
 
 	<dependencies>

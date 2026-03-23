@@ -56,10 +56,6 @@ public final class BuildMetadataParser {
 			parseMetadata(model, rawKey, rawValue);
 			return;
 		}
-		if ("properties.maven".equals(section)) {
-			parseMavenProperty(model, rawKey, rawValue);
-			return;
-		}
 		if ("values".equals(section)) {
 			parseValueEntry(model, rawKey, rawValue);
 			return;
@@ -86,23 +82,11 @@ public final class BuildMetadataParser {
 			model.setRevision(unquote(rawValue));
 			return;
 		}
-		if ("java".equals(key)) {
-			model.setJavaVersion(unquote(rawValue));
-			return;
-		}
 		if ("profiles".equals(key)) {
 			model.setSupportedProfiles(parseArray(rawValue));
 			return;
 		}
 		throw new IllegalArgumentException("Unsupported metadata key '" + key + "'");
-	}
-
-	private static void parseMavenProperty(BuildMetadataModel model, String rawKey, String rawValue) {
-		String trimmed = rawValue.trim();
-		if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
-			throw new IllegalArgumentException("Unsupported Maven property value '" + rawValue + "'");
-		}
-		model.putMavenProperty(parseKey(rawKey), unquote(rawValue));
 	}
 
 	private static void parseValueEntry(BuildMetadataModel model, String rawKey, String rawValue) {
