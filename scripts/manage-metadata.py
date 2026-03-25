@@ -8,8 +8,8 @@ import sys
 from pathlib import Path
 
 
-PREFIX = "[build-metadata]"
-USAGE = "Usage: build-metadata.py <sync|verify> [--verbose|-v]"
+PREFIX = "[manage-metadata]"
+USAGE = "Usage: manage-metadata.py <sync|verify> [--verbose|-v]"
 
 
 def log(verbose, message):
@@ -65,7 +65,7 @@ def main(argv):
             print("Missing java command. Please configure a JDK and ensure java is on PATH.", file=sys.stderr)
             return 1
 
-        log(verbose, "toolchain ready")
+        log(verbose, f"toolchain ready: javac={javac}, java={java}")
 
         sources = sorted(str(path_item) for path_item in source_dir.rglob("*.java"))
         source_list_file.write_text("\n".join(sources), encoding="ascii")

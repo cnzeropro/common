@@ -6,8 +6,8 @@ import sys
 from pathlib import Path
 
 
-PREFIX = "[build-metadata]"
-USAGE = "Usage: sync-build-metadata.py [--verbose|-v]"
+PREFIX = "[manage-metadata]"
+USAGE = "Usage: sync-metadata.py [--verbose|-v]"
 
 
 def parse_args(argv):
@@ -26,7 +26,7 @@ def main(argv):
         print(USAGE, file=sys.stderr)
         return 1
 
-    script = Path(__file__).resolve().with_name("build-metadata.py")
+    script = Path(__file__).resolve().with_name("manage-metadata.py")
     command = [sys.executable, str(script), "sync"]
     if verbose:
         print(f"{PREFIX} wrapper dispatch sync", file=sys.stderr)

@@ -123,25 +123,23 @@ JUnit 5，Gradle 匹配 `*Test`、`*Tests`、`*Spec`。优先定向验证，不�
 ## Metadata
 
 ```bash
-powershell -ExecutionPolicy Bypass -File scripts/sync-build-metadata.ps1
-powershell -ExecutionPolicy Bypass -File scripts/verify-build-metadata.ps1
-.\scripts\sync-build-metadata.bat
-.\scripts\verify-build-metadata.bat
-py scripts/sync-build-metadata.py
-py scripts/verify-build-metadata.py
-node scripts/sync-build-metadata.js
-node scripts/verify-build-metadata.js
-./scripts/sync-build-metadata.sh
-./scripts/verify-build-metadata.sh
+powershell -ExecutionPolicy Bypass -File scripts/sync-metadata.ps1
+powershell -ExecutionPolicy Bypass -File scripts/verify-metadata.ps1
+.\scripts\sync-metadata.bat
+.\scripts\verify-metadata.bat
+py scripts/sync-metadata.py
+py scripts/verify-metadata.py
+node scripts/sync-metadata.js
+node scripts/verify-metadata.js
+./scripts/sync-metadata.sh
+./scripts/verify-metadata.sh
 
 # verbose examples
-powershell -ExecutionPolicy Bypass -File scripts/verify-build-metadata.ps1 -VerboseOutput
-py scripts/verify-build-metadata.py --verbose
-node scripts/verify-build-metadata.js --verbose
-./scripts/verify-build-metadata.sh --verbose
-.\scripts\verify-build-metadata.bat --verbose
+powershell -ExecutionPolicy Bypass -File scripts/verify-metadata.ps1 --verbose
+py scripts/verify-metadata.py --verbose
+node scripts/verify-metadata.js --verbose
+./scripts/verify-metadata.sh --verbose
+.\scripts\verify-metadata.bat --verbose
 ```
 
-`sync-build-metadata` now runs `verify` plus Gradle/Maven smoke checks by default.
-
-Gradle 与 Maven 已完全解耦：`metadata/build-metadata.toml` 只在 `sync/verify-build-metadata` 脚本中读取，普通构建运行期只消费 Gradle `gradle.properties`、`gradle/libs.versions.toml` 与 Maven root `pom.xml`；临时覆盖分别使用 `-Pbuild.revision=...`、`-PbuildProfile=...` 和 `-Drevision=...`。Gradle 通过环境变量自动发现 JDK，Maven 多版本编译依赖用户自带 `toolchains.xml` 或命令行 `mvn -t <toolchains.xml> ...`。
+Gradle 与 Maven 已完全解耦：`metadata/build-metadata.toml` 只在 `sync/verify-metadata` 脚本中读取，普通构建运行期只消费 Gradle `gradle.properties`、`gradle/libs.versions.toml` 与 Maven root `pom.xml`；临时覆盖分别使用 `-Pbuild.revision=...`、`-PbuildProfile=...` 和 `-Drevision=...`。Gradle 通过环境变量自动发现 JDK，Maven 多版本编译依赖用户自带 `toolchains.xml` 或命令行 `mvn -t <toolchains.xml> ...`。

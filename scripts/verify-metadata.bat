@@ -1,7 +1,7 @@
 @echo off
 setlocal
 
-set "USAGE=Usage: sync-build-metadata.bat [--verbose|-v]"
+set "USAGE=Usage: verify-metadata.bat [--verbose|-v]"
 set "FORWARD_VERBOSE="
 
 if "%~1"=="" goto args_ok
@@ -23,9 +23,9 @@ exit /b 1
 
 :args_ok
 if defined FORWARD_VERBOSE (
-	>&2 echo [build-metadata] wrapper dispatch sync
-	call "%~dp0build-metadata.bat" sync %FORWARD_VERBOSE%
+	>&2 echo [manage-metadata] wrapper dispatch verify
+	call "%~dp0manage-metadata.bat" verify %FORWARD_VERBOSE%
 ) else (
-	call "%~dp0build-metadata.bat" sync
+	call "%~dp0manage-metadata.bat" verify
 )
 exit /b %ERRORLEVEL%

@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableExtensions DisableDelayedExpansion
 
-set "USAGE=Usage: build-metadata.bat ^<sync^|verify^> [--verbose^|-v]"
+set "USAGE=Usage: manage-metadata.bat ^<sync^|verify^> [--verbose^|-v]"
 set "VERBOSE="
 
 if /I "%~1"=="sync" (
@@ -45,6 +45,8 @@ set "CLASSES_DIR=%BUILD_DIR%\classes"
 set "SOURCE_LIST_FILE=%BUILD_DIR%\sources.txt"
 set "SOURCE_COUNT=0"
 set "EXIT_CODE=0"
+set "JAVAC_PATH="
+set "JAVA_PATH="
 call :log "paths ready: root=%ROOT_DIR%"
 
 mkdir "%CLASSES_DIR%" >nul 2>&1
@@ -54,21 +56,21 @@ if errorlevel 1 (
 	goto cleanup
 )
 
-where javac >nul 2>&1
-if errorlevel 1 (
+for /f "delims=" %%I in ('where javac 2^>nul') do if not defined JAVAC_PATH set "JAVAC_PATH=%%I"
+if not defined JAVAC_PATH (
 	>&2 echo Missing javac command. Please configure a JDK and ensure javac is on PATH.
 	set "EXIT_CODE=1"
 	goto cleanup
 )
 
-where java >nul 2>&1
-if errorlevel 1 (
+for /f "delims=" %%I in ('where java 2^>nul') do if not defined JAVA_PATH set "JAVA_PATH=%%I"
+if not defined JAVA_PATH (
 	>&2 echo Missing java command. Please configure a JDK and ensure java is on PATH.
 	set "EXIT_CODE=1"
 	goto cleanup
 )
 
-call :log "toolchain ready"
+call :log "toolchain ready: javac=%JAVAC_PATH%, java=%JAVA_PATH%"
 
 >"%SOURCE_LIST_FILE%" (
 	for /f "delims=" %%F in ('dir /b /s /a:-d /o:n "%SOURCE_DIR%\*.java"') do (
@@ -84,16 +86,16 @@ if errorlevel 1 (
 
 call :log "source list ready: %SOURCE_COUNT% file(s)"
 call :log "javac start"
-javac -encoding UTF-8 -d "%CLASSES_DIR%" @"%SOURCE_LIST_FILE%"
+"%JAVAC_PATH%" -encoding UTF-8 -d "%CLASSES_DIR%" @"%SOURCE_LIST_FILE%"
 set "EXIT_CODE=%ERRORLEVEL%"
 call :log "javac done: exit=%EXIT_CODE%"
 if not "%EXIT_CODE%"=="0" goto cleanup
 
 call :log "java cli start"
 if defined VERBOSE (
-	java -cp "%CLASSES_DIR%" org.zero.build.metadata.BuildMetadataCli %COMMAND% "%ROOT_DIR%" --verbose
+	"%JAVA_PATH%" -cp "%CLASSES_DIR%" org.zero.build.metadata.BuildMetadataCli %COMMAND% "%ROOT_DIR%" --verbose
 ) else (
-	java -cp "%CLASSES_DIR%" org.zero.build.metadata.BuildMetadataCli %COMMAND% "%ROOT_DIR%"
+	"%JAVA_PATH%" -cp "%CLASSES_DIR%" org.zero.build.metadata.BuildMetadataCli %COMMAND% "%ROOT_DIR%"
 )
 set "EXIT_CODE=%ERRORLEVEL%"
 call :log "java cli done: exit=%EXIT_CODE%"
@@ -108,5 +110,5 @@ exit /b %EXIT_CODE%
 
 :log
 if not defined VERBOSE exit /b 0
->&2 echo [build-metadata] %~1
+>&2 echo [manage-metadata] %~1
 exit /b 0

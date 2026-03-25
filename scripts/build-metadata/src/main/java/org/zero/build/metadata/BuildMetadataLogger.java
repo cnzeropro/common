@@ -3,7 +3,7 @@ package org.zero.build.metadata;
 import java.io.File;
 
 final class BuildMetadataLogger {
-	private static final String PREFIX = "[build-metadata] ";
+	private static final String PREFIX = "[manage-metadata] ";
 
 	private final boolean verbose;
 

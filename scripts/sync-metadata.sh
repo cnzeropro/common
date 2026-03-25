@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-USAGE='Usage: sync-build-metadata.sh [--verbose|-v]'
+USAGE='Usage: sync-metadata.sh [--verbose|-v]'
 verbose_flag=''
 
 if [ "$#" -gt 1 ]; then
@@ -21,7 +21,7 @@ if [ "$#" -eq 1 ]; then
   esac
 fi
 
-script_path="$(CDPATH= cd -- "$(dirname "$0")" && pwd)/build-metadata.sh"
+script_path="$(CDPATH= cd -- "$(dirname "$0")" && pwd)/manage-metadata.sh"
 if [ -n "$verbose_flag" ]; then
   exec "$script_path" sync "$verbose_flag"
 fi

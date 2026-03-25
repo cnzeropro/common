@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-USAGE='Usage: verify-build-metadata.sh [--verbose|-v]'
+USAGE='Usage: verify-metadata.sh [--verbose|-v]'
 verbose_flag=''
 
 if [ "$#" -gt 1 ]; then
@@ -21,7 +21,7 @@ if [ "$#" -eq 1 ]; then
   esac
 fi
 
-script_path="$(CDPATH= cd -- "$(dirname "$0")" && pwd)/build-metadata.sh"
+script_path="$(CDPATH= cd -- "$(dirname "$0")" && pwd)/manage-metadata.sh"
 if [ -n "$verbose_flag" ]; then
   exec "$script_path" verify "$verbose_flag"
 fi

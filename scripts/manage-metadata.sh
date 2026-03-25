@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
 set -eu
 
-PREFIX='[build-metadata]'
-USAGE='Usage: build-metadata.sh <sync|verify> [--verbose|-v]'
+PREFIX='[manage-metadata]'
+USAGE='Usage: manage-metadata.sh <sync|verify> [--verbose|-v]'
 command_name="${1:-}"
 verbose=false
 
@@ -65,17 +65,19 @@ cleanup() {
 }
 trap cleanup EXIT
 
-if ! command -v javac >/dev/null 2>&1; then
+javac_path=$(command -v javac || true)
+if [ -z "$javac_path" ]; then
   echo "Missing javac command. Please configure a JDK and ensure javac is on PATH." >&2
   exit 1
 fi
 
-if ! command -v java >/dev/null 2>&1; then
+java_path=$(command -v java || true)
+if [ -z "$java_path" ]; then
   echo "Missing java command. Please configure a JDK and ensure java is on PATH." >&2
   exit 1
 fi
 
-log 'toolchain ready'
+log "toolchain ready: javac=$javac_path, java=$java_path"
 
 find "$source_dir" -name '*.java' | LC_ALL=C sort | while IFS= read -r java_source_path; do
   to_java_path "$java_source_path"
@@ -85,7 +87,7 @@ source_count=$(wc -l < "$source_list_file" | tr -d ' ')
 log "source list ready: ${source_count:-0} file(s)"
 
 log 'javac start'
-if javac -encoding UTF-8 -d "$(to_java_path "$classes_dir")" "$source_list_arg"; then
+if "$javac_path" -encoding UTF-8 -d "$(to_java_path "$classes_dir")" "$source_list_arg"; then
   compile_exit=0
 else
   compile_exit=$?
@@ -97,13 +99,13 @@ fi
 
 log 'java cli start'
 if [ "$verbose" = "true" ]; then
-  if java -cp "$(to_java_path "$classes_dir")" org.zero.build.metadata.BuildMetadataCli "$command_name" "$(to_java_path "$root_dir")" --verbose; then
+  if "$java_path" -cp "$(to_java_path "$classes_dir")" org.zero.build.metadata.BuildMetadataCli "$command_name" "$(to_java_path "$root_dir")" --verbose; then
     java_exit=0
   else
     java_exit=$?
   fi
 else
-  if java -cp "$(to_java_path "$classes_dir")" org.zero.build.metadata.BuildMetadataCli "$command_name" "$(to_java_path "$root_dir")"; then
+  if "$java_path" -cp "$(to_java_path "$classes_dir")" org.zero.build.metadata.BuildMetadataCli "$command_name" "$(to_java_path "$root_dir")"; then
     java_exit=0
   else
     java_exit=$?

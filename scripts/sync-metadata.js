@@ -5,8 +5,8 @@
 const path = require("path");
 const { spawnSync } = require("child_process");
 
-const PREFIX = "[build-metadata]";
-const USAGE = "Usage: sync-build-metadata.js [--verbose|-v]";
+const PREFIX = "[manage-metadata]";
+const USAGE = "Usage: sync-metadata.js [--verbose|-v]";
 
 function parseArgs(argv) {
 	if (argv.length > 1) {
@@ -31,7 +31,7 @@ if (verbose) {
 	console.error(`${PREFIX} wrapper dispatch sync`);
 }
 
-const args = [path.join(__dirname, "build-metadata.js"), "sync"];
+const args = [path.join(__dirname, "manage-metadata.js"), "sync"];
 if (verbose) {
 	args.push("--verbose");
 }

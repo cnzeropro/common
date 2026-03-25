@@ -6,8 +6,8 @@ const fs = require("fs");
 const path = require("path");
 const { spawnSync } = require("child_process");
 
-const PREFIX = "[build-metadata]";
-const USAGE = "Usage: build-metadata.js <sync|verify> [--verbose|-v]";
+const PREFIX = "[manage-metadata]";
+const USAGE = "Usage: manage-metadata.js <sync|verify> [--verbose|-v]";
 
 function log(verbose, message) {
 	if (verbose) {
@@ -59,10 +59,19 @@ function runCommand(command, args) {
 	return result.status === null ? 1 : result.status;
 }
 
-function hasCommand(command) {
+function resolveCommand(command) {
 	const probeCommand = process.platform === "win32" ? "where" : "which";
-	const result = spawnSync(probeCommand, [command], { stdio: "ignore" });
-	return !result.error && result.status === 0;
+	const result = spawnSync(probeCommand, [command], {
+		encoding: "utf8",
+		stdio: ["ignore", "pipe", "ignore"],
+	});
+	if (result.error || result.status !== 0) {
+		return null;
+	}
+	return result.stdout
+		.split(/\r?\n/)
+		.map((line) => line.trim())
+		.find((line) => line.length > 0) ?? null;
 }
 
 function main(argv) {
@@ -87,20 +96,22 @@ function main(argv) {
 	fs.mkdirSync(classesDir, { recursive: true });
 
 	try {
-		const javac = process.platform === "win32" ? "javac.exe" : "javac";
-		const java = process.platform === "win32" ? "java.exe" : "java";
+		const javacCommand = process.platform === "win32" ? "javac.exe" : "javac";
+		const javaCommand = process.platform === "win32" ? "java.exe" : "java";
+		const javac = resolveCommand(javacCommand);
+		const java = resolveCommand(javaCommand);
 
-		if (!hasCommand(javac)) {
+		if (!javac) {
 			console.error("Missing javac command. Please configure a JDK and ensure javac is on PATH.");
 			return 1;
 		}
 
-		if (!hasCommand(java)) {
+		if (!java) {
 			console.error("Missing java command. Please configure a JDK and ensure java is on PATH.");
 			return 1;
 		}
 
-		log(verbose, "toolchain ready");
+		log(verbose, `toolchain ready: javac=${javac}, java=${java}`);
 
 		const sources = collectJavaSources(sourceDir);
 		fs.writeFileSync(sourceListFile, `${sources.join("\n")}`, { encoding: "ascii" });

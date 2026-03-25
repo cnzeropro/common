@@ -1,18 +1,41 @@
-param(
-    [Parameter(Mandatory = $true, Position = 0)]
-    [ValidateSet('sync', 'verify')]
-    [string]$Command,
-    [switch]$VerboseOutput
-)
-
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$usage = 'Usage: manage-metadata.ps1 <sync|verify> [--verbose|-v|-VerboseOutput]'
+$verbose = $false
+$command = $null
+
+function Write-Usage {
+    [Console]::Error.WriteLine($usage)
+}
+
+if ($args.Count -lt 1 -or $args.Count -gt 2) {
+    Write-Usage
+    exit 1
+}
+
+$command = [string]$args[0]
+if ($command -ne 'sync' -and $command -ne 'verify') {
+    Write-Usage
+    exit 1
+}
+
+if ($args.Count -eq 2) {
+    switch ([string]$args[1]) {
+        '--verbose' { $verbose = $true }
+        '-v' { $verbose = $true }
+        '-VerboseOutput' { $verbose = $true }
+        default {
+            Write-Usage
+            exit 1
+        }
+    }
+}
 
 function Write-BuildMetadataLog {
     param([string]$Message)
 
-    if ($VerboseOutput) {
-        [Console]::Error.WriteLine("[build-metadata] $Message")
+    if ($verbose) {
+        [Console]::Error.WriteLine("[manage-metadata] $Message")
     }
 }
 
@@ -39,7 +62,7 @@ if (-not $java) {
     throw 'Missing java command. Please configure a JDK and ensure java is on PATH.'
 }
 
-Write-BuildMetadataLog 'toolchain ready'
+Write-BuildMetadataLog "toolchain ready: javac=$($javac.Source), java=$($java.Source)"
 
 Get-ChildItem -Path $sourceDir -Recurse -Filter *.java |
     Sort-Object FullName |
@@ -58,8 +81,8 @@ try {
     $exitCode = $LASTEXITCODE
     Write-BuildMetadataLog "javac done: exit=$exitCode"
     if ($exitCode -eq 0) {
-        $javaArgs = @('-cp', $classesDir, 'org.zero.build.metadata.BuildMetadataCli', $Command, $rootDir)
-        if ($VerboseOutput) {
+        $javaArgs = @('-cp', $classesDir, 'org.zero.build.metadata.BuildMetadataCli', $command, $rootDir)
+        if ($verbose) {
             $javaArgs += '--verbose'
         }
 
