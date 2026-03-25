@@ -15,9 +15,16 @@ import java.util.Map;
  * Build metadata parser - 解析 build-metadata.toml 的精简 TOML 子集。
  */
 public final class BuildMetadataParser {
+	/*
+	 * 只解析 build-metadata.toml 实际用到的 TOML 子集，
+	 * 保持实现足够轻量，方便被多语言 wrapper 直接编译调用。
+	 */
 	private BuildMetadataParser() {
 	}
 
+	/**
+	 * 解析元数据文件，并在返回前完成模型校验。
+	 */
 	public static BuildMetadataModel parse(File file) {
 		BuildMetadataModel model = new BuildMetadataModel();
 		String currentSection = null;
@@ -112,6 +119,10 @@ public final class BuildMetadataParser {
 		parseReferenceableEntry(entry, rawValue, false);
 	}
 
+	/**
+	 * 解析可被别名引用的条目。
+	 * 纯字符串表示 base profile 版本，inline table 则允许声明 profile 版本及附加属性。
+	 */
 	private static void parseReferenceableEntry(VersionedEntry entry, String rawValue, boolean allowScope) {
 		String trimmed = rawValue.trim();
 		if (!trimmed.startsWith("{")) {
@@ -194,6 +205,9 @@ public final class BuildMetadataParser {
 		return values;
 	}
 
+	/**
+	 * 只在顶层切分 token，避免误切到字符串、inline table 或数组内部。
+	 */
 	private static List<String> splitTopLevel(String text, char delimiter) {
 		List<String> tokens = new ArrayList<String>();
 		StringBuilder current = new StringBuilder();
@@ -230,6 +244,9 @@ public final class BuildMetadataParser {
 		return tokens;
 	}
 
+	/**
+	 * 查找顶层键值分隔符，避免落到引号或嵌套结构内部。
+	 */
 	private static int findTopLevelSeparator(String text, char separator) {
 		boolean inQuote = false;
 		int braceDepth = 0;
@@ -266,6 +283,9 @@ public final class BuildMetadataParser {
 		return -1;
 	}
 
+	/**
+	 * 剥离非字符串上下文中的行尾注释。
+	 */
 	private static String stripInlineComment(String rawLine) {
 		boolean inQuote = false;
 		for (int index = 0; index < rawLine.length(); index++) {

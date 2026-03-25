@@ -25,11 +25,8 @@
         <org.springframework.security_spring-security-bom.version>5.8.16</org.springframework.security_spring-security-bom.version>
         <org.springframework.integration_spring-integration-bom.version>5.5.20</org.springframework.integration_spring-integration-bom.version>
         <org.springframework.shell_spring-shell-dependencies.version>2.1.15</org.springframework.shell_spring-shell-dependencies.version>
-        <org.springframework.session_spring-session-bom.version>2021.2.3</org.springframework.session_spring-session-bom.version>
         <org.mybatis.spring.boot_mybatis-spring-boot-starter.version>2.3.2</org.mybatis.spring.boot_mybatis-spring-boot-starter.version>
         <org.springframework.plugin_spring-plugin.version>2.0.0.RELEASE</org.springframework.plugin_spring-plugin.version>
-        <org.springframework.plugin_spring-plugin-core.version>2.0.0.RELEASE</org.springframework.plugin_spring-plugin-core.version>
-        <org.springframework.plugin_spring-plugin-metadata.version>2.0.0.RELEASE</org.springframework.plugin_spring-plugin-metadata.version>
         <jakarta.platform_jakarta.jakartaee-bom.version>9.1.0</jakarta.platform_jakarta.jakartaee-bom.version>
         <org.eclipse.jetty_jetty-bom.version>9.4.58.v20250814</org.eclipse.jetty_jetty-bom.version>
     </properties>

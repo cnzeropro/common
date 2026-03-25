@@ -92,7 +92,6 @@ dependencies {
         api(libs.com.alibaba.csp.sentinel.apache.dubbo3.adapter)
         api(libsCatalog.findLibrary('com-alibaba-csp_sentinel-spring-webmvc-6x-adapter').get().get())
         api(libs.com.alibaba.csp.sentinel.spring.webmvc.adapter)
-        api(libs.com.alibaba.druid)
         if (BuildProfileSupport.isAtLeast(project, activeBuildProfile, 'java17')) {
             api(libsCatalog.findLibrary('com-alibaba_druid-spring-boot-3-starter').get().get())
         }

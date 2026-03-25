@@ -13,6 +13,10 @@ import java.util.regex.Pattern;
  * Build metadata model - 聚合 values/libraries/plugins 条目并提供 profile 解析能力。
  */
 public final class BuildMetadataModel {
+	/*
+	 * 聚合 values / libraries / plugins 条目，
+	 * 并提供按 profile 解析、校验与差异对比的能力。
+	 */
 	private static final Pattern JAVA_PROFILE_PATTERN = Pattern.compile("^java(\\d+)$");
 
 	private String revision;
@@ -208,6 +212,9 @@ public final class BuildMetadataModel {
 		return resolved;
 	}
 
+	/**
+	 * 解析相对上一档 profile 发生变化的版本，用于生成 higher profile 覆盖块。
+	 */
 	public Map<String, String> resolveChangedVersions(List<? extends VersionedEntry> entries, String profile) {
 		profileIndex(profile);
 		if (profile.equals(getBaseProfile())) {
@@ -226,6 +233,9 @@ public final class BuildMetadataModel {
 		return changed;
 	}
 
+	/**
+	 * 校验模型完整性，并把原始条目预处理成可解析的内部表示。
+	 */
 	public void validate() {
 		if (revision == null || revision.isEmpty()) {
 			throw new IllegalArgumentException("Missing revision");
@@ -389,6 +399,10 @@ abstract class VersionedEntry extends MetadataEntry {
 	String resolveSelectedExpression(BuildMetadataModel model, String profile, VersionResolutionContext context) {
 		int targetIndex = model.profileIndex(profile);
 		VersionExpression selected = null;
+		/*
+		 * profile 版本声明按顺序递增覆盖；
+		 * 如果当前 profile 没有显式声明，就继承前一个命中的版本表达式。
+		 */
 		for (int index = 0; index <= targetIndex; index++) {
 			String candidateProfile = model.getSupportedProfiles().get(index);
 			if (versions.containsKey(candidateProfile)) {
@@ -441,6 +455,10 @@ abstract class VersionedEntry extends MetadataEntry {
 	}
 
 	private VersionExpression normalizeRawExpression(BuildMetadataModel model, RawVersionExpression expression) {
+		/*
+		 * 允许引用别名时，把原始字符串折叠成字面量或别名引用，
+		 * 后续解析阶段就不需要重复猜测语义。
+		 */
 		if (allowAliasReferences() && model.getReferenceableEntry(expression.getRawValue()) != null) {
 			return new AliasReferenceVersionExpression(expression.getRawValue());
 		}
@@ -646,6 +664,9 @@ final class AliasReferenceVersionExpression extends VersionExpression {
 }
 
 final class VersionResolutionContext {
+	/*
+	 * 记录递归解析链路，用于检测别名之间的循环引用。
+	 */
 	private final Deque<String> stack = new ArrayDeque<String>();
 
 	public String resolveEntry(BuildMetadataModel model, VersionedEntry entry, String profile) {

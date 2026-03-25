@@ -1,7 +1,17 @@
+param(
+    [switch]$VerboseOutput
+)
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-<#
-sync wrapper - delegate the sync command to the shared metadata script.
-#>
-& (Join-Path $PSScriptRoot 'build-metadata.ps1') 'sync'
+if ($VerboseOutput) {
+    [Console]::Error.WriteLine('[build-metadata] wrapper dispatch sync')
+}
+
+if ($VerboseOutput) {
+    & (Join-Path $PSScriptRoot 'build-metadata.ps1') -Command sync -VerboseOutput
+} else {
+    & (Join-Path $PSScriptRoot 'build-metadata.ps1') -Command sync
+}
+exit $LASTEXITCODE

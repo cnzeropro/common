@@ -18,14 +18,16 @@ import java.util.regex.Pattern;
  * Build metadata generator - 生成 Gradle/Maven 元数据。
  */
 public final class BuildMetadataGenerator {
+	/*
+	 * 以 metadata/build-metadata.toml 为输入，
+	 * 负责渲染并校验 Gradle / Maven 相关构建文件。
+	 */
 	private static final String VERSION_CATALOG_DIRECTORY = "gradle";
 	private static final String VERSION_CATALOG_BASENAME = "libs.versions";
 	private static final String VERSION_CATALOG_PATH = VERSION_CATALOG_DIRECTORY + "/" + VERSION_CATALOG_BASENAME + ".toml";
 	private static final String BUILD_REVISION_PROPERTY = "build.revision";
-	private static final String LEGACY_REVISION_PROPERTY = "revision";
 	private static final String REVISION_EXPRESSION = "${revision}";
 	private static final String BUILD_PROFILES_PROPERTY = "build.profiles";
-	private static final String LEGACY_SUPPORTED_PROFILES_PROPERTY = "zero.build.supportedProfiles";
 	private static final String COMMON_BOM_ALIAS = "org.zero_common-bom";
 	private static final String COMMON_BOM_PROPERTY = "org.zero_common-bom.version";
 	private static final String GENERATED_DEPENDENCY_PROPERTIES_START = "<!-- generated dependency-properties:start -->";
@@ -61,8 +63,13 @@ public final class BuildMetadataGenerator {
 	private final File commonBomPomFile;
 	private final File gradlePropertiesFile;
 	private final File commonBomGradlePropertiesFile;
+	private final BuildMetadataLogger logger;
 
 	public BuildMetadataGenerator(File rootDir) {
+		this(rootDir, new BuildMetadataLogger(false));
+	}
+
+	public BuildMetadataGenerator(File rootDir, BuildMetadataLogger logger) {
 		this.rootDir = rootDir;
 		this.metadataDir = new File(rootDir, "metadata");
 		this.buildMetadataFile = new File(metadataDir, "build-metadata.toml");
@@ -72,8 +79,12 @@ public final class BuildMetadataGenerator {
 		this.commonBomPomFile = new File(rootDir, "common-bom/pom.xml");
 		this.gradlePropertiesFile = new File(rootDir, "gradle.properties");
 		this.commonBomGradlePropertiesFile = new File(rootDir, "common-bom/gradle.properties");
+		this.logger = logger;
 	}
 
+	/**
+	 * 将元数据同步到 version catalog、POM 与 {@code gradle.properties}，并顺带清理历史产物。
+	 */
 	public void sync() {
 		BuildMetadataModel metadata = loadMetadata();
 		deleteLegacyCatalogFiles(metadata);
@@ -88,6 +99,9 @@ public final class BuildMetadataGenerator {
 		updateChildPomVersions();
 	}
 
+	/**
+	 * 重新渲染目标内容并逐个比对，发现漂移时抛出汇总异常。
+	 */
 	public void verify() {
 		BuildMetadataModel metadata = loadMetadata();
 		List<String> mismatches = new ArrayList<String>();
@@ -109,6 +123,7 @@ public final class BuildMetadataGenerator {
 	}
 
 	private BuildMetadataModel loadMetadata() {
+		logger.info("load metadata", buildMetadataFile);
 		if (!buildMetadataFile.exists()) {
 			throw new IllegalStateException("Missing build metadata file: " + buildMetadataFile);
 		}
@@ -150,6 +165,9 @@ public final class BuildMetadataGenerator {
 		}
 	}
 
+	/**
+	 * 清理旧 catalog 目录，以及当前 profile 集合之外遗留的高版本 catalog 文件。
+	 */
 	private void deleteLegacyCatalogFiles(BuildMetadataModel metadata) {
 		File legacyCatalogDirectory = new File(rootDir, ".gradle/version-catalogs");
 		for (String profile : metadata.getSupportedProfiles()) {
@@ -157,8 +175,8 @@ public final class BuildMetadataGenerator {
 		}
 		if (legacyCatalogDirectory.isDirectory()) {
 			File[] children = legacyCatalogDirectory.listFiles();
-			if (children != null && children.length == 0) {
-				legacyCatalogDirectory.delete();
+			if (children != null && children.length == 0 && legacyCatalogDirectory.delete()) {
+				logger.info("delete", legacyCatalogDirectory);
 			}
 		}
 
@@ -248,6 +266,9 @@ public final class BuildMetadataGenerator {
 		return replaceOrInsertPomProperty(xml, "revision", metadata.getRevision(), "        ");
 	}
 
+	/**
+	 * 覆盖或插入构建属性，同时尽量保持原文件其他内容和相对顺序不变。
+	 */
 	private String renderGradleProperties(File file, BuildMetadataModel metadata, boolean includeSupportedProfiles) {
 		List<String> lines = readLines(file);
 		List<String> updated = new ArrayList<String>();
@@ -257,7 +278,7 @@ public final class BuildMetadataGenerator {
 		String supportedProfiles = joinCommaSeparated(metadata.getSupportedProfiles());
 		int revisionInsertIndex = Math.min(4, lines.size());
 		for (String line : lines) {
-			if (line.startsWith(BUILD_REVISION_PROPERTY + "=") || line.startsWith(LEGACY_REVISION_PROPERTY + "=")) {
+			if (line.startsWith(BUILD_REVISION_PROPERTY + "=")) {
 				if (!revisionWritten) {
 					updated.add(BUILD_REVISION_PROPERTY + "=" + revision);
 					revisionInsertIndex = updated.size() - 1;
@@ -265,7 +286,7 @@ public final class BuildMetadataGenerator {
 				}
 				continue;
 			}
-			if (line.startsWith(BUILD_PROFILES_PROPERTY + "=") || line.startsWith(LEGACY_SUPPORTED_PROFILES_PROPERTY + "=")) {
+			if (line.startsWith(BUILD_PROFILES_PROPERTY + "=")) {
 				if (includeSupportedProfiles && !supportedProfilesWritten) {
 					updated.add(BUILD_PROFILES_PROPERTY + "=" + supportedProfiles);
 					supportedProfilesWritten = true;
@@ -398,6 +419,9 @@ public final class BuildMetadataGenerator {
 		);
 	}
 
+	/**
+	 * 用标记包裹的生成片段替换 root POM 中的对应区域，保留标记本身不变。
+	 */
 	private static String replaceGeneratedBlock(
 		String xml,
 		String startMarker,
@@ -649,6 +673,9 @@ public final class BuildMetadataGenerator {
 		return xml.substring(contentStart, endIndex);
 	}
 
+	/**
+	 * 扫描 pluginManagement 中非自动生成的插件，避免覆盖手工维护条目。
+	 */
 	private static Set<String> findManualPluginAliases(String xml) {
 		String pluginManagementBody = firstSectionBody(xml, "pluginManagement", "plugins");
 		if (pluginManagementBody == null || pluginManagementBody.isEmpty()) {
@@ -726,28 +753,39 @@ public final class BuildMetadataGenerator {
 		return "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
 	}
 
-	private static void assertMatches(File file, String expected, List<String> mismatches) {
+	private void assertMatches(File file, String expected, List<String> mismatches) {
+		logger.info("check", file);
 		if (!file.exists()) {
 			mismatches.add("Missing file: " + file);
+			logger.info("mismatch", file);
 			return;
 		}
 		String actual = readUtf8(file);
 		if (!normalize(actual).equals(normalize(expected))) {
 			mismatches.add("Out-of-sync file: " + file);
+			logger.info("mismatch", file);
 		}
 	}
 
-	private static void deleteIfExists(File file) {
-		if (file.exists() && !file.delete()) {
+	private void deleteIfExists(File file) {
+		boolean existed = file.exists();
+		if (existed && !file.delete()) {
 			throw new IllegalStateException("Failed to delete legacy catalog file: " + file);
 		}
+		if (existed) {
+			logger.info("delete", file);
+		}
 	}
 
-	private static void writeIfChanged(File file, String content) {
+	/**
+	 * 仅在内容发生变化时写回文件，并统一输出为 LF。
+	 */
+	private void writeIfChanged(File file, String content) {
 		String normalizedContent = content.replace("\r\n", "\n");
 		if (file.exists()) {
 			String current = readUtf8(file).replace("\r\n", "\n");
 			if (current.equals(normalizedContent)) {
+				logger.info("skip", file);
 				return;
 			}
 		}
@@ -756,6 +794,7 @@ public final class BuildMetadataGenerator {
 			parent.mkdirs();
 		}
 		writeUtf8(file, normalizedContent);
+		logger.info("write", file);
 	}
 
 	private static String join(List<String> lines) {
