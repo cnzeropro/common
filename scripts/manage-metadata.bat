@@ -72,22 +72,22 @@ if not defined JAVA_PATH (
 
 call :log "toolchain ready: javac=%JAVAC_PATH%, java=%JAVA_PATH%"
 
->"%SOURCE_LIST_FILE%" (
-	for /f "delims=" %%F in ('dir /b /s /a:-d /o:n "%SOURCE_DIR%\*.java"') do (
-		set /a SOURCE_COUNT+=1
-		echo %%~fF
-	)
-)
+rem Write relative ASCII source paths for javac argfile.
+type nul > "%SOURCE_LIST_FILE%"
+for /f "delims=" %%F in ('dir /b /s /a:-d /o:n "%SOURCE_DIR%\*.java"') do call :append_source "%%~fF"
 if errorlevel 1 (
 	>&2 echo Failed to collect Java sources from "%SOURCE_DIR%".
 	set "EXIT_CODE=1"
 	goto cleanup
 )
+for /f %%I in ('find /v /c "" ^< "%SOURCE_LIST_FILE%"') do set "SOURCE_COUNT=%%I"
 
-call :log "source list ready: %SOURCE_COUNT% file(s)"
+call :log "source list ready: %SOURCE_COUNT% relative file(s)"
 call :log "javac start"
+pushd "%ROOT_DIR%" >nul
 "%JAVAC_PATH%" -encoding UTF-8 -d "%CLASSES_DIR%" @"%SOURCE_LIST_FILE%"
 set "EXIT_CODE=%ERRORLEVEL%"
+popd >nul
 call :log "javac done: exit=%EXIT_CODE%"
 if not "%EXIT_CODE%"=="0" goto cleanup
 
@@ -111,4 +111,13 @@ exit /b %EXIT_CODE%
 :log
 if not defined VERBOSE exit /b 0
 >&2 echo [manage-metadata] %~1
+exit /b 0
+
+:append_source
+set "ABS_PATH=%~1"
+setlocal EnableDelayedExpansion
+set "REL_PATH=!ABS_PATH:%ROOT_DIR%\=!"
+set "REL_PATH=!REL_PATH:\=/!"
+>>"%SOURCE_LIST_FILE%" echo !REL_PATH!
+endlocal
 exit /b 0

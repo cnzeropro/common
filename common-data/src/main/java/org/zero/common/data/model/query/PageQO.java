@@ -1,6 +1,7 @@
 package org.zero.common.data.model.query;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -26,10 +27,12 @@ public class PageQO implements Serializable {
     /**
      * 页码
      */
+	@Builder.Default
     private long pageNum = 1L;
 
     /**
      * 每页显示数
      */
+	@Builder.Default
     private long pageSize = CommonConstant.DEFAULT_PAGE_SIZE;
 }

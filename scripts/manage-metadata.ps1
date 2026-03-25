@@ -64,20 +64,39 @@ if (-not $java) {
 
 Write-BuildMetadataLog "toolchain ready: javac=$($javac.Source), java=$($java.Source)"
 
-Get-ChildItem -Path $sourceDir -Recurse -Filter *.java |
-    Sort-Object FullName |
-    ForEach-Object { $_.FullName } |
-    Set-Content -Path $sourceListFile -Encoding Ascii
+# 使用相对 ASCII 路径写入参数文件，避免绝对路径里的非 ASCII 字符影响 javac @argfile。
+Push-Location $rootDir
+try {
+    $relativeSources = @(
+        Get-ChildItem -Path $sourceDir -Recurse -Filter *.java |
+            Sort-Object FullName |
+            ForEach-Object {
+                $relativePath = Resolve-Path -LiteralPath $_.FullName -Relative
+                if ($relativePath.StartsWith('.\')) {
+                    $relativePath = $relativePath.Substring(2)
+                }
+                $relativePath.Replace('\', '/')
+            }
+    )
+} finally {
+    Pop-Location
+}
+[System.IO.File]::WriteAllLines($sourceListFile, $relativeSources, (New-Object System.Text.UTF8Encoding($false)))
 
-$sourceCount = @(Get-Content -Path $sourceListFile).Count
-Write-BuildMetadataLog "source list ready: $sourceCount file(s)"
+$sourceCount = $relativeSources.Count
+Write-BuildMetadataLog "source list ready: $sourceCount relative file(s)"
 
 $sourceListArg = "@$sourceListFile"
 $exitCode = 0
 
 try {
     Write-BuildMetadataLog 'javac start'
-    & $javac.Source -encoding UTF-8 -d $classesDir $sourceListArg
+    Push-Location $rootDir
+    try {
+        & $javac.Source -encoding UTF-8 -d $classesDir $sourceListArg
+    } finally {
+        Pop-Location
+    }
     $exitCode = $LASTEXITCODE
     Write-BuildMetadataLog "javac done: exit=$exitCode"
     if ($exitCode -eq 0) {

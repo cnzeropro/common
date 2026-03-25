@@ -63,10 +63,6 @@ public final class BuildMetadataParser {
 			parseMetadata(model, rawKey, rawValue);
 			return;
 		}
-		if ("values".equals(section)) {
-			parseValueEntry(model, rawKey, rawValue);
-			return;
-		}
 		if ("libraries".equals(section)) {
 			parseLibraryEntry(model, rawKey, rawValue);
 			return;
@@ -94,14 +90,6 @@ public final class BuildMetadataParser {
 			return;
 		}
 		throw new IllegalArgumentException("Unsupported metadata key '" + key + "'");
-	}
-
-	private static void parseValueEntry(BuildMetadataModel model, String rawKey, String rawValue) {
-		ValueEntry entry = model.getOrCreateValue(parseKey(rawKey));
-		Map<String, String> table = parseInlineTable(rawValue);
-		for (Map.Entry<String, String> item : table.entrySet()) {
-			entry.putLiteralVersion(item.getKey(), item.getValue());
-		}
 	}
 
 	private static void parseLibraryEntry(BuildMetadataModel model, String rawKey, String rawValue) {

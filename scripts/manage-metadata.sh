@@ -79,15 +79,20 @@ fi
 
 log "toolchain ready: javac=$javac_path, java=$java_path"
 
+# 使用相对 ASCII 路径写入参数文件，避免绝对路径里的非 ASCII 字符影响 javac @argfile。
 find "$source_dir" -name '*.java' | LC_ALL=C sort | while IFS= read -r java_source_path; do
-  to_java_path "$java_source_path"
+  relative_source_path=${java_source_path#"$root_dir"/}
+  printf '%s\n' "$relative_source_path"
 done > "$source_list_file"
-source_list_arg="@${source_list_file}"
+source_list_arg="@$(to_java_path "$source_list_file")"
 source_count=$(wc -l < "$source_list_file" | tr -d ' ')
-log "source list ready: ${source_count:-0} file(s)"
+log "source list ready: ${source_count:-0} relative file(s)"
 
 log 'javac start'
-if "$javac_path" -encoding UTF-8 -d "$(to_java_path "$classes_dir")" "$source_list_arg"; then
+if (
+  cd "$root_dir"
+  "$javac_path" -encoding UTF-8 -d "$(to_java_path "$classes_dir")" "$source_list_arg"
+); then
   compile_exit=0
 else
   compile_exit=$?

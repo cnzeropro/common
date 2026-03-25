@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BuildMetadataModelTest {
 	@Test
@@ -24,7 +25,6 @@ class BuildMetadataModelTest {
 				"[metadata]",
 				"revision = \"1.0.0\"",
 				"profiles = [\"java8\", \"java11\", \"java17\", \"java21\"]",
-				"java = 8",
 				"",
 				"[libraries]",
 				"\"com.example_base-only\" = { java8 = \"8.0.0\" }",
@@ -43,6 +43,46 @@ class BuildMetadataModelTest {
 
 		assertResolvedViaHigherProfiles(metadata, "java17");
 		assertResolvedViaHigherProfiles(metadata, "java21");
+	}
+
+	@Test
+	void parseShouldValidateSupportedMavenScopes(@TempDir Path tempDir) throws IOException {
+		Path allowedMetadataFile = tempDir.resolve("build-metadata-allowed.toml");
+		Files.write(
+			allowedMetadataFile,
+			Arrays.asList(
+				"[metadata]",
+				"revision = \"1.0.0\"",
+				"profiles = [\"java8\", \"java17\"]",
+				"",
+				"[libraries]",
+				"\"org.example_demo-bom\" = { java8 = \"1.0.0\", scope = \"import\" }"
+			),
+			StandardCharsets.UTF_8
+		);
+
+		BuildMetadataModel allowedMetadata = BuildMetadataParser.parse(allowedMetadataFile.toFile());
+		assertEquals(LibraryEntry.MAVEN_SCOPE_IMPORT, allowedMetadata.getLibraries().get("org.example_demo-bom").getScope());
+
+		Path rejectedMetadataFile = tempDir.resolve("build-metadata-rejected.toml");
+		Files.write(
+			rejectedMetadataFile,
+			Arrays.asList(
+				"[metadata]",
+				"revision = \"1.0.0\"",
+				"profiles = [\"java8\", \"java17\"]",
+				"",
+				"[libraries]",
+				"\"org.example_demo-lib\" = { java8 = \"1.0.0\", scope = \"custom\" }"
+			),
+			StandardCharsets.UTF_8
+		);
+
+		IllegalArgumentException exception = assertThrows(
+			IllegalArgumentException.class,
+			() -> BuildMetadataParser.parse(rejectedMetadataFile.toFile())
+		);
+		assertEquals("Unsupported Maven dependency scope 'custom' for alias 'org.example_demo-lib'", exception.getMessage());
 	}
 
 	private void assertResolvedViaHigherProfiles(BuildMetadataModel metadata, String effectiveProfile) {

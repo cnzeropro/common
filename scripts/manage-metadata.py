@@ -67,13 +67,15 @@ def main(argv):
 
         log(verbose, f"toolchain ready: javac={javac}, java={java}")
 
-        sources = sorted(str(path_item) for path_item in source_dir.rglob("*.java"))
-        source_list_file.write_text("\n".join(sources), encoding="ascii")
-        log(verbose, f"source list ready: {len(sources)} file(s)")
+        # 使用相对 ASCII 路径写入参数文件，避免绝对路径里的非 ASCII 字符影响 javac @argfile。
+        sources = sorted(path_item.relative_to(root_dir).as_posix() for path_item in source_dir.rglob("*.java"))
+        source_list_file.write_text("\n".join(sources), encoding="utf-8")
+        log(verbose, f"source list ready: {len(sources)} relative file(s)")
 
         log(verbose, "javac start")
         compile_result = subprocess.run(
             [javac, "-encoding", "UTF-8", "-d", str(classes_dir), f"@{source_list_file}"],
+            cwd=root_dir,
             check=False,
         )
         log(verbose, f"javac done: exit={compile_result.returncode}")

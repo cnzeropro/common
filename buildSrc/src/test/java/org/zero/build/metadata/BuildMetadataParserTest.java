@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BuildMetadataParserTest {
 	@Test
-	void parseShouldSupportScalarDeclarationsAndAliasReferences(@TempDir Path tempDir) throws IOException {
+	void parseShouldSupportLibrariesPluginsAndAliasReferences(@TempDir Path tempDir) throws IOException {
 		Path metadataFile = tempDir.resolve("build-metadata.toml");
 		Files.write(
 			metadataFile,
@@ -25,20 +25,14 @@ class BuildMetadataParserTest {
 				"[metadata]",
 				"revision = \"1.2.3\"",
 				"profiles = [\"java8\", \"java11\", \"java17\", \"java21\"]",
-				"java = 8",
-				"",
-				"[properties.maven]",
-				"\"project.encoding\" = \"UTF-8\"",
-				"\"maven.compiler.encoding\" = \"${project.encoding}\"",
 				"",
 				"[libraries]",
 				"\"com.auth0_java-jwt\" = \"4.5.0\"",
 				"\"io.jsonwebtoken_jjwt-impl\" = \"0.13.0\"",
 				"\"io.jsonwebtoken_jjwt-gson\" = \"io.jsonwebtoken_jjwt-impl\"",
-				"\"com.example_demo-lib\" = \"org.apache.maven.plugins_maven-clean-plugin\"",
+				"\"com.example_literal-lib\" = \"legacy.version.key\"",
 				"\"org.jooq_jooq-bom\" = { java17 = \"3.19.26\", java21 = \"3.20.7\", scope = \"import\" }",
 				"\"org.jooq_jooq\" = \"org.jooq_jooq-bom\"",
-				"\"org.springdoc_springdoc-openapi-bom\" = { java8 = \"io.jsonwebtoken_jjwt-impl\", java17 = \"2.8.13\", scope = \"import\" }",
 				"",
 				"[plugins.maven]",
 				"\"org.apache.maven.plugins_maven-clean-plugin\" = \"3.5.0\"",
@@ -55,10 +49,6 @@ class BuildMetadataParserTest {
 
 		assertEquals(Arrays.asList("java8", "java11", "java17", "java21"), metadata.getSupportedProfiles());
 		assertEquals("1.2.3", metadata.getRevision());
-		assertEquals("8", metadata.getJavaVersion());
-		assertEquals("UTF-8", metadata.getMavenProperties().get("project.encoding"));
-		assertEquals("${project.encoding}", metadata.getMavenProperties().get("maven.compiler.encoding"));
-		assertTrue(metadata.getValues().isEmpty());
 
 		LibraryEntry auth0 = metadata.getLibraries().get("com.auth0_java-jwt");
 		assertEquals("4.5.0", auth0.resolveVersion(metadata, "java8"));
@@ -66,19 +56,17 @@ class BuildMetadataParserTest {
 		LibraryEntry jjwtGson = metadata.getLibraries().get("io.jsonwebtoken_jjwt-gson");
 		assertEquals("0.13.0", jjwtGson.resolveVersion(metadata, "java21"));
 
-		LibraryEntry demoLib = metadata.getLibraries().get("com.example_demo-lib");
-		assertEquals("com.example:demo-lib", demoLib.getCoordinate());
-		assertEquals("3.5.0", demoLib.resolveVersion(metadata, "java8"));
+		LibraryEntry literal = metadata.getLibraries().get("com.example_literal-lib");
+		assertEquals("com.example:literal-lib", literal.getCoordinate());
+		assertEquals("legacy.version.key", literal.resolveVersion(metadata, "java17"));
 
 		LibraryEntry jooq = metadata.getLibraries().get("org.jooq_jooq");
 		assertNull(jooq.resolveVersion(metadata, "java11"));
 		assertEquals("3.19.26", jooq.resolveVersion(metadata, "java17"));
 		assertEquals("3.20.7", jooq.resolveVersion(metadata, "java21"));
 
-		LibraryEntry springdoc = metadata.getLibraries().get("org.springdoc_springdoc-openapi-bom");
-		assertEquals("0.13.0", springdoc.resolveVersion(metadata, "java8"));
-		assertEquals("2.8.13", springdoc.resolveVersion(metadata, "java17"));
-		assertEquals("import", springdoc.getScope());
+		LibraryEntry jooqBom = metadata.getLibraries().get("org.jooq_jooq-bom");
+		assertEquals("import", jooqBom.getScope());
 
 		MavenPluginEntry cleanPlugin = metadata.getMavenPlugins().get("org.apache.maven.plugins_maven-clean-plugin");
 		assertEquals("3.5.0", cleanPlugin.resolveVersion(metadata, "java21"));
@@ -96,6 +84,30 @@ class BuildMetadataParserTest {
 	}
 
 	@Test
+	void parseShouldRejectValuesSection(@TempDir Path tempDir) throws IOException {
+		Path metadataFile = tempDir.resolve("build-metadata.toml");
+		Files.write(
+			metadataFile,
+			Arrays.asList(
+				"[metadata]",
+				"revision = \"1.0.0\"",
+				"profiles = [\"java8\", \"java17\"]",
+				"",
+				"[values]",
+				"\"legacy.version\" = { java8 = \"1.0.0\" }"
+			),
+			StandardCharsets.UTF_8
+		);
+
+		IllegalArgumentException exception = assertThrows(
+			IllegalArgumentException.class,
+			() -> BuildMetadataParser.parse(metadataFile.toFile())
+		);
+
+		assertTrue(exception.getMessage().contains("Unsupported build metadata section 'values'"));
+	}
+
+	@Test
 	void parseShouldRejectMavenPluginWithoutBaseProfileVersion(@TempDir Path tempDir) throws IOException {
 		Path metadataFile = tempDir.resolve("build-metadata.toml");
 		Files.write(
@@ -104,7 +116,6 @@ class BuildMetadataParserTest {
 				"[metadata]",
 				"revision = \"1.0.0\"",
 				"profiles = [\"java8\", \"java17\"]",
-				"java = 8",
 				"",
 				"[plugins.maven]",
 				"\"org.apache.maven.plugins_maven-clean-plugin\" = { java17 = \"3.5.0\" }"
@@ -121,30 +132,6 @@ class BuildMetadataParserTest {
 	}
 
 	@Test
-	void parseShouldRejectMissingMetadataJava(@TempDir Path tempDir) throws IOException {
-		Path metadataFile = tempDir.resolve("build-metadata.toml");
-		Files.write(
-			metadataFile,
-			Arrays.asList(
-				"[metadata]",
-				"revision = \"1.0.0\"",
-				"profiles = [\"java8\", \"java17\"]",
-				"",
-				"[libraries]",
-				"\"com.auth0_java-jwt\" = \"4.5.0\""
-			),
-			StandardCharsets.UTF_8
-		);
-
-		IllegalArgumentException exception = assertThrows(
-			IllegalArgumentException.class,
-			() -> BuildMetadataParser.parse(metadataFile.toFile())
-		);
-
-		assertTrue(exception.getMessage().contains("Missing metadata java"));
-	}
-
-	@Test
 	void parseShouldRejectCircularAndSelfReferences(@TempDir Path tempDir) throws IOException {
 		Path circularFile = tempDir.resolve("build-metadata-circular.toml");
 		Files.write(
@@ -153,7 +140,6 @@ class BuildMetadataParserTest {
 				"[metadata]",
 				"revision = \"1.0.0\"",
 				"profiles = [\"java8\", \"java17\"]",
-				"java = 8",
 				"",
 				"[libraries]",
 				"\"com.example_alpha\" = \"com.example_beta\"",
@@ -175,7 +161,6 @@ class BuildMetadataParserTest {
 				"[metadata]",
 				"revision = \"1.0.0\"",
 				"profiles = [\"java8\", \"java17\"]",
-				"java = 8",
 				"",
 				"[plugins.maven]",
 				"\"org.apache.maven.plugins_maven-clean-plugin\" = \"org.apache.maven.plugins_maven-clean-plugin\""
@@ -199,7 +184,6 @@ class BuildMetadataParserTest {
 				"[metadata]",
 				"revision = \"1.0.0\"",
 				"profiles = [\"java8\", \"java17\"]",
-				"java = 8",
 				"",
 				"[plugins.maven]",
 				"\"org.apache.maven.plugins_maven-clean-plugin\" = { java8 = \"3.5.0\", scope = \"import\" }"
@@ -213,30 +197,5 @@ class BuildMetadataParserTest {
 		);
 
 		assertTrue(exception.getMessage().contains("Unsupported key 'scope'"));
-	}
-
-	@Test
-	void parseShouldRejectNonScalarMavenProperty(@TempDir Path tempDir) throws IOException {
-		Path metadataFile = tempDir.resolve("build-metadata.toml");
-		Files.write(
-			metadataFile,
-			Arrays.asList(
-				"[metadata]",
-				"revision = \"1.0.0\"",
-				"profiles = [\"java8\", \"java17\"]",
-				"java = 8",
-				"",
-				"[properties.maven]",
-				"\"project.encoding\" = { java8 = \"UTF-8\" }"
-			),
-			StandardCharsets.UTF_8
-		);
-
-		IllegalArgumentException exception = assertThrows(
-			IllegalArgumentException.class,
-			() -> BuildMetadataParser.parse(metadataFile.toFile())
-		);
-
-		assertTrue(exception.getMessage().contains("Unsupported Maven property value"));
 	}
 }

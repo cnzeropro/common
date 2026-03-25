@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -28,8 +29,19 @@ public final class BuildMetadataGenerator {
 	private static final String BUILD_REVISION_PROPERTY = "build.revision";
 	private static final String REVISION_EXPRESSION = "${revision}";
 	private static final String BUILD_PROFILES_PROPERTY = "build.profiles";
+	private static final String POM_FILE_NAME = "pom.xml";
+	private static final String PROPERTIES_TAG = "<properties>";
+	private static final String REVISION_PROPERTY_TAG = "<revision>";
+	private static final String REVISION_PROPERTY_END_TAG = "</revision>";
 	private static final String COMMON_BOM_ALIAS = "org.zero_common-bom";
 	private static final String COMMON_BOM_PROPERTY = "org.zero_common-bom.version";
+	/*
+	 * 递归扫描子模块 POM 时跳过 IDE/构建产物目录，
+	 * 避免把临时目录误判成 Maven 模块。
+	 */
+	private static final Set<String> IGNORED_POM_SCAN_DIRECTORIES = Collections.unmodifiableSet(
+		new LinkedHashSet<String>(Arrays.asList(".git", ".gradle", ".idea", "build", "out"))
+	);
 	private static final String GENERATED_DEPENDENCY_PROPERTIES_START = "<!-- generated dependency-properties:start -->";
 	private static final String GENERATED_DEPENDENCY_PROPERTIES_END = "<!-- generated dependency-properties:end -->";
 	private static final String GENERATED_PLUGIN_PROPERTIES_START = "<!-- generated plugin-properties:start -->";
@@ -252,7 +264,7 @@ public final class BuildMetadataGenerator {
 	private String renderRootPom(BuildMetadataModel metadata) {
 		String xml = readUtf8(rootPomFile);
 		xml = replaceFirst(xml, ROOT_VERSION_PATTERN, REVISION_EXPRESSION);
-		xml = replaceOrInsertPomProperty(xml, "revision", metadata.getRevision(), "\t\t");
+		xml = replaceOrInsertRevisionProperty(xml, metadata.getRevision(), "\t\t");
 		xml = replaceGeneratedDependencyProperties(xml, metadata);
 		xml = replaceGeneratedPluginProperties(xml, metadata);
 		xml = replaceGeneratedDependencyManagement(xml, metadata);
@@ -263,7 +275,7 @@ public final class BuildMetadataGenerator {
 
 	private String renderCommonBomPom(BuildMetadataModel metadata) {
 		String xml = replaceFirst(readUtf8(commonBomPomFile), COMMON_BOM_VERSION_PATTERN, REVISION_EXPRESSION);
-		return replaceOrInsertPomProperty(xml, "revision", metadata.getRevision(), "        ");
+		return replaceOrInsertRevisionProperty(xml, metadata.getRevision(), "        ");
 	}
 
 	/**
@@ -333,7 +345,7 @@ public final class BuildMetadataGenerator {
 		}
 
 		String name = directory.getName();
-		if (".git".equals(name) || ".gradle".equals(name) || ".idea".equals(name) || "build".equals(name) || "out".equals(name)) {
+		if (IGNORED_POM_SCAN_DIRECTORIES.contains(name)) {
 			return;
 		}
 
@@ -347,7 +359,7 @@ public final class BuildMetadataGenerator {
 				collectPomFiles(child, pomFiles);
 				continue;
 			}
-			if (!"pom.xml".equals(child.getName())) {
+			if (!POM_FILE_NAME.equals(child.getName())) {
 				continue;
 			}
 			if (child.equals(rootPomFile) || child.equals(commonBomPomFile)) {
@@ -373,10 +385,7 @@ public final class BuildMetadataGenerator {
 	}
 
 	private static String replaceGeneratedDependencyProperties(String xml, BuildMetadataModel metadata) {
-		Map<String, String> dependencyVersions = sortResolvedVersions(
-			metadata,
-			joinVersionedEntries(metadata.getValues().values(), metadata.getLibraries().values())
-		);
+		Map<String, String> dependencyVersions = sortResolvedVersions(metadata, metadata.getLibraries().values());
 		return replaceGeneratedBlock(
 			xml,
 			GENERATED_DEPENDENCY_PROPERTIES_START,
@@ -398,8 +407,7 @@ public final class BuildMetadataGenerator {
 	}
 
 	private static String replaceGeneratedPluginManagement(String xml, BuildMetadataModel metadata) {
-		Set<String> manualPluginAliases = findManualPluginAliases(xml);
-		List<MavenPluginEntry> plugins = orderPlugins(metadata.getBaseMavenPlugins(), manualPluginAliases);
+		List<MavenPluginEntry> plugins = orderPlugins(metadata.getBaseMavenPlugins());
 		return replaceGeneratedBlock(
 			xml,
 			GENERATED_PLUGIN_MANAGEMENT_START,
@@ -539,7 +547,7 @@ public final class BuildMetadataGenerator {
 		builder.append(indent).append("\t<groupId>").append(library.getGroupId()).append("</groupId>\n");
 		builder.append(indent).append("\t<artifactId>").append(library.getArtifactId()).append("</artifactId>\n");
 		builder.append(indent).append("\t<version>${").append(propertyName).append("}</version>\n");
-		if ("import".equals(library.getScope())) {
+		if (LibraryEntry.MAVEN_SCOPE_IMPORT.equals(library.getScope())) {
 			builder.append(indent).append("\t<type>pom</type>\n");
 		}
 		if (library.getScope() != null && !library.getScope().isEmpty()) {
@@ -568,19 +576,21 @@ public final class BuildMetadataGenerator {
 		return Integer.parseInt(profile.substring("java".length()));
 	}
 
-	private static String replaceOrInsertPomProperty(String xml, String propertyName, String value, String indent) {
-		String propertyTag = "<" + propertyName + ">";
-		String propertyEndTag = "</" + propertyName + ">";
-		if (xml.contains(propertyTag) && xml.contains(propertyEndTag)) {
-			return replaceFirst(xml, REVISION_PROPERTY_PATTERN, value);
+	/**
+	 * 统一维护 root/common-bom POM 的 {@code revision} 属性，
+	 * 保持既有属性块位置不变，只在缺失时插入新行。
+	 */
+	private static String replaceOrInsertRevisionProperty(String xml, String revision, String indent) {
+		if (xml.contains(REVISION_PROPERTY_TAG) && xml.contains(REVISION_PROPERTY_END_TAG)) {
+			return replaceFirst(xml, REVISION_PROPERTY_PATTERN, revision);
 		}
 
-		int propertiesIndex = xml.indexOf("<properties>");
+		int propertiesIndex = xml.indexOf(PROPERTIES_TAG);
 		if (propertiesIndex < 0) {
 			return xml;
 		}
-		int insertIndex = propertiesIndex + "<properties>".length();
-		String propertyLine = "\n" + indent + propertyTag + value + propertyEndTag;
+		int insertIndex = propertiesIndex + PROPERTIES_TAG.length();
+		String propertyLine = "\n" + indent + REVISION_PROPERTY_TAG + revision + REVISION_PROPERTY_END_TAG;
 		return xml.substring(0, insertIndex) + propertyLine + xml.substring(insertIndex);
 	}
 
@@ -613,16 +623,6 @@ public final class BuildMetadataGenerator {
 			ordered.put(entry.getKey(), entry.getValue());
 		}
 		return ordered;
-	}
-
-	private static List<VersionedEntry> joinVersionedEntries(
-		Iterable<? extends VersionedEntry> first,
-		Iterable<? extends VersionedEntry> second
-	) {
-		List<VersionedEntry> entries = new ArrayList<VersionedEntry>();
-		entries.addAll(toVersionedEntryList(first));
-		entries.addAll(toVersionedEntryList(second));
-		return entries;
 	}
 
 	private static List<VersionedEntry> toVersionedEntryList(Iterable<? extends VersionedEntry> entries) {
@@ -663,77 +663,17 @@ public final class BuildMetadataGenerator {
 		return renderTomlString(version);
 	}
 
-	private static String preferredGeneratedBlock(String xml, String startMarker, String endMarker) {
-		int startIndex = xml.indexOf(startMarker);
-		int endIndex = xml.indexOf(endMarker);
-		if (startIndex < 0 || endIndex < 0 || endIndex < startIndex) {
-			return "";
-		}
-		int contentStart = startIndex + startMarker.length();
-		return xml.substring(contentStart, endIndex);
-	}
-
 	/**
-	 * 扫描 pluginManagement 中非自动生成的插件，避免覆盖手工维护条目。
+	 * 对依赖与插件条目按坐标排序，确保生成内容稳定。
 	 */
-	private static Set<String> findManualPluginAliases(String xml) {
-		String pluginManagementBody = firstSectionBody(xml, "pluginManagement", "plugins");
-		if (pluginManagementBody == null || pluginManagementBody.isEmpty()) {
-			return Collections.emptySet();
-		}
-
-		int startIndex = pluginManagementBody.indexOf(GENERATED_PLUGIN_MANAGEMENT_START);
-		int endIndex = pluginManagementBody.indexOf(GENERATED_PLUGIN_MANAGEMENT_END);
-		StringBuilder manual = new StringBuilder();
-		if (startIndex >= 0 && endIndex >= startIndex) {
-			manual.append(pluginManagementBody.substring(0, startIndex));
-			manual.append(pluginManagementBody.substring(endIndex + GENERATED_PLUGIN_MANAGEMENT_END.length()));
-		} else {
-			manual.append(pluginManagementBody);
-		}
-
-		Set<String> aliases = new LinkedHashSet<String>();
-		Matcher matcher = Pattern.compile("(?s)<plugin>(.*?)</plugin>").matcher(manual.toString());
-		while (matcher.find()) {
-			String body = matcher.group(1);
-			String groupId = firstTagValue(body, "groupId");
-			String artifactId = firstTagValue(body, "artifactId");
-			if (groupId != null && artifactId != null) {
-				aliases.add(groupId + "_" + artifactId);
-			}
-		}
-		return aliases;
-	}
-
-	private static String firstSectionBody(String xml, String outerTag, String innerTag) {
-		Pattern pattern = Pattern.compile(
-			"(?s)<" + outerTag + ">\\s*<" + innerTag + ">(.*?)</" + innerTag + ">\\s*</" + outerTag + ">"
-		);
-		Matcher matcher = pattern.matcher(xml);
-		return matcher.find() ? matcher.group(1) : null;
-	}
-
-	private static String firstTagValue(String body, String tagName) {
-		Matcher matcher = Pattern.compile("(?s)<" + Pattern.quote(tagName) + ">(.*?)</" + Pattern.quote(tagName) + ">").matcher(body);
-		return matcher.find() ? matcher.group(1).trim() : null;
-	}
-
 	private static List<LibraryEntry> orderLibraries(List<LibraryEntry> libraries) {
 		List<LibraryEntry> ordered = new ArrayList<LibraryEntry>(libraries);
 		Collections.sort(ordered, (left, right) -> left.getCoordinate().compareTo(right.getCoordinate()));
 		return ordered;
 	}
 
-	private static List<MavenPluginEntry> orderPlugins(
-		List<MavenPluginEntry> plugins,
-		Set<String> manualAliases
-	) {
-		List<MavenPluginEntry> ordered = new ArrayList<MavenPluginEntry>();
-		for (MavenPluginEntry plugin : plugins) {
-			if (!manualAliases.contains(plugin.getAlias())) {
-				ordered.add(plugin);
-			}
-		}
+	private static List<MavenPluginEntry> orderPlugins(List<MavenPluginEntry> plugins) {
+		List<MavenPluginEntry> ordered = new ArrayList<MavenPluginEntry>(plugins);
 		Collections.sort(ordered, (left, right) -> left.getCoordinate().compareTo(right.getCoordinate()));
 		return ordered;
 	}

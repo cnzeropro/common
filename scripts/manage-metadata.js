@@ -36,23 +36,23 @@ function parseArgs(argv) {
 	return { commandName, verbose };
 }
 
-function collectJavaSources(sourceDir) {
+function collectJavaSources(rootDir, sourceDir) {
 	const collected = [];
 	for (const entry of fs.readdirSync(sourceDir, { withFileTypes: true })) {
 		const fullPath = path.join(sourceDir, entry.name);
 		if (entry.isDirectory()) {
-			collected.push(...collectJavaSources(fullPath));
+			collected.push(...collectJavaSources(rootDir, fullPath));
 			continue;
 		}
 		if (entry.isFile() && entry.name.endsWith(".java")) {
-			collected.push(fullPath);
+			collected.push(path.relative(rootDir, fullPath).split(path.sep).join("/"));
 		}
 	}
 	return collected.sort();
 }
 
-function runCommand(command, args) {
-	const result = spawnSync(command, args, { stdio: "inherit" });
+function runCommand(command, args, cwd) {
+	const result = spawnSync(command, args, { stdio: "inherit", cwd });
 	if (result.error) {
 		throw result.error;
 	}
@@ -113,12 +113,13 @@ function main(argv) {
 
 		log(verbose, `toolchain ready: javac=${javac}, java=${java}`);
 
-		const sources = collectJavaSources(sourceDir);
-		fs.writeFileSync(sourceListFile, `${sources.join("\n")}`, { encoding: "ascii" });
-		log(verbose, `source list ready: ${sources.length} file(s)`);
+		// 使用相对 ASCII 路径写入参数文件，避免绝对路径里的非 ASCII 字符影响 javac @argfile。
+		const sources = collectJavaSources(rootDir, sourceDir);
+		fs.writeFileSync(sourceListFile, `${sources.join("\n")}`, { encoding: "utf8" });
+		log(verbose, `source list ready: ${sources.length} relative file(s)`);
 
 		log(verbose, "javac start");
-		let exitCode = runCommand(javac, ["-encoding", "UTF-8", "-d", classesDir, `@${sourceListFile}`]);
+		let exitCode = runCommand(javac, ["-encoding", "UTF-8", "-d", classesDir, `@${sourceListFile}`], rootDir);
 		log(verbose, `javac done: exit=${exitCode}`);
 		if (exitCode !== 0) {
 			return exitCode;

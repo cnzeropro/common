@@ -2,26 +2,28 @@ package org.zero.build.metadata;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
- * Build metadata model - 聚合 values/libraries/plugins 条目并提供 profile 解析能力。
+ * Build metadata model - 聚合 libraries/plugins 条目并提供 profile 解析能力。
  */
 public final class BuildMetadataModel {
 	/*
-	 * 聚合 values / libraries / plugins 条目，
+	 * 聚合 libraries / plugins 条目，
 	 * 并提供按 profile 解析、校验与差异对比的能力。
 	 */
 	private static final Pattern JAVA_PROFILE_PATTERN = Pattern.compile("^java(\\d+)$");
 
 	private String revision;
 	private final List<String> supportedProfiles = new ArrayList<String>();
-	private final Map<String, ValueEntry> values = new LinkedHashMap<String, ValueEntry>();
 	private final Map<String, LibraryEntry> libraries = new LinkedHashMap<String, LibraryEntry>();
 	private final Map<String, MavenPluginEntry> mavenPlugins = new LinkedHashMap<String, MavenPluginEntry>();
 	private final Map<String, GradlePluginEntry> gradlePlugins = new LinkedHashMap<String, GradlePluginEntry>();
@@ -53,10 +55,6 @@ public final class BuildMetadataModel {
 		return Collections.unmodifiableList(supportedProfiles);
 	}
 
-	public Map<String, ValueEntry> getValues() {
-		return values;
-	}
-
 	public Map<String, LibraryEntry> getLibraries() {
 		return libraries;
 	}
@@ -67,16 +65,6 @@ public final class BuildMetadataModel {
 
 	public Map<String, GradlePluginEntry> getGradlePlugins() {
 		return gradlePlugins;
-	}
-
-	public ValueEntry getOrCreateValue(String alias) {
-		ValueEntry entry = values.get(alias);
-		if (entry != null) {
-			return entry;
-		}
-		ValueEntry created = new ValueEntry(alias);
-		values.put(alias, created);
-		return created;
 	}
 
 	public LibraryEntry getOrCreateLibrary(String alias) {
@@ -134,7 +122,6 @@ public final class BuildMetadataModel {
 
 	public List<VersionedEntry> getCatalogVersionEntries() {
 		List<VersionedEntry> entries = new ArrayList<VersionedEntry>();
-		entries.addAll(values.values());
 		entries.addAll(libraries.values());
 		for (GradlePluginEntry plugin : gradlePlugins.values()) {
 			if (plugin.hasVersions()) {
@@ -160,7 +147,6 @@ public final class BuildMetadataModel {
 
 	public List<VersionedEntry> getPomPropertyEntries() {
 		List<VersionedEntry> entries = new ArrayList<VersionedEntry>();
-		entries.addAll(values.values());
 		entries.addAll(libraries.values());
 		entries.addAll(mavenPlugins.values());
 		return entries;
@@ -248,22 +234,18 @@ public final class BuildMetadataModel {
 		referenceableEntries.clear();
 
 		Map<String, String> aliases = new LinkedHashMap<String, String>();
-		collectAliases(values.values(), aliases);
 		collectAliases(libraries.values(), aliases);
 		collectAliases(mavenPlugins.values(), aliases);
 		collectAliases(gradlePlugins.values(), aliases);
 
-		prepareEntries(values.values());
 		prepareEntries(libraries.values());
 		prepareEntries(mavenPlugins.values());
 		prepareEntries(gradlePlugins.values());
 
-		validateEntries(values.values());
 		validateEntries(libraries.values());
 		validateEntries(mavenPlugins.values());
 		validateEntries(gradlePlugins.values());
 
-		validateResolvableEntries(values.values());
 		validateResolvableEntries(libraries.values());
 		validateResolvableEntries(mavenPlugins.values());
 		validateResolvableEntries(gradlePlugins.values());
@@ -466,12 +448,6 @@ abstract class VersionedEntry extends MetadataEntry {
 	}
 }
 
-final class ValueEntry extends VersionedEntry {
-	ValueEntry(String alias) {
-		super(alias);
-	}
-}
-
 abstract class CoordinateEntry extends VersionedEntry {
 	CoordinateEntry(String alias) {
 		super(alias);
@@ -518,6 +494,15 @@ abstract class CoordinateEntry extends VersionedEntry {
 }
 
 final class LibraryEntry extends CoordinateEntry {
+	static final String MAVEN_SCOPE_IMPORT = "import";
+	/*
+	 * 只收敛 Maven dependencyManagement 里稳定可用的 scope，
+	 * 避免校验条件散落成多处字面量比较。
+	 */
+	private static final Set<String> SUPPORTED_MAVEN_SCOPES = Collections.unmodifiableSet(
+		new LinkedHashSet<String>(Arrays.asList("compile", "provided", "runtime", "test", "system", MAVEN_SCOPE_IMPORT))
+	);
+
 	private String scope;
 
 	LibraryEntry(String alias) {
@@ -535,13 +520,7 @@ final class LibraryEntry extends CoordinateEntry {
 	@Override
 	public void validate(BuildMetadataModel model) {
 		super.validate(model);
-		if (scope != null && !scope.isEmpty()
-			&& !"compile".equals(scope)
-			&& !"provided".equals(scope)
-			&& !"runtime".equals(scope)
-			&& !"test".equals(scope)
-			&& !"system".equals(scope)
-			&& !"import".equals(scope)) {
+		if (scope != null && !scope.isEmpty() && !SUPPORTED_MAVEN_SCOPES.contains(scope)) {
 			throw new IllegalArgumentException(
 				"Unsupported Maven dependency scope '" + scope + "' for alias '" + getAlias() + "'"
 			);
