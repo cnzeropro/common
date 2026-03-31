@@ -2,7 +2,7 @@ package org.zero.common.core.exception.status;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.zero.common.data.exception.Status;
+import org.zero.common.data.enumeration.Status;
 
 import java.util.Locale;
 

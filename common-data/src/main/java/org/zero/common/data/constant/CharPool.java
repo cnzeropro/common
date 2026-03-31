@@ -1,6 +1,11 @@
 package org.zero.common.data.constant;
 
 /**
+ * 字符常量池。
+ * <p>
+ * 集中定义各类常用字符（标点、货币、数学、编程、特殊符号）的字面量常量，
+ * 避免在业务代码中出现魔法字符（magic character）。部分语义重叠的字符通过别名引用同一字面量。
+ *
  * @author Zero (cnzeropro@163.com)
  * @since 2025/4/24
  */
@@ -17,7 +22,7 @@ public interface CharPool {
     /**
      * 下划线：{@code '_'}
      */
-    char UNDERLINE = '_';
+    char UNDERSCORE = '_';
     /**
      * 连接符：{@code '-'}
      */
@@ -79,7 +84,7 @@ public interface CharPool {
      */
     char CURLY_LEFT = '{';
     /**
-     * 花括号（右）：<code>'}'</code>
+     * 花括号（右）：{@code '}'}
      */
     char CURLY_RIGHT = '}';
     /**
@@ -207,7 +212,7 @@ public interface CharPool {
     /**
      * 短线：{@code '-'}
      */
-    char DASHED = HYPHEN;
+    char DASH = HYPHEN;
     /**
      * 点：{@code '.'}
      */
@@ -221,8 +226,9 @@ public interface CharPool {
      */
     char BACKSLASH = '\\';
     /**
-     * 回车符：{@code '\r'} <br>
-     * 解释：该字符常用于表示 Linux 系统和 MacOS 系统下的文本换行
+     * 回车符（Carriage Return）：{@code '\r'} <br>
+     * 解释：通常与 {@link #LF} 组合为 {@code \r\n} 用于 Windows 系统的文本换行；
+     * 旧版 Mac OS（9 及之前）单独使用 {@code \r} 换行
      */
     char CR = '\r';
     /**

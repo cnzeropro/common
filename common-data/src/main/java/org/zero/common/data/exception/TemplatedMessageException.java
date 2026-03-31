@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.zero.common.data.format.DefaultMessageFormatter;
 import org.zero.common.data.format.MessageFormatter;
 
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -39,14 +40,14 @@ import java.util.Objects;
  * @see DefaultMessageFormatter
  * @see ParamTuple
  */
-public class MessageTemplateException extends RuntimeException {
+public class TemplatedMessageException extends RuntimeException {
 
 	/* ************************************************************** Native ************************************************************** */
 
 	/**
 	 * 无参构造。
 	 */
-	public MessageTemplateException() {
+	public TemplatedMessageException() {
 		super();
 	}
 
@@ -55,7 +56,7 @@ public class MessageTemplateException extends RuntimeException {
 	 *
 	 * @param message 异常详情
 	 */
-	public MessageTemplateException(String message) {
+	public TemplatedMessageException(String message) {
 		super(message);
 	}
 
@@ -64,7 +65,7 @@ public class MessageTemplateException extends RuntimeException {
 	 *
 	 * @param cause 原因异常
 	 */
-	public MessageTemplateException(Throwable cause) {
+	public TemplatedMessageException(Throwable cause) {
 		super(cause);
 	}
 
@@ -74,7 +75,7 @@ public class MessageTemplateException extends RuntimeException {
 	 * @param message 异常详情
 	 * @param cause   原因异常
 	 */
-	public MessageTemplateException(String message, Throwable cause) {
+	public TemplatedMessageException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
@@ -86,7 +87,7 @@ public class MessageTemplateException extends RuntimeException {
 	 * @param enableSuppression  是否启用抑制
 	 * @param writableStackTrace 是否可写堆栈
 	 */
-	protected MessageTemplateException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+	protected TemplatedMessageException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
 	}
 
@@ -98,7 +99,7 @@ public class MessageTemplateException extends RuntimeException {
 	 * @param pattern 消息模板
 	 * @param args    格式化参数；若尾参为 {@link Throwable} 则自动提取为 cause
 	 */
-	public MessageTemplateException(CharSequence pattern, Object... args) {
+	public TemplatedMessageException(CharSequence pattern, Object... args) {
 		this((Throwable) null, pattern, args);
 	}
 
@@ -109,7 +110,7 @@ public class MessageTemplateException extends RuntimeException {
 	 * @param pattern 消息模板
 	 * @param args    格式化参数
 	 */
-	public MessageTemplateException(Throwable cause, CharSequence pattern, Object... args) {
+	public TemplatedMessageException(Throwable cause, CharSequence pattern, Object... args) {
 		this(cause, pattern, null, args);
 	}
 
@@ -120,7 +121,7 @@ public class MessageTemplateException extends RuntimeException {
 	 * @param locale  格式化 Locale，为 {@code null} 时使用默认值
 	 * @param args    格式化参数；若尾参为 {@link Throwable} 则自动提取为 cause
 	 */
-	public MessageTemplateException(CharSequence pattern, Locale locale, Object... args) {
+	public TemplatedMessageException(CharSequence pattern, Locale locale, Object... args) {
 		this((Throwable) null, pattern, locale, args);
 	}
 
@@ -132,7 +133,7 @@ public class MessageTemplateException extends RuntimeException {
 	 * @param locale  格式化 Locale，为 {@code null} 时使用默认值
 	 * @param args    格式化参数
 	 */
-	public MessageTemplateException(Throwable cause, CharSequence pattern, Locale locale, Object... args) {
+	public TemplatedMessageException(Throwable cause, CharSequence pattern, Locale locale, Object... args) {
 		this(cause, null, pattern, locale, args);
 	}
 
@@ -143,7 +144,7 @@ public class MessageTemplateException extends RuntimeException {
 	 * @param pattern   消息模板
 	 * @param args      格式化参数；若尾参为 {@link Throwable} 则自动提取为 cause
 	 */
-	public MessageTemplateException(MessageFormatter formatter, CharSequence pattern, Object... args) {
+	public TemplatedMessageException(MessageFormatter formatter, CharSequence pattern, Object... args) {
 		this(null, formatter, pattern, args);
 	}
 
@@ -155,7 +156,7 @@ public class MessageTemplateException extends RuntimeException {
 	 * @param pattern   消息模板
 	 * @param args      格式化参数
 	 */
-	public MessageTemplateException(Throwable cause, MessageFormatter formatter, CharSequence pattern, Object... args) {
+	public TemplatedMessageException(Throwable cause, MessageFormatter formatter, CharSequence pattern, Object... args) {
 		this(cause, formatter, pattern, null, args);
 	}
 
@@ -167,7 +168,7 @@ public class MessageTemplateException extends RuntimeException {
 	 * @param locale    格式化 Locale，为 {@code null} 时使用默认值
 	 * @param args      格式化参数；若尾参为 {@link Throwable} 则自动提取为 cause
 	 */
-	public MessageTemplateException(MessageFormatter formatter, CharSequence pattern, Locale locale, Object... args) {
+	public TemplatedMessageException(MessageFormatter formatter, CharSequence pattern, Locale locale, Object... args) {
 		this(null, formatter, pattern, locale, args);
 	}
 
@@ -180,7 +181,7 @@ public class MessageTemplateException extends RuntimeException {
 	 * @param locale    格式化 Locale
 	 * @param args      格式化参数
 	 */
-	public MessageTemplateException(Throwable cause, MessageFormatter formatter, CharSequence pattern, Locale locale, Object... args) {
+	public TemplatedMessageException(Throwable cause, MessageFormatter formatter, CharSequence pattern, Locale locale, Object... args) {
 		this(new ParamTuple(cause, formatter, pattern, locale, args));
 	}
 
@@ -189,7 +190,7 @@ public class MessageTemplateException extends RuntimeException {
 	 *
 	 * @param paramTuple 参数元组，为 {@code null} 时使用默认值
 	 */
-	public MessageTemplateException(ParamTuple paramTuple) {
+	public TemplatedMessageException(ParamTuple paramTuple) {
 		this(resolve(paramTuple));
 	}
 
@@ -198,7 +199,7 @@ public class MessageTemplateException extends RuntimeException {
 	 *
 	 * @param resolvedTuple 已解析的参数元组
 	 */
-	protected MessageTemplateException(ResolvedTuple resolvedTuple) {
+	protected TemplatedMessageException(ResolvedTuple resolvedTuple) {
 		super(resolvedTuple.message, resolvedTuple.cause);
 	}
 
@@ -209,7 +210,7 @@ public class MessageTemplateException extends RuntimeException {
 	 * @param enableSuppression 是否启用抑制
 	 * @param writableStackTrace 是否可写堆栈
 	 */
-	protected MessageTemplateException(ParamTuple paramTuple, boolean enableSuppression, boolean writableStackTrace) {
+	protected TemplatedMessageException(ParamTuple paramTuple, boolean enableSuppression, boolean writableStackTrace) {
 		this(resolve(paramTuple), enableSuppression, writableStackTrace);
 	}
 
@@ -220,7 +221,7 @@ public class MessageTemplateException extends RuntimeException {
 	 * @param enableSuppression 是否启用抑制
 	 * @param writableStackTrace 是否可写堆栈
 	 */
-	protected MessageTemplateException(ResolvedTuple resolvedTuple, boolean enableSuppression, boolean writableStackTrace) {
+	protected TemplatedMessageException(ResolvedTuple resolvedTuple, boolean enableSuppression, boolean writableStackTrace) {
 		super(resolvedTuple.message, resolvedTuple.cause, enableSuppression, writableStackTrace);
 	}
 
@@ -246,9 +247,9 @@ public class MessageTemplateException extends RuntimeException {
 		Object[] actualArgs = sourceArgs;
 		if (Objects.isNull(actualCause)) {
 			// 模板构造里仅约定尾参 Throwable 为隐式 cause，并且不参与消息格式化。
-			actualCause = getThrowableCandidate(sourceArgs);
+			actualCause = getTrailingThrowable(sourceArgs);
 			if (Objects.nonNull(actualCause)) {
-				actualArgs = trimmedCopy(sourceArgs);
+				actualArgs = removeTrailingThrowable(sourceArgs);
 			}
 		}
 		MessageFormatter actualFormatter = Objects.nonNull(actualParamTuple.formatter) ? actualParamTuple.formatter : DefaultMessageFormatter.INSTANCE;
@@ -268,7 +269,7 @@ public class MessageTemplateException extends RuntimeException {
 	 * @param args 参数数组
 	 * @return 尾参的 {@link Throwable}，不存在或为空时返回 {@code null}
 	 */
-	protected static Throwable getThrowableCandidate(Object[] args) {
+	protected static Throwable getTrailingThrowable(Object[] args) {
 		if (Objects.isNull(args) || args.length <= 0) {
 			return null;
 		}
@@ -285,15 +286,11 @@ public class MessageTemplateException extends RuntimeException {
 	 * @param args 原始参数数组
 	 * @return 去掉尾元素的新数组；若输入为空或单元素则返回空数组
 	 */
-	protected static Object[] trimmedCopy(Object[] args) {
+	protected static Object[] removeTrailingThrowable(Object[] args) {
 		if (Objects.isNull(args) || args.length <= 0) {
 			return args;
 		}
-		Object[] trimmed = new Object[args.length - 1];
-		if (trimmed.length > 0) {
-			System.arraycopy(args, 0, trimmed, 0, trimmed.length);
-		}
-		return trimmed;
+		return Arrays.copyOf(args, args.length - 1);
 	}
 
 	/* ************************************************************** Inner Classes ************************************************************** */

@@ -11,7 +11,12 @@ import static java.lang.annotation.ElementType.TYPE_PARAMETER;
 import static java.lang.annotation.ElementType.TYPE_USE;
 
 /**
- * 指示资源不会被关闭
+ * 指示被标注的资源在当前作用域内不会被关闭。
+ * <p>
+ * 用于参数或局部变量上，声明调用方或当前方法不会关闭该资源，资源生命周期由其他方管理。
+ * 与 {@link WillClose} 互为反向声明，配合使用可明确资源关闭责任。
+ * <p>
+ * 该注解仅作为文档和静态分析标记，不改变运行时行为。
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2025/5/13

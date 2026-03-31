@@ -2,7 +2,6 @@ package org.zero.common.data.enumeration;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.zero.common.data.exception.Status;
 
 /**
  * 系统错误枚举

@@ -8,7 +8,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 指示所需依赖
+ * 指示类型所需依赖（坐标/版本声明）。
+ * <p>
+ * 该注解主要用于<strong>文档化</strong>与<strong>静态分析/工具扫描</strong>：在阅读源码或生成文档时，明确某个类型为了正常工作需要引入哪些三方库。
+ * <p>
+ * 注意：{@link RetentionPolicy#CLASS} 表示注解会被编译进 class 文件，但默认不会在运行期通过反射读取；也不会自动替你拉取依赖。
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2025/5/13
@@ -19,19 +23,21 @@ import java.lang.annotation.Target;
 @Documented
 public @interface NeedLib {
     /**
-     * 组 ID
+     * 组 ID（Maven coordinates 中的 groupId）。
+     * <p>
+     * 当 {@link #groupId()} / {@link #version()} 无法确定时，可使用 {@link #UNKNOWN} 作为占位。
      */
     String groupId() default UNKNOWN;
 
     /**
-     * 工件 ID
+     * 工件 ID（Maven coordinates 中的 artifactId）。
      */
     String artifactId();
 
     /**
-     * 版本
+     * 版本（Maven/Gradle 常见版本表达）。
      * <p>
-     * 版本范围（Version Ranges）语法
+     * 支持版本范围（Version Ranges）语法：
      * <ol>
      *     <li>固定版本号
      *     <table>
@@ -90,7 +96,7 @@ public @interface NeedLib {
     String version() default UNKNOWN;
 
     /**
-     * 未知（不确认，建议自行尝试）
+     * 未知占位（不确认，建议自行尝试）。
      */
     String UNKNOWN = "unknown";
 }

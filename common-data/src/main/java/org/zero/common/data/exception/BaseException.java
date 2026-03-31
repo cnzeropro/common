@@ -1,6 +1,7 @@
 package org.zero.common.data.exception;
 
 import lombok.Getter;
+import org.zero.common.data.enumeration.Status;
 
 import java.io.Serializable;
 import java.util.Objects;

@@ -1,7 +1,7 @@
 package org.zero.common.core.support.api.crypto.decryption;
 
 import org.zero.common.core.support.api.crypto.exception.CryptoException;
-import org.zero.common.data.exception.Status;
+import org.zero.common.data.enumeration.Status;
 
 /**
  * 解密异常

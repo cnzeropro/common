@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.util.StringUtils;
-import org.zero.common.data.exception.Status;
+import org.zero.common.data.enumeration.Status;
 import org.zero.common.data.format.DefaultMessageFormatter;
 import org.zero.common.data.format.MessageFormatter;
 

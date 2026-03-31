@@ -7,7 +7,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 指示抛出的异常
+ * {@link Throw} 的容器注解，用于支持 {@link java.lang.annotation.Repeatable @Repeatable}。
+ * <p>
+ * 仅作为编译期/文档期声明：表达多个“可能抛出的异常类型”。
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2025/5/13
@@ -16,5 +18,8 @@ import java.lang.annotation.Target;
 @Target({ElementType.PACKAGE, ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR})
 @Documented
 public @interface Throws {
+    /**
+     * 异常声明列表。
+     */
     Throw[] value();
 }

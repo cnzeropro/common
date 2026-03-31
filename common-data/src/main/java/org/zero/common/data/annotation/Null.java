@@ -17,7 +17,12 @@ import static java.lang.annotation.ElementType.TYPE_PARAMETER;
 import static java.lang.annotation.ElementType.TYPE_USE;
 
 /**
- * 指示可以为 {@code null}
+ * 指示被标注的程序元素可以为 {@code null}。
+ * <p>
+ * 用于参数、字段、返回值、局部变量等位置，向阅读者和工具明确表达该位置接受或可能返回 {@code null} 值。
+ * 该注解仅作为文档和静态分析标记，不改变运行时行为。
+ * <p>
+ * 与 {@link NonNull} 互为反向声明。
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2025/5/13

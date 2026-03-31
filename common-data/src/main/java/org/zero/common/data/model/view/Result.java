@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import org.zero.common.data.exception.Status;
+import org.zero.common.data.enumeration.Status;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

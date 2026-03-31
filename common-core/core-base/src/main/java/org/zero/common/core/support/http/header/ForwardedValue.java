@@ -173,7 +173,7 @@ public class ForwardedValue implements Iterable<ForwardedValue.Value> {
 				if (UNKNOWN.equalsIgnoreCase(ip)) {
 					return Type.UNKNOWN;
 				}
-				if (StringUtil.startWith(ip, StringPool.UNDERLINE)) {
+				if (StringUtil.startWith(ip, StringPool.UNDERSCORE)) {
 					return Type.OBFUSCATED;
 				}
 				if (InetAddressUtil.isIPv4(ip)) {
@@ -203,7 +203,7 @@ public class ForwardedValue implements Iterable<ForwardedValue.Value> {
 					return result;
 				}
 				// obfuscated identifier
-				if (value.startsWith(StringPool.UNDERLINE)) {
+				if (value.startsWith(StringPool.UNDERSCORE)) {
 					result.type = Type.OBFUSCATED;
 					return result;
 				}

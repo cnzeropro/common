@@ -1,6 +1,6 @@
 package org.zero.common.data.model.view;
 
-import org.zero.common.data.exception.Status;
+import org.zero.common.data.enumeration.Status;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

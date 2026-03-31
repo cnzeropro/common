@@ -1,6 +1,11 @@
 package org.zero.common.data.constant;
 
 /**
+ * 字符串常量池。
+ * <p>
+ * 集中定义各类常用字符串（标点、货币、数学、编程、特殊符号）的字面量常量，
+ * 避免在业务代码中出现魔法字符串（magic string）。部分语义重叠的字符串通过别名引用同一字面量。
+ *
  * @author Zero (cnzeropro@163.com)
  * @since 2025/4/24
  */
@@ -17,7 +22,7 @@ public interface StringPool {
 	/**
 	 * 下划线：{@code "_"}
 	 */
-	String UNDERLINE = "_";
+	String UNDERSCORE = "_";
 	/**
 	 * 连接符：{@code "-"}
 	 */
@@ -83,7 +88,7 @@ public interface StringPool {
 	 */
 	String CURLY_LEFT = "{";
 	/**
-	 * 花括号（右）：<code>"}"</code>
+	 * 花括号（右）：{@code "}"}
 	 */
 	String CURLY_RIGHT = "}";
 	/**
@@ -105,11 +110,11 @@ public interface StringPool {
 	/**
 	 * 尖括号（左）：{@code "<"}
 	 */
-	String ANGLE_LEFT = "<";
+	String DEGREE_LEFT = "<";
 	/**
 	 * 尖括号（右）：{@code ">"}
 	 */
-	String ANGLE_RIGHT = ">";
+	String DEGREE_RIGHT = ">";
 
 	/* ********************************************************** 货币符号 ********************************************************** */
 	/**
@@ -119,7 +124,7 @@ public interface StringPool {
 	/**
 	 * 港币（HKD）：{@code "HK$"}
 	 */
-	String HONGKONG_DOLLAR = "HK$";
+	String HONG_KONG_DOLLAR = "HK$";
 	/**
 	 * 美元（USD）：{@code "$"}
 	 */
@@ -169,11 +174,11 @@ public interface StringPool {
 	/**
 	 * 小于号：{@code "<"}
 	 */
-	String LESS_THAN = ANGLE_LEFT;
+	String LESS_THAN = DEGREE_LEFT;
 	/**
 	 * 大于号：{@code ">"}
 	 */
-	String GREATER_THAN = ANGLE_RIGHT;
+	String GREATER_THAN = DEGREE_RIGHT;
 	/**
 	 * 百分号：{@code "%"}
 	 */
@@ -193,7 +198,7 @@ public interface StringPool {
 	/**
 	 * 角度：{@code "°"}
 	 */
-	String ANGLE = "°";
+	String DEGREE = "°";
 	/**
 	 * 圆周率：{@code "π"}
 	 */
@@ -247,7 +252,7 @@ public interface StringPool {
 	/**
 	 * 短线：{@code "-"}
 	 */
-	String DASHED = HYPHEN;
+	String DASH = HYPHEN;
 	/**
 	 * 点：{@code "."}
 	 */
@@ -265,8 +270,9 @@ public interface StringPool {
 	 */
 	String BACKSLASH = "\\";
 	/**
-	 * 回车符：{@code "\r"} <br>
-	 * 解释：该字符常用于表示 Linux 系统和 MacOS 系统下的文本换行
+	 * 回车符（Carriage Return）：{@code "\r"} <br>
+	 * 解释：通常与 {@link #LF} 组合为 {@code \r\n} 用于 Windows 系统的文本换行；
+	 * 旧版 Mac OS（9 及之前）单独使用 {@code \r} 换行
 	 */
 	String CR = "\r";
 	/**

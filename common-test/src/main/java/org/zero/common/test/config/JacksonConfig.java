@@ -11,7 +11,7 @@ import org.zero.common.core.extension.jackson.JavaTimeJackson2ObjectMapperBuilde
 import org.zero.common.core.extension.jackson.JsonJavaTimeProperties;
 import org.zero.common.core.extension.jackson.databind.ser.JSONNullSerializer;
 import org.zero.common.core.extension.jackson.databind.ser.NumberJsonComponent;
-import org.zero.common.data.exception.Status;
+import org.zero.common.data.enumeration.Status;
 
 /**
  * @author Zero (cnzeropro@163.com)

@@ -1,4 +1,4 @@
-package org.zero.common.data.exception;
+package org.zero.common.data.enumeration;
 
 import lombok.Getter;
 

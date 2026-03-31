@@ -1,7 +1,7 @@
 package org.zero.common.core.support.api.crypto.exception;
 
+import org.zero.common.data.enumeration.Status;
 import org.zero.common.data.exception.BaseException;
-import org.zero.common.data.exception.Status;
 
 /**
  * @author Zero (cnzeropro@163.com)

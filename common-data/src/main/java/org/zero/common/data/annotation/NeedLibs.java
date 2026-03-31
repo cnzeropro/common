@@ -7,7 +7,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 指示所需依赖
+ * {@link NeedLib} 的容器注解，用于支持 {@link java.lang.annotation.Repeatable @Repeatable}。
+ * <p>
+ * 仅作为编译期/文档期声明：表达某个类型依赖的多个三方库坐标。
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2025/5/13
@@ -16,5 +18,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Documented
 public @interface NeedLibs {
+    /**
+     * 依赖声明列表。
+     */
     NeedLib[] value();
 }

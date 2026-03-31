@@ -1,6 +1,6 @@
 package org.zero.common.core.exception.status;
 
-import org.zero.common.data.exception.Status;
+import org.zero.common.data.enumeration.Status;
 
 import java.util.Locale;
 

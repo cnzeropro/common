@@ -6,7 +6,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.StringUtils;
-import org.zero.common.data.exception.Status;
+import org.zero.common.data.enumeration.Status;
 import org.zero.common.data.format.DefaultMessageFormatter;
 import org.zero.common.data.format.MessageFormatter;
 

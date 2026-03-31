@@ -14,45 +14,45 @@ import static org.junit.jupiter.api.Assertions.assertSame;
  * @author Zero (cnzeropro@163.com)
  * @since 2026/03/26
  */
-class MessageTemplateExceptionTest {
+class TemplatedMessageExceptionTest {
 
 	@Test
-	void messageTemplateExceptionShouldUseDefaultFormatterByDefault() {
-		MessageTemplateException exception = new MessageTemplateException(new StringBuilder("user {0} at {1}"), "zero", 3);
+	void templatedMessageExceptionShouldUseDefaultFormatterByDefault() {
+		TemplatedMessageException exception = new TemplatedMessageException(new StringBuilder("user {0} at {1}"), "zero", 3);
 
 		assertEquals("user zero at 3", exception.getMessage());
 	}
 
 	@Test
-	void messageTemplateExceptionShouldTreatStringConstructorAsPlainMessage() {
-		MessageTemplateException exception = new MessageTemplateException("user {0}");
+	void templatedMessageExceptionShouldTreatStringConstructorAsPlainMessage() {
+		TemplatedMessageException exception = new TemplatedMessageException("user {0}");
 
 		assertEquals("user {0}", exception.getMessage());
 		assertNull(exception.getCause());
 	}
 
 	@Test
-	void messageTemplateExceptionShouldAdaptThrowableOnlyConstructorToRuntimeExceptionBehavior() {
+	void templatedMessageExceptionShouldAdaptThrowableOnlyConstructorToRuntimeExceptionBehavior() {
 		IllegalStateException cause = new IllegalStateException("boom");
-		MessageTemplateException exception = new MessageTemplateException(cause);
+		TemplatedMessageException exception = new TemplatedMessageException(cause);
 
 		assertEquals(cause.toString(), exception.getMessage());
 		assertSame(cause, exception.getCause());
 	}
 
 	@Test
-	void messageTemplateExceptionShouldTreatMessageAndCauseConstructorAsPlainMessage() {
+	void templatedMessageExceptionShouldTreatMessageAndCauseConstructorAsPlainMessage() {
 		IllegalStateException cause = new IllegalStateException("boom");
-		MessageTemplateException exception = new MessageTemplateException("user {0}", cause);
+		TemplatedMessageException exception = new TemplatedMessageException("user {0}", cause);
 
 		assertEquals("user {0}", exception.getMessage());
 		assertSame(cause, exception.getCause());
 	}
 
 	@Test
-	void messageTemplateExceptionShouldAdaptProtectedRuntimeExceptionFlagsConstructor() {
+	void templatedMessageExceptionShouldAdaptProtectedRuntimeExceptionFlagsConstructor() {
 		IllegalStateException cause = new IllegalStateException("boom");
-		MessageTemplateException exception = new MessageTemplateException("user {0}", cause, false, false);
+		TemplatedMessageException exception = new TemplatedMessageException("user {0}", cause, false, false);
 
 		exception.addSuppressed(new IllegalArgumentException("suppressed"));
 
@@ -63,39 +63,39 @@ class MessageTemplateExceptionTest {
 	}
 
 	@Test
-	void messageTemplateExceptionShouldTreatTrailingThrowableAsImplicitCauseByDefaultFormatter() {
+	void templatedMessageExceptionShouldTreatTrailingThrowableAsImplicitCauseByDefaultFormatter() {
 		IllegalStateException cause = new IllegalStateException("boom");
-		MessageTemplateException exception = new MessageTemplateException("user {0}", "zero", cause);
+		TemplatedMessageException exception = new TemplatedMessageException("user {0}", "zero", cause);
 
 		assertEquals("user zero", exception.getMessage());
 		assertSame(cause, exception.getCause());
 	}
 
 	@Test
-	void messageTemplateExceptionShouldUseExplicitCauseAndLocale() {
+	void templatedMessageExceptionShouldUseExplicitCauseAndLocale() {
 		IllegalStateException cause = new IllegalStateException("boom");
-		MessageTemplateException exception =
-			new MessageTemplateException(cause, "amount {0,number,#,##0.00}", Locale.GERMANY, 1234.56d);
+		TemplatedMessageException exception =
+			new TemplatedMessageException(cause, "amount {0,number,#,##0.00}", Locale.GERMANY, 1234.56d);
 
 		assertEquals("amount 1.234,56", exception.getMessage());
 		assertSame(cause, exception.getCause());
 	}
 
 	@Test
-	void messageTemplateExceptionShouldUseProvidedSlf4jFormatter() {
+	void templatedMessageExceptionShouldUseProvidedSlf4jFormatter() {
 		IllegalStateException cause = new IllegalStateException("boom");
-		MessageTemplateException exception =
-			new MessageTemplateException(cause, Slf4jMessageFormatter.INSTANCE, new StringBuilder("user {}"), "zero");
+		TemplatedMessageException exception =
+			new TemplatedMessageException(cause, Slf4jMessageFormatter.INSTANCE, new StringBuilder("user {}"), "zero");
 
 		assertEquals("user zero", exception.getMessage());
 		assertSame(cause, exception.getCause());
 	}
 
 	@Test
-	void messageTemplateExceptionShouldPreferExplicitCauseOverFormatterResult() {
+	void templatedMessageExceptionShouldPreferExplicitCauseOverFormatterResult() {
 		IllegalStateException explicitCause = new IllegalStateException("outer");
 		IllegalArgumentException implicitCause = new IllegalArgumentException("inner");
-		MessageTemplateException exception = new MessageTemplateException(
+		TemplatedMessageException exception = new TemplatedMessageException(
 			explicitCause,
 			Slf4jMessageFormatter.INSTANCE,
 			"user {} failed",
@@ -108,66 +108,66 @@ class MessageTemplateExceptionTest {
 	}
 
 	@Test
-	void messageTemplateExceptionShouldFallbackToDefaultFormatterWhenFormatterIsNull() {
-		MessageTemplateException exception =
-			new MessageTemplateException((org.zero.common.data.format.MessageFormatter) null, "user {0}", "zero");
+	void templatedMessageExceptionShouldFallbackToDefaultFormatterWhenFormatterIsNull() {
+		TemplatedMessageException exception =
+			new TemplatedMessageException((org.zero.common.data.format.MessageFormatter) null, "user {0}", "zero");
 
 		assertEquals("user zero", exception.getMessage());
 	}
 
 	@Test
-	void messageTemplateExceptionShouldSupportDirectParamTupleConstructor() {
+	void templatedMessageExceptionShouldSupportDirectParamTupleConstructor() {
 		IllegalStateException cause = new IllegalStateException("boom");
-		MessageTemplateException.ParamTuple paramTuple = new MessageTemplateException.ParamTuple(
+		TemplatedMessageException.ParamTuple paramTuple = new TemplatedMessageException.ParamTuple(
 			cause,
 			null,
 			new StringBuffer("amount {0,number,#,##0.00}"),
 			Locale.GERMANY,
 			new Object[]{1234.56d}
 		);
-		MessageTemplateException exception = new MessageTemplateException(paramTuple);
+		TemplatedMessageException exception = new TemplatedMessageException(paramTuple);
 
 		assertEquals("amount 1.234,56", exception.getMessage());
 		assertSame(cause, exception.getCause());
 	}
 
 	@Test
-	void messageTemplateExceptionShouldSupportBuilderParamTupleConstructor() {
+	void templatedMessageExceptionShouldSupportBuilderParamTupleConstructor() {
 		IllegalStateException cause = new IllegalStateException("boom");
-		MessageTemplateException.ParamTuple paramTuple = MessageTemplateException.ParamTuple.builder()
+		TemplatedMessageException.ParamTuple paramTuple = TemplatedMessageException.ParamTuple.builder()
 			.formatter(Slf4jMessageFormatter.INSTANCE)
 			.pattern(new StringBuilder("user {} failed"))
 			.args(new Object[]{"zero", cause})
 			.build();
-		MessageTemplateException exception = new MessageTemplateException(paramTuple);
+		TemplatedMessageException exception = new TemplatedMessageException(paramTuple);
 
 		assertEquals("user zero failed", exception.getMessage());
 		assertSame(cause, exception.getCause());
 	}
 
 	@Test
-	void messageTemplateExceptionShouldSupportCharSequencePatternWithLocale() {
-		MessageTemplateException exception =
-			new MessageTemplateException(new StringBuffer("amount {0,number,#,##0.00}"), Locale.GERMANY, 1234.56d);
+	void templatedMessageExceptionShouldSupportCharSequencePatternWithLocale() {
+		TemplatedMessageException exception =
+			new TemplatedMessageException(new StringBuffer("amount {0,number,#,##0.00}"), Locale.GERMANY, 1234.56d);
 
 		assertEquals("amount 1.234,56", exception.getMessage());
 	}
 
 	@Test
-	void messageTemplateExceptionShouldUseProvidedHutoolFormatter() {
+	void templatedMessageExceptionShouldUseProvidedHutoolFormatter() {
 		IllegalStateException cause = new IllegalStateException("boom");
-		MessageTemplateException exception =
-			new MessageTemplateException(cause, HutoolMessageFormatter.INSTANCE, new StringBuilder("user {}"), "zero");
+		TemplatedMessageException exception =
+			new TemplatedMessageException(cause, HutoolMessageFormatter.INSTANCE, new StringBuilder("user {}"), "zero");
 
 		assertEquals("user {}", exception.getMessage());
 		assertSame(cause, exception.getCause());
 	}
 
 	@Test
-	void messageTemplateExceptionShouldPreferExplicitCauseOverHutoolImplicitCause() {
+	void templatedMessageExceptionShouldPreferExplicitCauseOverHutoolImplicitCause() {
 		IllegalStateException explicitCause = new IllegalStateException("outer");
 		IllegalArgumentException implicitCause = new IllegalArgumentException("inner");
-		MessageTemplateException exception = new MessageTemplateException(
+		TemplatedMessageException exception = new TemplatedMessageException(
 			explicitCause,
 			HutoolMessageFormatter.INSTANCE,
 			"user {} failed",
@@ -180,14 +180,14 @@ class MessageTemplateExceptionTest {
 	}
 
 	@Test
-	void messageTemplateExceptionShouldSupportHutoolFormatterInParamTuple() {
+	void templatedMessageExceptionShouldSupportHutoolFormatterInParamTuple() {
 		IllegalStateException cause = new IllegalStateException("boom");
-		MessageTemplateException.ParamTuple paramTuple = MessageTemplateException.ParamTuple.builder()
+		TemplatedMessageException.ParamTuple paramTuple = TemplatedMessageException.ParamTuple.builder()
 			.formatter(HutoolMessageFormatter.INSTANCE)
 			.pattern(new StringBuilder("user {} failed"))
 			.args(new Object[]{"zero", cause})
 			.build();
-		MessageTemplateException exception = new MessageTemplateException(paramTuple);
+		TemplatedMessageException exception = new TemplatedMessageException(paramTuple);
 
 		assertEquals("user {} failed", exception.getMessage());
 		assertSame(cause, exception.getCause());

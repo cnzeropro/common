@@ -160,7 +160,7 @@ public class Endpoint {
 			if (label.isEmpty() || label.length() > 63) {
 				return false;
 			}
-			if (label.startsWith(StringPool.DASHED) || label.endsWith(StringPool.DASHED)) {
+			if (label.startsWith(StringPool.DASH) || label.endsWith(StringPool.DASH)) {
 				return false;
 			}
 		}
