@@ -22,7 +22,7 @@
 | `:common-api` | API 契约与 DTO |
 | `:common-job` | 任务调度与 cron 能力 |
 | `:common-test` | 集成/演示应用，端口 34567 |
-| `common-bom/` | 独立模块，需单独构建 |
+| `common-bom` | 独立模块，需单独构建 |
 
 ---
 
@@ -122,7 +122,7 @@ node scripts/verify-metadata.js --verbose
  * 描述。
  *
  * @author Zero (cnzeropro@163.com)
- * @since 2026/03/12
+ * @since YYYY/MM/DD
  */
 ```
 
@@ -176,7 +176,7 @@ node scripts/verify-metadata.js --verbose
 
 ---
 
-## 增量补充（2026-03-13）
+## 增量补充
 
 - Gradle 可用 `-PexcludeProjects=...` 过滤动态扫描模块（见 `settings.gradle`）：
 - `./gradlew -PexcludeProjects=common-test test`

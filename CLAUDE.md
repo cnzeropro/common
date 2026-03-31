@@ -136,16 +136,6 @@ Javadoc 模板：
 - `ExportControllerTest`：写文件到 `target/download`
 - `common-test` 集成测试：依赖 Spring Boot 上下文和 H2
 
-## 工作流
-
-1. 先用 `rg` / grep 建立上下文，再决定是否运行构建
-2. 先读 `settings.gradle`、目标模块 `build.gradle`、相关 `pom.xml`
-3. 涉及依赖、发布、adapter、Java 版本时，同时检查 Gradle 和 Maven
-4. `gradlew` 如果因为网络失败，不要用“理论上能过”代替实际验证
-5. 默认跳过交互式、benchmark、绝对路径依赖测试
-6. 仓库内没有现成 CI 工作流时，不要假设有自动化兜底
-7. `AGENTS.md` 和 `CLAUDE.md` 属于本地协作文档；提交前确认是否需要纳入版本控制
-
 ## 回答要求
 
 完成改动后，明确说明：
