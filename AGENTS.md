@@ -77,6 +77,10 @@ node scripts/verify-metadata.js --verbose
 - Maven 默认读取 root `pom.xml` 中的 `<revision>`，如需临时覆盖使用 `-Drevision=...`
 - Maven 不再读取仓库内 JDK 绝对路径；多版本编译依赖外部 toolchains，使用用户自带 `~/.m2/toolchains.xml` 或命令行 `mvn -t <toolchains.xml> ...`
 - 如需仓库内临时 toolchains 文件，可自行创建 `.mvn/toolchains.local.xml`，该路径不会纳入版本控制
+- **不要假设直接执行 `mvn` / `./gradlew` 就一定使用了项目当前需要的 Java 版本**：两者会优先使用当前 shell 的 `JAVA_HOME`、`JDK11_HOME`、`JDK17_HOME`、`JDK21_HOME` 或 Maven toolchains 配置；如果这些环境变量/配置与项目实际目标版本不一致，测试代码可能会被误判为“编译报错”
+- 典型现象：代码本身没有问题，但编译阶段出现“类文件版本过高/过低”“拿到了 Spring 6 / Jakarta 依赖却在 Java 8 下编译”“同一模块在 IDEA 能过、命令行失败”等问题；这类问题优先检查实际使用的 JDK，而不是先改测试代码
+- AI 代理在运行构建前，必须先确认“命令实际选中的 Java”与“模块期望的 Java”一致：Gradle 检查 `JAVA_HOME` / `JDK*_HOME`，Maven 检查 `toolchains.xml` / `-t .mvn/toolchains.local.xml`，并结合 root `gradle.properties`、root `pom.xml`、目标模块 `build.gradle` / `pom.xml` 判断
+- 如果只是想验证某个模块/测试，不要因为命令行环境里的默认 JDK 偏差而修改源码；应先切换到正确的 `JAVA_HOME` 或显式指定 Maven toolchain，再重新执行命令
 
 ---
 

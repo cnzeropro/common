@@ -6,6 +6,8 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.util.StringUtils;
 import org.zero.common.data.exception.Status;
+import org.zero.common.data.format.DefaultMessageFormatter;
+import org.zero.common.data.format.MessageFormatter;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -20,6 +22,8 @@ import java.util.Objects;
 public class MessageSourceStatus extends Status.Default {
 	@Setter
 	protected static MessageSourceAccessor messageSourceAccessor;
+	@Setter
+	protected static MessageFormatter messageFormatter = DefaultMessageFormatter.INSTANCE;
 
 	public static MessageSourceStatus of(String code, Object... args) {
 		return of(code, (String) null, args);
@@ -50,7 +54,7 @@ public class MessageSourceStatus extends Status.Default {
 			}
 		} finally {
 			if (!StringUtils.hasText(message)) {
-				message = formatMessage(defaultMessage, locale, args);
+				message = messageFormatter.format(defaultMessage, locale, args);
 			}
 		}
 		return new MessageSourceStatus(code, message);

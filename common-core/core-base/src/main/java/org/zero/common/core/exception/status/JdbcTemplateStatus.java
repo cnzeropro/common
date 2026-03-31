@@ -7,6 +7,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.StringUtils;
 import org.zero.common.data.exception.Status;
+import org.zero.common.data.format.DefaultMessageFormatter;
+import org.zero.common.data.format.MessageFormatter;
 
 import java.util.Locale;
 
@@ -25,6 +27,8 @@ public class JdbcTemplateStatus extends Status.Default {
 	protected static String querySql = "SELECT message FROM sys_error_dict WHERE code = ? AND (locale = ? OR (locale IS NULL AND ? IS NULL))";
 	@Setter
 	protected static Locale locale = LocaleContextHolder.getLocale();
+	@Setter
+	protected static MessageFormatter messageFormatter = DefaultMessageFormatter.INSTANCE;
 
 	public static JdbcTemplateStatus of(String code, Object... args) {
 		return of(code, locale, args);
@@ -42,7 +46,7 @@ public class JdbcTemplateStatus extends Status.Default {
 		String message = null;
 		try {
 			String messageTemplate = jdbcTemplate.queryForObject(querySql, String.class, code, locale, locale);
-			message = formatMessage(messageTemplate, locale, args);
+			message = messageFormatter.format(messageTemplate, locale, args);
 		} catch (EmptyResultDataAccessException e) {
 			// do nothing
 		} catch (Exception e) {
@@ -52,7 +56,7 @@ public class JdbcTemplateStatus extends Status.Default {
 			}
 		} finally {
 			if (!StringUtils.hasText(message)) {
-				message = formatMessage(defaultMessage, locale, args);
+				message = messageFormatter.format(defaultMessage, locale, args);
 			}
 		}
 		return new JdbcTemplateStatus(code, message);
