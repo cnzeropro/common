@@ -25,8 +25,10 @@ public interface Status extends Serializable {
 
 	@Getter
 	class Default implements Status {
-		public static final Status OK = new Default(OK_CODE, "ok");
-		public static final Status ERROR = new Default(ERROR_CODE, "error");
+		public static final String OK_MESSAGE = "ok";
+		public static final String ERROR_MESSAGE = "error";
+		public static final Status OK = new Default(OK_CODE, OK_MESSAGE);
+		public static final Status ERROR = new Default(ERROR_CODE, ERROR_MESSAGE);
 
 		protected final Serializable code;
 		protected final CharSequence message;

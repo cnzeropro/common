@@ -42,7 +42,7 @@ import java.util.Objects;
  */
 public class TemplatedMessageException extends RuntimeException {
 
-	/* ************************************************************** Native ************************************************************** */
+	/* ************************************************************** Native Constructors ************************************************************** */
 
 	/**
 	 * 无参构造。
@@ -91,7 +91,7 @@ public class TemplatedMessageException extends RuntimeException {
 		super(message, cause, enableSuppression, writableStackTrace);
 	}
 
-	/* ************************************************************** Extended ************************************************************** */
+	/* ************************************************************** Pattern Constructors ************************************************************** */
 
 	/**
 	 * 模板构造：使用默认格式化器、默认 Locale 格式化消息。
@@ -137,6 +137,8 @@ public class TemplatedMessageException extends RuntimeException {
 		this(cause, null, pattern, locale, args);
 	}
 
+	/* ************************************************************** Formatter Constructors ************************************************************** */
+
 	/**
 	 * 模板构造：指定格式化器、使用默认 Locale。
 	 *
@@ -173,7 +175,7 @@ public class TemplatedMessageException extends RuntimeException {
 	}
 
 	/**
-	 * 模板构造：完整参数版本，所有 Extended 构造器最终委托至此。
+	 * 模板构造：完整参数版本，所有模板构造器最终委托至此。
 	 *
 	 * @param cause     原因异常（显式指定，不从 args 中提取）
 	 * @param formatter 消息格式化器
@@ -184,6 +186,8 @@ public class TemplatedMessageException extends RuntimeException {
 	public TemplatedMessageException(Throwable cause, MessageFormatter formatter, CharSequence pattern, Locale locale, Object... args) {
 		this(new ParamTuple(cause, formatter, pattern, locale, args));
 	}
+
+	/* ************************************************************** Tuple Constructors ************************************************************** */
 
 	/**
 	 * 元组构造：通过 {@link ParamTuple} 一次性传入所有参数。
@@ -206,8 +210,8 @@ public class TemplatedMessageException extends RuntimeException {
 	/**
 	 * 元组构造（完整签名）：支持控制 suppression 和堆栈写入。
 	 *
-	 * @param paramTuple        参数元组
-	 * @param enableSuppression 是否启用抑制
+	 * @param paramTuple         参数元组
+	 * @param enableSuppression  是否启用抑制
 	 * @param writableStackTrace 是否可写堆栈
 	 */
 	protected TemplatedMessageException(ParamTuple paramTuple, boolean enableSuppression, boolean writableStackTrace) {
@@ -217,15 +221,15 @@ public class TemplatedMessageException extends RuntimeException {
 	/**
 	 * 已解析构造（完整签名）：支持控制 suppression 和堆栈写入。
 	 *
-	 * @param resolvedTuple     已解析的参数元组
-	 * @param enableSuppression 是否启用抑制
+	 * @param resolvedTuple      已解析的参数元组
+	 * @param enableSuppression  是否启用抑制
 	 * @param writableStackTrace 是否可写堆栈
 	 */
 	protected TemplatedMessageException(ResolvedTuple resolvedTuple, boolean enableSuppression, boolean writableStackTrace) {
 		super(resolvedTuple.message, resolvedTuple.cause, enableSuppression, writableStackTrace);
 	}
 
-	/* ************************************************************** Resolve ************************************************************** */
+	/* ************************************************************** Resolve Helpers ************************************************************** */
 
 	/**
 	 * 将 {@link ParamTuple} 解析为 {@link ResolvedTuple}。
@@ -293,7 +297,7 @@ public class TemplatedMessageException extends RuntimeException {
 		return Arrays.copyOf(args, args.length - 1);
 	}
 
-	/* ************************************************************** Inner Classes ************************************************************** */
+	/* ************************************************************** Inner Types ************************************************************** */
 
 	/**
 	 * 已解析的参数元组，持有最终生效的 {@code message} 和 {@code cause}。
