@@ -1,4 +1,4 @@
-package org.zero.common.data.model.persistant;
+package org.zero.common.data.model.persistent;
 
 import java.io.Serializable;
 

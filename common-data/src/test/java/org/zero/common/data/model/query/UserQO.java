@@ -3,7 +3,7 @@ package org.zero.common.data.model.query;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.zero.common.data.model.persistant.UserPO;
+import org.zero.common.data.model.persistent.UserPO;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

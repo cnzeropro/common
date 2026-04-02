@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-import org.zero.common.data.model.persistant.UserPO;
+import org.zero.common.data.model.persistent.UserPO;
 
 /**
  * @author Zero (cnzeropro@qq.com)

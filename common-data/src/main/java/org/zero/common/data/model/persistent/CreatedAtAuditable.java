@@ -1,4 +1,4 @@
-package org.zero.common.data.model.persistant;
+package org.zero.common.data.model.persistent;
 
 import java.io.Serializable;
 
@@ -9,7 +9,7 @@ import java.io.Serializable;
  * @author Zero (cnzeropro@163.com)
  * @since 2025/2/13
  */
-public interface CreationTimeAuditable<CreatedAt extends Serializable & Comparable<?>> {
+public interface CreatedAtAuditable<CreatedAt extends Serializable & Comparable<?>> {
     /**
      * 获取创建时间
      *

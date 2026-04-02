@@ -1,4 +1,4 @@
-package org.zero.common.data.model.persistant;
+package org.zero.common.data.model.persistent;
 
 import java.io.Serializable;
 
@@ -9,7 +9,7 @@ import java.io.Serializable;
  * @author Zero (cnzeropro@163.com)
  * @since 2025/2/13
  */
-public interface UpdateTimeAuditable<UpdatedAt extends Serializable & Comparable<?>> {
+public interface UpdatedAtAuditable<UpdatedAt extends Serializable & Comparable<?>> {
     /**
      * 获取更新时间
      *

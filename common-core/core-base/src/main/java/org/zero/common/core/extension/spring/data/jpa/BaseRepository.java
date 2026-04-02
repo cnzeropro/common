@@ -5,8 +5,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.transaction.annotation.Transactional;
-import org.zero.common.data.model.persistant.Identifiable;
-import org.zero.common.data.model.persistant.SoftDeletable;
+import org.zero.common.data.model.persistent.Identifiable;
+import org.zero.common.data.model.persistent.SoftDeletable;
 
 import java.io.Serializable;
 import java.util.List;

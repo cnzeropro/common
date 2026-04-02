@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Singular;
 import lombok.experimental.SuperBuilder;
+import org.zero.common.data.constant.CharPool;
 import org.zero.common.data.constant.StringPool;
 
 import java.io.Serializable;
@@ -436,12 +437,12 @@ public class MimeType implements Serializable {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(this.getType());
-		builder.append('/');
+		builder.append(CharPool.SLASH);
 		builder.append(this.getSubtype());
 		this.getParameters().forEach((key, val) -> {
-			builder.append(';');
+			builder.append(CharPool.SEMICOLON);
 			builder.append(key);
-			builder.append('=');
+			builder.append(CharPool.EQUAL);
 			builder.append(val);
 		});
 		return builder.toString();
