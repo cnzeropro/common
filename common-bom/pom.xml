@@ -1,111 +1,109 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.zero</groupId>
-    <artifactId>common-bom</artifactId>
-    <version>${revision}</version>
+	<groupId>org.zero</groupId>
+	<artifactId>common-bom</artifactId>
+	<version>${revision}</version>
 
-    <packaging>pom</packaging>
+	<packaging>pom</packaging>
 
-    <name>common-bom</name>
-    <description>Common Bom</description>
+	<name>common-bom</name>
+	<description>Common Bom</description>
 
-    <properties>
-        <revision>1.0.0</revision>
-        <common-data.version>${project.version}</common-data.version>
-        <common-core.version>${project.version}</common-core.version>
-        <common-api.version>${project.version}</common-api.version>
-        <common-job.version>${project.version}</common-job.version>
+	<properties>
+		<revision>1.0.0</revision>
+		<common-data.version>${project.version}</common-data.version>
+		<common-core.version>${project.version}</common-core.version>
+		<common-api.version>${project.version}</common-api.version>
+		<common-job.version>${project.version}</common-job.version>
 
-        <!-- Maven Plugins -->
-        <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
-        <maven-javadoc-plugin.version>3.8.0</maven-javadoc-plugin.version>
-        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-        <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
-        <site-maven-plugin.version>0.12</site-maven-plugin.version>
-    </properties>
+		<!-- Maven Plugins -->
+		<maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>
+		<site-maven-plugin.version>0.12</site-maven-plugin.version>
+	</properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.zero</groupId>
-                <artifactId>common-data</artifactId>
-                <version>${common-data.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.zero</groupId>
-                <artifactId>common-core</artifactId>
-                <version>${common-core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.zero</groupId>
-                <artifactId>common-api</artifactId>
-                <version>${common-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.zero</groupId>
-                <artifactId>common-job</artifactId>
-                <version>${common-job.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.zero</groupId>
+				<artifactId>common-data</artifactId>
+				<version>${common-data.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.zero</groupId>
+				<artifactId>common-core</artifactId>
+				<version>${common-core.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.zero</groupId>
+				<artifactId>common-api</artifactId>
+				<version>${common-api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.zero</groupId>
+				<artifactId>common-job</artifactId>
+				<version>${common-job.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>${maven-deploy-plugin.version}</version>
-                <configuration>
-                    <altDeploymentRepository>
-                        local-staging-repository::default::file://${project.build.directory}/mvn-repo
-                    </altDeploymentRepository>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.github.github</groupId>
-                <artifactId>site-maven-plugin</artifactId>
-                <version>${site-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>site</goal>
-                        </goals>
-                        <phase>deploy</phase>
-                        <configuration>
-                            <server>github</server>
-                            <branch>refs/heads/main</branch>
-                            <message>upload ${project.artifactId}-${project.version}</message>
-                            <repositoryOwner>cnzeropro</repositoryOwner>
-                            <repositoryName>repository</repositoryName>
-                            <merge>true</merge>
-                            <noJekyll>true</noJekyll>
-                            <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
-                            <includes>
-                                <include>**/*</include>
-                            </includes>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+	<build>
+		<plugins>
+			<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-deploy-plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>${maven-deploy-plugin.version}</version>
+				<configuration>
+					<altDeploymentRepository>
+						local-staging-repository::file://${project.build.directory}/mvn-repo
+					</altDeploymentRepository>
+				</configuration>
+			</plugin>
+			<!-- https://mvnrepository.com/artifact/com.github.github/site-maven-plugin -->
+			<!-- 需要在 setting.xml 文件中指定用户名和密码
+			  <server>
+				  <id>github</id>
+				  <username>YOUR_USERNAME</username>
+				  <password>YOUR_PASSWORD</password>
+			  </server>
+			-->
+			<plugin>
+				<groupId>com.github.github</groupId>
+				<artifactId>site-maven-plugin</artifactId>
+				<version>${site-maven-plugin.version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>site</goal>
+						</goals>
+						<phase>deploy</phase>
+						<configuration>
+							<server>github</server>
+							<branch>refs/heads/main</branch>
+							<message>upload ${project.artifactId}-${project.version}</message>
+							<repositoryOwner>cnzeropro</repositoryOwner>
+							<repositoryName>repository</repositoryName>
+							<merge>true</merge>
+							<noJekyll>true</noJekyll>
+							<outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
+							<includes>
+								<include>**/*</include>
+							</includes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
-    <!-- setting.xml 文件中指定用户名和密码
-    <server>
-        <id>github</id>
-        <username>YOUR_USERNAME</username>
-        <password>YOUR_PASSWORD</password>
-    </server>
-    -->
-
-    <distributionManagement>
-        <repository>
-            <id>local-staging-repository</id>
-            <name>Local Staging Repository</name>
-            <url>file://${project.build.directory}/mvn-repo</url>
-        </repository>
-    </distributionManagement>
+	<distributionManagement>
+		<repository>
+			<id>local-staging-repository</id>
+			<name>Local Staging Repository</name>
+			<url>file://${project.build.directory}/mvn-repo</url>
+		</repository>
+	</distributionManagement>
 </project>
