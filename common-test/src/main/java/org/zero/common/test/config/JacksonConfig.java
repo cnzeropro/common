@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.zero.common.core.extension.jackson.JavaTimeJackson2ObjectMapperBuilderCustomizer;
 import org.zero.common.core.extension.jackson.JsonJavaTimeProperties;
+import org.zero.common.core.extension.jackson.QueryQOJackson2ObjectMapperBuilderCustomizer;
 import org.zero.common.core.extension.jackson.databind.ser.JSONNullSerializer;
 import org.zero.common.core.extension.jackson.databind.ser.NumberJsonComponent;
 import org.zero.common.data.enumeration.Status;
@@ -36,7 +37,10 @@ public class JacksonConfig {
 
     @Bean
     Jackson2ObjectMapperBuilderCustomizer jackson2ObjectMapperBuilderCustomizer() {
-        return builder -> builder.mixIn(Status.class, BaseSysErrorMixIn.class);
+		return builder -> {
+			builder.mixIn(Status.class, BaseSysErrorMixIn.class);
+			new QueryQOJackson2ObjectMapperBuilderCustomizer().customize(builder);
+		};
     }
 
     private interface BaseSysErrorMixIn{

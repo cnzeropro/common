@@ -4,21 +4,26 @@ import cn.hutool.json.JSONObject;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.zero.common.core.extension.common.data.model.query.converter.StringToFieldConverter;
-import org.zero.common.core.extension.common.data.model.query.converter.StringToOperatorConverter;
 import org.zero.common.core.extension.spring.web.method.support.JsonObjectArgumentResolvers;
 import org.zero.common.core.extension.spring.web.method.support.JsonObjectParam;
 import org.zero.common.core.support.bean.dynamic.DynamicBean;
 import org.zero.common.core.support.bean.dynamic.DynamicBeanArgumentResolver;
 import org.zero.common.core.support.bean.dynamic.DynamicBeanParam;
-import org.zero.common.data.model.query.BaseQO;
+import org.zero.common.data.model.query.PageQO;
+import org.zero.common.data.model.query.QueryQO;
+import org.zero.common.data.model.query.ReportQO;
 import org.zero.common.data.model.view.Result;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -31,12 +36,18 @@ import java.util.List;
 @RestController
 @RequestMapping("query")
 public class QueryController {
-    /**
-     * @see StringToFieldConverter
-     * @see StringToOperatorConverter
-     */
-    @GetMapping("q1")
-    public Result<BaseQO> q1(@Validated BaseQO param) {
+	@GetMapping("business")
+	public Result<UserListQO> business(UserListQO param) {
+		return Result.ok(param);
+	}
+
+	@PostMapping("search")
+	public Result<QueryQO> search(@RequestBody QueryQO param) {
+		return Result.ok(param);
+	}
+
+	@PostMapping("report")
+	public Result<ReportQO> report(@RequestBody ReportQO param) {
         return Result.ok(param);
     }
 
@@ -77,4 +88,17 @@ public class QueryController {
         log.info("at: {}", at);
         return Result.ok(param);
     }
+
+	@Data
+	@EqualsAndHashCode(callSuper = true)
+	public static class UserListQO extends PageQO {
+		private String name;
+		private String status;
+
+		@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+		private LocalDateTime createdFrom;
+
+		@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+		private LocalDateTime createdTo;
+	}
 }

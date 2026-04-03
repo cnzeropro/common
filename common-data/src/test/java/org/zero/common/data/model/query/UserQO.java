@@ -3,9 +3,8 @@ package org.zero.common.data.model.query;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.zero.common.data.model.persistent.UserPO;
+import org.zero.common.data.enumeration.UserStatus;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -15,25 +14,15 @@ import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class UserQO extends PageQO {
-    private UserPO eq;
-    private UserPO like;
-    private UserMultiValueQO in;
-    private UserRangeQO between;
+	private String name;
+	private UserStatus status;
+	private Long[] ids = new Long[0];
+	private Long startId;
+	private Long endId;
 
-    @Data
-    public static class UserMultiValueQO implements Serializable {
-        private Long[] ids = new Long[0];
-        private String[] names = new String[0];
-    }
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	private LocalDateTime createdFrom;
 
-    @Data
-    public static class UserRangeQO implements Serializable {
-        private Long startId;
-        private Long endId;
-
-        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-        private LocalDateTime startCreateTime;
-        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-        private LocalDateTime endCreateTime;
-    }
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	private LocalDateTime createdTo;
 }
