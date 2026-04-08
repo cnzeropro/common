@@ -27,8 +27,8 @@ profiles = ["java8", "java11", "java17", "java21", "java25"]
 "com.alibaba_druid-spring-boot-starter" = { java8 = "1.2.28" }
 # https://mvnrepository.com/artifact/com.alibaba/easyexcel
 "com.alibaba_easyexcel" = { java8 = "4.0.3" }
-# https://mvnrepository.com/artifact/com.alicp.jetcache/jetcache-core
-"com.alicp.jetcache_jetcache-bom" = { java8 = "2.7.8", scope = "import" }
+# https://mvnrepository.com/artifact/com.alibaba.fastjson2/fastjson2
+"com.alibaba.fastjson2_fastjson2" = { java8 = "2.0.15" }
 # https://mvnrepository.com/artifact/com.auth0/java-jwt
 "com.auth0_java-jwt" = { java8 = "4.5.1" }
 # https://mvnrepository.com/artifact/com.baomidou/dynamic-datasource-spring-boot-starter
@@ -117,8 +117,9 @@ profiles = ["java8", "java11", "java17", "java21", "java25"]
 "org.apache.commons_commons-compress" = { java8 = "1.28.0" }
 # https://mvnrepository.com/artifact/org.apache.commons/commons-text
 "org.apache.commons_commons-text" = { java8 = "1.14.0" }
+# https://mvnrepository.com/artifact/org.apache.dubbo/dubbo
+"org.apache.dubbo_dubbo" = { java8 = "2.7.21" }
 # https://mvnrepository.com/artifact/org.apache.dubbo/dubbo-bom
-"org.apache.dubbo_dubbo-bom" = { java8 = "3.2.12", scope = "import" }
 # https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-bom
 "org.apache.logging.log4j_log4j-bom" = { java8 = "2.24.3", scope = "import" }
 # https://mvnrepository.com/artifact/org.apache.maven/maven-model
@@ -177,6 +178,8 @@ profiles = ["java8", "java11", "java17", "java21", "java25"]
 "org.redisson_redisson-spring-boot-starter" = { java8 = "3.52.0" }
 # https://mvnrepository.com/artifact/org.slf4j/slf4j-bom
 "org.slf4j_slf4j-bom" = { java8 = "2.0.17", scope = "import" }
+# https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+"org.slf4j_slf4j-api" = { java8 = "2.0.17" }
 # https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-bom
 "org.springdoc_springdoc-openapi-bom" = { java8 = "2.8.9", java17 = "2.8.13", scope = "import" }
 # https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies

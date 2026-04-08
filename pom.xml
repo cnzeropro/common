@@ -52,9 +52,9 @@
 		<com.alibaba.csp_sentinel-apache-dubbo3-adapter.version>1.8.8</com.alibaba.csp_sentinel-apache-dubbo3-adapter.version>
 		<com.alibaba.csp_sentinel-spring-webmvc-6x-adapter.version>1.8.6</com.alibaba.csp_sentinel-spring-webmvc-6x-adapter.version>
 		<com.alibaba.csp_sentinel-spring-webmvc-adapter.version>1.8.8</com.alibaba.csp_sentinel-spring-webmvc-adapter.version>
+		<com.alibaba.fastjson2_fastjson2.version>2.0.15</com.alibaba.fastjson2_fastjson2.version>
 		<com.alibaba_druid-spring-boot-starter.version>1.2.28</com.alibaba_druid-spring-boot-starter.version>
 		<com.alibaba_easyexcel.version>4.0.3</com.alibaba_easyexcel.version>
-		<com.alicp.jetcache_jetcache-bom.version>2.7.8</com.alicp.jetcache_jetcache-bom.version>
 		<com.auth0_java-jwt.version>4.5.1</com.auth0_java-jwt.version>
 		<com.baomidou_dynamic-datasource-spring-boot-starter.version>4.5.0</com.baomidou_dynamic-datasource-spring-boot-starter.version>
 		<com.baomidou_lock4j-core.version>2.2.7</com.baomidou_lock4j-core.version>
@@ -98,7 +98,7 @@
 		<net.devh_grpc-server-spring-boot-starter.version>2.15.0.RELEASE</net.devh_grpc-server-spring-boot-starter.version>
 		<org.apache.commons_commons-compress.version>1.28.0</org.apache.commons_commons-compress.version>
 		<org.apache.commons_commons-text.version>1.14.0</org.apache.commons_commons-text.version>
-		<org.apache.dubbo_dubbo-bom.version>3.2.12</org.apache.dubbo_dubbo-bom.version>
+		<org.apache.dubbo_dubbo.version>2.7.21</org.apache.dubbo_dubbo.version>
 		<org.apache.logging.log4j_log4j-bom.version>2.24.3</org.apache.logging.log4j_log4j-bom.version>
 		<org.apache.maven_maven-model.version>3.9.11</org.apache.maven_maven-model.version>
 		<org.apache.poi_poi-ooxml.version>5.4.1</org.apache.poi_poi-ooxml.version>
@@ -126,6 +126,7 @@
 		<org.projectlombok_lombok.version>1.18.42</org.projectlombok_lombok.version>
 		<org.redisson_redisson-spring-boot-starter.version>3.52.0</org.redisson_redisson-spring-boot-starter.version>
 		<org.redisson_redisson.version>3.52.0</org.redisson_redisson.version>
+		<org.slf4j_slf4j-api.version>2.0.17</org.slf4j_slf4j-api.version>
 		<org.slf4j_slf4j-bom.version>2.0.17</org.slf4j_slf4j-bom.version>
 		<org.springdoc_springdoc-openapi-bom.version>2.8.9</org.springdoc_springdoc-openapi-bom.version>
 		<org.springframework.boot_spring-boot-dependencies.version>2.7.18</org.springframework.boot_spring-boot-dependencies.version>
@@ -254,6 +255,12 @@
 				<artifactId>sentinel-spring-webmvc-adapter</artifactId>
 				<version>${com.alibaba.csp_sentinel-spring-webmvc-adapter.version}</version>
 			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.alibaba.fastjson2/fastjson2 -->
+			<dependency>
+				<groupId>com.alibaba.fastjson2</groupId>
+				<artifactId>fastjson2</artifactId>
+				<version>${com.alibaba.fastjson2_fastjson2.version}</version>
+			</dependency>
 			<!-- https://mvnrepository.com/artifact/com.alibaba/druid-spring-boot-starter -->
 			<dependency>
 				<groupId>com.alibaba</groupId>
@@ -265,14 +272,6 @@
 				<groupId>com.alibaba</groupId>
 				<artifactId>easyexcel</artifactId>
 				<version>${com.alibaba_easyexcel.version}</version>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/com.alicp.jetcache/jetcache-bom -->
-			<dependency>
-				<groupId>com.alicp.jetcache</groupId>
-				<artifactId>jetcache-bom</artifactId>
-				<version>${com.alicp.jetcache_jetcache-bom.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
 			</dependency>
 			<!-- https://mvnrepository.com/artifact/com.auth0/java-jwt -->
 			<dependency>
@@ -560,13 +559,11 @@
 				<artifactId>commons-text</artifactId>
 				<version>${org.apache.commons_commons-text.version}</version>
 			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.apache.dubbo/dubbo-bom -->
+			<!-- https://mvnrepository.com/artifact/org.apache.dubbo/dubbo -->
 			<dependency>
 				<groupId>org.apache.dubbo</groupId>
-				<artifactId>dubbo-bom</artifactId>
-				<version>${org.apache.dubbo_dubbo-bom.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
+				<artifactId>dubbo</artifactId>
+				<version>${org.apache.dubbo_dubbo.version}</version>
 			</dependency>
 			<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-bom -->
 			<dependency>
@@ -741,6 +738,12 @@
 				<groupId>org.redisson</groupId>
 				<artifactId>redisson-spring-boot-starter</artifactId>
 				<version>${org.redisson_redisson-spring-boot-starter.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${org.slf4j_slf4j-api.version}</version>
 			</dependency>
 			<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-bom -->
 			<dependency>

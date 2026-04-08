@@ -7,8 +7,6 @@ import org.zero.common.api.extra.loki.LokiFeignClient;
 import org.zero.common.api.extra.loki.model.request.LokiQueryRangeRequest;
 import org.zero.common.data.model.view.Result;
 
-import java.math.BigInteger;
-
 /**
  * @author Zero (cnzeropro@163.com)
  * @since 2025/7/2
@@ -27,8 +25,8 @@ public class LokiController {
         //         .build();
         // Object result = lokiFeignClient.formatQueryPost(LokiFormatQueryRequest.builder().query("{appname=\"persona\"}").build());
         LokiQueryRangeRequest queryRangeRequest = LokiQueryRangeRequest.builder()
-                .start(BigInteger.valueOf(1751299200000000000L))
-                .end(BigInteger.valueOf(1751385600000000000L))
+			.start("1751299200000000000")
+			.end("1751385600000000000")
                 .query("{appname=\"persona\"}").build();
         Object result = lokiFeignClient.queryRange(queryRangeRequest);
         // LokiIndexStatsRequest indexStatsRequest = LokiIndexStatsRequest.builder()

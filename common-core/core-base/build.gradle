@@ -45,6 +45,7 @@ dependencies {
     implementation('org.slf4j:slf4j-api')
     implementation('com.alibaba:transmittable-thread-local')
     implementation(libs.com.alibaba.easyexcel)
+    implementation('com.alibaba.fastjson2:fastjson2')
     implementation('com.alibaba.cloud:spring-cloud-starter-alibaba-sentinel')
     implementation('com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery')
     /*
