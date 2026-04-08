@@ -54,10 +54,10 @@ public class QueryValidator {
 		if (pageSpec == null) {
 			throw new IllegalArgumentException("Page spec must not be null");
 		}
-		if (pageSpec.getPageNum() <= 0L) {
+		if (pageSpec.getNumber() <= 0L) {
 			throw new IllegalArgumentException("Page number must be greater than 0");
 		}
-		if (pageSpec.getPageSize() <= 0L) {
+		if (pageSpec.getSize() <= 0L) {
 			throw new IllegalArgumentException("Page size must be greater than 0");
 		}
 	}

@@ -7,7 +7,7 @@ const path = require("path");
 const { spawnSync } = require("child_process");
 
 const PREFIX = "[manage-metadata]";
-const USAGE = "Usage: manage-metadata.js <sync|verify> [--verbose|-v]";
+const USAGE = "Usage: manage-metadata.js <sync|verify|sync-gradle|verify-gradle|sync-maven|verify-maven> [--verbose|-v]";
 
 function log(verbose, message) {
 	if (verbose) {
@@ -21,7 +21,7 @@ function parseArgs(argv) {
 	}
 
 	const commandName = argv[0];
-	if (!["sync", "verify"].includes(commandName)) {
+    if (!["sync", "verify", "sync-gradle", "verify-gradle", "sync-maven", "verify-maven"].includes(commandName)) {
 		return null;
 	}
 

@@ -77,6 +77,11 @@ class BuildMetadataGeneratorTest {
 		assertTrue(gradleProperties.contains("build.profiles=java8,java17,java21"));
 		assertFalse(gradlePropertyLines.contains("revision=1.0.0"));
 
+		String platformMetadata = read(tempDir.resolve("gradle").resolve("platform-metadata.json"));
+		assertTrue(platformMetadata.contains("\"baseProfile\": \"java8\""));
+		assertTrue(platformMetadata.contains("\"java17\""));
+		assertTrue(platformMetadata.contains("\"org-jooq_jooq-bom\"".replace('.', '-')));
+
 		String commonBomGradleProperties = read(tempDir.resolve("common-bom").resolve("gradle.properties"));
 		assertTrue(commonBomGradleProperties.contains("build.revision=1.0.0"));
 		assertFalse(commonBomGradleProperties.contains("build.profiles="));
@@ -85,6 +90,43 @@ class BuildMetadataGeneratorTest {
 		assertTrue(commonBomPom.contains("<version>${revision}</version>"));
 		assertTrue(commonBomPom.contains("<revision>1.0.0</revision>"));
 		assertEquals(1, countMatches(commonBomPom, "<revision>1.0.0</revision>"));
+	}
+
+	@Test
+	void syncGradleShouldOnlyTouchGradleFiles(@TempDir Path tempDir) throws IOException {
+		writeFixture(tempDir);
+
+		BuildMetadataGenerator generator = new BuildMetadataGenerator(tempDir.toFile());
+		generator.syncGradle();
+		generator.verifyGradle();
+
+		String pom = read(tempDir.resolve("pom.xml"));
+		assertTrue(pom.contains("<legacy.dep>remove</legacy.dep>"));
+		assertTrue(pom.contains("<version>0.0.1</version>"));
+
+		String commonBomPom = read(tempDir.resolve("common-bom").resolve("pom.xml"));
+		assertTrue(commonBomPom.contains("<version>0.0.1</version>"));
+
+		String gradleProperties = read(tempDir.resolve("gradle.properties"));
+		assertTrue(gradleProperties.contains("build.revision=1.0.0"));
+		assertTrue(Files.exists(tempDir.resolve("gradle").resolve("platform-metadata.json")));
+	}
+
+	@Test
+	void syncMavenShouldOnlyTouchMavenFiles(@TempDir Path tempDir) throws IOException {
+		writeFixture(tempDir);
+
+		BuildMetadataGenerator generator = new BuildMetadataGenerator(tempDir.toFile());
+		generator.syncMaven();
+		generator.verifyMaven();
+
+		String pom = read(tempDir.resolve("pom.xml"));
+		assertTrue(pom.contains("<version>${revision}</version>"));
+		assertFalse(pom.contains("<legacy.dep>remove</legacy.dep>"));
+
+		String gradleProperties = read(tempDir.resolve("gradle.properties"));
+		assertTrue(gradleProperties.contains("build.revision=0.0.1"));
+		assertFalse(Files.exists(tempDir.resolve("gradle").resolve("platform-metadata.json")));
 	}
 
 	@Test

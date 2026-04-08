@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 PREFIX = "[manage-metadata]"
-USAGE = "Usage: manage-metadata.py <sync|verify> [--verbose|-v]"
+USAGE = "Usage: manage-metadata.py <sync|verify|sync-gradle|verify-gradle|sync-maven|verify-maven> [--verbose|-v]"
 
 
 def log(verbose, message):
@@ -22,7 +22,7 @@ def parse_args(argv):
         return None
 
     command = argv[0]
-    if command not in {"sync", "verify"}:
+    if command not in {"sync", "verify", "sync-gradle", "verify-gradle", "sync-maven", "verify-maven"}:
         return None
 
     verbose = False

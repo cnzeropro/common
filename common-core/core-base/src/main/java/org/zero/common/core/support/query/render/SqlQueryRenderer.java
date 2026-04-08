@@ -93,7 +93,7 @@ public class SqlQueryRenderer implements QueryRenderer<SqlFragment> {
 		appendOrderByClause(sql, querySpec, querySchema, metricMetadata);
 
 		if (querySpec.getPage() != null) {
-			sql.append(" LIMIT ").append(querySpec.getPage().getPageSize());
+			sql.append(" LIMIT ").append(querySpec.getPage().getSize());
 			sql.append(" OFFSET ").append(querySpec.getPage().getOffset());
 		}
 

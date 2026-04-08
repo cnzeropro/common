@@ -17,7 +17,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ApplicationConventionPluginFunctionalTest {
     @Test
     void java8ApplicationConventionShouldNotRegisterPublishingTasks(@TempDir Path tempDir) throws IOException {
-        writeFile(tempDir.resolve("settings.gradle"), "rootProject.name = 'sample-app'");
+        writeFile(
+            tempDir.resolve("settings.gradle"),
+            "rootProject.name = 'sample-app'"
+        );
+        writeFile(
+            tempDir.resolve("gradle/libs.versions.toml"),
+            "[versions]",
+            "junit = '5.12.2'",
+            "",
+            "[libraries]",
+            "org-junit_junit-bom = { module = 'org.junit:junit-bom', version.ref = 'junit' }"
+        );
         writeFile(tempDir.resolve("build.gradle"), String.join(
             System.lineSeparator(),
             "plugins {",
@@ -40,6 +51,9 @@ class ApplicationConventionPluginFunctionalTest {
     }
 
     private void writeFile(Path path, String... lines) throws IOException {
+        if (path.getParent() != null) {
+            Files.createDirectories(path.getParent());
+        }
         Files.write(path, Arrays.asList(lines), StandardCharsets.UTF_8);
     }
 }

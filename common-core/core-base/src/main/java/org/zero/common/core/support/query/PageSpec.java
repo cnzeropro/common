@@ -19,10 +19,10 @@ import java.io.Serializable;
 public class PageSpec implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private long pageNum = 1L;
-	private long pageSize = PageQO.DEFAULT_PAGE_SIZE;
+	private long number = 1L;
+	private long size = PageQO.DEFAULT_SIZE;
 
 	public long getOffset() {
-		return Math.max(pageNum - 1L, 0L) * pageSize;
+		return Math.max(number - 1L, 0L) * size;
 	}
 }

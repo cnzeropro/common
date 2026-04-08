@@ -39,6 +39,12 @@ dependencies {
  * mavenBom publication - 与根平台分离发布，方便外部工程单独按 org.zero:common-bom 引入。
  */
 publishing {
+    repositories {
+        maven {
+            name = 'localStagingRepository'
+            url = layout.buildDirectory.dir('mvn-repo')
+        }
+    }
     publications {
         mavenBom(MavenPublication) {
             from components.javaPlatform

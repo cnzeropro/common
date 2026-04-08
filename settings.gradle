@@ -238,14 +238,6 @@ rootProject.name = 'common'
  */
 def projects = new LinkedHashMap<String, Map<String, Object>>()
 registerProject(projects, ':core-base', 'core-base', 'common-core/core-base', [':common-data'])
-registerProject(projects, ':core-jakarta', 'core-jakarta', 'common-core/adapters/core-jakarta', [':core-base', ':common-data'])
-registerProject(
-	projects,
-	':core-spring-boot3',
-	'core-spring-boot3',
-	'common-core/adapters/core-spring-boot3',
-	[':core-base', ':core-jakarta', ':common-data']
-)
 registerProject(projects, ':core-ip2region2', 'core-ip2region2', 'common-core/adapters/core-ip2region2', [':core-base'])
 registerProject(projects, ':core-distribution', 'common-core', 'common-core/core-distribution', [':core-base', ':core-ip2region2'])
 registerProject(projects, ':common-data', 'common-data', 'common-data')
@@ -264,6 +256,14 @@ registerProject(
  * 作用：在 `java17` 及以上 profile 下补齐 distribution 侧 adapter 模块依赖。
  */
 if (isAtLeastProfile(activeBuildProfile, 'java17', supportedProfiles)) {
+    registerProject(projects, ':core-jakarta', 'core-jakarta', 'common-core/adapters/core-jakarta', [':core-base', ':common-data'])
+    registerProject(
+        projects,
+        ':core-spring-boot3',
+        'core-spring-boot3',
+        'common-core/adapters/core-spring-boot3',
+        [':core-base', ':core-jakarta', ':common-data']
+    )
 	projects[':core-distribution'].dependencies.addAll([':core-jakarta', ':core-spring-boot3'])
 }
 

@@ -19,7 +19,10 @@ class BuildMetadataCliTest {
 		CliResult result = runCli();
 
 		assertEquals(1, result.exitCode);
-		assertEquals("Usage: BuildMetadataCli <sync|verify> <repoRoot> [--verbose]", result.stderr.trim());
+		assertEquals(
+			"Usage: BuildMetadataCli <sync|verify|sync-gradle|verify-gradle|sync-maven|verify-maven> <repoRoot> [--verbose]",
+			result.stderr.trim()
+		);
 	}
 
 	@Test

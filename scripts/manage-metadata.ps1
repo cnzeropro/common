@@ -1,6 +1,6 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-$usage = 'Usage: manage-metadata.ps1 <sync|verify> [--verbose|-v|-VerboseOutput]'
+$usage = 'Usage: manage-metadata.ps1 <sync|verify|sync-gradle|verify-gradle|sync-maven|verify-maven> [--verbose|-v|-VerboseOutput]'
 $verbose = $false
 $command = $null
 
@@ -14,7 +14,14 @@ if ($args.Count -lt 1 -or $args.Count -gt 2) {
 }
 
 $command = [string]$args[0]
-if ($command -ne 'sync' -and $command -ne 'verify') {
+if (
+	$command -ne 'sync' -and
+	$command -ne 'verify' -and
+	$command -ne 'sync-gradle' -and
+	$command -ne 'verify-gradle' -and
+	$command -ne 'sync-maven' -and
+	$command -ne 'verify-maven'
+) {
     Write-Usage
     exit 1
 }

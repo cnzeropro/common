@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableExtensions DisableDelayedExpansion
 
-set "USAGE=Usage: manage-metadata.bat ^<sync^|verify^> [--verbose^|-v]"
+set "USAGE=Usage: manage-metadata.bat ^<sync^|verify^|sync-gradle^|verify-gradle^|sync-maven^|verify-maven^> [--verbose^|-v]"
 set "VERBOSE="
 
 if /I "%~1"=="sync" (
@@ -10,6 +10,22 @@ if /I "%~1"=="sync" (
 )
 if /I "%~1"=="verify" (
 	set "COMMAND=verify"
+	goto parse_flag
+)
+if /I "%~1"=="sync-gradle" (
+	set "COMMAND=sync-gradle"
+	goto parse_flag
+)
+if /I "%~1"=="verify-gradle" (
+	set "COMMAND=verify-gradle"
+	goto parse_flag
+)
+if /I "%~1"=="sync-maven" (
+	set "COMMAND=sync-maven"
+	goto parse_flag
+)
+if /I "%~1"=="verify-maven" (
+	set "COMMAND=verify-maven"
 	goto parse_flag
 )
 goto usage

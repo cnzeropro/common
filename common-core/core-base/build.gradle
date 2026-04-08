@@ -82,6 +82,7 @@ dependencies {
     implementation('io.jsonwebtoken:jjwt-api')
     testImplementation('io.jsonwebtoken:jjwt-impl')
     testImplementation('io.jsonwebtoken:jjwt-jackson')
+    testImplementation('org.springframework.security:spring-security-oauth2-core')
     implementation('ch.qos.logback:logback-classic')
     implementation('javax.servlet:javax.servlet-api')
     implementation(libs.javax.servlet.servlet.api)

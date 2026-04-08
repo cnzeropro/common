@@ -2,7 +2,7 @@
 set -eu
 
 PREFIX='[manage-metadata]'
-USAGE='Usage: manage-metadata.sh <sync|verify> [--verbose|-v]'
+USAGE='Usage: manage-metadata.sh <sync|verify|sync-gradle|verify-gradle|sync-maven|verify-maven> [--verbose|-v]'
 command_name="${1:-}"
 verbose=false
 
@@ -16,7 +16,12 @@ log() {
   fi
 }
 
-if [ "$command_name" != "sync" ] && [ "$command_name" != "verify" ]; then
+if [ "$command_name" != "sync" ] &&
+   [ "$command_name" != "verify" ] &&
+   [ "$command_name" != "sync-gradle" ] &&
+   [ "$command_name" != "verify-gradle" ] &&
+   [ "$command_name" != "sync-maven" ] &&
+   [ "$command_name" != "verify-maven" ]; then
   usage
   exit 1
 fi

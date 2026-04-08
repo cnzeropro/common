@@ -28,5 +28,5 @@ public class QuerySpec implements Serializable {
 	private List<String> fields = Collections.emptyList();
 	private List<String> dimensions = Collections.emptyList();
 	private List<MetricSpec> metrics = Collections.emptyList();
-	private PageSpec page = PageSpec.of(1L, PageQO.DEFAULT_PAGE_SIZE);
+	private PageSpec page = PageSpec.of(PageQO.DEFAULT_NUMBER, PageQO.DEFAULT_SIZE);
 }

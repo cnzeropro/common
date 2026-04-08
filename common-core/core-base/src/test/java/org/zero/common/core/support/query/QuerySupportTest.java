@@ -68,8 +68,8 @@ class QuerySupportTest {
 	@Test
 	void shouldCompileBusinessQueryObject() {
 		UserListQO qo = new UserListQO();
-		qo.setPageNum(2L);
-		qo.setPageSize(5L);
+		qo.setNumber(2L);
+		qo.setSize(5L);
 		qo.setName("tom");
 
 		QuerySpec querySpec = queryCompiler.compile(qo, userListQO -> QuerySpec.of(
@@ -80,25 +80,36 @@ class QuerySupportTest {
 			Arrays.asList("id", "name"),
 			Collections.emptyList(),
 			Collections.emptyList(),
-			PageSpec.of(userListQO.getPageNum(), userListQO.getPageSize())
+			PageSpec.of(userListQO.getNumber(), userListQO.getSize())
 		));
 
 		assertEquals(QueryMode.SEARCH, querySpec.getMode());
-		assertEquals(2L, querySpec.getPage().getPageNum());
+		assertEquals(2L, querySpec.getPage().getNumber());
 		assertEquals("name", ((AtomicPredicate) querySpec.getWhere()).getField());
 	}
 
 	@Test
-	void shouldRenderSearchSql() {
+	void shouldUseDefaultPageForPlainQueryQO() {
 		QueryQO qo = new QueryQO();
+		qo.setFields(Collections.singletonList("id"));
+
+		QuerySpec querySpec = queryCompiler.compile(qo);
+
+		assertEquals(PageQO.DEFAULT_NUMBER, querySpec.getPage().getNumber());
+		assertEquals(PageQO.DEFAULT_SIZE, querySpec.getPage().getSize());
+	}
+
+	@Test
+	void shouldRenderSearchSql() {
+		LegacyQueryQO qo = new LegacyQueryQO();
 		qo.setFields(Arrays.asList("id", "name"));
 		qo.setSorts(Collections.singletonList(new SortQO("createdAt", SortQO.Direction.DESC)));
 		qo.setWhere(new ConditionGroupQO(ConditionGroupQO.Logic.AND, Arrays.asList(
 			new ConditionQO("name", "contains", Collections.<Object>singletonList("tom")),
 			new ConditionQO("status", "in", Arrays.<Object>asList("ENABLED", "LOCKED"))
 		)));
-		qo.setPageNum(1L);
-		qo.setPageSize(20L);
+		qo.setNumber(1L);
+		qo.setSize(20L);
 
 		QuerySpec querySpec = queryCompiler.compile(qo);
 		SqlFragment sqlFragment = new SqlQueryRenderer(operatorRegistry).render(querySpec, querySchema);
@@ -112,14 +123,14 @@ class QuerySupportTest {
 
 	@Test
 	void shouldRenderReportSql() {
-		ReportQO qo = new ReportQO();
+		LegacyReportQO qo = new LegacyReportQO();
 		qo.setDimensions(Collections.singletonList("status"));
 		qo.setMetrics(Collections.singletonList(new MetricQO("id", "count", "userCount")));
 		qo.setWhere(new ConditionQO("status", "in", Collections.<Object>singletonList("ENABLED")));
 		qo.setHaving(new ConditionQO("userCount", "gt", Collections.<Object>singletonList(10)));
 		qo.setSorts(Collections.singletonList(new SortQO("userCount", SortQO.Direction.DESC)));
-		qo.setPageNum(2L);
-		qo.setPageSize(10L);
+		qo.setNumber(2L);
+		qo.setSize(10L);
 
 		QuerySpec querySpec = queryCompiler.compile(qo);
 		SqlFragment sqlFragment = new SqlQueryRenderer(operatorRegistry).render(querySpec, querySchema);
@@ -172,6 +183,48 @@ class QuerySupportTest {
 
 		public void setName(String name) {
 			this.name = name;
+		}
+	}
+
+	static class LegacyQueryQO extends QueryQO implements PageParameterProvider {
+		private long number = PageQO.DEFAULT_NUMBER;
+		private long size = PageQO.DEFAULT_SIZE;
+
+		public long getNumber() {
+			return number;
+		}
+
+		public void setNumber(long number) {
+			this.number = number;
+		}
+
+		public long getSize() {
+			return size;
+		}
+
+		public void setSize(long size) {
+			this.size = size;
+		}
+	}
+
+	static class LegacyReportQO extends ReportQO implements PageParameterProvider {
+		private long number = PageQO.DEFAULT_NUMBER;
+		private long size = PageQO.DEFAULT_SIZE;
+
+		public long getNumber() {
+			return number;
+		}
+
+		public void setNumber(long number) {
+			this.number = number;
+		}
+
+		public long getSize() {
+			return size;
+		}
+
+		public void setSize(long size) {
+			this.size = size;
 		}
 	}
 }

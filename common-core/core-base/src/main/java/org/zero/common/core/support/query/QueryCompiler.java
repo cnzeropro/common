@@ -36,7 +36,7 @@ public class QueryCompiler {
 			normalizeTextList(queryQO.getFields()),
 			Collections.emptyList(),
 			Collections.emptyList(),
-			PageSpec.of(queryQO.getPageNum(), queryQO.getPageSize())
+			resolvePageSpec(queryQO)
 		);
 	}
 
@@ -52,7 +52,7 @@ public class QueryCompiler {
 			Collections.emptyList(),
 			normalizeTextList(reportQO.getDimensions()),
 			compileMetrics(reportQO.getMetrics()),
-			PageSpec.of(reportQO.getPageNum(), reportQO.getPageSize())
+			resolvePageSpec(reportQO)
 		);
 	}
 
@@ -139,6 +139,18 @@ public class QueryCompiler {
 			return PredicateGroup.of(fromGroupLogic(groupQO.getLogic()), children);
 		}
 		throw new IllegalArgumentException(String.format("Unsupported predicate type: %s", predicateQO.getClass().getName()));
+	}
+
+	private PageSpec resolvePageSpec(Object queryObject) {
+		if (queryObject instanceof PageQO) {
+			PageQO pageQO = (PageQO) queryObject;
+			return PageSpec.of(pageQO.getNumber(), pageQO.getSize());
+		}
+		if (queryObject instanceof PageParameterProvider) {
+			PageParameterProvider pageParameterProvider = (PageParameterProvider) queryObject;
+			return PageSpec.of(pageParameterProvider.getNumber(), pageParameterProvider.getSize());
+		}
+		return PageSpec.of(PageQO.DEFAULT_NUMBER, PageQO.DEFAULT_SIZE);
 	}
 
 	private String requireText(String value, String message) {
