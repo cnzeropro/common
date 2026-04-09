@@ -40,6 +40,8 @@ class BuildMetadataGeneratorTest {
 		assertTrue(java17Catalog.contains("com-github-ben-manes-caffeine_caffeine = { strictly = \"3.2.0\" }"));
 		assertTrue(java17Catalog.contains("org-jooq_jooq = \"3.19.26\""));
 		assertTrue(java17Catalog.contains("com-alibaba_druid-spring-boot-3-starter = \"1.2.27\""));
+		assertTrue(java17Catalog.contains("managed-platforms = ["));
+		assertTrue(java17Catalog.contains("managed-constraints = ["));
 
 		String java21Catalog = read(tempDir.resolve("gradle").resolve("libs.versions-java21.toml"));
 		assertTrue(java21Catalog.contains("org-jooq_jooq = \"3.20.7\""));
@@ -77,10 +79,7 @@ class BuildMetadataGeneratorTest {
 		assertTrue(gradleProperties.contains("build.profiles=java8,java17,java21"));
 		assertFalse(gradlePropertyLines.contains("revision=1.0.0"));
 
-		String platformMetadata = read(tempDir.resolve("gradle").resolve("platform-metadata.json"));
-		assertTrue(platformMetadata.contains("\"baseProfile\": \"java8\""));
-		assertTrue(platformMetadata.contains("\"java17\""));
-		assertTrue(platformMetadata.contains("\"org-jooq_jooq-bom\"".replace('.', '-')));
+		assertFalse(Files.exists(tempDir.resolve("gradle").resolve("platform-metadata.json")));
 
 		String commonBomGradleProperties = read(tempDir.resolve("common-bom").resolve("gradle.properties"));
 		assertTrue(commonBomGradleProperties.contains("build.revision=1.0.0"));
@@ -109,7 +108,7 @@ class BuildMetadataGeneratorTest {
 
 		String gradleProperties = read(tempDir.resolve("gradle.properties"));
 		assertTrue(gradleProperties.contains("build.revision=1.0.0"));
-		assertTrue(Files.exists(tempDir.resolve("gradle").resolve("platform-metadata.json")));
+		assertFalse(Files.exists(tempDir.resolve("gradle").resolve("platform-metadata.json")));
 	}
 
 	@Test

@@ -19,7 +19,7 @@ This file provides guidance to Claude Code when working with this repository.
 ./gradlew test
 ./gradlew :core-base:test
 ./gradlew :core-base:test --tests "*.CharSequenceUtilTest"
-./gradlew clean publishToMavenLocal
+./gradlew clean publish
 
 # Maven
 mvn -pl common-core/core-base -am test
@@ -75,7 +75,7 @@ Agent 在运行构建前，必须先做这几个检查：
 
 补充：
 
-- `buildSrc/` 包含自定义 convention plugin
+- `build-logic/` 包含自定义 convention plugin
 - `common-bom/` 是独立发布模块
 - `settings.gradle` 支持 `-PincludeProjects=...` 和 `-PexcludeProjects=...`
 

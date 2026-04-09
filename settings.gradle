@@ -3,8 +3,8 @@
  * 作用：配置 settings 阶段解析 Gradle plugin 所需仓库。
  */
 pluginManagement {
+    includeBuild('build-logic')
 	repositories {
-		mavenLocal()
 		mavenCentral()
 		gradlePluginPortal()
 	}
@@ -214,14 +214,9 @@ dependencyResolutionManagement {
 			from(files(activeVersionCatalogFile))
 		}
 	}
-	repositoriesMode = org.gradle.api.initialization.resolve.RepositoriesMode.PREFER_SETTINGS
+    repositoriesMode = org.gradle.api.initialization.resolve.RepositoriesMode.FAIL_ON_PROJECT_REPOS
 	repositories {
 		maven { url = 'https://maven.aliyun.com/repository/public/' }
-		mavenLocal {
-			content {
-				includeGroup('org.zero')
-			}
-		}
 		mavenCentral()
 	}
 }

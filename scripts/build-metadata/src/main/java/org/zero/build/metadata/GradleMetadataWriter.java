@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Gradle metadata writer - 仅负责 Gradle 侧生成物的同步与校验。
+ * Gradle metadata writer - 仅负责 Gradle 侧产物的同步与校验。
  */
 final class GradleMetadataWriter {
 	private static final String VERSION_CATALOG_DIRECTORY = "gradle";
@@ -16,13 +16,16 @@ final class GradleMetadataWriter {
 	private static final String VERSION_CATALOG_PATH = VERSION_CATALOG_DIRECTORY + "/" + VERSION_CATALOG_BASENAME + ".toml";
 	private static final String BUILD_REVISION_PROPERTY = "build.revision";
 	private static final String BUILD_PROFILES_PROPERTY = "build.profiles";
+	private static final String MANAGED_ENFORCED_PLATFORMS_BUNDLE = "managed-enforced-platforms";
+	private static final String MANAGED_PLATFORMS_BUNDLE = "managed-platforms";
+	private static final String MANAGED_CONSTRAINTS_BUNDLE = "managed-constraints";
 
 	private final File rootDir;
 	private final File versionCatalogDirectory;
 	private final File versionCatalogFile;
 	private final File gradlePropertiesFile;
 	private final File commonBomGradlePropertiesFile;
-	private final File platformMetadataFile;
+	private final File legacyPlatformMetadataFile;
 	private final BuildMetadataLogger logger;
 
 	GradleMetadataWriter(File rootDir, BuildMetadataLogger logger) {
@@ -31,7 +34,7 @@ final class GradleMetadataWriter {
 		this.versionCatalogFile = new File(rootDir, VERSION_CATALOG_PATH);
 		this.gradlePropertiesFile = new File(rootDir, "gradle.properties");
 		this.commonBomGradlePropertiesFile = new File(rootDir, "common-bom/gradle.properties");
-		this.platformMetadataFile = new File(rootDir, "gradle/platform-metadata.json");
+		this.legacyPlatformMetadataFile = new File(rootDir, "gradle/platform-metadata.json");
 		this.logger = logger;
 	}
 
@@ -48,7 +51,7 @@ final class GradleMetadataWriter {
 			renderGradleProperties(commonBomGradlePropertiesFile, metadata, false),
 			logger
 		);
-		MetadataFileSupport.writeIfChanged(platformMetadataFile, renderPlatformMetadata(metadata), logger);
+		MetadataFileSupport.deleteIfExists(legacyPlatformMetadataFile, logger);
 	}
 
 	void verify(BuildMetadataModel metadata, List<String> mismatches) {
@@ -65,12 +68,10 @@ final class GradleMetadataWriter {
 			mismatches,
 			logger
 		);
-		MetadataFileSupport.assertMatches(
-			platformMetadataFile,
-			renderPlatformMetadata(metadata),
-			mismatches,
-			logger
-		);
+		if (legacyPlatformMetadataFile.exists()) {
+			mismatches.add("Unexpected legacy file: " + legacyPlatformMetadataFile);
+			logger.info("mismatch", legacyPlatformMetadataFile);
+		}
 	}
 
 	private void writeVersionCatalogFiles(BuildMetadataModel metadata) {
@@ -106,6 +107,7 @@ final class GradleMetadataWriter {
 		builder.append('\n').append("[libraries]\n");
 		renderCatalogLibraries(builder, metadata, profile);
 		builder.append('\n').append("[bundles]\n");
+		renderCatalogBundles(builder, metadata, profile);
 		builder.append('\n').append("[plugins]\n");
 		renderCatalogPlugins(builder, metadata, profile);
 		builder.append('\n');
@@ -124,6 +126,27 @@ final class GradleMetadataWriter {
 				.append(MetadataFileSupport.renderTomlString(MetadataFileSupport.catalogAlias(library.getAlias())))
 				.append(" }\n");
 		}
+	}
+
+	private void renderCatalogBundles(StringBuilder builder, BuildMetadataModel metadata, String profile) {
+		renderCatalogBundle(builder, MANAGED_ENFORCED_PLATFORMS_BUNDLE, resolvedEnforcedPlatformAliases(metadata, profile));
+		renderCatalogBundle(builder, MANAGED_PLATFORMS_BUNDLE, resolvedPlatformAliases(metadata, profile));
+		renderCatalogBundle(builder, MANAGED_CONSTRAINTS_BUNDLE, resolvedConstraintAliases(metadata, profile));
+	}
+
+	private void renderCatalogBundle(StringBuilder builder, String alias, List<String> members) {
+		if (members.isEmpty()) {
+			return;
+		}
+		builder.append(alias)
+			.append(" = [");
+		for (int index = 0; index < members.size(); index++) {
+			if (index > 0) {
+				builder.append(", ");
+			}
+			builder.append(MetadataFileSupport.renderTomlString(members.get(index)));
+		}
+		builder.append("]\n");
 	}
 
 	private void renderCatalogPlugins(StringBuilder builder, BuildMetadataModel metadata, String profile) {
@@ -175,103 +198,6 @@ final class GradleMetadataWriter {
 			updated.add(insertIndex, BUILD_PROFILES_PROPERTY + "=" + supportedProfiles);
 		}
 		return MetadataFileSupport.joinLines(updated);
-	}
-
-	private String renderPlatformMetadata(BuildMetadataModel metadata) {
-		StringBuilder builder = new StringBuilder();
-		builder.append("{\n");
-		builder.append("  \"revision\": ").append(MetadataFileSupport.renderJsonString(metadata.getRevision())).append(",\n");
-		builder.append("  \"baseProfile\": ").append(MetadataFileSupport.renderJsonString(metadata.getBaseProfile())).append(",\n");
-		builder.append("  \"supportedProfiles\": ");
-		appendJsonArray(builder, metadata.getSupportedProfiles(), "  ");
-		builder.append(",\n");
-		builder.append("  \"profiles\": {\n");
-		List<String> supportedProfiles = metadata.getSupportedProfiles();
-		for (int index = 0; index < supportedProfiles.size(); index++) {
-			String profile = supportedProfiles.get(index);
-			builder.append("    ").append(MetadataFileSupport.renderJsonString(profile)).append(": {\n");
-			builder.append("      \"enforcedPlatformAliases\": ");
-			appendJsonArray(builder, resolvedEnforcedPlatformAliases(metadata, profile), "      ");
-			builder.append(",\n");
-			builder.append("      \"platformAliases\": ");
-			appendJsonArray(builder, resolvedPlatformAliases(metadata, profile), "      ");
-			builder.append(",\n");
-			builder.append("      \"constraintAliases\": ");
-			appendJsonArray(builder, resolvedConstraintAliases(metadata, profile), "      ");
-			builder.append("\n");
-			builder.append("    }");
-			if (index < supportedProfiles.size() - 1) {
-				builder.append(',');
-			}
-			builder.append('\n');
-		}
-		builder.append("  }\n");
-		builder.append("}\n");
-		return builder.toString();
-	}
-
-	private List<String> resolvedPlatformAliases(BuildMetadataModel metadata, String profile) {
-		List<String> aliases = new ArrayList<String>();
-		for (LibraryEntry library : metadata.getLibraries().values()) {
-			if (library.resolveVersion(metadata, profile) == null) {
-				continue;
-			}
-			if (!LibraryEntry.MAVEN_SCOPE_IMPORT.equals(library.getScope())) {
-				continue;
-			}
-			aliases.add(MetadataFileSupport.catalogAlias(library.getAlias()));
-		}
-		Collections.sort(aliases);
-		return aliases;
-	}
-
-	private List<String> resolvedEnforcedPlatformAliases(BuildMetadataModel metadata, String profile) {
-		List<String> aliases = new ArrayList<String>();
-		for (LibraryEntry library : metadata.getLibraries().values()) {
-			if (library.resolveVersion(metadata, profile) == null) {
-				continue;
-			}
-			if (!LibraryEntry.MAVEN_SCOPE_IMPORT.equals(library.getScope())) {
-				continue;
-			}
-			if (!isEnforcedPlatformAlias(library)) {
-				continue;
-			}
-			aliases.add(MetadataFileSupport.catalogAlias(library.getAlias()));
-		}
-		Collections.sort(aliases);
-		return aliases;
-	}
-
-	private List<String> resolvedConstraintAliases(BuildMetadataModel metadata, String profile) {
-		List<String> aliases = new ArrayList<String>();
-		for (LibraryEntry library : metadata.getLibraries().values()) {
-			if (library.resolveVersion(metadata, profile) == null) {
-				continue;
-			}
-			if (LibraryEntry.MAVEN_SCOPE_IMPORT.equals(library.getScope())) {
-				continue;
-			}
-			aliases.add(MetadataFileSupport.catalogAlias(library.getAlias()));
-		}
-		Collections.sort(aliases);
-		return aliases;
-	}
-
-	private void appendJsonArray(StringBuilder builder, List<String> values, String indent) {
-		if (values.isEmpty()) {
-			builder.append("[]");
-			return;
-		}
-		builder.append("[\n");
-		for (int index = 0; index < values.size(); index++) {
-			builder.append(indent).append("  ").append(MetadataFileSupport.renderJsonString(values.get(index)));
-			if (index < values.size() - 1) {
-				builder.append(',');
-			}
-			builder.append('\n');
-		}
-		builder.append(indent).append("]");
 	}
 
 	private void deleteLegacyCatalogFiles(BuildMetadataModel metadata) {
@@ -326,8 +252,69 @@ final class GradleMetadataWriter {
 		return MetadataFileSupport.renderTomlString(version);
 	}
 
+	private List<String> resolvedPlatformAliases(BuildMetadataModel metadata, String profile) {
+		List<String> aliases = new ArrayList<String>();
+		for (LibraryEntry library : metadata.getLibraries().values()) {
+			if (library.resolveVersion(metadata, profile) == null) {
+				continue;
+			}
+			if (!LibraryEntry.MAVEN_SCOPE_IMPORT.equals(library.getScope())) {
+				continue;
+			}
+			if (shouldSkipGradleManagedLibrary(library)) {
+				continue;
+			}
+			if (isEnforcedPlatformAlias(library)) {
+				continue;
+			}
+			aliases.add(MetadataFileSupport.catalogAlias(library.getAlias()));
+		}
+		Collections.sort(aliases);
+		return aliases;
+	}
+
+	private List<String> resolvedEnforcedPlatformAliases(BuildMetadataModel metadata, String profile) {
+		List<String> aliases = new ArrayList<String>();
+		for (LibraryEntry library : metadata.getLibraries().values()) {
+			if (library.resolveVersion(metadata, profile) == null) {
+				continue;
+			}
+			if (!LibraryEntry.MAVEN_SCOPE_IMPORT.equals(library.getScope())) {
+				continue;
+			}
+			if (shouldSkipGradleManagedLibrary(library)) {
+				continue;
+			}
+			if (!isEnforcedPlatformAlias(library)) {
+				continue;
+			}
+			aliases.add(MetadataFileSupport.catalogAlias(library.getAlias()));
+		}
+		Collections.sort(aliases);
+		return aliases;
+	}
+
+	private List<String> resolvedConstraintAliases(BuildMetadataModel metadata, String profile) {
+		List<String> aliases = new ArrayList<String>();
+		for (LibraryEntry library : metadata.getLibraries().values()) {
+			if (library.resolveVersion(metadata, profile) == null) {
+				continue;
+			}
+			if (LibraryEntry.MAVEN_SCOPE_IMPORT.equals(library.getScope())) {
+				continue;
+			}
+			aliases.add(MetadataFileSupport.catalogAlias(library.getAlias()));
+		}
+		Collections.sort(aliases);
+		return aliases;
+	}
+
 	private boolean isEnforcedPlatformAlias(LibraryEntry library) {
 		return "org.springframework_spring-framework-bom".equals(library.getAlias())
 			|| "org.springframework.boot_spring-boot-dependencies".equals(library.getAlias());
+	}
+
+	private boolean shouldSkipGradleManagedLibrary(LibraryEntry library) {
+		return "org.zero_common-bom".equals(library.getAlias());
 	}
 }

@@ -18,15 +18,13 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent;
 import org.gradle.external.javadoc.StandardJavadocDocletOptions;
 import org.gradle.jvm.toolchain.JavaLanguageVersion;
 
-import java.util.Collections;
-import java.util.List;
-
 /**
  * Convention support - 集中封装各模块共享的 Java、测试与发布约定。
  */
 public final class ConventionSupport {
     private static final String SLF4J_API_MODULE = "org.slf4j:slf4j-api";
     private static final String SLF4J_BOM_VERSION_ALIAS = "org-slf4j_slf4j-bom";
+    private static final String MANAGED_ENFORCED_PLATFORMS_BUNDLE = "managed-enforced-platforms";
 
     private ConventionSupport() {
     }
@@ -88,21 +86,22 @@ public final class ConventionSupport {
 
     private static void configureEnforcedPlatforms(Project project) {
         VersionCatalog libraries = project.getExtensions().getByType(VersionCatalogsExtension.class).named("libs");
-        for (String alias : enforcedPlatformAliases(project)) {
-            Provider<MinimalExternalModuleDependency> library = requiredLibrary(libraries, alias);
-            project.getDependencies().add(
-                JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME,
-                project.getDependencies().enforcedPlatform(library.get())
-            );
-            project.getDependencies().add(
-                JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME,
-                project.getDependencies().enforcedPlatform(library.get())
-            );
-            project.getDependencies().add(
-                JavaPlugin.TEST_RUNTIME_ONLY_CONFIGURATION_NAME,
-                project.getDependencies().enforcedPlatform(library.get())
-            );
-        }
+        libraries.findBundle(MANAGED_ENFORCED_PLATFORMS_BUNDLE).ifPresent(bundle ->
+            bundle.get().forEach(dependency -> {
+                project.getDependencies().add(
+                    JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME,
+                    project.getDependencies().enforcedPlatform(dependency)
+                );
+                project.getDependencies().add(
+                    JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME,
+                    project.getDependencies().enforcedPlatform(dependency)
+                );
+                project.getDependencies().add(
+                    JavaPlugin.TEST_RUNTIME_ONLY_CONFIGURATION_NAME,
+                    project.getDependencies().enforcedPlatform(dependency)
+                );
+            })
+        );
     }
 
     private static void configureSlf4jApiOverride(Project project) {
@@ -135,18 +134,6 @@ public final class ConventionSupport {
         return catalog.findLibrary(alias).orElseThrow(() -> new IllegalStateException("Missing Gradle catalog alias '" + alias + "'."));
     }
 
-    @SuppressWarnings("unchecked")
-    private static List<String> enforcedPlatformAliases(Project project) {
-        if (!project.getRootProject().getExtensions().getExtraProperties().has("enforcedPlatformAliases")) {
-            return Collections.emptyList();
-        }
-        Object aliases = project.getRootProject().getExtensions().getExtraProperties().get("enforcedPlatformAliases");
-        if (aliases instanceof List) {
-            return (List<String>) aliases;
-        }
-        return Collections.emptyList();
-    }
-
     public static void configurePublishing(Project project) {
         PublishingExtension publishing = project.getExtensions().getByType(PublishingExtension.class);
         configurePublishingRepositories(project, publishing);
@@ -165,7 +152,7 @@ public final class ConventionSupport {
         }
         publishing.getRepositories().maven(repository -> {
             repository.setName("localStagingRepository");
-            repository.setUrl(project.getRootProject().getLayout().getBuildDirectory().dir("mvn-repo"));
+            repository.setUrl(project.getRootProject().getLayout().getBuildDirectory().dir("repos/local-staging"));
         });
     }
 }

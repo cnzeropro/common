@@ -37,7 +37,7 @@
 ./gradlew :core-base:test --tests "org.zero.common.util.StringUtilTest"  # 单测试类
 ./gradlew :core-base:test --tests "org.zero.common.util.StringUtilTest.isBlank*"  # 单测试方法
 ./gradlew :common-test:test -x test  # 跳过测试打包
-./gradlew publishToMavenLocal
+./gradlew publish
 ```
 
 ### Maven
@@ -180,8 +180,8 @@ node scripts/verify-metadata.js --verbose
 
 - Gradle 可用 `-PexcludeProjects=...` 过滤动态扫描模块（见 `settings.gradle`）：
 - `./gradlew -PexcludeProjects=common-test test`
-- 本地发布建议使用 clean + publish 组合（与仓库日常用法一致）：
-- `./gradlew clean publishToMavenLocal`
+- 本地发布建议使用 clean + publish 组合（Gradle 产物输出到 `build/repos/local-staging`，不写入 Maven Local）：
+- `./gradlew clean publish`
 - Maven 打包演示应用（跳过 root 全量）：
 - `mvn -pl common-test -am package`
 - 受限网络环境下，Gradle Wrapper 需下载 `gradle-8.14.3-bin.zip`，失败时需在结论中标注“未完成构建验证”。

@@ -15,6 +15,7 @@ def revision = revisionProvider.get()
 group = 'org.zero'
 version = revision
 description = 'common-bom'
+def localStagingRepositoryDirectory = layout.buildDirectory.dir('repos/local-staging')
 
 /*
  * platform-only module - 这里不打普通 jar，只导出对 common 系列模块的版本约束。
@@ -42,7 +43,7 @@ publishing {
     repositories {
         maven {
             name = 'localStagingRepository'
-            url = layout.buildDirectory.dir('mvn-repo')
+            url = localStagingRepositoryDirectory
         }
     }
     publications {

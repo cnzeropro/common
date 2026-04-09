@@ -9,7 +9,7 @@ plugins {
 /*
  * active profile bridge - 聚合分发模块直接读取根工程推导后的 profile，决定是否纳入高版本适配层。
  */
-def activeBuildProfile = rootProject.ext.activeBuildProfile as String
+def activeBuildProfile = BuildProfileSupport.resolveProfile(project, findProperty('buildProfile'))
 
 /*
  * aggregated projects - Java 8 基线始终打入，Jakarta/Boot3 仅在高版本 profile 下参与聚合。

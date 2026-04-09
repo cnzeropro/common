@@ -1,105 +1,61 @@
-import groovy.json.JsonSlurper
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.Delete
-import org.zero.build.BuildProfileSupport
-import org.zero.plugin.publish.PublishSiteTask
 
 plugins {
     id('java-platform')
     id('base')
     id('maven-publish')
+    id('org.zero.conventions.site-publish')
 }
 
-/*
- * 构建 profile 解析。
- * 作用：统一解析当前构建使用的 profile，并向子模块暴露结果。
- */
-def activeBuildProfile = BuildProfileSupport.resolveProfile(rootProject, findProperty('buildProfile'))
-ext.activeBuildProfile = activeBuildProfile
-
-/*
- * 构建版本属性校验。
- * 作用：确保运行期只依赖 Gradle 原生属性中的 build.revision。
- */
 def revisionProvider = providers.gradleProperty('build.revision')
 if (!revisionProvider.isPresent()) {
     throw new GradleException("Missing Gradle property 'build.revision'.")
 }
-def revision = revisionProvider.get()
 
-/*
- * Java 平台配置。
- * 作用：将 root 项目作为 BOM 平台使用，并允许声明平台依赖。
- */
 javaPlatform {
     allowDependencies()
 }
 
 group = 'org.zero'
-version = revision
+version = revisionProvider.get()
 description = 'Common Project'
 
 def libsCatalog = extensions.getByType(VersionCatalogsExtension).named('libs')
-def platformMetadataFile = file('gradle/platform-metadata.json')
+def localStagingRepositoryDirectory = layout.buildDirectory.dir('repos/local-staging')
 
-/*
- * Gradle 平台元数据读取。
- * 作用：只消费 Gradle 侧独立生成的 platform-metadata.json，不再手写镜像 Maven 的长依赖列表。
- */
-def requiredCatalogLibrary = { String alias ->
-    libsCatalog.findLibrary(alias).orElseThrow {
-        new GradleException("Missing Gradle catalog alias '${alias}' required by ${platformMetadataFile}.")
-    }.get()
+def resolveCatalogBundle = { String alias ->
+    libsCatalog.findBundle(alias)
+        .map { bundle -> bundle.get().collect { dependency -> dependency } }
+        .orElse([])
 }
 
-def loadPlatformMetadata = { String profile ->
-    if (!platformMetadataFile.exists()) {
-        throw new GradleException("Missing Gradle platform metadata file: ${platformMetadataFile}.")
-    }
-    def metadata = new JsonSlurper().parse(platformMetadataFile)
-    def profileMetadata = metadata?.profiles?.get(profile)
-    if (profileMetadata == null) {
-        throw new GradleException("Missing Gradle platform metadata for profile '${profile}'.")
-    }
-    [
-        enforcedPlatformAliases: (profileMetadata.enforcedPlatformAliases ?: []) as List<String>,
-        platformAliases        : (profileMetadata.platformAliases ?: []) as List<String>,
-        constraintAliases      : (profileMetadata.constraintAliases ?: []) as List<String>
-    ]
-}
+def managedEnforcedPlatforms = resolveCatalogBundle('managed-enforced-platforms')
+def managedPlatforms = resolveCatalogBundle('managed-platforms')
+def managedConstraints = resolveCatalogBundle('managed-constraints')
 
-def platformMetadata = loadPlatformMetadata(activeBuildProfile)
-def enforcedPlatformAliases = platformMetadata.enforcedPlatformAliases ?: []
-def platformAliases = platformMetadata.platformAliases ?: []
-def constraintAliases = platformMetadata.constraintAliases ?: []
-ext.enforcedPlatformAliases = enforcedPlatformAliases
-
-/*
- * 统一依赖管理。
- * 作用：按当前 profile 从 Gradle 平台元数据装配平台导入和普通约束，避免脚本与 catalog 漂移。
- */
 dependencies {
-    platformAliases.each { String alias ->
-        api(platform(requiredCatalogLibrary(alias)))
+    managedEnforcedPlatforms.each { dependencyNotation ->
+        api(enforcedPlatform(dependencyNotation))
+    }
+
+    managedPlatforms.each { dependencyNotation ->
+        api(platform(dependencyNotation))
     }
 
     constraints {
-        constraintAliases.each { String alias ->
-            api(requiredCatalogLibrary(alias))
+        managedConstraints.each { dependencyNotation ->
+            api(dependencyNotation)
         }
     }
 }
 
-/*
- * Root 发布配置。
- * 作用：发布 org.zero:common，并统一将 Gradle 侧产物输出到 build/mvn-repo。
- */
 publishing {
     repositories {
         maven {
             name = 'localStagingRepository'
-            url = layout.buildDirectory.dir('mvn-repo')
+            url = localStagingRepositoryDirectory
         }
     }
     publications {
@@ -114,44 +70,10 @@ publishing {
     }
 }
 
-/*
- * 站点发布配置。
- * 作用：复用 publish 生成的 build/mvn-repo，再将站点内容推送到 Git 分支。
- */
-def sitePublishConfig = [
-    repositoryOwner: 'cnzeropro',
-    repositoryName : 'repository',
-    branch         : 'main',
-    merge          : true,
-    noJekyll       : true
-]
-
-tasks.register('publishSite', PublishSiteTask) { PublishSiteTask task ->
-    dependsOn(allprojects.collect { Project candidate -> candidate.tasks.matching { it.name == 'publish' } })
-    inputDirectory.set(layout.buildDirectory.dir('mvn-repo'))
-    workspaceDirectory.set(layout.buildDirectory.dir('site-publish'))
-    repositoryOwner.convention(sitePublishConfig.repositoryOwner)
-    repositoryName.convention(sitePublishConfig.repositoryName)
-    branch.convention(sitePublishConfig.branch)
-    commitMessage.convention(providers.provider { "upload ${project.name}-${project.version}" })
-    merge.convention(sitePublishConfig.merge)
-    noJekyll.convention(sitePublishConfig.noJekyll)
-    remoteUrl.convention(providers.gradleProperty('sitePublish.remoteUrl'))
-    dryRun.convention(providers.gradleProperty('sitePublish.dryRun').map { Boolean.parseBoolean(it) }.orElse(false))
-}
-
-/*
- * clean 任务配置。
- * 作用：允许 clean 处理符号链接目录。
- */
 tasks.named('clean', Delete).configure {
     followSymlinks = true
 }
 
-/*
- * Wrapper 版本锁定。
- * 作用：固定团队统一使用的 Gradle Wrapper 版本。
- */
 wrapper {
     gradleVersion = '8.14.3'
     distributionType = Wrapper.DistributionType.ALL

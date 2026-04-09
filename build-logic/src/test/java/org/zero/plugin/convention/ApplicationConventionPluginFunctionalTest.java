@@ -25,6 +25,7 @@ class ApplicationConventionPluginFunctionalTest {
             tempDir.resolve("gradle/libs.versions.toml"),
             "[versions]",
             "junit = '5.12.2'",
+            "org-slf4j_slf4j-bom = '2.0.17'",
             "",
             "[libraries]",
             "org-junit_junit-bom = { module = 'org.junit:junit-bom', version.ref = 'junit' }"

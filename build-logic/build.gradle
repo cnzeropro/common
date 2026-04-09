@@ -6,16 +6,15 @@ plugins {
 }
 
 /*
- * plugin repositories - buildSrc 既要解析 Gradle API，也要解析自定义 plugin 的发布依赖。
+ * plugin repositories - build-logic 既要解析 Gradle API，也要解析自定义 plugin 的发布依赖。
  */
 repositories {
-    mavenLocal()
     mavenCentral()
     gradlePluginPortal()
 }
 
 /*
- * Java 8 baseline - buildSrc 自身保持最低兼容版本，方便主仓库在低版本 JDK 场景下编译插件代码。
+ * Java 8 baseline - build-logic 自身保持最低兼容版本，方便主仓库在低版本 JDK 场景下编译插件代码。
  */
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -68,6 +67,10 @@ gradlePlugin {
             id = 'org.zero.conventions.aggregate-distribution'
             implementationClass = 'org.zero.plugin.convention.AggregateDistributionConventionPlugin'
         }
+        sitePublishConvention {
+            id = 'org.zero.conventions.site-publish'
+            implementationClass = 'org.zero.plugin.convention.SitePublishConventionPlugin'
+        }
     }
 }
 
@@ -89,12 +92,14 @@ tasks.named('jar') {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-def skipBuildSrcTests = providers.gradleProperty('buildSrc.skipTests')
+def skipBuildLogicTests = providers.gradleProperty('buildLogic.skipTests')
+def skipLegacyBuildSrcTests = providers.gradleProperty('buildSrc.skipTests')
 
 /*
- * buildSrc test gate - 本地排查插件装配问题时，可通过 -PbuildSrc.skipTests 跳过 buildSrc 自测。
+ * build-logic test gate - 本地排查插件装配问题时，可通过 -PbuildLogic.skipTests 跳过 build-logic 自测。
+ * 兼容旧属性 -PbuildSrc.skipTests，避免历史脚本立即失效。
  */
 tasks.named('test', Test).configure {
     useJUnitPlatform()
-    onlyIf { !skipBuildSrcTests.isPresent() }
+    onlyIf { !skipBuildLogicTests.isPresent() && !skipLegacyBuildSrcTests.isPresent() }
 }
