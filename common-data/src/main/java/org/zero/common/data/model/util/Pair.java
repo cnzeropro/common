@@ -33,7 +33,8 @@ public class Pair<K, V> implements Map.Entry<K, V> {
      */
 	@Override
 	public V setValue(V value) {
+		V oldValue = this.value;
 		this.value = value;
-		return value;
+		return oldValue;
 	}
 }
