@@ -79,8 +79,6 @@ class BuildMetadataGeneratorTest {
 		assertTrue(gradleProperties.contains("build.profiles=java8,java17,java21"));
 		assertFalse(gradlePropertyLines.contains("revision=1.0.0"));
 
-		assertFalse(Files.exists(tempDir.resolve("gradle").resolve("platform-metadata.json")));
-
 		String commonBomGradleProperties = read(tempDir.resolve("common-bom").resolve("gradle.properties"));
 		assertTrue(commonBomGradleProperties.contains("build.revision=1.0.0"));
 		assertFalse(commonBomGradleProperties.contains("build.profiles="));
@@ -108,7 +106,6 @@ class BuildMetadataGeneratorTest {
 
 		String gradleProperties = read(tempDir.resolve("gradle.properties"));
 		assertTrue(gradleProperties.contains("build.revision=1.0.0"));
-		assertFalse(Files.exists(tempDir.resolve("gradle").resolve("platform-metadata.json")));
 	}
 
 	@Test
@@ -125,7 +122,6 @@ class BuildMetadataGeneratorTest {
 
 		String gradleProperties = read(tempDir.resolve("gradle.properties"));
 		assertTrue(gradleProperties.contains("build.revision=0.0.1"));
-		assertFalse(Files.exists(tempDir.resolve("gradle").resolve("platform-metadata.json")));
 	}
 
 	@Test

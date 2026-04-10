@@ -3,7 +3,8 @@ plugins {
 }
 
 /*
- * dependency layout - common-job 只保留任务调度所需的最小 Spring/SLF4J 依赖面。
+ * 依赖布局。
+ * 作用：`common-job` 只保留任务调度所需的最小 Spring 和 SLF4J 依赖面。
  */
 dependencies {
     implementation(platform(project(':')))
@@ -12,7 +13,8 @@ dependencies {
     implementation('ch.qos.logback:logback-classic')
 
     /*
-     * Lombok compile support - 仅参与编译期代码生成。
+     * Lombok 编译支持。
+     * 作用：仅在编译期参与代码生成。
      */
     compileOnly('org.projectlombok:lombok')
     annotationProcessor(libs.org.projectlombok.lombok)

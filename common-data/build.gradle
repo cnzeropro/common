@@ -3,7 +3,8 @@ plugins {
 }
 
 /*
- * dependency layout - common-data 提供通用模型与常量，依赖保持在基础 Spring/Jackson/Hutool 层。
+ * 依赖布局。
+ * 作用：`common-data` 提供通用模型与常量，依赖保持在基础 Spring、Jackson 和 Hutool 层。
  */
 dependencies {
     implementation(platform(project(':')))
@@ -21,7 +22,8 @@ dependencies {
     implementation('jakarta.validation:jakarta.validation-api')
 
     /*
-     * Lombok compile support - 保持 DTO/模型生成体验，同时不污染运行时依赖。
+     * Lombok 编译支持。
+     * 作用：保持 DTO 与模型生成体验，同时不污染运行时依赖。
      */
     compileOnly('org.projectlombok:lombok')
     annotationProcessor(libs.org.projectlombok.lombok)

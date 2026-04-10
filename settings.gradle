@@ -1,6 +1,6 @@
 /*
- * 插件仓库管理。
- * 作用：配置 settings 阶段解析 Gradle plugin 所需仓库。
+ * 插件仓库。
+ * 作用：配置 settings 阶段解析插件与 `build-logic` included build 所需仓库。
  */
 pluginManagement {
     includeBuild('build-logic')
@@ -11,8 +11,8 @@ pluginManagement {
 }
 
 /*
- * Profile 辅助闭包。
- * 作用：统一处理 `build.profiles` 读取、`buildProfile` 校验与 JDK version 推导。
+ * Profile 解析辅助。
+ * 作用：统一读取 `build.profiles`、校验 `buildProfile`，并根据运行 JDK 推导当前 profile。
  */
 def parseNonBlankCsv = { String rawValue ->
 	rawValue.split(',')
@@ -88,8 +88,8 @@ def isAtLeastProfile = { String currentProfile, String baselineProfile, List<Str
 }
 
 /*
- * Catalog 文件解析。
- * 作用：根据 `activeBuildProfile` 选择可用的 version catalog 文件。
+ * Version Catalog 选择。
+ * 作用：根据 `activeBuildProfile` 选择当前可用的 version catalog 文件。
  */
 def requireActiveVersionCatalogFile = { String activeBuildProfile, String baseProfile ->
 	def defaultVersionCatalogFile = file('gradle/libs.versions.toml')
@@ -109,8 +109,8 @@ def requireActiveVersionCatalogFile = { String activeBuildProfile, String basePr
 }
 
 /*
- * 项目注册辅助闭包。
- * 作用：统一处理项目注册、token 索引、dependency closure 与动态 include。
+ * 项目注册辅助。
+ * 作用：统一处理项目注册、token 索引、dependency closure 与动态 `include`。
  */
 def registerProject = { Map<String, Map<String, Object>> projects, String path, String name, String dir, List<String> dependencies = [] ->
 	projects[path] = [name: name, dir: dir, dependencies: new ArrayList<String>(dependencies)]
@@ -193,7 +193,7 @@ def includeSelectedProjects = { Set<String> selectedProjects, Map<String, Map<St
 }
 
 /*
- * Profile 元数据初始化。
+ * Profile 初始化。
  * 作用：读取 `build.profiles` 并解析当前 `activeBuildProfile`。
  */
 def profileMetadata = resolveProfileMetadata()
@@ -204,7 +204,7 @@ def activeBuildProfile = resolveActiveBuildProfile(explicitProfile, baseProfile,
 def activeVersionCatalogFile = requireActiveVersionCatalogFile(activeBuildProfile, baseProfile)
 
 /*
- * 依赖解析管理。
+ * 依赖解析。
  * 作用：统一声明 repositories，并按 `activeBuildProfile` 装配 `libs` catalog。
  */
 dependencyResolutionManagement {
@@ -222,7 +222,7 @@ dependencyResolutionManagement {
 }
 
 /*
- * 根项目标识。
+ * 根项目名称。
  * 作用：设置多模块构建的 `rootProject` 名称。
  */
 rootProject.name = 'common'
@@ -247,7 +247,7 @@ registerProject(
 )
 
 /*
- * Profile 条件依赖补齐。
+ * Profile 条件补齐。
  * 作用：在 `java17` 及以上 profile 下补齐 distribution 侧 adapter 模块依赖。
  */
 if (isAtLeastProfile(activeBuildProfile, 'java17', supportedProfiles)) {

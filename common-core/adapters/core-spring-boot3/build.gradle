@@ -4,10 +4,15 @@ plugins {
     id 'org.zero.conventions.java17-library'
 }
 
+/*
+ * Catalog 访问。
+ * 作用：从当前 `libs` catalog 解析 Boot 3 场景下的额外适配器坐标。
+ */
 def libsCatalog = extensions.getByType(VersionCatalogsExtension).named('libs')
 
 /*
- * dependency layout - Boot 3 适配层在根平台基础上叠加 Spring/Jakarta 高版本 BOM，隔离新生态依赖面。
+ * 依赖布局。
+ * 作用：在根平台基础上叠加 Spring 与 Jakarta 高版本 BOM，隔离新生态依赖面。
  */
 dependencies {
     implementation(platform(project(':')))
@@ -30,7 +35,8 @@ dependencies {
     implementation('org.slf4j:slf4j-api')
 
     /*
-     * Lombok compile support - 仅保留编译期注解处理能力。
+     * Lombok 编译支持。
+     * 作用：仅在编译期保留注解处理能力。
      */
     compileOnly('org.projectlombok:lombok')
     annotationProcessor(libs.org.projectlombok.lombok)

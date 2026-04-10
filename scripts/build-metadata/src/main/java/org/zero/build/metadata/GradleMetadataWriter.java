@@ -25,7 +25,6 @@ final class GradleMetadataWriter {
 	private final File versionCatalogFile;
 	private final File gradlePropertiesFile;
 	private final File commonBomGradlePropertiesFile;
-	private final File legacyPlatformMetadataFile;
 	private final BuildMetadataLogger logger;
 
 	GradleMetadataWriter(File rootDir, BuildMetadataLogger logger) {
@@ -34,7 +33,6 @@ final class GradleMetadataWriter {
 		this.versionCatalogFile = new File(rootDir, VERSION_CATALOG_PATH);
 		this.gradlePropertiesFile = new File(rootDir, "gradle.properties");
 		this.commonBomGradlePropertiesFile = new File(rootDir, "common-bom/gradle.properties");
-		this.legacyPlatformMetadataFile = new File(rootDir, "gradle/platform-metadata.json");
 		this.logger = logger;
 	}
 
@@ -51,7 +49,6 @@ final class GradleMetadataWriter {
 			renderGradleProperties(commonBomGradlePropertiesFile, metadata, false),
 			logger
 		);
-		MetadataFileSupport.deleteIfExists(legacyPlatformMetadataFile, logger);
 	}
 
 	void verify(BuildMetadataModel metadata, List<String> mismatches) {
@@ -68,10 +65,6 @@ final class GradleMetadataWriter {
 			mismatches,
 			logger
 		);
-		if (legacyPlatformMetadataFile.exists()) {
-			mismatches.add("Unexpected legacy file: " + legacyPlatformMetadataFile);
-			logger.info("mismatch", legacyPlatformMetadataFile);
-		}
 	}
 
 	private void writeVersionCatalogFiles(BuildMetadataModel metadata) {

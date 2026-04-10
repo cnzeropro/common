@@ -1,3 +1,7 @@
+/*
+ * 构建逻辑 Catalog。
+ * 作用：让 `build-logic` 独立构建时复用仓库根目录的专用 version catalog。
+ */
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {

@@ -3,13 +3,16 @@ plugins {
 }
 
 /*
- * dependency layout - 先继承根平台版本，再声明对 common-core/common-data 的 API 契约依赖。
+ * 依赖布局。
+ * 作用：先继承根平台版本，再声明面向 `common-core` 和 `common-data` 的 API 契约依赖。
  */
 dependencies {
     implementation(platform(project(':')))
     implementation(project(':common-core'))
+
     /*
-     * compileOnly core-base - 只复用基础类型，不把核心实现重复打进当前产物。
+     * 编译期核心类型。
+     * 作用：仅复用 `core-base` 的基础类型，避免核心实现重复进入当前产物。
      */
     compileOnly(project(':core-base'))
     implementation(project(':common-data'))
@@ -22,7 +25,8 @@ dependencies {
     implementation('jakarta.validation:jakarta.validation-api')
 
     /*
-     * Lombok compile support - 只参与编译期生成代码，不进入发布产物。
+     * Lombok 编译支持。
+     * 作用：只在编译期参与代码生成，不进入发布产物。
      */
     compileOnly('org.projectlombok:lombok')
     annotationProcessor(libs.org.projectlombok.lombok)

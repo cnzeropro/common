@@ -3,7 +3,8 @@ plugins {
 }
 
 /*
- * dependency layout - ip2region2 适配层非常薄，只在根平台之上补核心模块与查询库依赖。
+ * 依赖布局。
+ * 作用：`ip2region2` 适配层非常薄，只在根平台之上补核心模块与查询库依赖。
  */
 dependencies {
     implementation(platform(project(':')))
@@ -11,7 +12,8 @@ dependencies {
     implementation(libs.org.lionsoul.ip2region)
 
     /*
-     * Lombok compile support - 适配层源码继续沿用统一注解处理策略。
+     * Lombok 编译支持。
+     * 作用：适配层源码继续沿用统一注解处理策略。
      */
     compileOnly('org.projectlombok:lombok')
     annotationProcessor(libs.org.projectlombok.lombok)

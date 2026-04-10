@@ -9,11 +9,19 @@ plugins {
     id('org.zero.conventions.site-publish')
 }
 
+/*
+ * 构建版本。
+ * 作用：根平台从 `build.revision` 读取统一版本，缺失时立即失败，避免发布坐标漂移。
+ */
 def revisionProvider = providers.gradleProperty('build.revision')
 if (!revisionProvider.isPresent()) {
     throw new GradleException("Missing Gradle property 'build.revision'.")
 }
 
+/*
+ * 平台模块。
+ * 作用：根工程作为 `java-platform` 导出依赖约束，并允许叠加外部 platform 或 BOM。
+ */
 javaPlatform {
     allowDependencies()
 }
@@ -22,6 +30,10 @@ group = 'org.zero'
 version = revisionProvider.get()
 description = 'Common Project'
 
+/*
+ * Catalog bundle 解析。
+ * 作用：把 `libs` catalog 中的 bundle 转成可遍历的依赖记号，供平台约束装配复用。
+ */
 def libsCatalog = extensions.getByType(VersionCatalogsExtension).named('libs')
 def localStagingRepositoryDirectory = layout.buildDirectory.dir('repos/local-staging')
 
@@ -35,6 +47,10 @@ def managedEnforcedPlatforms = resolveCatalogBundle('managed-enforced-platforms'
 def managedPlatforms = resolveCatalogBundle('managed-platforms')
 def managedConstraints = resolveCatalogBundle('managed-constraints')
 
+/*
+ * 平台约束装配。
+ * 作用：分别导入 enforced platform、普通 platform 和常规 constraints。
+ */
 dependencies {
     managedEnforcedPlatforms.each { dependencyNotation ->
         api(enforcedPlatform(dependencyNotation))
@@ -51,6 +67,10 @@ dependencies {
     }
 }
 
+/*
+ * 本地发布仓库。
+ * 作用：统一发布到 `build/repos/local-staging`，避免与 Maven 本地仓库或其他构建产物混用。
+ */
 publishing {
     repositories {
         maven {
@@ -70,10 +90,18 @@ publishing {
     }
 }
 
+/*
+ * 清理任务。
+ * 作用：开启符号链接跟随，确保 staging 目录等关联产物能够被完整清理。
+ */
 tasks.named('clean', Delete).configure {
     followSymlinks = true
 }
 
+/*
+ * Wrapper 配置。
+ * 作用：固定团队使用的 Gradle 版本与完整分发类型。
+ */
 wrapper {
     gradleVersion = '8.14.3'
     distributionType = Wrapper.DistributionType.ALL

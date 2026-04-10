@@ -4,7 +4,8 @@ plugins {
 }
 
 /*
- * build.revision guard - common-bom 作为独立工程发布时，也必须复用根仓库同步出的 build.revision。
+ * 构建版本。
+ * 作用：`common-bom` 独立发布时仍复用根仓库同步出的 `build.revision`。
  */
 def revisionProvider = providers.gradleProperty('build.revision')
 if (!revisionProvider.isPresent()) {
@@ -18,7 +19,8 @@ description = 'common-bom'
 def localStagingRepositoryDirectory = layout.buildDirectory.dir('repos/local-staging')
 
 /*
- * platform-only module - 这里不打普通 jar，只导出对 common 系列模块的版本约束。
+ * 平台模块。
+ * 作用：当前工程只导出版本约束，不生成普通业务 jar。
  */
 javaPlatform {
     allowDependencies()
@@ -26,7 +28,8 @@ javaPlatform {
 
 dependencies {
     /*
-     * internal coordinates - BOM 只约束仓库内公共模块版本，不声明业务实现依赖。
+     * 内部坐标约束。
+     * 作用：BOM 只管理仓库内公共模块版本，不声明业务实现依赖。
      */
     constraints {
         api "org.zero:common-data:${version}"
@@ -37,7 +40,8 @@ dependencies {
 }
 
 /*
- * mavenBom publication - 与根平台分离发布，方便外部工程单独按 org.zero:common-bom 引入。
+ * BOM 发布。
+ * 作用：将 `common-bom` 单独发布到本地 staging 仓库，供外部工程按坐标引入。
  */
 publishing {
     repositories {

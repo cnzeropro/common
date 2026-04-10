@@ -6,7 +6,8 @@ plugins {
 }
 
 /*
- * plugin repositories - build-logic 既要解析 Gradle API，也要解析自定义 plugin 的发布依赖。
+ * 插件仓库。
+ * 作用：解析 Gradle API、测试依赖和自定义 plugin 的发布依赖。
  */
 repositories {
     mavenCentral()
@@ -14,13 +15,18 @@ repositories {
 }
 
 /*
- * Java 8 baseline - build-logic 自身保持最低兼容版本，方便主仓库在低版本 JDK 场景下编译插件代码。
+ * Java 基线。
+ * 作用：`build-logic` 自身保持 Java 8 兼容，便于主仓库在低版本 JDK 环境下编译插件代码。
  */
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
+/*
+ * 测试源码集。
+ * 作用：复用 `scripts/build-metadata` 的源码与测试，确保元数据逻辑和 `build-logic` 侧验证保持一致。
+ */
 sourceSets {
     test {
         java {
@@ -39,7 +45,8 @@ dependencies {
 }
 
 /*
- * convention plugin registry - 根仓库 build.gradle 里使用的自定义插件都在这里声明入口实现类。
+ * 插件注册。
+ * 作用：集中声明根仓库使用的 convention plugin 入口实现类。
  */
 gradlePlugin {
     plugins {
@@ -75,14 +82,16 @@ gradlePlugin {
 }
 
 /*
- * Java source of truth - 当前生效实现已经迁移到 src/main/java，禁用 Groovy 编译避免同名类重复打包。
+ * Groovy 编译禁用。
+ * 作用：当前实现已迁移到 `src/main/java`，关闭 Groovy 编译避免同名类重复打包。
  */
 tasks.matching { it.name == 'compileGroovy' || it.name == 'compileTestGroovy' }.configureEach {
     enabled = false
 }
 
 /*
- * resource merge - 插件 descriptor 允许重复来源并入 resources，最终 jar 再做排重收口。
+ * 插件描述合并。
+ * 作用：允许 descriptor 在 `processResources` 阶段并入资源，并在 `jar` 阶段统一排重。
  */
 tasks.named('processResources') {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
@@ -96,8 +105,8 @@ def skipBuildLogicTests = providers.gradleProperty('buildLogic.skipTests')
 def skipLegacyBuildSrcTests = providers.gradleProperty('buildSrc.skipTests')
 
 /*
- * build-logic test gate - 本地排查插件装配问题时，可通过 -PbuildLogic.skipTests 跳过 build-logic 自测。
- * 兼容旧属性 -PbuildSrc.skipTests，避免历史脚本立即失效。
+ * 测试开关。
+ * 作用：支持通过 `-PbuildLogic.skipTests` 跳过自测，并兼容历史属性 `-PbuildSrc.skipTests`。
  */
 tasks.named('test', Test).configure {
     useJUnitPlatform()

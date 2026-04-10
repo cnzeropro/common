@@ -3,7 +3,8 @@ plugins {
 }
 
 /*
- * dependency layout - Jakarta 适配层在根平台之上叠加 Jakarta BOM，再统一替换 javax API。
+ * 依赖布局。
+ * 作用：Jakarta 适配层在根平台之上叠加 Jakarta BOM，再统一替换 `javax` API。
  */
 dependencies {
     implementation(platform(project(':')))
@@ -18,7 +19,8 @@ dependencies {
     implementation('org.slf4j:slf4j-api')
 
     /*
-     * Lombok compile support - 适配层源码同样只在编译期使用 Lombok。
+     * Lombok 编译支持。
+     * 作用：适配层源码同样只在编译期使用 Lombok。
      */
     compileOnly('org.projectlombok:lombok')
     annotationProcessor(libs.org.projectlombok.lombok)

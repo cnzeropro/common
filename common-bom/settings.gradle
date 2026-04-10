@@ -1,3 +1,7 @@
+/*
+ * 插件仓库。
+ * 作用：独立构建 `common-bom` 时允许从本地和远程仓库解析构建插件。
+ */
 pluginManagement {
     repositories {
         mavenLocal()
@@ -7,7 +11,8 @@ pluginManagement {
 }
 
 /*
- * standalone BOM repositories - 独立构建 common-bom 时复用主工程的解析策略。
+ * 依赖仓库。
+ * 作用：独立构建 `common-bom` 时复用主工程解析策略，并仅从 `mavenLocal()` 读取 `org.zero` 产物。
  */
 dependencyResolutionManagement {
     repositoriesMode = org.gradle.api.initialization.resolve.RepositoriesMode.PREFER_SETTINGS
@@ -23,6 +28,7 @@ dependencyResolutionManagement {
 }
 
 /*
- * standalone BOM build - common-bom 支持单独构建与发布，因此保留独立 rootProject.name。
+ * 根项目名称。
+ * 作用：保留 `common-bom` 的独立构建入口与发布标识。
  */
 rootProject.name = 'common-bom'
