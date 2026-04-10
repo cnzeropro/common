@@ -6,7 +6,7 @@ import lombok.experimental.UtilityClass;
  * 布尔状态常量集合。
  * <p>
  * 集中定义各类二元状态（0/1）的常量值，用于统一业务系统中"开/关"、"是/否"类语义的表达。
- * 所有常量遵循约定：<strong>0 表示否定状态，1 表示肯定状态</strong>。
+ * 所有常量遵循约定：<b>0 表示否定状态，1 表示肯定状态</b>。
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2025/3/5

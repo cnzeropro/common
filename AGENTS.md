@@ -11,18 +11,17 @@
 
 ## 模块地图
 
-| 模块 | 说明 |
-|------|------|
-| `:core-base` | 核心主体，包结构 `extension/`、`support/`、`util/`、`exception/`、`aop/` |
-| `:core-jakarta` | Jakarta 适配层 |
-| `:core-spring-boot3` | Spring Boot 3 / Jakarta 适配层 |
-| `:core-ip2region2` | ip2region v2 适配层 |
-| `:core-distribution` | Gradle 分发占位 |
-| `:common-data` | 常量、枚举、异常、通用模型 |
-| `:common-api` | API 契约与 DTO |
-| `:common-job` | 任务调度与 cron 能力 |
-| `:common-test` | 集成/演示应用，端口 34567 |
-| `common-bom` | 独立模块，需单独构建 |
+| 模块                   | 说明                                                                            |
+|----------------------|-------------------------------------------------------------------------------|
+| `:core-base`         | 核心主体，包结构 `extension/`、`support/`、`util/`、`exception/`、`aop/`，现包含任务调度与 cron 能力 |
+| `:core-jakarta`      | Jakarta 适配层                                                                   |
+| `:core-spring-boot3` | Spring Boot 3 / Jakarta 适配层                                                   |
+| `:core-ip2region2`   | ip2region v2 适配层                                                              |
+| `:core-distribution` | Gradle 分发占位                                                                   |
+| `:common-data`       | 常量、枚举、异常、通用模型                                                                 |
+| `:common-api`        | API 契约与 DTO                                                                   |
+| `:common-test`       | 集成/演示应用，端口 34567                                                              |
+| `common-bom`         | 独立模块，需单独构建                                                                    |
 
 ---
 
@@ -139,7 +138,8 @@ node scripts/verify-metadata.js --verbose
 ## 测试策略
 
 - 框架：JUnit 5，匹配：`*Test`、`*Tests`、`*Spec`
-- 已知陷阱：`TaskManagerTest`、`SocketPingClientTest`（等待 `Scanner(System.in)`）、`JmhTests`（Benchmark）、`ChunkedByteBufferTest`、`ExcelUtilTest`、`ExportControllerTest`（依赖绝对路径或输出目录）
+- 已知陷阱：`SocketPingClientTest`（等待 `Scanner(System.in)`）、`JmhTests`（Benchmark）、`ChunkedByteBufferTest`、
+  `ExcelUtilTest`、`ExportControllerTest`（依赖绝对路径或输出目录）
 
 ---
 

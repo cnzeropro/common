@@ -61,17 +61,16 @@ Agent 在运行构建前，必须先做这几个检查：
 
 ## 模块结构
 
-| Gradle 项目 | 目录 | 说明 |
-|---|---|---|
-| `:core-base` | `common-core/core-base/` | 核心主体 |
-| `:core-jakarta` | `common-core/adapters/core-jakarta/` | Jakarta 适配层 |
-| `:core-spring-boot3` | `common-core/adapters/core-spring-boot3/` | Spring Boot 3 适配层 |
-| `:core-ip2region2` | `common-core/adapters/core-ip2region2/` | ip2region v2 适配层 |
-| `:core-distribution` | `common-core/core-distribution/` | Gradle 分发占位；Maven 侧对应 `common-core` 聚合 |
-| `:common-data` | `common-data/` | 常量、枚举、异常、通用模型 |
-| `:common-api` | `common-api/` | API 契约与 DTO |
-| `:common-job` | `common-job/` | 任务调度与 cron |
-| `:common-test` | `common-test/` | Spring Boot 集成/演示应用，端口 `34567` |
+| Gradle 项目            | 目录                                        | 说明                                     |
+|----------------------|-------------------------------------------|----------------------------------------|
+| `:core-base`         | `common-core/core-base/`                  | 核心主体，包含任务调度与 cron                      |
+| `:core-jakarta`      | `common-core/adapters/core-jakarta/`      | Jakarta 适配层                            |
+| `:core-spring-boot3` | `common-core/adapters/core-spring-boot3/` | Spring Boot 3 适配层                      |
+| `:core-ip2region2`   | `common-core/adapters/core-ip2region2/`   | ip2region v2 适配层                       |
+| `:core-distribution` | `common-core/core-distribution/`          | Gradle 分发占位；Maven 侧对应 `common-core` 聚合 |
+| `:common-data`       | `common-data/`                            | 常量、枚举、异常、通用模型                          |
+| `:common-api`        | `common-api/`                             | API 契约与 DTO                            |
+| `:common-test`       | `common-test/`                            | Spring Boot 集成/演示应用，端口 `34567`         |
 
 补充：
 
@@ -130,7 +129,7 @@ Javadoc 模板：
 
 需要避开的测试：
 
-- `TaskManagerTest`、`SocketPingClientTest`：依赖 `Scanner(System.in)`，会挂起
+- `SocketPingClientTest`：依赖 `Scanner(System.in)`，会挂起
 - `JmhTests`：benchmark，不是常规回归测试
 - `ChunkedByteBufferTest`、`ExcelUtilTest`、`FileRangeSplitterTest`：依赖绝对 Windows 路径
 - `ExportControllerTest`：写文件到 `target/download`

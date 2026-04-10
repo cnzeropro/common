@@ -35,7 +35,6 @@ dependencies {
         api "org.zero:common-data:${version}"
         api "org.zero:common-core:${version}"
         api "org.zero:common-api:${version}"
-        api "org.zero:common-job:${version}"
     }
 }
 

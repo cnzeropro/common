@@ -237,13 +237,12 @@ registerProject(projects, ':core-ip2region2', 'core-ip2region2', 'common-core/ad
 registerProject(projects, ':core-distribution', 'common-core', 'common-core/core-distribution', [':core-base', ':core-ip2region2'])
 registerProject(projects, ':common-data', 'common-data', 'common-data')
 registerProject(projects, ':common-api', 'common-api', 'common-api', [':core-distribution', ':core-base', ':common-data'])
-registerProject(projects, ':common-job', 'common-job', 'common-job')
 registerProject(
 	projects,
 	':common-test',
 	'common-test',
 	'common-test',
-	[':core-distribution', ':core-base', ':common-data', ':common-api', ':common-job']
+    [':core-distribution', ':core-base', ':common-data', ':common-api']
 )
 
 /*
