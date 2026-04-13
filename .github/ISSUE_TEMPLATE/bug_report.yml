@@ -1,0 +1,99 @@
+name: Bug Report
+description: 报告缺陷、回归或兼容性问题
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        在提交缺陷前，请先阅读以下文档：
+
+        - [CONTRIBUTING.md](https://gitee.com/zerocn/common/blob/master/CONTRIBUTING.md)
+        - [SECURITY.md](https://gitee.com/zerocn/common/blob/master/SECURITY.md)
+
+        如果问题属于安全漏洞，请不要继续提交公开 issue。
+  - type: dropdown
+    id: issue_type
+    attributes:
+      label: 问题类型
+      options:
+        - 功能缺陷 / Functional bug
+        - 兼容性回归 / Compatibility regression
+        - 构建或发布问题 / Build or release issue
+        - 文档或配置问题 / Documentation or configuration issue
+    validations:
+      required: true
+  - type: input
+    id: module
+    attributes:
+      label: 影响模块
+      description: 例如 `common-data`、`core-base`、`common-api`、`common-bom`
+      placeholder: common-data
+    validations:
+      required: true
+  - type: input
+    id: java_version
+    attributes:
+      label: JDK 版本
+      description: 请写明实际使用的 Java 版本，以及是否配置了 `JAVA_HOME` / `JDK11_HOME` / `JDK17_HOME` / `JDK21_HOME`
+      placeholder: OpenJDK 17.0.12, JAVA_HOME=/path/to/jdk17
+    validations:
+      required: true
+  - type: dropdown
+    id: build_tool
+    attributes:
+      label: 构建入口
+      options:
+        - Gradle
+        - Maven
+        - Both / 两者均有
+    validations:
+      required: true
+  - type: dropdown
+    id: metadata_related
+    attributes:
+      label: 是否涉及 metadata 同步
+      options:
+        - No
+        - Yes
+        - Not sure / 不确定
+    validations:
+      required: true
+  - type: textarea
+    id: commands
+    attributes:
+      label: 复现命令
+      description: 请粘贴实际执行的 Gradle / Maven 命令
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 请尽量给出最小复现步骤
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望行为
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志或错误片段
+      render: text
+  - type: textarea
+    id: sample
+    attributes:
+      label: 最小复现样例
+      description: 如有需要，可粘贴最小代码片段、配置片段或仓库路径

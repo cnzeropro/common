@@ -1,0 +1,27 @@
+stages:
+  - verify
+
+variables:
+  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle-user-home"
+
+verify:
+  stage: verify
+  script:
+    - echo "[ci] This pipeline expects JAVA_HOME, JDK11_HOME, JDK17_HOME, JDK21_HOME, Maven, and Bash to be pre-provisioned on the runner."
+    - bash ./scripts/ci/verify.sh
+  artifacts:
+    when: always
+    paths:
+      - build/
+      - common-api/build/
+      - common-data/build/
+      - common-core/core-base/build/
+      - common-bom/build/
+      - common-api/target/
+      - common-data/target/
+      - common-core/core-base/target/
+      - common-bom/target/
+    expire_in: 7 days
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH'

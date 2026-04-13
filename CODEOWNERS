@@ -1,0 +1,31 @@
+# 根级 CODEOWNERS 同时服务于 GitHub 与 GitLab。
+# 如果镜像平台上的命名空间与当前仓库 owner 不一致，请同步调整下面的 handle。
+
+* @zerocn
+
+/common-core/ @zerocn
+/common-api/ @zerocn
+/common-data/ @zerocn
+/common-test/ @zerocn
+/common-bom/ @zerocn
+/build-logic/ @zerocn
+/buildSrc/ @zerocn
+/gradle/ @zerocn
+/metadata/ @zerocn
+/scripts/ @zerocn
+/.github/ @zerocn
+/.gitlab/ @zerocn
+
+/.editorconfig @zerocn
+/.gitattributes @zerocn
+/.gitignore @zerocn
+/README.md @zerocn
+/LICENSE @zerocn
+/CONTRIBUTING.md @zerocn
+/SECURITY.md @zerocn
+/CODE_OF_CONDUCT.md @zerocn
+/CODEOWNERS @zerocn
+/build.gradle @zerocn
+/settings.gradle @zerocn
+/pom.xml @zerocn
+/.gitlab-ci.yml @zerocn
