@@ -77,5 +77,6 @@ jobs:
             **/build/reports/**
             **/build/test-results/**
             **/target/surefire-reports/**
+            **/target/failsafe-reports/**
             **/target/site/**
           if-no-files-found: ignore

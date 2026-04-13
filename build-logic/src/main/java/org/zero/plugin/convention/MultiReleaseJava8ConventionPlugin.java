@@ -43,13 +43,13 @@ public final class MultiReleaseJava8ConventionPlugin extends AbstractJvmConventi
         SourceSet mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
         SourceSet testSourceSet = sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME);
         JavaToolchainService toolchains = project.getExtensions().getByType(JavaToolchainService.class);
+        TaskProvider<Jar> jarTask = project.getTasks().named("jar", Jar.class);
 
-        project.getTasks().named("jar", Jar.class)
-            .configure(task -> task.getManifest().attributes(Collections.singletonMap("Multi-Release", "true")));
+        jarTask.configure(task -> task.getManifest().attributes(Collections.singletonMap("Multi-Release", "true")));
         project.getTasks().named("sourcesJar", Jar.class).configure(task -> task.setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE));
 
         for (Integer version : discoverMultiReleaseVersions(project)) {
-            configureMultiReleaseVersion(project, mainSourceSet, testSourceSet, toolchains, version.intValue());
+            configureMultiReleaseVersion(project, mainSourceSet, testSourceSet, toolchains, jarTask, version.intValue());
         }
     }
 
@@ -86,6 +86,7 @@ public final class MultiReleaseJava8ConventionPlugin extends AbstractJvmConventi
         SourceSet mainSourceSet,
         SourceSet testSourceSet,
         JavaToolchainService toolchains,
+        TaskProvider<Jar> jarTask,
         int version
     ) {
         int toolchainVersion = BuildProfileSupport.resolveToolchainLanguageVersion(project, version);
@@ -112,6 +113,7 @@ public final class MultiReleaseJava8ConventionPlugin extends AbstractJvmConventi
         if (containsJavaSources(testSourceDir)) {
             Provider<Directory> testOutputDirectory = project.getLayout().getBuildDirectory().dir("classes/java/testMultiRelease/" + version);
             TaskProvider<JavaCompile> compileTestTask = project.getTasks().register("compileTestJava" + version, JavaCompile.class, task -> {
+                task.dependsOn(compileTask);
                 task.source(project.fileTree(testSourceDir, spec -> spec.include("**/*.java")));
                 task.setClasspath(testSourceSet.getCompileClasspath().plus(mainSourceSet.getOutput()).plus(project.files(outputDirectory)));
                 task.getDestinationDirectory().set(testOutputDirectory);
@@ -121,10 +123,15 @@ public final class MultiReleaseJava8ConventionPlugin extends AbstractJvmConventi
                 task.getJavaCompiler().set(toolchains.compilerFor(spec -> spec.getLanguageVersion().set(JavaLanguageVersion.of(toolchainVersion))));
             });
             TaskProvider<Test> testTask = project.getTasks().register("testJava" + version, Test.class, task -> {
-                task.dependsOn(compileTask, compileTestTask);
+                task.dependsOn(jarTask, compileTestTask);
                 task.setTestClassesDirs(project.files(testOutputDirectory));
-                task.setClasspath(testSourceSet.getRuntimeClasspath().plus(project.files(testOutputDirectory, outputDirectory)));
+                task.setClasspath(
+                    project.files(testOutputDirectory)
+                        .plus(testSourceSet.getRuntimeClasspath().minus(mainSourceSet.getOutput()))
+                        .plus(project.files(jarTask.flatMap(Jar::getArchiveFile)))
+                );
                 task.getJavaLauncher().set(toolchains.launcherFor(spec -> spec.getLanguageVersion().set(JavaLanguageVersion.of(toolchainVersion))));
+                task.include("**/*MultiReleaseTest.class");
                 task.useJUnitPlatform();
             });
             project.getTasks().named("check").configure(task -> task.dependsOn(testTask));

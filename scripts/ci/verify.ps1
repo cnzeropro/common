@@ -4,6 +4,7 @@ $ErrorActionPreference = 'Stop'
 $RootDir = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $CommonDataTest = 'org.zero.common.data.enumeration.HttpStatusTest'
 $CoreBaseTest = 'org.zero.common.core.util.java.EnumUtilTest'
+$CoreBaseMultiReleaseTest = 'org.zero.common.core.util.java.lang.StackUtilMultiReleaseTest'
 
 function Write-Step {
 	param([string]$Message)
@@ -64,7 +65,9 @@ Invoke-Step 'run stable Gradle test slice' {
 		':common-data:test' `
 		'--tests' $CommonDataTest `
 		':core-base:test' `
-		'--tests' $CoreBaseTest
+		'--tests' $CoreBaseTest `
+		':core-base:testJava9' `
+		'--tests' $CoreBaseMultiReleaseTest
 }
 
 Invoke-Step 'run stable Maven test slice for common-data' {
@@ -77,7 +80,7 @@ Invoke-Step 'run stable Maven test slice for common-data' {
 		'test'
 }
 
-Invoke-Step 'run stable Maven test slice for core-base' {
+Invoke-Step 'run stable Maven verify slice for core-base multi-release tests' {
 	& $MavenWrapper `
 		'-B' `
 		'-ntp' `
@@ -85,7 +88,9 @@ Invoke-Step 'run stable Maven test slice for core-base' {
 		'-am' `
 		'-Dtest=EnumUtilTest' `
 		'-Dsurefire.failIfNoSpecifiedTests=false' `
-		'test'
+		'-Dit.test=StackUtilMultiReleaseTest' `
+		'-Dfailsafe.failIfNoSpecifiedTests=false' `
+		'verify'
 }
 
 Write-Step 'verification completed'

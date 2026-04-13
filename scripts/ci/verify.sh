@@ -6,6 +6,7 @@ GRADLEW="$ROOT_DIR/gradlew"
 MVNW="$ROOT_DIR/mvnw"
 COMMON_DATA_TEST='org.zero.common.data.enumeration.HttpStatusTest'
 CORE_BASE_TEST='org.zero.common.core.util.java.EnumUtilTest'
+CORE_BASE_MULTI_RELEASE_TEST='org.zero.common.core.util.java.lang.StackUtilMultiReleaseTest'
 
 log() {
   printf '[ci-verify] %s\n' "$1" >&2
@@ -50,7 +51,9 @@ run_step \
   :common-data:test \
   --tests "$COMMON_DATA_TEST" \
   :core-base:test \
-  --tests "$CORE_BASE_TEST"
+  --tests "$CORE_BASE_TEST" \
+  :core-base:testJava9 \
+  --tests "$CORE_BASE_MULTI_RELEASE_TEST"
 
 run_step \
   'run stable Maven test slice for common-data' \
@@ -63,14 +66,16 @@ run_step \
   test
 
 run_step \
-  'run stable Maven test slice for core-base' \
+  'run stable Maven verify slice for core-base multi-release tests' \
   "$MVNW" \
   -B \
   -ntp \
   -pl common-core/core-base \
   -am \
   -Dtest=EnumUtilTest \
+  -Dit.test=StackUtilMultiReleaseTest \
   -Dsurefire.failIfNoSpecifiedTests=false \
-  test
+  -Dfailsafe.failIfNoSpecifiedTests=false \
+  verify
 
 log 'verification completed'

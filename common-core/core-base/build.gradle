@@ -95,11 +95,6 @@ dependencies {
     implementation('javax.annotation:javax.annotation-api')
     implementation('javax.websocket:javax.websocket-api')
     implementation('javax.mail:javax.mail-api')
-    implementation('jakarta.servlet:jakarta.servlet-api')
-    implementation('jakarta.validation:jakarta.validation-api')
-    implementation('jakarta.websocket:jakarta.websocket-api')
-    implementation('jakarta.annotation:jakarta.annotation-api')
-    implementation('jakarta.mail:jakarta.mail-api')
     implementation(libs.xerces.xercesImpl)
 
     /*
