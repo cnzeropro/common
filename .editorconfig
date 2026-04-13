@@ -1,87 +1,60 @@
+# EditorConfig 用于在不同 IDE / 编辑器之间保持一致的基础格式化规则。
 root = true
 
+# 全局默认值：统一字符集、换行、基础缩进与空白处理。
 [*]
 charset = utf-8
 end_of_line = lf
-indent_size = 4
 indent_style = space
-insert_final_newline = false
-max_line_length = 120
+indent_size = 4
 tab_width = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+max_line_length = 120
 
-[.editorconfig]
-
-[*.java]
-
-[*.{adoc,bat,groovy,html,java,js,jsp,kt,kts,md,properties,py,rb,sh,sql,svg,txt,xml,xsd}]
-charset = utf-8
-
-[*.{groovy,java,kt,kts,xml,xsd}]
+# Java 生态源码与 XML 按仓库既有风格使用 Tab，保持与主线代码一致。
+[*.{aj,groovy,java,kt,kts,xml,xsd}]
 indent_style = tab
 indent_size = 4
+continuation_indent_size = 8
+
+# Gradle Groovy DSL 保持 4 空格，和当前构建脚本风格一致。
+[*.gradle]
+indent_style = space
+indent_size = 4
+
+# 如后续引入 Gradle Kotlin DSL，继续使用 4 空格缩进。
+[*.gradle.kts]
+indent_style = space
+indent_size = 4
+
+# 结构化配置文件统一使用 2 空格缩进。
+[*.{json,jsonc,toml,yaml,yml}]
+indent_size = 2
+tab_width = 2
+
+# Properties 文件延续项目文档约定，使用 2 空格续行缩进。
+[*.properties]
+indent_size = 2
+tab_width = 2
+
+# POSIX Shell 脚本使用 2 空格缩进，并显式保持 LF。
+[*.{bash,sh}]
+indent_size = 2
+tab_width = 2
 end_of_line = lf
 
-[*.css]
+# PowerShell 脚本保持 4 空格缩进，并与仓库脚本统一为 LF。
+[*.ps1]
+indent_size = 4
+tab_width = 4
+end_of_line = lf
 
-[*.less]
-indent_size = 2
+# Windows 命令脚本显式使用 CRLF，避免在 cmd.exe / bat 环境下出现兼容性问题。
+[*.{bat,cmd}]
+end_of_line = crlf
 
-[*.sass]
-indent_size = 2
-
-[*.scss]
-indent_size = 2
-
-[*.vue]
-indent_size = 2
-tab_width = 2
-
-[{*.yml,*.yaml}]
-indent_size = 2
-
-[{*.ant,*.fxml,*.jhm,*.jnlp,*.jrxml,*.pom,*.rng,*.tld,*.wadl,*.wsdd,*.wsdl,*.xjb,*.xml,*.xsd,*.xsl,*.xslt,*.xul}]
-
-[{*.ats,*.cts,*.mts,*.ts}]
-
-[{*.bash,*.sh,*.zsh}]
-indent_size = 2
-tab_width = 2
-
-[*.proto]
-indent_size = 2
-tab_width = 2
-
-[*.csv]
-indent_style = tab
-
-[{*.cjs,*.js}]
-
-[{*.ft,*.vm,*.vsl}]
-
-[{*.gant,*.groovy,*.gy}]
-
-[{*.har,*.jsb2,*.jsb3,*.jsonc,*.postman_collection,*.postman_collection.json,*.postman_environment,*.postman_environment.json,*.sonarlint/*.json,.babelrc,.eslintrc,.prettierrc,.stylelintrc,.ws-context,bowerrc,connectedMode.json,jest.config}]
-indent_size = 2
-
-[{*.htm,*.html,*.sht,*.shtm,*.shtml}]
-
-[{*.http,*.rest}]
-indent_size = 0
-
-[{*.jsf,*.jsp,*.jspf,*.tag,*.tagf,*.xjsp}]
-
-[{*.jspx,*.tagx}]
-
-[{*.kt,*.kts}]
-
-[{*.markdown,*.md}]
-
-[{*.pb,*.textproto,*.txtpb}]
-indent_size = 2
-tab_width = 2
-
-[{*.properties,spring.handlers,spring.schemas}]
-
-[{*.qute.htm,*.qute.html,*.qute.json,*.qute.txt,*.qute.yaml,*.qute.yml}]
-
-[{*.toml,Cargo.lock,Cargo.toml.orig,Gopkg.lock,Pipfile,poetry.lock}]
+# 文档允许保留行尾空格，并关闭列宽提示以兼容显式换行与长链接。
+[*.{adoc,md,markdown}]
+trim_trailing_whitespace = false
+max_line_length = off

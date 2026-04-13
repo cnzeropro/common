@@ -1,62 +1,115 @@
-# 本地 AI 与 IDE 目录
+# 本地 AI 助手与工作区元数据。
 .trae/
 .ai/
 .aiassistant/
-.idea/
-.idea_modules/
-.vscode/
+.cursor/
+.run/
 .xcodemap/
 
-# Eclipse 项目元数据文件
+# IDE / 编辑器工程文件。
+# VS Code 使用“忽略内容 + 放行少量共享配置”的写法，兼容根模块与子模块。
+.idea/
+.idea_modules/
+**/.vscode/*
+!**/.vscode/extensions.json
+!**/.vscode/launch.json
+!**/.vscode/settings.json
+!**/.vscode/tasks.json
+*.iml
+*.ipr
+*.iws
 .project
 .classpath
+.settings/
+.factorypath
+.metadata/
+.springBeans
+.recommenders/
+.apt_generated/
+.sts4-cache/
+**/nbproject/private/
+**/nbbuild/
+**/nbdist/
+**/.nb-gradle/
+gradle-app.setting
 
-# Maven/Gradle Wrapper 与构建元数据
-.mvn/timing.properties
-.mvn/toolchains.local.xml
-.mvn/wrapper/maven-wrapper.jar
+# 操作系统生成文件。
+.DS_Store
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# 临时文件、交换文件与补丁残留。
+*.sw?
+*~
+.#*
+*#
+*.orig
+*.rej
+
+# 构建输出与打包产物。
 .gradle/
-.gradle-user-home/
-gradle/gradle-wrapper.jar
-
-# 构建输出目录
-build/
-# 允许 src 目录中的 build 源码包，例如 org/zero/build
+.gradletasknamecache
+/.kotlin/
+**/build/
+# 允许 src 目录中名为 build 的源码包路径，例如 org/zero/build。
 !**/src/**/build/
-out/
+**/out/
 **/target/
-
-# 日志目录与文件
-**/logs/
-*.log
-
-# Java 编译与打包产物
+# 允许 src 目录中名为 target 的源码或资源目录，避免误伤历史包结构。
+!**/src/**/target/
 *.class
 *.jar
+# 保留 Gradle / Maven Wrapper 二进制，避免被通用归档规则误忽略。
+!**/gradle/wrapper/gradle-wrapper.jar
+!**/.mvn/wrapper/maven-wrapper.jar
 *.war
 *.nar
 *.ear
-
-# 压缩归档文件
 *.zip
 *.tar.gz
 *.rar
-*.gz
 
-# JVM 崩溃与回放文件
-hs_err_pid*
-replay_pid*
-
-# Maven 发布与版本管理临时文件
+# 构建工具状态与发布中间文件。
+/.gradle-user-home/
+/.gradle-user-home-*/
+/.m2/
+/.m2-*/
+/.mvn/timing.properties
+/.mvn/toolchains.local.xml
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
 pom.xml.next
 release.properties
+.flattened-pom.xml
 dependency-reduced-pom.xml
 buildNumber.properties
 
-# IntelliJ 项目文件
-*.iml
-*.ipr
-*.iws
+# 日志与 JVM 诊断文件。
+**/logs/
+*.log
+build.log
+hs_err_pid*
+replay_pid*
+.attach_pid*
+*.stackdump
+*.hprof
+*.jfr
+
+# 本地环境与机器相关覆盖文件。
+.env
+.env.*
+!.env.example
+!.env.sample
+application-local.properties
+application-local.yml
+application-local.yaml
+bootstrap-local.properties
+bootstrap-local.yml
+bootstrap-local.yaml
+*.local.properties
+*.local.yml
+*.local.yaml
