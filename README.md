@@ -62,13 +62,15 @@ cd common-bom && mvn deploy
 ### 元数据同步与校验
 
 ```bash
-./scripts/verify-metadata.sh
-./scripts/verify-gradle.sh
-./scripts/verify-maven.sh
+./scripts/metadata/sync.sh
+./scripts/metadata/verify.sh
+./scripts/metadata/sync.sh gradle
+./scripts/metadata/verify.sh maven --verbose
 
-powershell -ExecutionPolicy Bypass -File scripts/verify-metadata.ps1
-powershell -ExecutionPolicy Bypass -File scripts/verify-gradle.ps1
-powershell -ExecutionPolicy Bypass -File scripts/verify-maven.ps1
+powershell -ExecutionPolicy Bypass -File scripts/metadata/sync.ps1
+powershell -ExecutionPolicy Bypass -File scripts/metadata/verify.ps1
+powershell -ExecutionPolicy Bypass -File scripts/metadata/sync.ps1 gradle
+powershell -ExecutionPolicy Bypass -File scripts/metadata/verify.ps1 maven --verbose
 ```
 
 ### 统一 CI 校验入口

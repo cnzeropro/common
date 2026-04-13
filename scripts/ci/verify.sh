@@ -40,9 +40,7 @@ run_step 'javac -version' javac -version
 run_step 'gradle wrapper version' "$GRADLEW" --version
 run_step 'maven wrapper version' "$MVNW" -version
 
-run_step 'verify build metadata' "$ROOT_DIR/scripts/verify-metadata.sh" --verbose
-run_step 'verify Gradle metadata projection' "$ROOT_DIR/scripts/verify-gradle.sh" --verbose
-run_step 'verify Maven metadata projection' "$ROOT_DIR/scripts/verify-maven.sh" --verbose
+run_step 'verify metadata projections' "$ROOT_DIR/scripts/metadata/verify.sh" --verbose
 
 run_step \
   'run stable Gradle test slice' \
@@ -72,6 +70,7 @@ run_step \
   -pl common-core/core-base \
   -am \
   -Dtest=EnumUtilTest \
+  -Dsurefire.failIfNoSpecifiedTests=false \
   test
 
 log 'verification completed'

@@ -1,6 +1,6 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-$usage = 'Usage: manage-metadata.ps1 <sync|verify|sync-gradle|verify-gradle|sync-maven|verify-maven> [--verbose|-v|-VerboseOutput]'
+$usage = 'Usage: manage.ps1 <sync|verify|sync-gradle|verify-gradle|sync-maven|verify-maven> [--verbose|-v|-VerboseOutput]'
 $verbose = $false
 $command = $null
 
@@ -49,8 +49,8 @@ function Write-BuildMetadataLog {
 Write-BuildMetadataLog 'arguments parsed'
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$rootDir = (Resolve-Path (Join-Path $scriptDir '..')).Path
-$sourceDir = Join-Path $scriptDir 'build-metadata\src\main\java'
+$rootDir = (Resolve-Path (Join-Path $scriptDir '..\..\..')).Path
+$sourceDir = Join-Path $scriptDir 'cli\src\main\java'
 $buildRootDir = Join-Path $rootDir 'build\build-metadata-cli'
 $buildDir = Join-Path $buildRootDir ([string]$PID)
 $classesDir = Join-Path $buildDir 'classes'
@@ -71,7 +71,6 @@ if (-not $java) {
 
 Write-BuildMetadataLog "toolchain ready: javac=$($javac.Source), java=$($java.Source)"
 
-# 使用相对 ASCII 路径写入参数文件，避免绝对路径里的非 ASCII 字符影响 javac @argfile。
 Push-Location $rootDir
 try {
     $relativeSources = @(

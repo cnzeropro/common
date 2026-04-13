@@ -1,7 +1,13 @@
 @echo off
 setlocal EnableExtensions DisableDelayedExpansion
 
-set "USAGE=Usage: manage-metadata.bat ^<sync^|verify^|sync-gradle^|verify-gradle^|sync-maven^|verify-maven^> [--verbose^|-v]"
+call :main %*
+set "EXIT_CODE=%ERRORLEVEL%"
+call :cleanup
+exit /b %EXIT_CODE%
+
+:main
+set "USAGE=Usage: manage.bat ^<sync^|verify^|sync-gradle^|verify-gradle^|sync-maven^|verify-maven^> [--verbose^|-v]"
 set "VERBOSE="
 
 if /I "%~1"=="sync" (
@@ -52,49 +58,40 @@ exit /b 1
 call :log "arguments parsed"
 
 set "SCRIPT_DIR=%~dp0"
-for %%I in ("%SCRIPT_DIR%..") do set "ROOT_DIR=%%~fI"
-set "SOURCE_DIR=%SCRIPT_DIR%build-metadata\src\main\java"
+for %%I in ("%SCRIPT_DIR%..\..\..") do set "ROOT_DIR=%%~fI"
+set "SOURCE_DIR=%SCRIPT_DIR%cli\src\main\java"
 set "BUILD_ROOT_DIR=%ROOT_DIR%\build\build-metadata-cli"
-set "RUN_TOKEN=%RANDOM%%RANDOM%"
-set "BUILD_DIR=%BUILD_ROOT_DIR%\%RUN_TOKEN%"
-set "CLASSES_DIR=%BUILD_DIR%\classes"
-set "SOURCE_LIST_FILE=%BUILD_DIR%\sources.txt"
 set "SOURCE_COUNT=0"
-set "EXIT_CODE=0"
 set "JAVAC_PATH="
 set "JAVA_PATH="
 call :log "paths ready: root=%ROOT_DIR%"
 
-mkdir "%CLASSES_DIR%" >nul 2>&1
+call :create_build_dir
 if errorlevel 1 (
-	>&2 echo Failed to create build directory "%CLASSES_DIR%".
-	set "EXIT_CODE=1"
-	goto cleanup
+	>&2 echo Failed to create build directory under "%BUILD_ROOT_DIR%".
+	exit /b 1
 )
+set "SOURCE_LIST_FILE=%BUILD_DIR%\sources.txt"
 
 for /f "delims=" %%I in ('where javac 2^>nul') do if not defined JAVAC_PATH set "JAVAC_PATH=%%I"
 if not defined JAVAC_PATH (
 	>&2 echo Missing javac command. Please configure a JDK and ensure javac is on PATH.
-	set "EXIT_CODE=1"
-	goto cleanup
+	exit /b 1
 )
 
 for /f "delims=" %%I in ('where java 2^>nul') do if not defined JAVA_PATH set "JAVA_PATH=%%I"
 if not defined JAVA_PATH (
 	>&2 echo Missing java command. Please configure a JDK and ensure java is on PATH.
-	set "EXIT_CODE=1"
-	goto cleanup
+	exit /b 1
 )
 
 call :log "toolchain ready: javac=%JAVAC_PATH%, java=%JAVA_PATH%"
 
-rem Write relative ASCII source paths for javac argfile.
 type nul > "%SOURCE_LIST_FILE%"
 for /f "delims=" %%F in ('dir /b /s /a:-d /o:n "%SOURCE_DIR%\*.java"') do call :append_source "%%~fF"
 if errorlevel 1 (
 	>&2 echo Failed to collect Java sources from "%SOURCE_DIR%".
-	set "EXIT_CODE=1"
-	goto cleanup
+	exit /b 1
 )
 for /f %%I in ('find /v /c "" ^< "%SOURCE_LIST_FILE%"') do set "SOURCE_COUNT=%%I"
 
@@ -105,7 +102,7 @@ pushd "%ROOT_DIR%" >nul
 set "EXIT_CODE=%ERRORLEVEL%"
 popd >nul
 call :log "javac done: exit=%EXIT_CODE%"
-if not "%EXIT_CODE%"=="0" goto cleanup
+if not "%EXIT_CODE%"=="0" exit /b %EXIT_CODE%
 
 call :log "java cli start"
 if defined VERBOSE (
@@ -115,14 +112,42 @@ if defined VERBOSE (
 )
 set "EXIT_CODE=%ERRORLEVEL%"
 call :log "java cli done: exit=%EXIT_CODE%"
+exit /b %EXIT_CODE%
 
 :cleanup
 call :log "cleanup start"
-if exist "%BUILD_DIR%" (
+if defined BUILD_DIR if exist "%BUILD_DIR%" (
 	rmdir /s /q "%BUILD_DIR%" >nul 2>&1
 )
 call :log "cleanup done"
-exit /b %EXIT_CODE%
+exit /b 0
+
+:create_build_dir
+setlocal EnableDelayedExpansion
+if not exist "%BUILD_ROOT_DIR%" (
+	mkdir "%BUILD_ROOT_DIR%" >nul 2>&1
+)
+for /l %%I in (1,1,32) do (
+	set "RUN_TOKEN=!TIME!_%%I_!RANDOM!!RANDOM!"
+	set "RUN_TOKEN=!RUN_TOKEN: =0!"
+	set "RUN_TOKEN=!RUN_TOKEN::=_!"
+	set "RUN_TOKEN=!RUN_TOKEN:.=_!"
+	set "RUN_TOKEN=!RUN_TOKEN:,=_!"
+	set "RUN_TOKEN=!RUN_TOKEN:/=_!"
+	set "RUN_TOKEN=!RUN_TOKEN:\=_!"
+	set "RUN_TOKEN=!RUN_TOKEN:-=_!"
+	set "CANDIDATE_BUILD_DIR=%BUILD_ROOT_DIR%\!RUN_TOKEN!"
+	mkdir "!CANDIDATE_BUILD_DIR!\classes" >nul 2>&1 && (
+		for %%P in ("!CANDIDATE_BUILD_DIR!") do (
+			endlocal
+			set "BUILD_DIR=%%~fP"
+			set "CLASSES_DIR=%%~fP\classes"
+			exit /b 0
+		)
+	)
+)
+endlocal
+exit /b 1
 
 :log
 if not defined VERBOSE exit /b 0

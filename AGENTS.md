@@ -50,23 +50,33 @@ cd common-bom && mvn deploy
 ### 元数据同步
 
 ```bash
-powershell -ExecutionPolicy Bypass -File scripts/sync-metadata.ps1
-powershell -ExecutionPolicy Bypass -File scripts/verify-metadata.ps1
-.\scripts\sync-metadata.bat
-.\scripts\verify-metadata.bat
-py scripts/sync-metadata.py
-py scripts/verify-metadata.py
-node scripts/sync-metadata.js
-node scripts/verify-metadata.js
-./scripts/sync-metadata.sh
-./scripts/verify-metadata.sh
+powershell -ExecutionPolicy Bypass -File scripts/metadata/sync.ps1
+powershell -ExecutionPolicy Bypass -File scripts/metadata/verify.ps1
+powershell -ExecutionPolicy Bypass -File scripts/metadata/sync.ps1 gradle
+powershell -ExecutionPolicy Bypass -File scripts/metadata/verify.ps1 maven
+.\scripts\metadata\sync.bat
+.\scripts\metadata\verify.bat
+.\scripts\metadata\sync.bat gradle
+.\scripts\metadata\verify.bat maven
+py scripts/metadata/sync.py
+py scripts/metadata/verify.py
+py scripts/metadata/sync.py gradle
+py scripts/metadata/verify.py maven
+node scripts/metadata/sync.js
+node scripts/metadata/verify.js
+node scripts/metadata/sync.js gradle
+node scripts/metadata/verify.js maven
+./scripts/metadata/sync.sh
+./scripts/metadata/verify.sh
+./scripts/metadata/sync.sh gradle
+./scripts/metadata/verify.sh maven
 
 # verbose examples
-powershell -ExecutionPolicy Bypass -File scripts/verify-metadata.ps1 --verbose
-py scripts/verify-metadata.py --verbose
-node scripts/verify-metadata.js --verbose
-./scripts/verify-metadata.sh --verbose
-.\scripts\verify-metadata.bat --verbose
+powershell -ExecutionPolicy Bypass -File scripts/metadata/verify.ps1 gradle --verbose
+py scripts/metadata/verify.py maven --verbose
+node scripts/metadata/verify.js gradle --verbose
+./scripts/metadata/verify.sh maven --verbose
+.\scripts\metadata\verify.bat gradle --verbose
 ```
 
 ### JDK / Toolchains

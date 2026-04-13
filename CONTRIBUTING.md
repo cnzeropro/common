@@ -28,9 +28,8 @@
 ### 必做校验
 
 ```bash
-./scripts/verify-metadata.sh
-./scripts/verify-gradle.sh
-./scripts/verify-maven.sh
+./scripts/metadata/verify.sh
+./scripts/metadata/verify.sh gradle
 ```
 
 ### 建议使用统一入口

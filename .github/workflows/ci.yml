@@ -65,7 +65,7 @@ jobs:
 
       - name: Run repository verification
         run: |
-          chmod +x ./gradlew ./mvnw ./scripts/*.sh ./scripts/ci/*.sh
+          chmod +x ./gradlew ./mvnw ./scripts/metadata/*.sh ./scripts/metadata/internal/*.sh ./scripts/ci/*.sh
           ./scripts/ci/verify.sh
 
       - name: Upload verification reports

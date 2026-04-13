@@ -17,7 +17,7 @@ function Show-EnvVar {
 		[Console]::Error.WriteLine("{0}=<unset>" -f $Name)
 		return
 	}
-	[Console]::Error.WriteLine("{0}={1}" -f $Name, $Value)
+	[Console]::Error.WriteLine(("{0}={1}" -f $Name, $Value))
 }
 
 function Invoke-Step {
@@ -33,7 +33,9 @@ function Invoke-Step {
 	}
 }
 
-if ($IsWindows) {
+$isWindowsShell = $env:OS -eq 'Windows_NT'
+
+if ($isWindowsShell) {
 	$GradleWrapper = Join-Path $RootDir 'gradlew.bat'
 	$MavenWrapper = Join-Path $RootDir 'mvnw.cmd'
 } else {
@@ -53,9 +55,7 @@ Invoke-Step 'javac -version' { & javac -version }
 Invoke-Step 'gradle wrapper version' { & $GradleWrapper --version }
 Invoke-Step 'maven wrapper version' { & $MavenWrapper -version }
 
-Invoke-Step 'verify build metadata' { & (Join-Path $RootDir 'scripts\verify-metadata.ps1') '--verbose' }
-Invoke-Step 'verify Gradle metadata projection' { & (Join-Path $RootDir 'scripts\verify-gradle.ps1') '--verbose' }
-Invoke-Step 'verify Maven metadata projection' { & (Join-Path $RootDir 'scripts\verify-maven.ps1') '--verbose' }
+Invoke-Step 'verify metadata projections' { & (Join-Path $RootDir 'scripts\metadata\verify.ps1') '--verbose' }
 
 Invoke-Step 'run stable Gradle test slice' {
 	& $GradleWrapper `
@@ -84,6 +84,7 @@ Invoke-Step 'run stable Maven test slice for core-base' {
 		'-pl' 'common-core/core-base' `
 		'-am' `
 		'-Dtest=EnumUtilTest' `
+		'-Dsurefire.failIfNoSpecifiedTests=false' `
 		'test'
 }
 

@@ -2,7 +2,7 @@
 set -eu
 
 PREFIX='[manage-metadata]'
-USAGE='Usage: manage-metadata.sh <sync|verify|sync-gradle|verify-gradle|sync-maven|verify-maven> [--verbose|-v]'
+USAGE='Usage: manage.sh <sync|verify|sync-gradle|verify-gradle|sync-maven|verify-maven> [--verbose|-v]'
 command_name="${1:-}"
 verbose=false
 
@@ -46,8 +46,8 @@ fi
 log 'arguments parsed'
 
 script_dir=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
-root_dir=$(CDPATH= cd -- "$script_dir/.." && pwd)
-source_dir="$script_dir/build-metadata/src/main/java"
+root_dir=$(CDPATH= cd -- "$script_dir/../../.." && pwd)
+source_dir="$script_dir/cli/src/main/java"
 build_root_dir="$root_dir/build/build-metadata-cli"
 build_dir="$build_root_dir/$$"
 classes_dir="$build_dir/classes"
@@ -84,7 +84,6 @@ fi
 
 log "toolchain ready: javac=$javac_path, java=$java_path"
 
-# 使用相对 ASCII 路径写入参数文件，避免绝对路径里的非 ASCII 字符影响 javac @argfile。
 find "$source_dir" -name '*.java' | LC_ALL=C sort | while IFS= read -r java_source_path; do
   relative_source_path=${java_source_path#"$root_dir"/}
   printf '%s\n' "$relative_source_path"

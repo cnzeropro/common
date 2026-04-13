@@ -89,16 +89,26 @@ Agent 在运行构建前，必须先做这几个检查：
 元数据命令：
 
 ```bash
-powershell -ExecutionPolicy Bypass -File scripts/sync-metadata.ps1
-powershell -ExecutionPolicy Bypass -File scripts/verify-metadata.ps1
-.\scripts\sync-metadata.bat
-.\scripts\verify-metadata.bat
-py scripts/sync-metadata.py
-py scripts/verify-metadata.py
-node scripts/sync-metadata.js
-node scripts/verify-metadata.js
-./scripts/sync-metadata.sh
-./scripts/verify-metadata.sh
+powershell -ExecutionPolicy Bypass -File scripts/metadata/sync.ps1
+powershell -ExecutionPolicy Bypass -File scripts/metadata/verify.ps1
+powershell -ExecutionPolicy Bypass -File scripts/metadata/sync.ps1 gradle
+powershell -ExecutionPolicy Bypass -File scripts/metadata/verify.ps1 maven
+.\scripts\metadata\sync.bat
+.\scripts\metadata\verify.bat
+.\scripts\metadata\sync.bat gradle
+.\scripts\metadata\verify.bat maven
+py scripts/metadata/sync.py
+py scripts/metadata/verify.py
+py scripts/metadata/sync.py gradle
+py scripts/metadata/verify.py maven
+node scripts/metadata/sync.js
+node scripts/metadata/verify.js
+node scripts/metadata/sync.js gradle
+node scripts/metadata/verify.js maven
+./scripts/metadata/sync.sh
+./scripts/metadata/verify.sh
+./scripts/metadata/sync.sh gradle
+./scripts/metadata/verify.sh maven
 ```
 
 ## 代码约定

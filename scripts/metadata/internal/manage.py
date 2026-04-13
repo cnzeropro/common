@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 PREFIX = "[manage-metadata]"
-USAGE = "Usage: manage-metadata.py <sync|verify|sync-gradle|verify-gradle|sync-maven|verify-maven> [--verbose|-v]"
+USAGE = "Usage: manage.py <sync|verify|sync-gradle|verify-gradle|sync-maven|verify-maven> [--verbose|-v]"
 
 
 def log(verbose, message):
@@ -44,8 +44,8 @@ def main(argv):
     log(verbose, "arguments parsed")
 
     script_dir = Path(__file__).resolve().parent
-    root_dir = script_dir.parent
-    source_dir = script_dir / "build-metadata" / "src" / "main" / "java"
+    root_dir = script_dir.parent.parent.parent
+    source_dir = script_dir / "cli" / "src" / "main" / "java"
     build_root_dir = root_dir / "build" / "build-metadata-cli"
     build_dir = build_root_dir / str(os.getpid())
     classes_dir = build_dir / "classes"
@@ -67,7 +67,6 @@ def main(argv):
 
         log(verbose, f"toolchain ready: javac={javac}, java={java}")
 
-        # 使用相对 ASCII 路径写入参数文件，避免绝对路径里的非 ASCII 字符影响 javac @argfile。
         sources = sorted(path_item.relative_to(root_dir).as_posix() for path_item in source_dir.rglob("*.java"))
         source_list_file.write_text("\n".join(sources), encoding="utf-8")
         log(verbose, f"source list ready: {len(sources)} relative file(s)")
