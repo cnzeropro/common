@@ -16,7 +16,7 @@ repositories {
 
 /*
  * Java 基线。
- * 作用：`build-logic` 自身保持 Java 8 兼容，便于主仓库在低版本 JDK 环境下编译插件代码。
+ * 作用：`build-logic` 自身保持 Java 8 兼容，便于主仓库在低版本 JDK 环境中编译插件代码。
  */
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -25,13 +25,13 @@ java {
 
 /*
  * 测试源码集。
- * 作用：复用 `scripts/build-metadata` 的源码与测试，确保元数据逻辑和 `build-logic` 侧验证保持一致。
+ * 作用：复用 `scripts/metadata/internal/cli` 的源码与测试，确保元数据逻辑和 `build-logic` 侧验证保持一致。
  */
 sourceSets {
     test {
         java {
-            srcDir('../scripts/build-metadata/src/main/java')
-            srcDir('../scripts/build-metadata/src/test/java')
+            srcDir('../scripts/metadata/internal/cli/src/main/java')
+            srcDir('../scripts/metadata/internal/cli/src/test/java')
         }
     }
 }
