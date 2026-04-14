@@ -1,5 +1,15 @@
+import org.gradle.api.artifacts.VersionCatalogsExtension
+
 plugins {
     id 'org.zero.conventions.java8-library'
+}
+
+def baseCatalog = extensions.getByType(VersionCatalogsExtension).named('baseLibs')
+
+def requiredBaseLibrary = { String alias ->
+    baseCatalog.findLibrary(alias).orElseThrow {
+        new GradleException("Missing catalog alias '${alias}'.")
+    }.get()
 }
 
 /*
@@ -9,16 +19,16 @@ plugins {
 dependencies {
     implementation(platform(project(':')))
     implementation(project(':core-base'))
-    implementation(libs.org.lionsoul.ip2region)
+    implementation(requiredBaseLibrary('org-lionsoul_ip2region'))
 
     /*
      * Lombok 编译支持。
      * 作用：适配层源码继续沿用统一注解处理策略。
      */
     compileOnly('org.projectlombok:lombok')
-    annotationProcessor(libs.org.projectlombok.lombok)
+    annotationProcessor(requiredBaseLibrary('org-projectlombok_lombok'))
     testCompileOnly('org.projectlombok:lombok')
-    testAnnotationProcessor(libs.org.projectlombok.lombok)
+    testAnnotationProcessor(requiredBaseLibrary('org-projectlombok_lombok'))
 }
 
 description = 'common-core::ip2region2'

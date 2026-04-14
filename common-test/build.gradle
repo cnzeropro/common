@@ -5,10 +5,6 @@ plugins {
     alias(baseLibs.plugins.org.springframework.boot)
 }
 
-/*
- * Catalog 访问辅助。
- * 作用：从 `baseLibs` 解析必需 alias 和 bundle，避免演示应用重复硬编码 Spring 平台坐标。
- */
 def baseCatalog = extensions.getByType(VersionCatalogsExtension).named('baseLibs')
 
 def requiredCatalogLibrary = { catalog, String alias ->
@@ -17,34 +13,16 @@ def requiredCatalogLibrary = { catalog, String alias ->
     }.get()
 }
 
-def resolveCatalogBundle = { catalog, String alias ->
-    catalog.findBundle(alias)
-        .map { bundle -> bundle.get().collect { dependency -> dependency } }
-        .orElse([])
-}
-
-/*
- * 平台依赖分组。
- * 作用：把 `baseLibs` 中的 platform bundle 与 Spring Boot 版本预先解析成可复用变量。
- */
-def baseManagedEnforcedPlatforms = resolveCatalogBundle(baseCatalog, 'managed-enforced-platforms')
-def baseManagedPlatforms = resolveCatalogBundle(baseCatalog, 'managed-platforms')
 def baseSpringBootVersion = baseCatalog.findVersion('org-springframework-boot')
     .orElseThrow { new GradleException("Missing catalog version 'org-springframework-boot'.") }
     .requiredVersion
 
-/*
- * 依赖布局。
- * 作用：在根平台基础上叠加 `baseLibs` 管理的 Spring 生态平台，并装配演示应用依赖。
- */
 dependencies {
     implementation(platform(project(':')))
-    (baseManagedEnforcedPlatforms + baseManagedPlatforms).each { dependencyNotation ->
-        implementation(enforcedPlatform(dependencyNotation))
-    }
 
     implementation(project(':common-core'))
     compileOnly(project(':core-base'))
+    testImplementation(project(':core-base'))
     implementation(project(':common-data'))
     implementation(project(':common-api'))
     implementation('org.springframework:spring-aspects')
@@ -56,10 +34,6 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-logging')
     implementation('org.springframework.boot:spring-boot-starter-aop')
 
-    /*
-     * 配置元数据处理。
-     * 作用：让 Spring Boot 配置处理器版本跟随 `baseLibs`，并仅参与编译期元数据生成。
-     */
     compileOnly("org.springframework.boot:spring-boot-configuration-processor:${baseSpringBootVersion}")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor:${baseSpringBootVersion}")
     runtimeOnly('org.springframework.boot:spring-boot-devtools')
@@ -67,44 +41,32 @@ dependencies {
     implementation('org.springframework.data:spring-data-commons')
     implementation('org.springframework.cloud:spring-cloud-starter-openfeign')
     implementation(requiredCatalogLibrary(baseCatalog, 'org-mybatis-spring-boot_mybatis-spring-boot-starter'))
-    implementation(libs.org.apache.poi.poi.ooxml)
+    implementation(requiredCatalogLibrary(baseCatalog, 'org-apache-poi_poi-ooxml'))
     testImplementation('org.openjdk.jmh:jmh-core')
     testImplementation('org.openjdk.jmh:jmh-generator-annprocess')
     implementation('org.slf4j:slf4j-api')
     implementation('com.querydsl:querydsl-core')
     implementation('com.querydsl:querydsl-jpa')
-    implementation(libs.com.alibaba.easyexcel)
+    implementation(requiredCatalogLibrary(baseCatalog, 'com-alibaba_easyexcel'))
     implementation('com.alibaba:transmittable-thread-local')
     runtimeOnly('com.h2database:h2')
     implementation('cn.hutool:hutool-core')
     implementation('cn.hutool:hutool-json')
     implementation('io.projectreactor:reactor-core')
     implementation('javax.annotation:javax.annotation-api')
-    implementation(libs.javax.inject.javax.inject)
+    implementation(requiredCatalogLibrary(baseCatalog, 'javax-inject_javax-inject'))
     implementation('jakarta.inject:jakarta.inject-api')
 
-    /*
-     * Lombok 编译支持。
-     * 作用：仅在编译期启用注解处理，不额外扩大运行时依赖面。
-     */
     compileOnly('org.projectlombok:lombok')
-    annotationProcessor(libs.org.projectlombok.lombok)
+    annotationProcessor(requiredCatalogLibrary(baseCatalog, 'org-projectlombok_lombok'))
     testCompileOnly('org.projectlombok:lombok')
-    testAnnotationProcessor(libs.org.projectlombok.lombok)
+    testAnnotationProcessor(requiredCatalogLibrary(baseCatalog, 'org-projectlombok_lombok'))
 }
 
-/*
- * 应用入口。
- * 作用：声明演示应用主类，供 `run`、分发包和 Spring Boot 打包复用。
- */
 application {
     mainClass = 'org.zero.common.test.Application'
 }
 
-/*
- * Multi-Release 清单。
- * 作用：让普通 `jar` 与 `bootJar` 都写入 `Multi-Release: true`。
- */
 tasks.named('jar') {
     manifest.attributes('Multi-Release': 'true')
 }

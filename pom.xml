@@ -1672,9 +1672,6 @@
 		<!-- generated higher-build-profiles:start -->
 		<profile>
 			<id>java11-higher</id>
-			<activation>
-				<jdk>[11,)</jdk>
-			</activation>
 			<properties>
 				<com.github.ben-manes.caffeine_caffeine.version>3.2.3</com.github.ben-manes.caffeine_caffeine.version>
 				<com.lmax_disruptor.version>4.0.0</com.lmax_disruptor.version>
@@ -1687,9 +1684,6 @@
 		</profile>
 		<profile>
 			<id>java17-higher</id>
-			<activation>
-				<jdk>[17,)</jdk>
-			</activation>
 			<properties>
 				<com.alibaba.cloud_spring-cloud-alibaba-dependencies.version>2023.0.1.0</com.alibaba.cloud_spring-cloud-alibaba-dependencies.version>
 				<com.alibaba_druid-spring-boot-3-starter.version>1.2.28</com.alibaba_druid-spring-boot-3-starter.version>
@@ -1740,9 +1734,6 @@
 		</profile>
 		<profile>
 			<id>java21-higher</id>
-			<activation>
-				<jdk>[21,)</jdk>
-			</activation>
 			<properties>
 				<com.redis_testcontainers-redis.version>2.1.0</com.redis_testcontainers-redis.version>
 				<org.jooq_jooq-bom.version>3.20.7</org.jooq_jooq-bom.version>
@@ -1750,9 +1741,6 @@
 		</profile>
 		<profile>
 			<id>java25-higher</id>
-			<activation>
-				<jdk>[25,)</jdk>
-			</activation>
 		</profile>
 		<!-- generated higher-build-profiles:end -->
 	</profiles>

@@ -34,11 +34,11 @@ description = 'Common Project'
  * Catalog bundle 解析。
  * 作用：把 `libs` catalog 中的 bundle 转成可遍历的依赖记号，供平台约束装配复用。
  */
-def libsCatalog = extensions.getByType(VersionCatalogsExtension).named('libs')
+def baseCatalog = extensions.getByType(VersionCatalogsExtension).named('baseLibs')
 def localStagingRepositoryDirectory = layout.buildDirectory.dir('repos/local-staging')
 
 def resolveCatalogBundle = { String alias ->
-    libsCatalog.findBundle(alias)
+    baseCatalog.findBundle(alias)
         .map { bundle -> bundle.get().collect { dependency -> dependency } }
         .orElse([])
 }

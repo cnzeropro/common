@@ -43,7 +43,9 @@ public final class ConventionSupport {
     public static void configureJava(Project project, int languageVersion) {
         JavaPluginExtension javaExtension = project.getExtensions().getByType(JavaPluginExtension.class);
         configureTestDependencies(project);
-        configureEnforcedPlatforms(project);
+        if (languageVersion <= 8) {
+            configureEnforcedPlatforms(project);
+        }
         configureSlf4jApiOverride(project);
         javaExtension.withJavadocJar();
         javaExtension.withSourcesJar();
@@ -75,7 +77,7 @@ public final class ConventionSupport {
     }
 
     private static void configureTestDependencies(Project project) {
-        VersionCatalog libraries = project.getExtensions().getByType(VersionCatalogsExtension.class).named("libs");
+        VersionCatalog libraries = project.getExtensions().getByType(VersionCatalogsExtension.class).named("baseLibs");
         Provider<MinimalExternalModuleDependency> junitBom = requiredLibrary(libraries, "org-junit_junit-bom");
 
         project.getDependencies().add(
@@ -91,7 +93,7 @@ public final class ConventionSupport {
     }
 
     private static void configureEnforcedPlatforms(Project project) {
-        VersionCatalog libraries = project.getExtensions().getByType(VersionCatalogsExtension.class).named("libs");
+        VersionCatalog libraries = project.getExtensions().getByType(VersionCatalogsExtension.class).named("baseLibs");
         libraries.findBundle(MANAGED_ENFORCED_PLATFORMS_BUNDLE).ifPresent(bundle ->
             bundle.get().forEach(dependency -> {
                 project.getDependencies().add(
@@ -111,7 +113,7 @@ public final class ConventionSupport {
     }
 
     private static void configureSlf4jApiOverride(Project project) {
-        VersionCatalog libraries = project.getExtensions().getByType(VersionCatalogsExtension.class).named("libs");
+        VersionCatalog libraries = project.getExtensions().getByType(VersionCatalogsExtension.class).named("baseLibs");
         String slf4jVersion = libraries.findVersion(SLF4J_BOM_VERSION_ALIAS)
             .orElseThrow(() -> new IllegalStateException("Missing Gradle catalog version '" + SLF4J_BOM_VERSION_ALIAS + "'."))
             .getRequiredVersion();

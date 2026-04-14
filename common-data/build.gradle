@@ -1,5 +1,15 @@
+import org.gradle.api.artifacts.VersionCatalogsExtension
+
 plugins {
     id 'org.zero.conventions.java8-library'
+}
+
+def baseCatalog = extensions.getByType(VersionCatalogsExtension).named('baseLibs')
+
+def requiredBaseLibrary = { String alias ->
+    baseCatalog.findLibrary(alias).orElseThrow {
+        new GradleException("Missing catalog alias '${alias}'.")
+    }.get()
 }
 
 /*
@@ -26,9 +36,9 @@ dependencies {
      * 作用：保持 DTO 与模型生成体验，同时不污染运行时依赖。
      */
     compileOnly('org.projectlombok:lombok')
-    annotationProcessor(libs.org.projectlombok.lombok)
+    annotationProcessor(requiredBaseLibrary('org-projectlombok_lombok'))
     testCompileOnly('org.projectlombok:lombok')
-    testAnnotationProcessor(libs.org.projectlombok.lombok)
+    testAnnotationProcessor(requiredBaseLibrary('org-projectlombok_lombok'))
 }
 
 description = 'common-data'

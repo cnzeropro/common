@@ -15,15 +15,14 @@ def libsCatalog = extensions.getByType(VersionCatalogsExtension).named('libs')
  * 作用：在根平台基础上叠加 Spring 与 Jakarta 高版本 BOM，隔离新生态依赖面。
  */
 dependencies {
-    implementation(platform(project(':')))
     implementation(platform(libs.org.springframework.spring.framework.bom))
     implementation(platform(libs.org.springframework.boot.spring.boot.dependencies))
     implementation(platform(libs.org.springframework.cloud.spring.cloud.dependencies))
     implementation(platform(libs.com.alibaba.cloud.spring.cloud.alibaba.dependencies))
     implementation(platform(libs.jakarta.platform.jakarta.jakartaee.bom))
-    implementation(project(':core-base'))
-    implementation(project(':core-jakarta'))
-    implementation(project(':common-data'))
+    compileOnly(project(':core-base'))
+    compileOnly(project(':core-jakarta'))
+    compileOnly(project(':common-data'))
     implementation('org.springframework:spring-web')
     implementation('org.springframework:spring-webmvc')
     implementation('org.springframework.boot:spring-boot')
@@ -38,9 +37,9 @@ dependencies {
      * Lombok 编译支持。
      * 作用：仅在编译期保留注解处理能力。
      */
-    compileOnly('org.projectlombok:lombok')
+    compileOnly(libs.org.projectlombok.lombok)
     annotationProcessor(libs.org.projectlombok.lombok)
-    testCompileOnly('org.projectlombok:lombok')
+    testCompileOnly(libs.org.projectlombok.lombok)
     testAnnotationProcessor(libs.org.projectlombok.lombok)
 }
 

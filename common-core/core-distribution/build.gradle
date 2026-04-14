@@ -158,7 +158,9 @@ def mergeAggregateServiceDescriptors = tasks.register('mergeAggregateServiceDesc
     task.outputs.dir(aggregateServicesOutputDir)
     task.doLast {
         File outputDirectory = aggregateServicesOutputDir.get().asFile
-        project.delete(outputDirectory)
+        if (outputDirectory.exists()) {
+            outputDirectory.deleteDir()
+        }
         outputDirectory.mkdirs()
 
         Map<String, Set<String>> mergedDescriptors = new LinkedHashMap<String, Set<String>>()

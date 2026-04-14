@@ -255,9 +255,6 @@ final class MavenMetadataWriter {
 		StringBuilder builder = new StringBuilder();
 		builder.append("\t\t<profile>\n");
 		builder.append("\t\t\t<id>").append(profile).append("-higher</id>\n");
-		builder.append("\t\t\t<activation>\n");
-		builder.append("\t\t\t\t<jdk>[").append(profileJavaVersion(profile)).append(",)</jdk>\n");
-		builder.append("\t\t\t</activation>\n");
 		builder.append(renderGeneratedProfileProperties(metadata, profile));
 		builder.append(renderGeneratedProfileDependencyManagement(metadata, profile));
 		builder.append("\t\t</profile>");

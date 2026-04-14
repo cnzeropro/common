@@ -2,10 +2,13 @@ package org.zero.common.core.extension.java.collection;
 
 import org.junit.jupiter.api.Test;
 import org.zero.common.core.extension.java.util.LRUMap;
-import org.zero.common.core.util.java.lang.ArrayUtil;
 
-import java.nio.ByteBuffer;
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Zero (cnzeropro@163.com)
@@ -13,20 +16,21 @@ import java.util.Map;
  */
 class LRUMapTest {
 
-    @Test
-    void test() {
-        Map<String, String> map = LRUMap.create(true,3);
-        map.put("1", "1");
-        map.put("2", "2");
-        map.put("3", "3");
-        System.out.println(map);
-        // 移除最近最少使用的元素
-        map.get("1");
-        map.put("4", "4");
-        System.out.println(map);
+	@Test
+	void shouldEvictLeastRecentlyUsedEntry() {
+		Map<String, String> map = LRUMap.create(true, 3);
+		map.put("1", "1");
+		map.put("2", "2");
+		map.put("3", "3");
 
-		int i = (ArrayUtil.MAX_ARRAY_SIZE) * 2;
-		System.out.println(i);
-		ByteBuffer.allocate(ArrayUtil.MAX_ARRAY_SIZE);
+		map.get("1");
+		map.put("4", "4");
+
+		assertEquals(3, map.size());
+		assertTrue(map.containsKey("1"));
+		assertNull(map.get("2"));
+		assertFalse(map.containsKey("2"));
+		assertEquals("3", map.get("3"));
+		assertEquals("4", map.get("4"));
 	}
 }

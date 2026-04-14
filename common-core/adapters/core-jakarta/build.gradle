@@ -7,10 +7,9 @@ plugins {
  * 作用：Jakarta 适配层在根平台之上叠加 Jakarta BOM，再统一替换 `javax` API。
  */
 dependencies {
-    implementation(platform(project(':')))
     implementation(platform(libs.jakarta.platform.jakarta.jakartaee.bom))
-    implementation(project(':core-base'))
-    implementation(project(':common-data'))
+    compileOnly(project(':core-base'))
+    compileOnly(project(':common-data'))
     implementation('jakarta.servlet:jakarta.servlet-api')
     implementation('jakarta.validation:jakarta.validation-api')
     implementation('jakarta.websocket:jakarta.websocket-api')
@@ -22,9 +21,9 @@ dependencies {
      * Lombok 编译支持。
      * 作用：适配层源码同样只在编译期使用 Lombok。
      */
-    compileOnly('org.projectlombok:lombok')
+    compileOnly(libs.org.projectlombok.lombok)
     annotationProcessor(libs.org.projectlombok.lombok)
-    testCompileOnly('org.projectlombok:lombok')
+    testCompileOnly(libs.org.projectlombok.lombok)
     testAnnotationProcessor(libs.org.projectlombok.lombok)
 }
 
