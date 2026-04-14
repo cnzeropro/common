@@ -431,7 +431,6 @@
 						<configuration>
 							<skipAddTestSourceIfMissing>true</skipAddTestSourceIfMissing>
 							<sources>
-								<source>${project.basedir}/src/test/java9</source>
 								<source>${project.basedir}/src/test/java11</source>
 								<source>${project.basedir}/src/test/java17</source>
 								<source>${project.basedir}/src/test/java21</source>
@@ -465,23 +464,6 @@
 							</jdkToolchain>
 							<source>8</source>
 							<target>8</target>
-						</configuration>
-					</execution>
-					<execution>
-						<id>compile-java9</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-						<configuration>
-							<jdkToolchain>
-								<version>11</version>
-							</jdkToolchain>
-							<release>9</release>
-							<multiReleaseOutput>true</multiReleaseOutput>
-							<compileSourceRoots>
-								<compileSourceRoot>${project.basedir}/src/main/java9</compileSourceRoot>
-							</compileSourceRoots>
 						</configuration>
 					</execution>
 					<execution>
@@ -566,23 +548,6 @@
 							<target>8</target>
 							<compileSourceRoots>
 								<compileSourceRoot>${project.basedir}/src/test/java</compileSourceRoot>
-							</compileSourceRoots>
-						</configuration>
-					</execution>
-					<execution>
-						<id>compile-test-java9</id>
-						<phase>test-compile</phase>
-						<goals>
-							<goal>testCompile</goal>
-						</goals>
-						<configuration>
-							<jdkToolchain>
-								<version>11</version>
-							</jdkToolchain>
-							<testRelease>9</testRelease>
-							<outputDirectory>${project.build.directory}/test-classes-java9</outputDirectory>
-							<compileSourceRoots>
-								<compileSourceRoot>${project.basedir}/src/test/java9</compileSourceRoot>
 							</compileSourceRoots>
 						</configuration>
 					</execution>
@@ -690,19 +655,6 @@
 					</additionalClasspathElements>
 				</configuration>
 				<executions>
-					<execution>
-						<id>test-java9</id>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
-						</goals>
-						<configuration>
-							<jdkToolchain>
-								<version>11</version>
-							</jdkToolchain>
-							<testClassesDirectory>${project.build.directory}/test-classes-java9</testClassesDirectory>
-						</configuration>
-					</execution>
 					<execution>
 						<id>test-java11</id>
 						<goals>

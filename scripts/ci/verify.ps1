@@ -50,6 +50,7 @@ Show-EnvVar 'JAVA_HOME'
 Show-EnvVar 'JDK11_HOME'
 Show-EnvVar 'JDK17_HOME'
 Show-EnvVar 'JDK21_HOME'
+Show-EnvVar 'JDK25_HOME'
 
 Invoke-Step 'java -version' { & java -version }
 Invoke-Step 'javac -version' { & javac -version }
@@ -66,8 +67,10 @@ Invoke-Step 'run stable Gradle test slice' {
 		'--tests' $CommonDataTest `
 		':core-base:test' `
 		'--tests' $CoreBaseTest `
-		':core-base:testJava9' `
-		'--tests' $CoreBaseMultiReleaseTest
+		':core-base:testJava11' `
+		'--tests' $CoreBaseMultiReleaseTest `
+		':core-base:testJava17' `
+		':core-base:testJava21'
 }
 
 Invoke-Step 'run stable Maven test slice for common-data' {

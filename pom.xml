@@ -1157,26 +1157,6 @@
 				</configuration>
 				<executions>
 					<execution>
-						<id>copy-multi-release-test-resources9</id>
-						<phase>process-test-resources</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<skip>${multi.release.resources.skip}</skip>
-							<outputDirectory>${project.build.directory}/test-classes-java9</outputDirectory>
-							<resources>
-								<resource>
-									<directory>${project.basedir}/src/test/resources9</directory>
-									<filtering>false</filtering>
-									<excludes>
-										<exclude>META-INF/**</exclude>
-									</excludes>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-					<execution>
 						<id>copy-multi-release-test-resources11</id>
 						<phase>process-test-resources</phase>
 						<goals>
@@ -1262,42 +1242,6 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
 				<executions>
-					<execution>
-						<id>add-multi-release-resources9</id>
-						<goals>
-							<goal>add-resource</goal>
-						</goals>
-						<configuration>
-							<skipAddResource>${multi.release.resources.skip}</skipAddResource>
-							<skipAddResourceIfMissing>true</skipAddResourceIfMissing>
-							<resources>
-								<resource>
-									<directory>${project.basedir}/src/main/resources9</directory>
-									<filtering>true</filtering>
-									<targetPath>META-INF/versions/9</targetPath>
-									<includes>
-										<include>**/application*.yml</include>
-										<include>**/application*.yaml</include>
-										<include>**/application*.properties</include>
-									</includes>
-									<excludes>
-										<exclude>META-INF/**</exclude>
-									</excludes>
-								</resource>
-								<resource>
-									<directory>${project.basedir}/src/main/resources9</directory>
-									<filtering>false</filtering>
-									<targetPath>META-INF/versions/9</targetPath>
-									<excludes>
-										<exclude>**/application*.yml</exclude>
-										<exclude>**/application*.yaml</exclude>
-										<exclude>**/application*.properties</exclude>
-										<exclude>META-INF/**</exclude>
-									</excludes>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
 					<execution>
 						<id>add-multi-release-resources11</id>
 						<goals>
@@ -1637,9 +1581,9 @@
 			</build>
 		</profile>
 		<profile>
-			<id>java9-higher</id>
+			<id>java11-plus-release</id>
 			<activation>
-				<jdk>[9,)</jdk>
+				<jdk>[11,)</jdk>
 			</activation>
 			<properties>
 				<maven.compiler.release>${java.version}</maven.compiler.release>

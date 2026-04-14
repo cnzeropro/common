@@ -17,6 +17,7 @@ import org.zero.build.BuildProfileSupport;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -27,6 +28,7 @@ import java.util.regex.Pattern;
  */
 public final class MultiReleaseJava8ConventionPlugin extends AbstractJvmConventionPlugin {
     private static final Pattern VERSIONED_SOURCE_SET_PATTERN = Pattern.compile("^(?:java|resources)(\\d+)$");
+    private static final List<Integer> SUPPORTED_MULTI_RELEASE_VERSIONS = Collections.unmodifiableList(Arrays.asList(11, 17, 21, 25));
     private static final String META_INF_PATTERN = "META-INF/**";
 
     @Override
@@ -77,6 +79,10 @@ public final class MultiReleaseJava8ConventionPlugin extends AbstractJvmConventi
                 continue;
             }
             Integer version = Integer.valueOf(matcher.group(1));
+            if (!SUPPORTED_MULTI_RELEASE_VERSIONS.contains(version)) {
+                throw new IllegalArgumentException("Unsupported multi-release version directory: " + child.getPath()
+                    + ". Supported versions are " + SUPPORTED_MULTI_RELEASE_VERSIONS + ".");
+            }
             if (!versions.contains(version)) {
                 versions.add(version);
             }
@@ -114,7 +120,10 @@ public final class MultiReleaseJava8ConventionPlugin extends AbstractJvmConventi
             }
         });
         project.getTasks().named("sourcesJar", Jar.class).configure(task -> {
-            task.from(mainSourceDir, copy -> copy.into("META-INF/versions/" + version));
+            task.from(project.fileTree(mainSourceDir, spec -> spec.include("**/*.java")), copy -> {
+                copy.into("META-INF/versions/" + version);
+                copy.setIncludeEmptyDirs(false);
+            });
             if (containsSupportedResources(mainResourceDir)) {
                 task.from(project.fileTree(mainResourceDir, spec -> spec.exclude(META_INF_PATTERN)), copy -> copy.into("META-INF/versions/" + version));
             }

@@ -166,7 +166,7 @@ node scripts/metadata/verify.js gradle --verbose
 ## Multi-Release JAR
 
 - `src/main/java` - Java 8 主线
-- `src/main/java9`、`java11`、`java17`、`java21`
+- `src/main/java11`、`java17`、`java21`、`java25`
 
 日常改 Java 8 主线；触及版本差异再检查高版本目录。
 

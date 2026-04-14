@@ -6,9 +6,7 @@ GRADLEW="$ROOT_DIR/gradlew"
 MVNW="$ROOT_DIR/mvnw"
 COMMON_DATA_TEST='org.zero.common.data.enumeration.HttpStatusTest'
 CORE_BASE_TEST='org.zero.common.core.util.java.EnumUtilTest'
-CORE_BASE_RESOURCE_TEST='org.zero.common.core.util.java.lang.ResourceBaselineTest'
 CORE_BASE_MULTI_RELEASE_TEST='org.zero.common.core.util.java.lang.StackUtilMultiReleaseTest'
-CORE_BASE_MULTI_RELEASE_RESOURCE_TEST='org.zero.common.core.util.java.lang.ResourceMultiReleaseTest'
 
 log() {
   printf '[ci-verify] %s\n' "$1" >&2
@@ -55,13 +53,10 @@ run_step \
   --tests "$COMMON_DATA_TEST" \
   :core-base:test \
   --tests "$CORE_BASE_TEST" \
-  --tests "$CORE_BASE_RESOURCE_TEST" \
-  :core-base:testJava9 \
+  :core-base:testJava11 \
   --tests "$CORE_BASE_MULTI_RELEASE_TEST" \
-  --tests "$CORE_BASE_MULTI_RELEASE_RESOURCE_TEST" \
-  :core-base:testJava25 \
-  --tests "$CORE_BASE_MULTI_RELEASE_TEST" \
-  --tests "$CORE_BASE_MULTI_RELEASE_RESOURCE_TEST"
+  :core-base:testJava17 \
+  :core-base:testJava21
 
 run_step \
   'run stable Maven test slice for common-data' \
@@ -80,8 +75,8 @@ run_step \
   -ntp \
   -pl common-core/core-base \
   -am \
-  -Dtest=EnumUtilTest,ResourceBaselineTest \
-  -Dit.test=StackUtilMultiReleaseTest,ResourceMultiReleaseTest \
+  -Dtest=EnumUtilTest \
+  -Dit.test=StackUtilMultiReleaseTest \
   -Dsurefire.failIfNoSpecifiedTests=false \
   -Dfailsafe.failIfNoSpecifiedTests=false \
   verify

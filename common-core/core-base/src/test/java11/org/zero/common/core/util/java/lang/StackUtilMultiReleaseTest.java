@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * 验证多版本 JAR 在高版本运行时会优先命中 java9 覆盖实现。
+ * 验证多版本 JAR 在高版本运行时会优先命中 Java 11 覆盖实现。
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2026/4/13
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 class StackUtilMultiReleaseTest {
 
 	@Test
-	void getCurrentStackTraceUsesJava9Implementation() {
+	void getCurrentStackTraceUsesJava11Implementation() {
 		StackTraceElement[] stackTraceElements = StackUtil.getCurrentStackTrace();
 		Assertions.assertTrue(stackTraceElements.length > 0);
 

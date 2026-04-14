@@ -7,7 +7,7 @@ This file provides guidance to Claude Code when working with this repository.
 - 坐标：`org.zero:common`
 - 技术栈：Spring Boot 2.7 / Spring Cloud 2021
 - 主线兼容：Java 8
-- 兼容层：保留 `java9` / `java11` / `java17` / `java21` multi-release source set
+- 兼容层：保留 `java11` / `java17` / `java21` / `java25` multi-release source set
 - 构建职责：Gradle 是日常开发入口，Maven 负责发布和聚合
 - Root 项目是 `java-platform` 版本对齐入口，不是普通业务模块
 
