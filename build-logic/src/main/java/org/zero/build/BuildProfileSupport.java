@@ -108,7 +108,7 @@ public final class BuildProfileSupport {
 	}
 
 	private static ProfileMetadata profileMetadata(Project project) {
-		File rootDir = project.getRootProject().getProjectDir();
+		File rootDir = project.getRootDir();
 		String rawProfiles = requiredSupportedProfilesProperty(project);
 		return loadProfileMetadata(rootDir, rawProfiles);
 	}

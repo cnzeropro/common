@@ -1,71 +1,223 @@
+import org.gradle.api.GradleException
+import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.bundling.Jar
 import org.zero.build.BuildProfileSupport
+
+import java.nio.charset.StandardCharsets
+import java.util.zip.ZipFile
 
 plugins {
     id 'org.zero.conventions.aggregate-distribution'
 }
 
-/*
- * Profile 桥接。
- * 作用：聚合分发模块读取根工程解析出的 profile，决定是否纳入高版本适配层。
- */
-def activeBuildProfile = BuildProfileSupport.resolveProfile(project, findProperty('buildProfile'))
+def supportedDistributionAdapters = ['ip2region2', 'jakarta', 'spring-boot3'] as Set
 
-/*
- * 聚合模块列表。
- * 作用：Java 8 基线始终参与，Jakarta 与 Boot 3 适配层仅在高版本 profile 下并入。
- */
-def aggregatedProjects = [
-    project(':core-base'),
-    project(':core-ip2region2')
-]
-if (BuildProfileSupport.isAtLeast(project, activeBuildProfile, 'java17')) {
-    aggregatedProjects.add(project(':core-jakarta'))
-    aggregatedProjects.add(project(':core-spring-boot3'))
+def resolveDistributionAdapters = { Object rawValue ->
+    if (rawValue == null || !rawValue.toString().trim()) {
+        return new LinkedHashSet<String>()
+    }
+
+    def tokens = rawValue.toString().split(',')
+        .collect { String item -> item.trim() }
+        .findAll { String item -> !item.isEmpty() }
+    def unknownTokens = tokens.findAll { String token -> !supportedDistributionAdapters.contains(token) }.unique()
+    if (!unknownTokens.isEmpty()) {
+        throw new GradleException(
+            "Unsupported distributionAdapters values ${unknownTokens}. Supported values: ${supportedDistributionAdapters}"
+        )
+    }
+
+    def resolvedAdapters = new LinkedHashSet<String>()
+    tokens.each { String token ->
+        if (token == 'spring-boot3') {
+            resolvedAdapters.add('jakarta')
+        }
+        resolvedAdapters.add(token)
+    }
+    resolvedAdapters
 }
 
-/*
- * 聚合主 Jar。
- * 作用：当前模块不编译源码，只把被聚合模块的 `main` 输出合并进同一个 jar。
- */
-tasks.named('jar', Jar) {
-    aggregatedProjects.each { Project dependencyProject ->
-        dependsOn(dependencyProject.tasks.named('classes'))
-        from(dependencyProject.extensions.getByType(org.gradle.api.tasks.SourceSetContainer).getByName('main').output)
+def explicitBuildProfile = providers.gradleProperty('buildProfile').orNull
+def distributionAdaptersProperty = providers.gradleProperty('distributionAdapters').orNull
+def activeBuildProfile = BuildProfileSupport.resolveProfile(project, explicitBuildProfile)
+def distributionAdapters = resolveDistributionAdapters(distributionAdaptersProperty)
+def java17Adapters = distributionAdapters.findAll { String adapter -> ['jakarta', 'spring-boot3'].contains(adapter) }
+if (!java17Adapters.isEmpty() && !BuildProfileSupport.isAtLeast(project, activeBuildProfile, 'java17')) {
+    throw new GradleException(
+        "distributionAdapters ${java17Adapters} require buildProfile >= java17. Current activeBuildProfile: '${activeBuildProfile}'."
+    )
+}
+
+def adapterProjectPaths = [
+    'ip2region2'  : ':core-ip2region2',
+    'jakarta'     : ':core-jakarta',
+    'spring-boot3': ':core-spring-boot3'
+]
+def aggregatedProjectPaths = [':core-base']
+aggregatedProjectPaths.addAll(distributionAdapters.collect { String adapter -> adapterProjectPaths[adapter] })
+aggregatedProjectPaths = aggregatedProjectPaths.unique()
+
+configurations {
+    aggregateRuntimeArtifacts {
+        canBeConsumed = false
+        canBeResolved = true
+        visible = false
+        attributes {
+            attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
+            attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category, Category.LIBRARY))
+            attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling, Bundling.EXTERNAL))
+            attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements, LibraryElements.JAR))
+        }
+    }
+    aggregateSourcesArtifacts {
+        canBeConsumed = false
+        canBeResolved = true
+        visible = false
+        attributes {
+            attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category, Category.DOCUMENTATION))
+            attribute(DocsType.DOCS_TYPE_ATTRIBUTE, objects.named(DocsType, DocsType.SOURCES))
+        }
+    }
+    aggregateJavadocArtifacts {
+        canBeConsumed = false
+        canBeResolved = true
+        visible = false
+        attributes {
+            attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category, Category.DOCUMENTATION))
+            attribute(DocsType.DOCS_TYPE_ATTRIBUTE, objects.named(DocsType, DocsType.JAVADOC))
+        }
     }
 }
 
-/*
- * 聚合源码附件。
- * 作用：`sourcesJar` 合并被聚合模块的源码附件，避免发布空归档。
- */
+dependencies {
+    aggregatedProjectPaths.each { String projectPath ->
+        add('aggregateRuntimeArtifacts', project(projectPath)) {
+            transitive = false
+        }
+        add('aggregateSourcesArtifacts', project(projectPath)) {
+            transitive = false
+        }
+        add('aggregateJavadocArtifacts', project(projectPath)) {
+            transitive = false
+        }
+    }
+}
+
+def resolveProjectArtifacts = { String configurationName ->
+    configurations.named(configurationName).get().incoming.artifactView { view ->
+        view.componentFilter { Object componentIdentifier -> componentIdentifier instanceof ProjectComponentIdentifier }
+    }.files
+}
+
+def aggregateRuntimeArtifactFiles = resolveProjectArtifacts('aggregateRuntimeArtifacts')
+def aggregateSourcesArtifactFiles = resolveProjectArtifacts('aggregateSourcesArtifacts')
+def aggregateJavadocArtifactFiles = resolveProjectArtifacts('aggregateJavadocArtifacts')
+
+def aggregateRuntimeOutputDir = layout.buildDirectory.dir('tmp/aggregateDistribution/runtime')
+def aggregateSourcesOutputDir = layout.buildDirectory.dir('tmp/aggregateDistribution/sources')
+def aggregateJavadocOutputDir = layout.buildDirectory.dir('tmp/aggregateDistribution/javadoc')
+def aggregateServicesOutputDir = layout.buildDirectory.dir('generated/aggregateDistribution/services')
+
+def unpackAggregateRuntimeArtifacts = tasks.register('unpackAggregateRuntimeArtifacts', Sync) { task ->
+    task.inputs.files(aggregateRuntimeArtifactFiles)
+    task.from({
+        aggregateRuntimeArtifactFiles.files.collect { File artifact -> zipTree(artifact) }
+    }) {
+        exclude('META-INF/MANIFEST.MF', 'META-INF/services/**')
+    }
+    task.into(aggregateRuntimeOutputDir)
+    task.setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+}
+
+def unpackAggregateSourcesArtifacts = tasks.register('unpackAggregateSourcesArtifacts', Sync) { task ->
+    task.inputs.files(aggregateSourcesArtifactFiles)
+    task.from({
+        aggregateSourcesArtifactFiles.files.collect { File artifact -> zipTree(artifact) }
+    }) {
+        exclude('META-INF/MANIFEST.MF')
+    }
+    task.into(aggregateSourcesOutputDir)
+    task.setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+}
+
+def unpackAggregateJavadocArtifacts = tasks.register('unpackAggregateJavadocArtifacts', Sync) { task ->
+    task.inputs.files(aggregateJavadocArtifactFiles)
+    task.from({
+        aggregateJavadocArtifactFiles.files.collect { File artifact -> zipTree(artifact) }
+    }) {
+        exclude('META-INF/MANIFEST.MF')
+    }
+    task.into(aggregateJavadocOutputDir)
+    task.setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+}
+
+def mergeAggregateServiceDescriptors = tasks.register('mergeAggregateServiceDescriptors') { task ->
+    task.inputs.files(aggregateRuntimeArtifactFiles)
+    task.outputs.dir(aggregateServicesOutputDir)
+    task.doLast {
+        File outputDirectory = aggregateServicesOutputDir.get().asFile
+        project.delete(outputDirectory)
+        outputDirectory.mkdirs()
+
+        Map<String, Set<String>> mergedDescriptors = new LinkedHashMap<String, Set<String>>()
+        aggregateRuntimeArtifactFiles.files.each { File artifact ->
+            ZipFile zipFile = new ZipFile(artifact)
+            try {
+                def entries = zipFile.entries()
+                while (entries.hasMoreElements()) {
+                    def entry = entries.nextElement()
+                    if (entry.isDirectory() || !entry.name.startsWith('META-INF/services/')) {
+                        continue
+                    }
+                    Set<String> descriptorLines = mergedDescriptors[entry.name]
+                    if (descriptorLines == null) {
+                        descriptorLines = new LinkedHashSet<String>()
+                        mergedDescriptors[entry.name] = descriptorLines
+                    }
+                    zipFile.getInputStream(entry).withCloseable { InputStream inputStream ->
+                        inputStream.getText(StandardCharsets.UTF_8.name()).readLines().each { String line ->
+                            if (line.trim()) {
+                                descriptorLines.add(line)
+                            }
+                        }
+                    }
+                }
+            } finally {
+                zipFile.close()
+            }
+        }
+
+        mergedDescriptors.each { String relativePath, Set<String> descriptorLines ->
+            File outputFile = new File(outputDirectory, relativePath)
+            outputFile.parentFile.mkdirs()
+            outputFile.setText(descriptorLines.join(System.lineSeparator()) + System.lineSeparator(), StandardCharsets.UTF_8.name())
+        }
+    }
+}
+
+tasks.named('jar', Jar) {
+    dependsOn(unpackAggregateRuntimeArtifacts, mergeAggregateServiceDescriptors)
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(aggregateRuntimeOutputDir)
+    from(aggregateServicesOutputDir) {
+        include 'META-INF/services/**'
+    }
+}
+
 tasks.named('sourcesJar', Jar) {
     enabled = true
+    dependsOn(unpackAggregateSourcesArtifacts)
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    aggregatedProjects.each { Project dependencyProject ->
-        def sourceJarTask = dependencyProject.tasks.named('sourcesJar', Jar)
-        dependsOn(sourceJarTask)
-        from({
-            zipTree(sourceJarTask.get().archiveFile.get().asFile)
-        })
-    }
+    from(aggregateSourcesOutputDir)
 }
 
-/*
- * 聚合 Javadoc 附件。
- * 作用：`javadocJar` 合并被聚合模块的文档附件，保持发布语义一致。
- */
 tasks.named('javadocJar', Jar) {
     enabled = true
+    dependsOn(unpackAggregateJavadocArtifacts)
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    aggregatedProjects.each { Project dependencyProject ->
-        def javadocJarTask = dependencyProject.tasks.named('javadocJar', Jar)
-        dependsOn(javadocJarTask)
-        from({
-            zipTree(javadocJarTask.get().archiveFile.get().asFile)
-        })
-    }
+    from(aggregateJavadocOutputDir)
 }
 
 description = 'common-core::distribution'

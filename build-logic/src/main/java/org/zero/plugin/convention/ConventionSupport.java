@@ -22,6 +22,8 @@ import org.gradle.jvm.toolchain.JavaLanguageVersion;
  * Convention support - 集中封装各模块共享的 Java、测试与发布约定。
  */
 public final class ConventionSupport {
+    private static final String BUILD_REVISION_PROPERTY = "build.revision";
+    private static final String DEFAULT_GROUP = "org.zero";
     private static final String SLF4J_API_MODULE = "org.slf4j:slf4j-api";
     private static final String SLF4J_BOM_VERSION_ALIAS = "org-slf4j_slf4j-bom";
     private static final String MANAGED_ENFORCED_PLATFORMS_BUNDLE = "managed-enforced-platforms";
@@ -30,8 +32,12 @@ public final class ConventionSupport {
     }
 
     public static void applySharedIdentity(Project project) {
-        project.setGroup(project.getRootProject().getGroup());
-        project.setVersion(project.getRootProject().getVersion());
+        Provider<String> buildRevision = project.getProviders().gradleProperty(BUILD_REVISION_PROPERTY);
+        if (!buildRevision.isPresent()) {
+            throw new IllegalStateException("Missing Gradle property '" + BUILD_REVISION_PROPERTY + "'.");
+        }
+        project.setGroup(DEFAULT_GROUP);
+        project.setVersion(buildRevision.get());
     }
 
     public static void configureJava(Project project, int languageVersion) {
@@ -152,7 +158,7 @@ public final class ConventionSupport {
         }
         publishing.getRepositories().maven(repository -> {
             repository.setName("localStagingRepository");
-            repository.setUrl(project.getRootProject().getLayout().getBuildDirectory().dir("repos/local-staging"));
+            repository.setUrl(new java.io.File(project.getRootDir(), "build/repos/local-staging"));
         });
     }
 }

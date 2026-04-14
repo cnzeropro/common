@@ -6,10 +6,6 @@ plugins {
  * Catalog 回退。
  * 作用：个别坐标暂未进入当前 catalog 时保留稳定 fallback，避免历史构建直接失效。
  */
-def libsCatalog = extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension).named('libs')
-def sentinelWebMvcDependency = libsCatalog.findLibrary('com-alibaba-csp_sentinel-spring-webmvc-adapter').orElse(null)
-    ?: 'com.alibaba.csp:sentinel-spring-webmvc-adapter:1.8.8'
-
 /*
  * 依赖布局。
  * 作用：`core-base` 统一复用根平台约束，并按当前 profile 选择实现与测试依赖。
@@ -55,7 +51,7 @@ dependencies {
      * Sentinel 适配器回退。
      * 作用：优先使用 catalog 别名，缺项时回退到历史稳定版本。
      */
-    implementation(sentinelWebMvcDependency)
+    implementation(libs.com.alibaba.csp.sentinel.spring.webmvc.adapter)
     implementation('com.alibaba.csp:sentinel-parameter-flow-control')
     implementation(libs.com.alibaba.csp.sentinel.apache.dubbo.adapter)
     implementation(libs.com.alibaba.csp.sentinel.apache.dubbo3.adapter)

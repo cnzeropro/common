@@ -30,14 +30,15 @@ class ApplicationConventionPluginFunctionalTest {
             "[libraries]",
             "org-junit_junit-bom = { module = 'org.junit:junit-bom', version.ref = 'junit' }"
         );
+        writeFile(
+            tempDir.resolve("gradle.properties"),
+            "build.revision=1.0.0"
+        );
         writeFile(tempDir.resolve("build.gradle"), String.join(
             System.lineSeparator(),
             "plugins {",
             "    id 'org.zero.conventions.java8-application'",
-            "}",
-            "",
-            "group = 'org.zero.test'",
-            "version = '1.0.0'"
+            "}"
         ));
 
         BuildResult result = GradleRunner.create()

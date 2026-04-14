@@ -419,68 +419,6 @@
 		<finalName>${project.parent.artifactId}-${project.parent.version}</finalName>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-toolchains-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>validate-jdk8-toolchain</id>
-						<phase>validate</phase>
-						<goals>
-							<goal>toolchain</goal>
-						</goals>
-						<configuration>
-							<toolchains>
-								<jdk>
-									<version>8</version>
-								</jdk>
-							</toolchains>
-						</configuration>
-					</execution>
-					<execution>
-						<id>validate-jdk11-toolchain</id>
-						<phase>validate</phase>
-						<goals>
-							<goal>toolchain</goal>
-						</goals>
-						<configuration>
-							<toolchains>
-								<jdk>
-									<version>11</version>
-								</jdk>
-							</toolchains>
-						</configuration>
-					</execution>
-					<execution>
-						<id>validate-jdk17-toolchain</id>
-						<phase>validate</phase>
-						<goals>
-							<goal>toolchain</goal>
-						</goals>
-						<configuration>
-							<toolchains>
-								<jdk>
-									<version>17</version>
-								</jdk>
-							</toolchains>
-						</configuration>
-					</execution>
-					<execution>
-						<id>validate-jdk21-toolchain</id>
-						<phase>validate</phase>
-						<goals>
-							<goal>toolchain</goal>
-						</goals>
-						<configuration>
-							<toolchains>
-								<jdk>
-									<version>21</version>
-								</jdk>
-							</toolchains>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
 				<executions>
@@ -496,6 +434,7 @@
 								<source>${project.basedir}/src/test/java11</source>
 								<source>${project.basedir}/src/test/java17</source>
 								<source>${project.basedir}/src/test/java21</source>
+								<source>${project.basedir}/src/test/java25</source>
 							</sources>
 						</configuration>
 					</execution>
@@ -596,6 +535,23 @@
 						</configuration>
 					</execution>
 					<execution>
+						<id>compile-java25</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+						<configuration>
+							<jdkToolchain>
+								<version>25</version>
+							</jdkToolchain>
+							<release>25</release>
+							<multiReleaseOutput>true</multiReleaseOutput>
+							<compileSourceRoots>
+								<compileSourceRoot>${project.basedir}/src/main/java25</compileSourceRoot>
+							</compileSourceRoots>
+						</configuration>
+					</execution>
+					<execution>
 						<id>compile-test-base</id>
 						<phase>test-compile</phase>
 						<goals>
@@ -677,6 +633,23 @@
 							<outputDirectory>${project.build.directory}/test-classes-java21</outputDirectory>
 							<compileSourceRoots>
 								<compileSourceRoot>${project.basedir}/src/test/java21</compileSourceRoot>
+							</compileSourceRoots>
+						</configuration>
+					</execution>
+					<execution>
+						<id>compile-test-java25</id>
+						<phase>test-compile</phase>
+						<goals>
+							<goal>testCompile</goal>
+						</goals>
+						<configuration>
+							<jdkToolchain>
+								<version>25</version>
+							</jdkToolchain>
+							<testRelease>25</testRelease>
+							<outputDirectory>${project.build.directory}/test-classes-java25</outputDirectory>
+							<compileSourceRoots>
+								<compileSourceRoot>${project.basedir}/src/test/java25</compileSourceRoot>
 							</compileSourceRoots>
 						</configuration>
 					</execution>
@@ -766,6 +739,19 @@
 								<version>21</version>
 							</jdkToolchain>
 							<testClassesDirectory>${project.build.directory}/test-classes-java21</testClassesDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>test-java25</id>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+						<configuration>
+							<jdkToolchain>
+								<version>25</version>
+							</jdkToolchain>
+							<testClassesDirectory>${project.build.directory}/test-classes-java25</testClassesDirectory>
 						</configuration>
 					</execution>
 				</executions>

@@ -45,12 +45,20 @@ jobs:
           distribution: temurin
           java-version: "21"
 
+      - name: Set up JDK 25
+        id: java25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+
       - name: Export toolchain variables
         run: |
           echo "JAVA_HOME=${{ steps.java8.outputs.path }}" >> "$GITHUB_ENV"
           echo "JDK11_HOME=${{ steps.java11.outputs.path }}" >> "$GITHUB_ENV"
           echo "JDK17_HOME=${{ steps.java17.outputs.path }}" >> "$GITHUB_ENV"
           echo "JDK21_HOME=${{ steps.java21.outputs.path }}" >> "$GITHUB_ENV"
+          echo "JDK25_HOME=${{ steps.java25.outputs.path }}" >> "$GITHUB_ENV"
 
       - name: Cache Gradle and Maven
         uses: actions/cache@v4

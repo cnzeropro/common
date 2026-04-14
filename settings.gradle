@@ -87,6 +87,40 @@ def isAtLeastProfile = { String currentProfile, String baselineProfile, List<Str
 	currentIndex >= 0 && baselineIndex >= 0 && currentIndex >= baselineIndex
 }
 
+def supportedDistributionAdapters = ['ip2region2', 'jakarta', 'spring-boot3']
+
+def resolveDistributionAdapters = { Object rawValue ->
+    if (rawValue == null || !rawValue.toString().trim()) {
+        return new LinkedHashSet<String>()
+    }
+
+    def tokens = parseNonBlankCsv(rawValue.toString())
+    def unknownTokens = tokens.findAll { String token -> !supportedDistributionAdapters.contains(token) }.unique()
+    if (!unknownTokens.isEmpty()) {
+        throw new GradleException(
+            "Unsupported distributionAdapters values ${unknownTokens}. Supported values: ${supportedDistributionAdapters}"
+        )
+    }
+
+    def resolvedAdapters = new LinkedHashSet<String>()
+    tokens.each { String token ->
+        if (token == 'spring-boot3') {
+            resolvedAdapters.add('jakarta')
+        }
+        resolvedAdapters.add(token)
+    }
+    resolvedAdapters
+}
+
+def validateDistributionAdapters = { Set<String> distributionAdapters, String currentProfile, List<String> supportedProfiles ->
+    def java17Adapters = distributionAdapters.findAll { String adapter -> ['jakarta', 'spring-boot3'].contains(adapter) }
+    if (!java17Adapters.isEmpty() && !isAtLeastProfile(currentProfile, 'java17', supportedProfiles)) {
+        throw new GradleException(
+            "distributionAdapters ${java17Adapters} require buildProfile >= java17. Current activeBuildProfile: '${currentProfile}'."
+        )
+    }
+}
+
 /*
  * Version Catalog 选择。
  * 作用：根据 `activeBuildProfile` 选择当前可用的 version catalog 文件。
@@ -201,6 +235,8 @@ def baseProfile = profileMetadata.baseProfile
 def supportedProfiles = profileMetadata.supportedProfiles
 def explicitProfile = normalizeBuildProfile(gradle.startParameter.projectProperties.get('buildProfile'), supportedProfiles)
 def activeBuildProfile = resolveActiveBuildProfile(explicitProfile, baseProfile, supportedProfiles)
+def distributionAdapters = resolveDistributionAdapters(gradle.startParameter.projectProperties.get('distributionAdapters'))
+validateDistributionAdapters(distributionAdapters, activeBuildProfile, supportedProfiles)
 def activeVersionCatalogFile = requireActiveVersionCatalogFile(activeBuildProfile, baseProfile)
 
 /*
@@ -234,7 +270,7 @@ rootProject.name = 'common'
 def projects = new LinkedHashMap<String, Map<String, Object>>()
 registerProject(projects, ':core-base', 'core-base', 'common-core/core-base', [':common-data'])
 registerProject(projects, ':core-ip2region2', 'core-ip2region2', 'common-core/adapters/core-ip2region2', [':core-base'])
-registerProject(projects, ':core-distribution', 'common-core', 'common-core/core-distribution', [':core-base', ':core-ip2region2'])
+registerProject(projects, ':core-distribution', 'common-core', 'common-core/core-distribution', [':core-base'])
 registerProject(projects, ':common-data', 'common-data', 'common-data')
 registerProject(projects, ':common-api', 'common-api', 'common-api', [':core-distribution', ':core-base', ':common-data'])
 registerProject(
@@ -258,8 +294,16 @@ if (isAtLeastProfile(activeBuildProfile, 'java17', supportedProfiles)) {
         'common-core/adapters/core-spring-boot3',
         [':core-base', ':core-jakarta', ':common-data']
     )
-	projects[':core-distribution'].dependencies.addAll([':core-jakarta', ':core-spring-boot3'])
 }
+
+def distributionAdapterProjectPaths = [
+    'ip2region2'  : ':core-ip2region2',
+    'jakarta'     : ':core-jakarta',
+    'spring-boot3': ':core-spring-boot3'
+]
+projects[':core-distribution'].dependencies.addAll(
+    distributionAdapters.collect { String adapter -> distributionAdapterProjectPaths[adapter] }
+)
 
 /*
  * 项目筛选。

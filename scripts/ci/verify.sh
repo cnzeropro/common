@@ -35,6 +35,7 @@ print_env_var JAVA_HOME
 print_env_var JDK11_HOME
 print_env_var JDK17_HOME
 print_env_var JDK21_HOME
+print_env_var JDK25_HOME
 
 run_step 'java -version' java -version
 run_step 'javac -version' javac -version
@@ -53,6 +54,8 @@ run_step \
   :core-base:test \
   --tests "$CORE_BASE_TEST" \
   :core-base:testJava9 \
+  --tests "$CORE_BASE_MULTI_RELEASE_TEST" \
+  :core-base:testJava25 \
   --tests "$CORE_BASE_MULTI_RELEASE_TEST"
 
 run_step \
