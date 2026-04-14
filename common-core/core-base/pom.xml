@@ -15,6 +15,7 @@
 	<name>common-core::base</name>
 
 	<properties>
+		<multi.release.resources.skip>false</multi.release.resources.skip>
 		<org.springframework_spring-framework-bom.version>5.3.39</org.springframework_spring-framework-bom.version>
 		<org.springframework.boot_spring-boot-dependencies.version>2.7.18</org.springframework.boot_spring-boot-dependencies.version>
 		<org.springframework.cloud_spring-cloud-dependencies.version>2021.0.9</org.springframework.cloud_spring-cloud-dependencies.version>

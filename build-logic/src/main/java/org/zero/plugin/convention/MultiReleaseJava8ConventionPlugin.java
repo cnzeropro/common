@@ -4,6 +4,7 @@ import org.gradle.api.Project;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.DuplicatesStrategy;
 import org.gradle.api.provider.Provider;
+import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
@@ -25,7 +26,8 @@ import java.util.regex.Pattern;
  * Multi-Release Java 8 convention - 在 Java 8 主线上追加 Java 9+ 的多版本源码输出。
  */
 public final class MultiReleaseJava8ConventionPlugin extends AbstractJvmConventionPlugin {
-    private static final Pattern VERSIONED_SOURCE_SET_PATTERN = Pattern.compile("^java(\\d+)$");
+    private static final Pattern VERSIONED_SOURCE_SET_PATTERN = Pattern.compile("^(?:java|resources)(\\d+)$");
+    private static final String META_INF_PATTERN = "META-INF/**";
 
     @Override
     protected String basePluginId() {
@@ -91,6 +93,7 @@ public final class MultiReleaseJava8ConventionPlugin extends AbstractJvmConventi
     ) {
         int toolchainVersion = BuildProfileSupport.resolveToolchainLanguageVersion(project, version);
         File mainSourceDir = project.file("src/main/java" + version);
+        File mainResourceDir = project.file("src/main/resources" + version);
         Provider<Directory> outputDirectory = project.getLayout().getBuildDirectory().dir("classes/java/multiRelease/" + version);
         TaskProvider<JavaCompile> compileTask = project.getTasks().register("compileJava" + version, JavaCompile.class, task -> {
             task.source(project.fileTree(mainSourceDir, spec -> spec.include("**/*.java")));
@@ -106,12 +109,22 @@ public final class MultiReleaseJava8ConventionPlugin extends AbstractJvmConventi
         project.getTasks().named("jar", Jar.class).configure(task -> {
             task.dependsOn(compileTask);
             task.from(outputDirectory, copy -> copy.into("META-INF/versions/" + version));
+            if (containsSupportedResources(mainResourceDir)) {
+                task.from(project.fileTree(mainResourceDir, spec -> spec.exclude(META_INF_PATTERN)), copy -> copy.into("META-INF/versions/" + version));
+            }
         });
-        project.getTasks().named("sourcesJar", Jar.class).configure(task -> task.from(mainSourceDir, copy -> copy.into("META-INF/versions/" + version)));
+        project.getTasks().named("sourcesJar", Jar.class).configure(task -> {
+            task.from(mainSourceDir, copy -> copy.into("META-INF/versions/" + version));
+            if (containsSupportedResources(mainResourceDir)) {
+                task.from(project.fileTree(mainResourceDir, spec -> spec.exclude(META_INF_PATTERN)), copy -> copy.into("META-INF/versions/" + version));
+            }
+        });
 
         File testSourceDir = project.file("src/test/java" + version);
         if (containsJavaSources(testSourceDir)) {
+            File testResourceDir = project.file("src/test/resources" + version);
             Provider<Directory> testOutputDirectory = project.getLayout().getBuildDirectory().dir("classes/java/testMultiRelease/" + version);
+            Provider<Directory> testResourcesOutputDirectory = project.getLayout().getBuildDirectory().dir("resources/testMultiRelease/" + version);
             TaskProvider<JavaCompile> compileTestTask = project.getTasks().register("compileTestJava" + version, JavaCompile.class, task -> {
                 task.dependsOn(compileTask);
                 task.source(project.fileTree(testSourceDir, spec -> spec.include("**/*.java")));
@@ -122,11 +135,19 @@ public final class MultiReleaseJava8ConventionPlugin extends AbstractJvmConventi
                 task.getOptions().setEncoding("UTF-8");
                 task.getJavaCompiler().set(toolchains.compilerFor(spec -> spec.getLanguageVersion().set(JavaLanguageVersion.of(toolchainVersion))));
             });
+            TaskProvider<Copy> processTestResourcesTask = project.getTasks().register("processTestResources" + version, Copy.class, task -> {
+                task.from(project.fileTree(testResourceDir, spec -> spec.exclude(META_INF_PATTERN)));
+                task.into(testResourcesOutputDirectory);
+                task.setIncludeEmptyDirs(false);
+                task.setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE);
+                task.onlyIf(spec -> containsSupportedResources(testResourceDir));
+            });
             TaskProvider<Test> testTask = project.getTasks().register("testJava" + version, Test.class, task -> {
-                task.dependsOn(jarTask, compileTestTask);
+                task.dependsOn(jarTask, compileTestTask, processTestResourcesTask);
                 task.setTestClassesDirs(project.files(testOutputDirectory));
                 task.setClasspath(
                     project.files(testOutputDirectory)
+                        .plus(project.files(testResourcesOutputDirectory))
                         .plus(testSourceSet.getRuntimeClasspath().minus(mainSourceSet.getOutput()))
                         .plus(project.files(jarTask.flatMap(Jar::getArchiveFile)))
                 );
@@ -136,6 +157,31 @@ public final class MultiReleaseJava8ConventionPlugin extends AbstractJvmConventi
             });
             project.getTasks().named("check").configure(task -> task.dependsOn(testTask));
         }
+    }
+
+    private boolean containsSupportedResources(File sourceDirectory) {
+        if (sourceDirectory == null || !sourceDirectory.isDirectory()) {
+            return false;
+        }
+        File[] children = sourceDirectory.listFiles();
+        if (children == null) {
+            return false;
+        }
+        for (File child : children) {
+            if (child.isDirectory()) {
+                if ("META-INF".equals(child.getName())) {
+                    continue;
+                }
+                if (containsSupportedResources(child)) {
+                    return true;
+                }
+                continue;
+            }
+            if (child.isFile()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean containsJavaSources(File sourceDirectory) {
