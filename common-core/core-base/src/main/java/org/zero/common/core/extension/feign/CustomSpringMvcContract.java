@@ -149,8 +149,7 @@ public class CustomSpringMvcContract extends SpringMvcContract implements Enviro
         this.registerParameterAnnotation(QueryMap.class, (queryMap, data, paramIndex) -> {
             feign.Util.checkState(data.queryMapIndex() == null, "QueryMap annotation was present on multiple parameters.");
             data.queryMapIndex(paramIndex);
-            // deprecated
-            // data.queryMapEncoded(queryMap.encoded());
+			data.queryMapEncoded(queryMap.encoded());
         });
         this.registerParameterAnnotation(HeaderMap.class, (queryMap, data, paramIndex) -> {
             feign.Util.checkState(data.headerMapIndex() == null, "HeaderMap annotation was present on multiple parameters.");

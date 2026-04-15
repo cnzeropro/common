@@ -5,11 +5,9 @@ import feign.RequestTemplate;
 import jakarta.servlet.http.HttpServletRequest;
 import org.zero.common.core.util.spring.web.context.request.RequestUtil;
 
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -19,7 +17,6 @@ import java.util.Objects;
 public class HeaderRequestInterceptor implements RequestInterceptor {
 	protected final Mode mode;
 	protected final String[] headerNames;
-	protected final Map<String, String> normalizedHeaderNames;
 
 	public HeaderRequestInterceptor(String... headerNames) {
 		this(Mode.INCLUDE, headerNames);
@@ -27,15 +24,13 @@ public class HeaderRequestInterceptor implements RequestInterceptor {
 
 	public HeaderRequestInterceptor(Mode mode, String... headerNames) {
 		this.mode = Objects.requireNonNull(mode, "Mode must not be null");
-		LinkedHashMap<String, String> normalizedHeaderNames = normalizeHeaderNames(headerNames);
-		this.headerNames = normalizedHeaderNames.values().toArray(new String[0]);
-		this.normalizedHeaderNames = Collections.unmodifiableMap(normalizedHeaderNames);
+		this.headerNames = normalizeHeaderNames(headerNames);
 	}
 
-	protected static LinkedHashMap<String, String> normalizeHeaderNames(String[] headerNames) {
+	protected static String[] normalizeHeaderNames(String[] headerNames) {
 		LinkedHashMap<String, String> result = new LinkedHashMap<>();
 		if (Objects.isNull(headerNames)) {
-			return result;
+			return new String[0];
 		}
 		for (String headerName : headerNames) {
 			String normalizedHeaderName = normalizeHeaderName(headerName);
@@ -44,7 +39,19 @@ public class HeaderRequestInterceptor implements RequestInterceptor {
 			}
 			result.put(normalizedHeaderName, headerName.trim());
 		}
-		return result;
+		return result.values().toArray(new String[0]);
+	}
+
+	protected boolean containsHeaderName(String headerName) {
+		if (Objects.isNull(headerName)) {
+			return false;
+		}
+		for (String configuredHeaderName : headerNames) {
+			if (configuredHeaderName.equalsIgnoreCase(headerName)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	protected static String normalizeHeaderName(String headerName) {
@@ -87,7 +94,7 @@ public class HeaderRequestInterceptor implements RequestInterceptor {
 		}
 		while (requestHeaderNames.hasMoreElements()) {
 			String headerName = requestHeaderNames.nextElement();
-			if (normalizedHeaderNames.containsKey(normalizeHeaderName(headerName))) {
+			if (containsHeaderName(headerName)) {
 				continue;
 			}
 			String headerValue = request.getHeader(headerName);
