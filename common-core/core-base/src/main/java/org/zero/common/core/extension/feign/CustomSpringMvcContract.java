@@ -9,10 +9,12 @@ import feign.QueryMap;
 import feign.Request;
 import feign.RequestLine;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.cloud.openfeign.CollectionFormat;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -30,9 +32,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * SpringCloud OpenFeign Contract（{@link SpringMvcContract}）只支持 SpringMVC 注解和少量 Feign 原生注解，
- * 而 Feign 默认的 Contract（{@link feign.Contract.Default}）只支持 Feign 原生注解，
- * 因此需要自定义 Contract 用于支持两种实现（也就是各自的注解都支持）。
+ * 同时支持 Spring MVC 注解和 Feign 原生注解的 Contract。
  *
  * @author zero
  * @see SpringMvcContract
@@ -48,23 +48,43 @@ public class CustomSpringMvcContract extends SpringMvcContract implements Enviro
 
     @Override
     protected void processAnnotationOnClass(MethodMetadata data, Class<?> clz) {
-        // 先支持 Feign 的注解，再支持 SpringMvc 的注解，以后者为主，防止前者覆盖后者
-        this.supportFeignAnnotationOnClass(data, clz);
+		Annotation[] annotations = clz.getAnnotations();
+		Arrays.stream(annotations).forEach(annotation -> this.processFeignAnnotationOnClass(data, annotation));
         super.processAnnotationOnClass(data, clz);
+
+		if (annotations.length == 0) {
+			this.warnNoClassAnnotations(data, clz);
+			return;
+		}
+
+		List<String> unsupportedAnnotations = Arrays.stream(annotations)
+				.filter(annotation -> !this.matchesFeignAnnotationOnClass(annotation)
+						&& !this.isSpringSupportedClassAnnotation(annotation))
+				.map(this::annotationName)
+				.collect(Collectors.toList());
+		if (!unsupportedAnnotations.isEmpty()) {
+			this.warnUnsupportedClassAnnotations(data, clz, unsupportedAnnotations);
+		}
     }
 
     @Override
     protected void processAnnotationOnMethod(MethodMetadata data, Annotation methodAnnotation, Method method) {
-        this.supportFeignAnnotationOnMethod(data, methodAnnotation, method);
+		boolean feignProcessed = this.processFeignAnnotationOnMethod(data, methodAnnotation);
         super.processAnnotationOnMethod(data, methodAnnotation, method);
-    }
-
+		if (!feignProcessed && !this.isSpringSupportedMethodAnnotation(methodAnnotation)) {
+			this.warnUnsupportedMethodAnnotation(data, method, methodAnnotation);
+		}
+	}
 
     @Override
     protected boolean processAnnotationsOnParameter(MethodMetadata data, Annotation[] annotations, int paramIndex) {
-        return this.supportFeignAnnotationOnParameter(data, annotations, paramIndex) && super.processAnnotationsOnParameter(data, annotations, paramIndex);
-    }
-
+		boolean feignProcessed = this.processFeignAnnotationOnParameter(data, annotations, paramIndex);
+		boolean springProcessed = super.processAnnotationsOnParameter(data, annotations, paramIndex);
+		if (!feignProcessed && !springProcessed) {
+			this.warnUnsupportedParameterAnnotations(data, annotations, paramIndex);
+		}
+		return feignProcessed || springProcessed;
+	}
 
     protected String resolve(String value) {
         return StringUtils.hasText(value) ? environment.resolvePlaceholders(value) : value;
@@ -76,7 +96,7 @@ public class CustomSpringMvcContract extends SpringMvcContract implements Enviro
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
         this.init();
     }
 
@@ -96,18 +116,21 @@ public class CustomSpringMvcContract extends SpringMvcContract implements Enviro
         });
         this.registerMethodAnnotation(RequestLine.class, (ann, data) -> {
             final String requestLine = ann.value();
-            feign.Util.checkState(feign.Util.emptyToNull(requestLine) != null, "RequestLine annotation was empty on targetMethod %s.", data.configKey());
+			feign.Util.checkState(feign.Util.emptyToNull(requestLine) != null,
+					"RequestLine annotation was empty on targetMethod %s.", data.configKey());
             final Matcher requestLineMatcher = REQUEST_LINE_PATTERN.matcher(requestLine);
             if (!requestLineMatcher.find()) {
-                throw new IllegalStateException(String.format("RequestLine annotation didn't start with an HTTP verb on targetMethod %s", data.configKey()));
-            } else {
-                String method = requestLineMatcher.group(1);
-                String resolvedMethod = this.resolve(method);
-                data.template().method(Request.HttpMethod.valueOf(resolvedMethod));
-                String uri = requestLineMatcher.group(2);
-                String resolvedUri = this.resolve(uri);
-                data.template().uri(resolvedUri);
-            }
+				throw new IllegalStateException(
+						String.format("RequestLine annotation didn't start with an HTTP verb on targetMethod %s", data.configKey()));
+			}
+
+			String method = requestLineMatcher.group(1);
+			String resolvedMethod = this.resolve(method);
+			data.template().method(Request.HttpMethod.valueOf(resolvedMethod));
+
+			String uri = requestLineMatcher.group(2);
+			String resolvedUri = this.resolve(uri);
+			data.template().uri(resolvedUri);
             data.template().decodeSlash(ann.decodeSlash());
             data.template().collectionFormat(ann.collectionFormat());
         });
@@ -149,7 +172,6 @@ public class CustomSpringMvcContract extends SpringMvcContract implements Enviro
         this.registerParameterAnnotation(QueryMap.class, (queryMap, data, paramIndex) -> {
             feign.Util.checkState(data.queryMapIndex() == null, "QueryMap annotation was present on multiple parameters.");
             data.queryMapIndex(paramIndex);
-			data.queryMapEncoded(queryMap.encoded());
         });
         this.registerParameterAnnotation(HeaderMap.class, (queryMap, data, paramIndex) -> {
             feign.Util.checkState(data.headerMapIndex() == null, "HeaderMap annotation was present on multiple parameters.");
@@ -170,78 +192,89 @@ public class CustomSpringMvcContract extends SpringMvcContract implements Enviro
 
     /* ***************************************** Copy from feign.DeclarativeContract ***************************************** */
 
-    protected void supportFeignAnnotationOnClass(MethodMetadata data, Class<?> clz) {
-        final List<GuardedAnnotationProcessor> processors = Arrays.stream(clz.getAnnotations())
-                .flatMap(annotation -> classAnnotationProcessors.stream()
-                        .filter(processor -> processor.test(annotation)))
+	protected boolean processFeignAnnotationOnClass(MethodMetadata data, Annotation annotation) {
+		List<GuardedAnnotationProcessor> processors = this.classAnnotationProcessors.stream()
+				.filter(processor -> processor.test(annotation))
                 .collect(Collectors.toList());
+		processors.forEach(processor -> processor.process(annotation, data));
+		return !processors.isEmpty();
+	}
 
-        if (!processors.isEmpty()) {
-            Arrays.stream(clz.getAnnotations())
-                    .forEach(annotation -> processors.stream()
-                            .filter(processor -> processor.test(annotation))
-                            .forEach(processor -> processor.process(annotation, data)));
-        } else {
-            if (clz.getAnnotations().length == 0) {
-                data.addWarning(String.format("Class %s has no annotations, it may affect contract %s",
-                        clz.getSimpleName(),
-                        getClass().getSimpleName()));
-            } else {
-                data.addWarning(String.format("Class %s has annotations %s that are not used by contract %s",
-                        clz.getSimpleName(),
-                        Arrays.stream(clz.getAnnotations())
-                                .map(annotation -> annotation.annotationType()
-                                        .getSimpleName())
-                                .collect(Collectors.toList()),
-                        getClass().getSimpleName()));
-            }
-        }
+	protected boolean matchesFeignAnnotationOnClass(Annotation annotation) {
+		return this.classAnnotationProcessors.stream().anyMatch(processor -> processor.test(annotation));
+	}
+
+	protected boolean processFeignAnnotationOnMethod(MethodMetadata data, Annotation annotation) {
+		List<GuardedAnnotationProcessor> processors = this.methodAnnotationProcessors.stream()
+				.filter(processor -> processor.test(annotation))
+				.collect(Collectors.toList());
+		processors.forEach(processor -> processor.process(annotation, data));
+		return !processors.isEmpty();
+	}
+
+	protected boolean processFeignAnnotationOnParameter(MethodMetadata data, Annotation[] annotations, int paramIndex) {
+		List<Annotation> matchingAnnotations = Arrays.stream(annotations)
+				.filter(annotation -> parameterAnnotationProcessors.containsKey(annotation.annotationType()))
+				.collect(Collectors.toList());
+		matchingAnnotations.forEach(annotation -> parameterAnnotationProcessors
+				.getOrDefault(annotation.annotationType(), ParameterAnnotationProcessor.DO_NOTHING)
+				.process(annotation, data, paramIndex));
+		return !matchingAnnotations.isEmpty();
+	}
+
+	protected boolean isSpringSupportedClassAnnotation(Annotation annotation) {
+		return CollectionFormat.class.isInstance(annotation)
+				|| RequestMapping.class.isInstance(annotation)
+				|| annotation.annotationType().isAnnotationPresent(RequestMapping.class);
+	}
+
+	protected boolean isSpringSupportedMethodAnnotation(Annotation annotation) {
+		return CollectionFormat.class.isInstance(annotation)
+				|| RequestMapping.class.isInstance(annotation)
+				|| annotation.annotationType().isAnnotationPresent(RequestMapping.class);
+	}
+
+	protected void warnNoClassAnnotations(MethodMetadata data, Class<?> clz) {
+		data.addWarning(String.format("Class %s has no annotations, it may affect contract %s",
+				clz.getSimpleName(),
+				getClass().getSimpleName()));
+	}
+
+	protected void warnUnsupportedClassAnnotations(MethodMetadata data, Class<?> clz, List<String> annotationNames) {
+		data.addWarning(String.format("Class %s has annotations %s that are not used by contract %s",
+				clz.getSimpleName(),
+				annotationNames,
+				getClass().getSimpleName()));
     }
 
-    protected void supportFeignAnnotationOnMethod(MethodMetadata data, Annotation annotation, Method method) {
-        List<GuardedAnnotationProcessor> processors = methodAnnotationProcessors.stream()
-                .filter(processor -> processor.test(annotation))
-                .collect(Collectors.toList());
-
-        if (!processors.isEmpty()) {
-            processors.forEach(processor -> processor.process(annotation, data));
-        } else {
-            data.addWarning(String.format("Method %s has an annotation %s that is not used by contract %s",
-                    method.getName(),
-                    annotation.annotationType()
-                            .getSimpleName(),
-                    getClass().getSimpleName()));
-        }
+	protected void warnUnsupportedMethodAnnotation(MethodMetadata data, Method method, Annotation annotation) {
+		data.addWarning(String.format("Method %s has an annotation %s that is not used by contract %s",
+				method.getName(),
+				this.annotationName(annotation),
+				getClass().getSimpleName()));
     }
 
-    protected boolean supportFeignAnnotationOnParameter(MethodMetadata data, Annotation[] annotations, int paramIndex) {
-        List<Annotation> matchingAnnotations = Arrays.stream(annotations)
-                .filter(annotation -> parameterAnnotationProcessors.containsKey(annotation.annotationType()))
-                .collect(Collectors.toList());
+	protected void warnUnsupportedParameterAnnotations(MethodMetadata data, Annotation[] annotations, int paramIndex) {
+		final Parameter parameter = data.method().getParameters()[paramIndex];
+		String parameterName = parameter.isNamePresent()
+				? parameter.getName()
+				: parameter.getType().getSimpleName();
+		if (annotations.length == 0) {
+			data.addWarning(String.format("Parameter %s has no annotations, it may affect contract %s",
+					parameterName,
+					getClass().getSimpleName()));
+			return;
+		}
+		data.addWarning(String.format("Parameter %s has annotations %s that are not used by contract %s",
+				parameterName,
+				Arrays.stream(annotations)
+						.map(this::annotationName)
+						.collect(Collectors.toList()),
+				getClass().getSimpleName()));
+	}
 
-        if (!matchingAnnotations.isEmpty()) {
-            matchingAnnotations.forEach(annotation -> parameterAnnotationProcessors.getOrDefault(annotation.annotationType(), ParameterAnnotationProcessor.DO_NOTHING)
-                    .process(annotation, data, paramIndex));
-        } else {
-            final Parameter parameter = data.method().getParameters()[paramIndex];
-            String parameterName = parameter.isNamePresent()
-                    ? parameter.getName()
-                    : parameter.getType().getSimpleName();
-            if (annotations.length == 0) {
-                data.addWarning(String.format("Parameter %s has no annotations, it may affect contract %s",
-                        parameterName,
-                        getClass().getSimpleName()));
-            } else {
-                data.addWarning(String.format("Parameter %s has annotations %s that are not used by contract %s",
-                        parameterName,
-                        Arrays.stream(annotations)
-                                .map(annotation -> annotation.annotationType()
-                                        .getSimpleName())
-                                .collect(Collectors.toList()),
-                        getClass().getSimpleName()));
-            }
-        }
-        return true;
+	protected String annotationName(Annotation annotation) {
+		return annotation.annotationType().getSimpleName();
     }
 
     protected <E extends Annotation> void registerClassAnnotation(Class<E> annotationType, AnnotationProcessor<E> processor) {
@@ -261,8 +294,10 @@ public class CustomSpringMvcContract extends SpringMvcContract implements Enviro
     }
 
     @SuppressWarnings({"unchecked"})
-    protected <E extends Annotation> void registerParameterAnnotation(Class<E> annotation, ParameterAnnotationProcessor<E> processor) {
-        this.parameterAnnotationProcessors.put((Class<Annotation>) annotation, (ParameterAnnotationProcessor<Annotation>) processor);
+	protected <E extends Annotation> void registerParameterAnnotation(Class<E> annotation,
+                                                                      ParameterAnnotationProcessor<E> processor) {
+		this.parameterAnnotationProcessors.put((Class<Annotation>) annotation,
+				(ParameterAnnotationProcessor<Annotation>) processor);
     }
 
     @FunctionalInterface
