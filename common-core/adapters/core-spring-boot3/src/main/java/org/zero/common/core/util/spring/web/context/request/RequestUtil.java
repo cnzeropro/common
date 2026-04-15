@@ -1,4 +1,4 @@
-package org.zero.common.core.util.spring.web.context.request.jakarta;
+package org.zero.common.core.util.spring.web.context.request;
 
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;

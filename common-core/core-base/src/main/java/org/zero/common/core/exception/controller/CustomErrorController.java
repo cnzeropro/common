@@ -103,7 +103,7 @@ public class CustomErrorController extends BasicErrorController {
 		}
 		Map<String, Object> body = getErrorAttributes(request, getErrorAttributeOptions(request, MediaType.APPLICATION_XML));
 		SpringXmlResult result = SpringXmlResult.of(body);
-		return ResponseEntity.ok()
+		return ResponseEntity.status(status)
 			.contentType(MediaType.APPLICATION_XML)
 			.body(result);
 	}

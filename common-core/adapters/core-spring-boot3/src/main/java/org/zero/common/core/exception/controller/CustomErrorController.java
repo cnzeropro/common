@@ -1,4 +1,4 @@
-package org.zero.common.core.exception.controller.jakarta;
+package org.zero.common.core.exception.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.ObjectProvider;
@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.zero.common.core.exception.controller.SpringXmlResult;
 
 import java.util.List;
 import java.util.Map;
@@ -104,7 +103,7 @@ public class CustomErrorController extends BasicErrorController {
 		}
 		Map<String, Object> body = getErrorAttributes(request, getErrorAttributeOptions(request, MediaType.APPLICATION_XML));
 		SpringXmlResult result = SpringXmlResult.of(body);
-		return ResponseEntity.ok()
+		return ResponseEntity.status(status)
 			.contentType(MediaType.APPLICATION_XML)
 			.body(result);
 	}

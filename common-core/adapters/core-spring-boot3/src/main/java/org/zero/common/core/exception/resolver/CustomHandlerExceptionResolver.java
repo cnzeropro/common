@@ -1,4 +1,4 @@
-package org.zero.common.core.exception.resolver.jakarta;
+package org.zero.common.core.exception.resolver;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
