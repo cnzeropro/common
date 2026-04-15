@@ -4,13 +4,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
+import org.zero.common.test.config.ResponseBodyAdviceConfig;
 
 import javax.annotation.Resource;
 import java.io.IOException;
@@ -28,11 +29,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Zero (cnzeropro@163.com)
  * @since 2025/1/7
  */
-// @WebMvcTest(ExportController.class)
-// @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.STRICT_STUBS)
-@AutoConfigureMockMvc
-@SpringBootTest
+@WebMvcTest(ExportController.class)
+@Import(ResponseBodyAdviceConfig.class)
 class ExportControllerTest {
     @Resource
     MockMvc mockMvc;

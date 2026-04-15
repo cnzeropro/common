@@ -5,7 +5,8 @@ import org.aspectj.lang.annotation.Pointcut;
 /**
  * Spring 专属切点定义集合。
  * <p>
- * 该类承载与 Spring stereotype、ControllerAdvice 等注解相关的切点，并通过组合方式复用
+ * 该类承载与 Spring stereotype、ControllerAdvice 等注解相关的切点，
+ * 并通过组合方式复用
  * {@link org.zero.common.core.aop.aspectj.pointcut.Pointcuts} 中的通用切点。
  *
  * @author Zero (cnzeropro@163.com)
@@ -13,9 +14,9 @@ import org.aspectj.lang.annotation.Pointcut;
  */
 public class Pointcuts {
 	/**
-	 * 匹配标注了 {@code @Controller} 或 {@code @RestController} 的类型中的方法。
+	 * 匹配标注 {@code @Controller} 或 {@code @RestController} 的类型中的方法。
 	 * <p>
-	 * 适用于基于 Spring Web stereotype 的控制层切面。
+	 * 适合基于 Spring Web stereotype 的控制层切面。
 	 */
 	@Pointcut("@within(org.springframework.stereotype.Controller) || " +
 			"@within(org.springframework.web.bind.annotation.RestController)")
@@ -23,27 +24,27 @@ public class Pointcuts {
 	}
 
 	/**
-	 * 匹配标注了 {@code @Service} 的类型中的方法。
+	 * 匹配标注 {@code @Service} 的类型中的方法。
 	 * <p>
-	 * 适用于基于 Spring stereotype 的业务层切面。
+	 * 适合基于 Spring stereotype 的业务层切面。
 	 */
 	@Pointcut("@within(org.springframework.stereotype.Service)")
 	public void serviceAnnotationMethod() {
 	}
 
 	/**
-	 * 匹配标注了 {@code @Repository} 的类型中的方法。
+	 * 匹配标注 {@code @Repository} 的类型中的方法。
 	 * <p>
-	 * 适用于基于 Spring stereotype 的数据访问层切面。
+	 * 适合基于 Spring stereotype 的数据访问层切面。
 	 */
 	@Pointcut("@within(org.springframework.stereotype.Repository)")
 	public void repositoryAnnotationMethod() {
 	}
 
 	/**
-	 * 匹配标注了 {@code @ControllerAdvice} 或 {@code @RestControllerAdvice} 的类型中的方法。
+	 * 匹配标注 {@code @ControllerAdvice} 或 {@code @RestControllerAdvice} 的类型中的方法。
 	 * <p>
-	 * 适用于控制层全局通知相关切面。
+	 * 适合控制层全局通知相关切面。
 	 */
 	@Pointcut("@within(org.springframework.web.bind.annotation.ControllerAdvice) || " +
 			"@within(org.springframework.web.bind.annotation.RestControllerAdvice)")

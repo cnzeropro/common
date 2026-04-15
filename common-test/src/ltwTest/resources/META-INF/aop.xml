@@ -3,7 +3,7 @@
 		"https://www.eclipse.org/aspectj/dtd/aspectj.dtd">
 <aspectj>
 	<aspects>
-		<aspect name="org.zero.common.core.aop.aspectj.aspect.TimeLoggerAspect"/>
+		<aspect name="org.zero.common.core.aop.aspectj.aspect.LoggableAspect"/>
 	</aspects>
 	<weaver options="-showWeaveInfo">
 		<include within="org.zero.common.test.aspectj.ltw..*"/>

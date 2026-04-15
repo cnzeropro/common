@@ -6,9 +6,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 标记需要由原生 AspectJ 记录执行耗时的方法。
+ * 标记需要由原生 AspectJ 统计执行耗时的方法。
  * <p>
- * 当前模块发布的是 AspectJ aspect library，下游项目需要自行选择 LTW 或 CTW 接入。
+ * 该注解只声明切点语义，不会直接触发 Spring AOP 代理。
+ * 下游项目需要通过 LTW 或 CTW 织入
+ * {@link org.zero.common.core.aop.aspectj.aspect.LoggableAspect} 后才会生效。
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2025/3/30

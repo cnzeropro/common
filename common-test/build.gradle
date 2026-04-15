@@ -88,7 +88,7 @@ def ltwTestSourceSet = sourceSetContainer.named('ltwTest').get()
 def ctwTestSourceSet = sourceSetContainer.named('ctwTest').get()
 def ctwWovenOutputDirectory = layout.buildDirectory.dir('classes/java/ctwWoven')
 def compileCtwArgumentsFile = layout.buildDirectory.file('tmp/aspectj/compileCtwTest.args')
-def ctwXmlConfiguredFile = file('src/ctwTest/resources/META-INF/ajc-time-logger.xml')
+def ctwXmlConfiguredFile = file('src/ctwTest/resources/META-INF/ajc-loggable.xml')
 
 dependencies {
     implementation(platform(project(':')))

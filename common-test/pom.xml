@@ -417,7 +417,7 @@
 									<showWeaveInfo>true</showWeaveInfo>
 									<proc>none</proc>
 									<xmlConfigured>
-										${project.basedir}/src/ctwTest/resources/META-INF/ajc-time-logger.xml
+										${project.basedir}/src/ctwTest/resources/META-INF/ajc-loggable.xml
 									</xmlConfigured>
 									<testSources/>
 									<weaveDirectories>

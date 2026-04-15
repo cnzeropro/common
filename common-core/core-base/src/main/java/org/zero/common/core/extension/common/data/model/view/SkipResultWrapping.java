@@ -8,6 +8,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * 跳过 {@link org.zero.common.data.model.view.Result} 包装。
+ *
  * @author Zero (cnzeropro@163.com)
  * @since 2024/8/26
  */
@@ -15,5 +17,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-public @interface IgnorePackResult {
+public @interface SkipResultWrapping {
 }

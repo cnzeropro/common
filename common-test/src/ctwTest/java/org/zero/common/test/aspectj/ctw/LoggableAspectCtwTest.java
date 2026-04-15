@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Zero (cnzeropro@163.com)
  * @since 2026/4/14
  */
-class TimeLoggerAspectCtwTest {
+class LoggableAspectCtwTest {
     @Test
     void shouldLogExecutionTimeForCtwScenario() throws Exception {
         ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
