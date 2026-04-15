@@ -7,16 +7,16 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.zero.common.core.exception.ThrowableMessageSupplier;
 import org.zero.common.core.exception.handler.ThrowableHandler;
-import org.zero.common.data.model.view.Result;
+import org.zero.common.core.exception.handler.ThrowableResponseType;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * 异常处理器
+ * 异常处理器。
  * <p>
- * 异常建议从小到大（便于代码阅读和后期维护）
+ * 异常建议从小到大，便于代码阅读和后续维护。
  *
  * @author Zero
  * @since 2020/03/21
@@ -30,15 +30,19 @@ public class JakartaExceptionHandler extends ThrowableHandler {
 		super(throwableMessageProvider);
 	}
 
+	public JakartaExceptionHandler(ThrowableMessageSupplier throwableMessageProvider, ThrowableResponseType responseType) {
+		super(throwableMessageProvider, responseType);
+	}
+
 	/* *************************************************** Javax 异常 *************************************************** */
 	@ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
-	public Result<Void> constraintViolationException(jakarta.validation.ConstraintViolationException e) {
+	public Object constraintViolationException(jakarta.validation.ConstraintViolationException e) {
 		String errorMsg = Optional.ofNullable(e.getConstraintViolations())
 			.stream()
 			.flatMap(Collection::stream)
 			.map(jakarta.validation.ConstraintViolation::getMessage)
 			.collect(Collectors.joining(" | ", "[", "]"));
 		log.error(String.format("Parameter validation not pass: %s", errorMsg), e);
-		return this.handle(HttpStatus.BAD_REQUEST, e, new String[]{errorMsg});
+		return this.handle(HttpStatus.BAD_REQUEST, e, new Object[]{errorMsg});
 	}
 }

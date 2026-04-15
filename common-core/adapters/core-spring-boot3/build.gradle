@@ -41,6 +41,17 @@ dependencies {
     annotationProcessor(libs.org.projectlombok.lombok)
     testCompileOnly(libs.org.projectlombok.lombok)
     testAnnotationProcessor(libs.org.projectlombok.lombok)
+    testImplementation(project(':core-base')) {
+        transitive = false
+    }
+    testImplementation(project(':core-jakarta')) {
+        transitive = false
+    }
+    testImplementation(project(':common-data')) {
+        transitive = false
+    }
+    testImplementation('com.fasterxml.jackson.core:jackson-databind')
+    testImplementation('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
 }
 
 description = 'common-core::spring-boot3'

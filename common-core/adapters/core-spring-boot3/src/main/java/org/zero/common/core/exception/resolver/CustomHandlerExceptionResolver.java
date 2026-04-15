@@ -7,12 +7,11 @@ import lombok.SneakyThrows;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.zero.common.core.exception.handler.ThrowableHandler;
-import org.zero.common.data.model.view.Result;
 
 import java.util.Objects;
 
 /**
- * Spring MVC 异常解析器
+ * Spring MVC 异常解析器。
  *
  * @author zero
  * @see org.springframework.web.servlet.HandlerExceptionResolver
@@ -46,7 +45,7 @@ public class CustomHandlerExceptionResolver extends DefaultHandlerExceptionResol
 	@SneakyThrows
 	protected ModelAndView handleException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
 		this.sendServerError(ex, request, response);
-		Result<Void> result = throwableHandler.handle(ex);
+		Object result = throwableHandler.handle(ex);
 		request.setAttribute("jakarta.servlet.error.result", result);
 		return new ModelAndView("error");
 	}

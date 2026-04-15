@@ -7,12 +7,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.zero.common.core.exception.ThrowableMessageSupplier;
 import org.zero.common.core.exception.handler.ThrowableHandler;
+import org.zero.common.core.exception.handler.ThrowableResponseType;
 import org.zero.common.core.util.jackson.databind.JacksonUtils;
 import org.zero.common.core.util.jakarta.servlet.ResponseUtil;
-import org.zero.common.data.model.view.Result;
 
 /**
- * Web MVC 端 Sentinel 统一异常处理
+ * Web MVC 端 Sentinel 统一异常处理。
  * <p>
  * 默认实现：{@link com.alibaba.csp.sentinel.adapter.spring.webmvc.callback.DefaultBlockExceptionHandler}
  *
@@ -25,10 +25,14 @@ public class CustomBlockExceptionHandler extends ThrowableHandler implements Blo
 		super(throwableMessageProvider);
 	}
 
+	public CustomBlockExceptionHandler(ThrowableMessageSupplier throwableMessageProvider, ThrowableResponseType responseType) {
+		super(throwableMessageProvider, responseType);
+	}
+
 	@Override
 	public void handle(HttpServletRequest request, HttpServletResponse response, BlockException e) {
 		log.error("Sentinel block exception", e);
-		Result<Void> result = this.handle(e);
+		Object result = this.handle(e);
 		String jsonStr = JacksonUtils.toJsonStr(result);
 		ResponseUtil.writeErrorJson(response, jsonStr);
 	}
