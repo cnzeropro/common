@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Import;
 import org.zero.common.core.exception.MessageSourceThrowableMessageSupplier;
 import org.zero.common.core.exception.ThrowableMessageSource;
 import org.zero.common.core.exception.ThrowableMessageSupplier;
-import org.zero.common.core.exception.controller.javax.CustomErrorController;
+import org.zero.common.core.exception.controller.CustomErrorController;
 import org.zero.common.core.exception.handler.spring.BaseExceptionHandler;
 import org.zero.common.core.exception.handler.spring.JavaExceptionHandler;
 import org.zero.common.core.exception.handler.spring.SpringWebExceptionHandler;

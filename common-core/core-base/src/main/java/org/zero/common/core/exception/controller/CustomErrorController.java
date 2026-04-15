@@ -1,4 +1,4 @@
-package org.zero.common.core.exception.controller.javax;
+package org.zero.common.core.exception.controller;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.web.ErrorProperties;
@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.zero.common.core.exception.controller.SpringXmlResult;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
