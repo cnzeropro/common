@@ -38,6 +38,11 @@
         </dependency>
         <dependency>
             <groupId>org.zero</groupId>
+			<artifactId>core-base</artifactId>
+			<version>${revision}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.zero</groupId>
             <artifactId>common-data</artifactId>
         </dependency>
         <dependency>
@@ -164,6 +169,17 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjrt</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>${org.slf4j_slf4j-api.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -258,4 +274,176 @@
             </plugin>
         </plugins>
     </build>
+
+	<profiles>
+		<profile>
+			<id>aspectj-ltw</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>build-helper-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>add-ltw-test-source</id>
+								<goals>
+									<goal>add-test-source</goal>
+								</goals>
+								<configuration>
+									<sources>
+										<source>${project.basedir}/src/ltwTest/java</source>
+									</sources>
+								</configuration>
+							</execution>
+							<execution>
+								<id>add-ltw-test-resource</id>
+								<goals>
+									<goal>add-test-resource</goal>
+								</goals>
+								<configuration>
+									<resources>
+										<resource>
+											<directory>${project.basedir}/src/ltwTest/resources</directory>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>copy-aspectjweaver-agent</id>
+								<phase>process-test-resources</phase>
+								<goals>
+									<goal>copy</goal>
+								</goals>
+								<configuration>
+									<artifactItems>
+										<artifactItem>
+											<groupId>org.aspectj</groupId>
+											<artifactId>aspectjweaver</artifactId>
+											<version>${org.aspectj_aspectjweaver.version}</version>
+											<destFileName>aspectjweaver.jar</destFileName>
+											<outputDirectory>${project.build.directory}/aspectj-agent</outputDirectory>
+										</artifactItem>
+									</artifactItems>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<includes>
+								<include>**/*LtwTest.class</include>
+							</includes>
+							<argLine>-javaagent:${project.build.directory}/aspectj-agent/aspectjweaver.jar</argLine>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>aspectj-ctw</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>build-helper-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>add-ctw-test-source</id>
+								<goals>
+									<goal>add-test-source</goal>
+								</goals>
+								<configuration>
+									<sources>
+										<source>${project.basedir}/src/ctwTest/java</source>
+									</sources>
+								</configuration>
+							</execution>
+							<execution>
+								<id>add-ctw-test-resource</id>
+								<goals>
+									<goal>add-test-resource</goal>
+								</goals>
+								<configuration>
+									<resources>
+										<resource>
+											<directory>${project.basedir}/src/ctwTest/resources</directory>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>aspectj-maven-plugin</artifactId>
+						<dependencies>
+							<dependency>
+								<groupId>org.aspectj</groupId>
+								<artifactId>aspectjtools</artifactId>
+								<version>${org.aspectj_aspectjtools.version}</version>
+							</dependency>
+							<dependency>
+								<groupId>org.openjdk.jmh</groupId>
+								<artifactId>jmh-core</artifactId>
+								<version>1.36</version>
+							</dependency>
+							<dependency>
+								<groupId>org.openjdk.jmh</groupId>
+								<artifactId>jmh-generator-annprocess</artifactId>
+								<version>1.36</version>
+							</dependency>
+						</dependencies>
+						<executions>
+							<execution>
+								<id>compile-ctw-tests</id>
+								<phase>test-compile</phase>
+								<goals>
+									<goal>test-compile</goal>
+								</goals>
+								<configuration>
+									<forceAjcCompile>true</forceAjcCompile>
+									<complianceLevel>1.8</complianceLevel>
+									<source>1.8</source>
+									<target>1.8</target>
+									<encoding>${project.build.sourceEncoding}</encoding>
+									<showWeaveInfo>true</showWeaveInfo>
+									<proc>none</proc>
+									<xmlConfigured>
+										${project.basedir}/src/ctwTest/resources/META-INF/ajc-time-logger.xml
+									</xmlConfigured>
+									<testSources/>
+									<weaveDirectories>
+										<weaveDirectory>${project.build.testOutputDirectory}</weaveDirectory>
+									</weaveDirectories>
+									<aspectLibraries>
+										<aspectLibrary>
+											<groupId>org.zero</groupId>
+											<artifactId>core-base</artifactId>
+										</aspectLibrary>
+									</aspectLibraries>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<includes>
+								<include>**/*CtwTest.class</include>
+							</includes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

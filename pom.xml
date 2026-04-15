@@ -105,6 +105,9 @@
 		<org.apache.shardingsphere.elasticjob_elasticjob-lite-spring-boot-starter.version>3.0.4</org.apache.shardingsphere.elasticjob_elasticjob-lite-spring-boot-starter.version>
 		<org.apache.shardingsphere.elasticjob_elasticjob.version>3.0.4</org.apache.shardingsphere.elasticjob_elasticjob.version>
 		<org.apache.shiro_shiro-bom.version>1.13.0</org.apache.shiro_shiro-bom.version>
+		<org.aspectj_aspectjrt.version>1.9.22.1</org.aspectj_aspectjrt.version>
+		<org.aspectj_aspectjtools.version>1.9.22.1</org.aspectj_aspectjtools.version>
+		<org.aspectj_aspectjweaver.version>1.9.22.1</org.aspectj_aspectjweaver.version>
 		<org.dromara.dynamictp_dynamic-tp-dependencies.version>1.2.2</org.dromara.dynamictp_dynamic-tp-dependencies.version>
 		<org.dromara.x-file-storage_x-file-storage-core.version>2.3.0</org.dromara.x-file-storage_x-file-storage-core.version>
 		<org.dromara.x-file-storage_x-file-storage-spring.version>2.3.0</org.dromara.x-file-storage_x-file-storage-spring.version>
@@ -171,6 +174,7 @@
 		<org.apache.maven.plugins_maven-toolchains-plugin.version>3.2.0</org.apache.maven.plugins_maven-toolchains-plugin.version>
 		<org.apache.maven.plugins_maven-war-plugin.version>3.4.0</org.apache.maven.plugins_maven-war-plugin.version>
 		<org.apache.maven.plugins_maven-wrapper-plugin.version>3.3.2</org.apache.maven.plugins_maven-wrapper-plugin.version>
+		<org.codehaus.mojo_aspectj-maven-plugin.version>1.16.0</org.codehaus.mojo_aspectj-maven-plugin.version>
 		<org.codehaus.mojo_build-helper-maven-plugin.version>3.6.1</org.codehaus.mojo_build-helper-maven-plugin.version>
 		<org.codehaus.mojo_versions-maven-plugin.version>2.18.0</org.codehaus.mojo_versions-maven-plugin.version>
 		<org.codehaus.mojo_xml-maven-plugin.version>1.1.0</org.codehaus.mojo_xml-maven-plugin.version>
@@ -604,6 +608,24 @@
 				<version>${org.apache.shiro_shiro-bom.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.aspectj/aspectjrt -->
+			<dependency>
+				<groupId>org.aspectj</groupId>
+				<artifactId>aspectjrt</artifactId>
+				<version>${org.aspectj_aspectjrt.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.aspectj/aspectjtools -->
+			<dependency>
+				<groupId>org.aspectj</groupId>
+				<artifactId>aspectjtools</artifactId>
+				<version>${org.aspectj_aspectjtools.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.aspectj/aspectjweaver -->
+			<dependency>
+				<groupId>org.aspectj</groupId>
+				<artifactId>aspectjweaver</artifactId>
+				<version>${org.aspectj_aspectjweaver.version}</version>
 			</dependency>
 			<!-- https://mvnrepository.com/artifact/org.dromara.dynamictp/dynamic-tp-dependencies -->
 			<dependency>
@@ -1047,6 +1069,12 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-wrapper-plugin</artifactId>
 					<version>${org.apache.maven.plugins_maven-wrapper-plugin.version}</version>
+				</plugin>
+				<!-- https://mvnrepository.com/artifact/org.codehaus.mojo/aspectj-maven-plugin -->
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>aspectj-maven-plugin</artifactId>
+					<version>${org.codehaus.mojo_aspectj-maven-plugin.version}</version>
 				</plugin>
 				<!-- https://mvnrepository.com/artifact/org.codehaus.mojo/build-helper-maven-plugin -->
 				<plugin>

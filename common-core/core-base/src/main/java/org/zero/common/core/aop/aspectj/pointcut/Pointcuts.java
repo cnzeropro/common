@@ -23,15 +23,15 @@ public class Pointcuts {
     public void getMethod() {
     }
 
-    @Pointcut("execution(* *.controller..*.*(..))")
+	@Pointcut("execution(* *..controller..*.*(..))")
     public void controllerMethod() {
     }
 
-    @Pointcut("execution(* *.service..*.*(..))")
+	@Pointcut("execution(* *..service..*.*(..))")
     public void serviceMethod() {
     }
 
-    @Pointcut("execution(* *.mapper..*.*(..))")
+	@Pointcut("execution(* *..mapper..*.*(..))")
     public void mapperMethod() {
     }
 }

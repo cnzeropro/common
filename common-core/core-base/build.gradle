@@ -1,10 +1,47 @@
 import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.gradle.jvm.toolchain.JavaToolchainService
 
 plugins {
     id 'org.zero.conventions.multi-release-java8'
 }
 
 def baseCatalog = extensions.getByType(VersionCatalogsExtension).named('baseLibs')
+def sourceSets = extensions.getByType(SourceSetContainer)
+def toolchains = extensions.getByType(JavaToolchainService)
+def mainSourceSet = sourceSets.named(SourceSet.MAIN_SOURCE_SET_NAME).get()
+def aspectSourceDirectory = file('src/main/aspect')
+def compileJavaTask = tasks.named('compileJava', JavaCompile)
+def mainResourcesDirectory = layout.buildDirectory.dir('resources/main')
+def compileAspectjArgumentsFile = layout.buildDirectory.file('tmp/aspectj/compileAspectj.args')
+def aspectClassesDirectory = layout.buildDirectory.dir('classes/aspectj/main')
+def aspectjVersion = baseCatalog.findVersion('org-aspectj_aspectjrt')
+    .orElseThrow { new GradleException("Missing catalog version 'org-aspectj_aspectjrt'.") }
+    .requiredVersion
+
+configurations {
+    aspectjTools {
+        canBeConsumed = false
+        canBeResolved = true
+        visible = false
+    }
+}
+
+configurations.configureEach { configuration ->
+    if (!configuration.canBeResolved) {
+        return
+    }
+    configuration.resolutionStrategy.force(
+        "org.aspectj:aspectjrt:${aspectjVersion}",
+        "org.aspectj:aspectjtools:${aspectjVersion}",
+        "org.aspectj:aspectjweaver:${aspectjVersion}"
+    )
+}
 
 def requiredBaseLibrary = { String alias ->
     baseCatalog.findLibrary(alias).orElseThrow {
@@ -44,7 +81,7 @@ dependencies {
     implementation(requiredBaseLibrary('org-apache-commons_commons-text'))
     implementation(requiredBaseLibrary('org-apache-commons_commons-compress'))
     implementation('org.apache.logging.log4j:log4j-core')
-    implementation('org.aspectj:aspectjrt')
+    implementation(requiredBaseLibrary('org-aspectj_aspectjrt'))
     implementation('org.quartz-scheduler:quartz')
     implementation('org.hibernate:hibernate-core')
     implementation(requiredBaseLibrary('org-redisson_redisson'))
@@ -93,6 +130,7 @@ dependencies {
     implementation('io.jsonwebtoken:jjwt-api')
     testImplementation('io.jsonwebtoken:jjwt-impl')
     testImplementation('io.jsonwebtoken:jjwt-jackson')
+    testImplementation(requiredBaseLibrary('org-aspectj_aspectjweaver'))
     testImplementation('org.springframework.security:spring-security-oauth2-core')
     implementation('ch.qos.logback:logback-classic')
     implementation('javax.servlet:javax.servlet-api')
@@ -111,6 +149,63 @@ dependencies {
     annotationProcessor(requiredBaseLibrary('org-projectlombok_lombok'))
     testCompileOnly('org.projectlombok:lombok')
     testAnnotationProcessor(requiredBaseLibrary('org-projectlombok_lombok'))
+}
+
+def compileAspectj = tasks.register('compileAspectj', JavaExec) { task ->
+    task.group = 'build'
+    task.description = 'Compile AspectJ sources from src/main/aspect into the main output directory.'
+    task.classpath = configurations.aspectjTools
+    task.mainClass.set('org.aspectj.tools.ajc.Main')
+    task.javaLauncher.set(toolchains.launcherFor(spec -> spec.getLanguageVersion().set(JavaLanguageVersion.of(17))))
+    task.notCompatibleWithConfigurationCache('AspectJ compile arguments are generated dynamically for Windows command length limits.')
+    task.dependsOn(compileJavaTask, tasks.named('processResources'))
+    task.inputs.files(fileTree(aspectSourceDirectory) {
+        include('**/*.aj')
+    })
+    task.inputs.files(mainSourceSet.getCompileClasspath(), compileJavaTask.flatMap { it.destinationDirectory }, mainResourcesDirectory)
+    task.outputs.dir(aspectClassesDirectory)
+    task.outputs.file(compileAspectjArgumentsFile)
+    task.onlyIf {
+        aspectSourceDirectory.isDirectory() && !fileTree(aspectSourceDirectory).matching {
+            include('**/*.aj')
+        }.isEmpty()
+    }
+    task.doFirst {
+        List<String> aspectFiles = fileTree(aspectSourceDirectory).matching {
+            include('**/*.aj')
+        }.files.collect { File file -> file.absolutePath }.sort()
+        File argsFile = compileAspectjArgumentsFile.get().asFile
+        argsFile.parentFile.mkdirs()
+        List<String> arguments = [
+            '-1.8',
+            '-encoding', 'UTF-8',
+            '-showWeaveInfo',
+            '-classpath', files(mainSourceSet.getCompileClasspath(), compileJavaTask.get().destinationDirectory, mainResourcesDirectory).asPath,
+            '-d', aspectClassesDirectory.get().asFile.absolutePath
+        ] + aspectFiles
+        argsFile.setText(arguments.join(System.lineSeparator()), 'UTF-8')
+        task.args = ['-argfile', argsFile.absolutePath]
+    }
+}
+
+tasks.named('classes') {
+    dependsOn(compileAspectj)
+}
+
+mainSourceSet.output.dir(aspectClassesDirectory, builtBy: compileAspectj)
+
+tasks.named('compileTestJava') {
+    dependsOn(compileAspectj)
+}
+
+tasks.named('sourcesJar', Jar) {
+    from(aspectSourceDirectory) {
+        include('**/*.aj')
+    }
+}
+
+dependencies {
+    aspectjTools(requiredBaseLibrary('org-aspectj_aspectjtools'))
 }
 
 description = 'common-core::base'

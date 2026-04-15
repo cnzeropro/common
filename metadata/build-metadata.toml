@@ -122,6 +122,12 @@ profiles = ["java8", "java11", "java17", "java21", "java25"]
 # https://mvnrepository.com/artifact/org.apache.dubbo/dubbo-bom
 # https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-bom
 "org.apache.logging.log4j_log4j-bom" = { java8 = "2.24.3", scope = "import" }
+# https://mvnrepository.com/artifact/org.aspectj/aspectjrt
+"org.aspectj_aspectjrt" = { java8 = "1.9.22.1" }
+# https://mvnrepository.com/artifact/org.aspectj/aspectjtools
+"org.aspectj_aspectjtools" = { java8 = "1.9.22.1" }
+# https://mvnrepository.com/artifact/org.aspectj/aspectjweaver
+"org.aspectj_aspectjweaver" = { java8 = "1.9.22.1" }
 # https://mvnrepository.com/artifact/org.apache.maven/maven-model
 "org.apache.maven_maven-model" = { java8 = "3.9.11" }
 # https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
@@ -262,6 +268,8 @@ profiles = ["java8", "java11", "java17", "java21", "java25"]
 "org.apache.maven.plugins_maven-wrapper-plugin" = { java8 = "3.3.2" }
 # https://mvnrepository.com/artifact/org.codehaus.mojo/build-helper-maven-plugin
 "org.codehaus.mojo_build-helper-maven-plugin" = { java8 = "3.6.1" }
+# https://mvnrepository.com/artifact/org.codehaus.mojo/aspectj-maven-plugin
+"org.codehaus.mojo_aspectj-maven-plugin" = { java8 = "1.16.0" }
 # https://mvnrepository.com/artifact/org.codehaus.mojo/versions-maven-plugin
 "org.codehaus.mojo_versions-maven-plugin" = { java8 = "2.18.0" }
 # https://mvnrepository.com/artifact/org.codehaus.mojo/xml-maven-plugin

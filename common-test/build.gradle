@@ -1,4 +1,10 @@
 import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.api.tasks.testing.Test
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.gradle.jvm.toolchain.JavaToolchainService
 
 plugins {
     id 'org.zero.conventions.java8-application'
@@ -6,6 +12,8 @@ plugins {
 }
 
 def baseCatalog = extensions.getByType(VersionCatalogsExtension).named('baseLibs')
+def sourceSetContainer = extensions.getByType(SourceSetContainer)
+def toolchains = extensions.getByType(JavaToolchainService)
 
 def requiredCatalogLibrary = { catalog, String alias ->
     catalog.findLibrary(alias).orElseThrow {
@@ -16,6 +24,71 @@ def requiredCatalogLibrary = { catalog, String alias ->
 def baseSpringBootVersion = baseCatalog.findVersion('org-springframework-boot')
     .orElseThrow { new GradleException("Missing catalog version 'org-springframework-boot'.") }
     .requiredVersion
+def aspectjVersion = baseCatalog.findVersion('org-aspectj_aspectjrt')
+    .orElseThrow { new GradleException("Missing catalog version 'org-aspectj_aspectjrt'.") }
+    .requiredVersion
+
+configurations {
+    aspectjTools {
+        canBeConsumed = false
+        canBeResolved = true
+        visible = false
+    }
+    aspectjWeaverAgent {
+        canBeConsumed = false
+        canBeResolved = true
+        visible = false
+    }
+    ctwAspectPath {
+        canBeConsumed = false
+        canBeResolved = true
+        visible = false
+    }
+}
+
+configurations.configureEach { configuration ->
+    if (!configuration.canBeResolved) {
+        return
+    }
+    configuration.resolutionStrategy.force(
+        "org.aspectj:aspectjrt:${aspectjVersion}",
+        "org.aspectj:aspectjtools:${aspectjVersion}",
+        "org.aspectj:aspectjweaver:${aspectjVersion}",
+        "org.slf4j:slf4j-simple:2.0.17"
+    )
+}
+
+sourceSetContainer.create('ltwTest') {
+    java.setSrcDirs(['src/ltwTest/java'])
+    resources.setSrcDirs(['src/ltwTest/resources'])
+    compileClasspath += sourceSetContainer.main.output + configurations.testCompileClasspath
+    runtimeClasspath += output + sourceSetContainer.main.output + configurations.testRuntimeClasspath
+}
+
+sourceSetContainer.create('ctwTest') {
+    java.setSrcDirs(['src/ctwTest/java'])
+    resources.setSrcDirs(['src/ctwTest/resources'])
+    compileClasspath += sourceSetContainer.main.output + configurations.testCompileClasspath
+    runtimeClasspath += output + sourceSetContainer.main.output + configurations.testRuntimeClasspath
+}
+
+configurations {
+    ltwTestImplementation.extendsFrom(testImplementation)
+    ltwTestCompileOnly.extendsFrom(testCompileOnly)
+    ltwTestAnnotationProcessor.extendsFrom(testAnnotationProcessor)
+    ltwTestRuntimeOnly.extendsFrom(testRuntimeOnly)
+
+    ctwTestImplementation.extendsFrom(testImplementation)
+    ctwTestCompileOnly.extendsFrom(testCompileOnly)
+    ctwTestAnnotationProcessor.extendsFrom(testAnnotationProcessor)
+    ctwTestRuntimeOnly.extendsFrom(testRuntimeOnly)
+}
+
+def ltwTestSourceSet = sourceSetContainer.named('ltwTest').get()
+def ctwTestSourceSet = sourceSetContainer.named('ctwTest').get()
+def ctwWovenOutputDirectory = layout.buildDirectory.dir('classes/java/ctwWoven')
+def compileCtwArgumentsFile = layout.buildDirectory.file('tmp/aspectj/compileCtwTest.args')
+def ctwXmlConfiguredFile = file('src/ctwTest/resources/META-INF/ajc-time-logger.xml')
 
 dependencies {
     implementation(platform(project(':')))
@@ -38,6 +111,8 @@ dependencies {
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor:${baseSpringBootVersion}")
     runtimeOnly('org.springframework.boot:spring-boot-devtools')
     testImplementation('org.springframework.boot:spring-boot-starter-test')
+    testImplementation(requiredCatalogLibrary(baseCatalog, 'org-aspectj_aspectjrt'))
+    testRuntimeOnly('org.slf4j:slf4j-simple:2.0.17')
     implementation('org.springframework.data:spring-data-commons')
     implementation('org.springframework.cloud:spring-cloud-starter-openfeign')
     implementation(requiredCatalogLibrary(baseCatalog, 'org-mybatis-spring-boot_mybatis-spring-boot-starter'))
@@ -61,6 +136,11 @@ dependencies {
     annotationProcessor(requiredCatalogLibrary(baseCatalog, 'org-projectlombok_lombok'))
     testCompileOnly('org.projectlombok:lombok')
     testAnnotationProcessor(requiredCatalogLibrary(baseCatalog, 'org-projectlombok_lombok'))
+    aspectjTools(requiredCatalogLibrary(baseCatalog, 'org-aspectj_aspectjtools'))
+    aspectjWeaverAgent(requiredCatalogLibrary(baseCatalog, 'org-aspectj_aspectjweaver'))
+    ctwAspectPath(project(':core-base')) {
+        transitive = false
+    }
 }
 
 application {
@@ -73,6 +153,81 @@ tasks.named('jar') {
 
 tasks.named('bootJar') {
     manifest.attributes('Multi-Release': 'true')
+}
+
+tasks.named(ltwTestSourceSet.getCompileJavaTaskName(), JavaCompile) {
+    options.compilerArgs.add('-parameters')
+    options.encoding = 'UTF-8'
+}
+
+tasks.named(ctwTestSourceSet.getCompileJavaTaskName(), JavaCompile) {
+    options.compilerArgs.add('-parameters')
+    options.encoding = 'UTF-8'
+}
+
+def compileCtwTestAspectj = tasks.register('compileCtwTestAspectj', JavaExec) { task ->
+    task.group = 'verification'
+    task.description = 'Compile and weave CTW smoke tests with AspectJ.'
+    task.classpath = configurations.aspectjTools
+    task.mainClass.set('org.aspectj.tools.ajc.Main')
+    task.javaLauncher.set(toolchains.launcherFor(spec -> spec.getLanguageVersion().set(JavaLanguageVersion.of(17))))
+    task.notCompatibleWithConfigurationCache('AspectJ compile arguments are generated dynamically for Windows command length limits.')
+    task.dependsOn(tasks.named('classes'), tasks.named(ctwTestSourceSet.getProcessResourcesTaskName()))
+    task.inputs.files(fileTree('src/ctwTest/java') {
+        include('**/*.java')
+    })
+    task.inputs.files(ctwTestSourceSet.compileClasspath)
+    task.inputs.files(configurations.ctwAspectPath)
+    task.inputs.file(ctwXmlConfiguredFile)
+    task.outputs.dir(ctwWovenOutputDirectory)
+    task.outputs.file(compileCtwArgumentsFile)
+    task.onlyIf {
+        file('src/ctwTest/java').isDirectory() && !fileTree('src/ctwTest/java').matching {
+            include('**/*.java')
+        }.isEmpty()
+    }
+    task.doFirst {
+        List<String> sources = fileTree('src/ctwTest/java').matching {
+            include('**/*.java')
+        }.files.collect { File file -> file.absolutePath }.sort()
+        File argsFile = compileCtwArgumentsFile.get().asFile
+        argsFile.parentFile.mkdirs()
+        List<String> arguments = [
+            '-1.8',
+            '-encoding', 'UTF-8',
+            '-showWeaveInfo',
+            '-classpath', ctwTestSourceSet.compileClasspath.asPath,
+            '-aspectpath', configurations.ctwAspectPath.singleFile.absolutePath,
+            '-xmlConfigured', ctwXmlConfiguredFile.absolutePath,
+            '-d', ctwWovenOutputDirectory.get().asFile.absolutePath
+        ] + sources
+        argsFile.setText(arguments.join(System.lineSeparator()), 'UTF-8')
+        task.args = ['-argfile', argsFile.absolutePath]
+    }
+}
+
+tasks.register('ltwTest', Test) { task ->
+    task.group = 'verification'
+    task.description = 'Run LTW smoke tests with the AspectJ javaagent.'
+    task.dependsOn(tasks.named(ltwTestSourceSet.getClassesTaskName()))
+    task.testClassesDirs = ltwTestSourceSet.output.classesDirs
+    task.classpath = ltwTestSourceSet.runtimeClasspath
+    task.jvmArgs("-javaagent:${configurations.aspectjWeaverAgent.singleFile.absolutePath}")
+    task.javaLauncher.set(toolchains.launcherFor(spec -> spec.getLanguageVersion().set(JavaLanguageVersion.of(8))))
+    task.include('**/*LtwTest.class')
+    task.useJUnitPlatform()
+}
+
+tasks.register('ctwTest', Test) { task ->
+    task.group = 'verification'
+    task.description = 'Run CTW smoke tests compiled by AspectJ.'
+    task.dependsOn(compileCtwTestAspectj, tasks.named(ctwTestSourceSet.getProcessResourcesTaskName()))
+    task.testClassesDirs = files(ctwWovenOutputDirectory)
+    task.classpath = files(ctwWovenOutputDirectory, ctwTestSourceSet.output.resourcesDir)
+        .plus(ctwTestSourceSet.runtimeClasspath.minus(ctwTestSourceSet.output))
+    task.javaLauncher.set(toolchains.launcherFor(spec -> spec.getLanguageVersion().set(JavaLanguageVersion.of(8))))
+    task.include('**/*CtwTest.class')
+    task.useJUnitPlatform()
 }
 
 description = 'common-test'
