@@ -1,4 +1,4 @@
-package org.zero.common.core.exception.handler.sentinel.javax;
+package org.zero.common.core.exception.handler.sentinel;
 
 import com.alibaba.csp.sentinel.adapter.spring.webmvc.callback.BlockExceptionHandler;
 import com.alibaba.csp.sentinel.slots.block.BlockException;

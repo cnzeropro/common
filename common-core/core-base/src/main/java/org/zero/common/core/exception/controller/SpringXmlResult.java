@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.Map;
 
 /**
+ * Spring Boot 错误属性的 XML 视图对象。
+ *
  * @author Zero (cnzeropro@163.com)
  * @since 2025/3/6
  */
@@ -29,6 +31,12 @@ public class SpringXmlResult {
     @JacksonXmlProperty(localName = "Path")
     private String path;
 
+	/**
+	 * 将 Spring Boot 默认错误属性映射转换为 XML 结果对象。
+	 *
+	 * @param result Spring Boot 生成的错误属性
+	 * @return XML 结果对象
+	 */
     public static SpringXmlResult of(Map<String, Object> result) {
         return SpringXmlResult.of((Date) result.get("timestamp"),
                 (Integer) result.get("status"),

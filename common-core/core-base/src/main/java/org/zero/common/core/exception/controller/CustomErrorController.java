@@ -18,11 +18,12 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 /**
- * Spring Boot 全局错误处理控制器，负责生成统一错误响应
+ * Spring Boot 全局错误控制器，负责在兜底错误分发阶段输出统一格式的错误响应。
  * <p>
- * 当其他异常处理机制未处理异常时，作为兜底机制触发
+ * 当常规异常处理器未消费异常，或请求直接进入 {@code /error} 分发链路时，
+ * 根据协商的媒体类型返回纯文本、JSON 或 XML 响应。
  *
- * @author zero
+ * @author Zero (cnzeropro@163.com)
  * @see org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController
  * @see org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration#basicErrorController(ErrorAttributes, ObjectProvider)
  * @since 2024/4/12
@@ -39,12 +40,9 @@ public class CustomErrorController extends BasicErrorController {
 	}
 
 	/**
-	 * "timestamp": "2025-03-06 16:52:35.487"<br>
-	 * "status": 500<br>
-	 * "error": "Internal Server Error"<br>
-	 * "trace": "org.zero.common.data.exception.CommonException: xxx\r\n\tat org.zero.common.core.support.export.FileExportResponseBodyAdvice.handleFile(FileExportResponseBodyAdvice.java:139)\r\n\t"<br>
-	 * "message": "xxx"<br>
-	 * "path": "/export/e1"
+	 * 返回纯文本错误响应。
+	 * <p>
+	 * 每行输出一个错误属性，格式为 {@code key: value}，便于命令行或文件下载等场景直接查看。
 	 */
 	@ResponseBody
 	@RequestMapping(produces = MediaType.TEXT_PLAIN_VALUE)
@@ -60,14 +58,9 @@ public class CustomErrorController extends BasicErrorController {
 	}
 
 	/**
-	 * {
-	 * "timestamp": "2025-03-06 16:52:35.487",
-	 * "status": 500,
-	 * "error": "Internal Server Error",
-	 * "trace": "org.zero.common.data.exception.CommonException: xxx\r\n\tat org.zero.common.core.support.export.FileExportResponseBodyAdvice.handleFile(FileExportResponseBodyAdvice.java:139)\r\n\t",
-	 * "message": "xxx",
-	 * "path": "/export/e1"
-	 * }
+	 * 返回 JSON 错误响应。
+	 * <p>
+	 * 响应体直接透传 Spring Boot 生成的错误属性映射，HTTP 状态码与底层错误状态保持一致。
 	 */
 	@ResponseBody
 	@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -81,18 +74,10 @@ public class CustomErrorController extends BasicErrorController {
 	}
 
 	/**
-	 * 需要 {@code jackson-dataformat-xml} lib 支持
+	 * 返回 XML 错误响应。
 	 * <p>
-	 * &lt;Result&gt;<br>
-	 * &lt;Timestamp&gt;2025-03-06 17:51:15.245&lt;/Timestamp&gt;<br>
-	 * &lt;Status&gt;500&lt;/Status&gt;<br>
-	 * &lt;Error&gt;Internal Server Error&lt;/Error&gt;<br>
-	 * &lt;Trace&gt;org.zero.common.data.exception.CommonException: xxx&#xd;
-	 * at org.zero.common.core.support.export.FileExportResponseBodyAdvice.handleFile(FileExportResponseBodyAdvice.java:139)&#xd;
-	 * &lt;/Trace&gt;
-	 * &lt;Message&gt;xxx&lt;/Message&gt;<br>
-	 * &lt;Path&gt;/export/e1&lt;/Path&gt;<br>
-	 * &lt;/Result&gt;
+	 * 需要 {@code jackson-dataformat-xml} 支持，并将 Spring Boot 生成的错误属性转换为 {@link SpringXmlResult}。
+	 * HTTP 状态码与底层错误状态保持一致。
 	 */
 	@ResponseBody
 	@RequestMapping(produces = MediaType.APPLICATION_XML_VALUE)
