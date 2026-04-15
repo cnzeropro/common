@@ -2,13 +2,12 @@ package org.zero.common.core.extension.feign;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
-import jakarta.servlet.http.HttpServletRequest;
-import org.zero.common.core.util.spring.web.context.request.RequestUtil;
+import org.zero.common.core.util.spring.web.context.request.javax.RequestUtil;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -55,7 +54,7 @@ public class HeaderRequestInterceptor implements RequestInterceptor {
 		if (trimmedHeaderName.isEmpty()) {
 			return null;
 		}
-		return trimmedHeaderName.toLowerCase(Locale.ROOT);
+		return trimmedHeaderName.toLowerCase();
 	}
 
 	@Override

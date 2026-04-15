@@ -25,7 +25,6 @@ import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
 import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.cloud.openfeign.support.SpringEncoder;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 
@@ -36,9 +35,11 @@ import java.util.Objects;
 import static feign.form.ContentType.MULTIPART;
 
 /**
+ * Spring Boot 3 / OpenFeign 高版本通用配置基类。
+ *
  * @author Zero (cnzeropro@163.com)
  * @see org.springframework.cloud.openfeign.FeignClientsConfiguration
- * @since 2025/7/2
+ * @since 2026/4/15
  */
 public abstract class AbstractFeignConfig {
 	@Autowired
@@ -73,9 +74,11 @@ public abstract class AbstractFeignConfig {
 	public Encoder defaultEncoder() {
 		SpringEncoder springEncoder;
 		if (Objects.nonNull(formWriter)) {
-			springEncoder = new SpringEncoder(new SpringPojoFormEncoder(formWriter), httpMessageConvertersProvider, feignEncoderProperties, httpMessageConverterCustomizerProvider);
+			springEncoder = new SpringEncoder(new SpringPojoFormEncoder(formWriter), httpMessageConvertersProvider,
+					feignEncoderProperties, httpMessageConverterCustomizerProvider);
 		} else {
-			springEncoder = new SpringEncoder(new SpringFormEncoder(), httpMessageConvertersProvider, feignEncoderProperties, httpMessageConverterCustomizerProvider);
+			springEncoder = new SpringEncoder(new SpringFormEncoder(), httpMessageConvertersProvider,
+					feignEncoderProperties, httpMessageConverterCustomizerProvider);
 		}
 		if (isClassPresent("org.springframework.data.domain.Pageable")) {
 			PageableSpringEncoder pageableSpringEncoder = new PageableSpringEncoder(springEncoder);
@@ -106,11 +109,10 @@ public abstract class AbstractFeignConfig {
 	}
 
 	/**
-	 * copy from {@link org.springframework.cloud.openfeign.FeignClientsConfiguration#feignContract(ConversionService)}
+	 * copy from {@link org.springframework.cloud.openfeign.FeignClientsConfiguration#feignContract(org.springframework.core.convert.ConversionService)}
 	 */
 	public Contract defaultContract() {
-		boolean decodeSlash = Objects.isNull(feignClientProperties) || feignClientProperties.isDecodeSlash();
-		return new SpringMvcContract(annotatedParameterProcessors, this.defaultConversionService(), decodeSlash);
+		return new SpringMvcContract(annotatedParameterProcessors, this.defaultConversionService(), feignClientProperties);
 	}
 
 	/**

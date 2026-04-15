@@ -27,6 +27,7 @@ dependencies {
     implementation('org.springframework:spring-webmvc')
     implementation('org.springframework.boot:spring-boot')
     implementation('org.springframework.boot:spring-boot-autoconfigure')
+    implementation('org.springframework.cloud:spring-cloud-openfeign-core')
     implementation(libsCatalog.findLibrary('com-alibaba-csp_sentinel-spring-webmvc-6x-adapter').get().get())
     implementation('jakarta.servlet:jakarta.servlet-api')
     implementation('jakarta.validation:jakarta.validation-api')
