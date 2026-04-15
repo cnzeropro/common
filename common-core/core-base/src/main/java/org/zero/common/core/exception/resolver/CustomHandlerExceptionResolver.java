@@ -1,4 +1,4 @@
-package org.zero.common.core.exception.resolver.javax;
+package org.zero.common.core.exception.resolver;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;

@@ -131,6 +131,7 @@ dependencies {
     testImplementation('io.jsonwebtoken:jjwt-impl')
     testImplementation('io.jsonwebtoken:jjwt-jackson')
     testImplementation(requiredBaseLibrary('org-aspectj_aspectjweaver'))
+    testImplementation('org.springframework:spring-test')
     testImplementation('org.springframework.security:spring-security-oauth2-core')
     implementation('ch.qos.logback:logback-classic')
     implementation('javax.servlet:javax.servlet-api')
