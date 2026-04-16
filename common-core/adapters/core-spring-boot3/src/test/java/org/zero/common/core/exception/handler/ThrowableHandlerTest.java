@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.zero.common.core.exception.ThrowableMessageSupplier;
+import org.zero.common.core.exception.handler.ThrowableHandler.ResponseType;
 import org.zero.common.data.model.view.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,7 +34,7 @@ class ThrowableHandlerTest {
 
 	@Test
 	void shouldReturnResultWhenResponseTypeIsResult() {
-		ThrowableHandler handler = new ThrowableHandler(THROWABLE_MESSAGE_SUPPLIER, ThrowableResponseType.RESULT);
+		ThrowableHandler handler = new ThrowableHandler(THROWABLE_MESSAGE_SUPPLIER, ResponseType.RESULT);
 
 		Object result = handler.handle(HttpStatus.BAD_REQUEST, new IllegalArgumentException("boom"));
 

@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 条件组合节点。
+ * 单个过滤条件节点。
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2026/4/2
@@ -16,24 +16,21 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ConditionGroupQO implements PredicateQO {
+public class FilterConditionQO implements FilterQO {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * 逻辑运算。
+	 * 前端字段 key。
 	 */
-	private Logic logic = Logic.AND;
+	private String field;
 
 	/**
-	 * 子条件节点。
+	 * 操作符 code，例如 eq / in / contains。
 	 */
-	private List<PredicateQO> children = Collections.emptyList();
+	private String operator = "eq";
 
 	/**
-	 * 逻辑运算符：AND / OR。
+	 * 条件值列表。
 	 */
-	public enum Logic {
-		AND,
-		OR
-	}
+	private List<Object> values = Collections.emptyList();
 }

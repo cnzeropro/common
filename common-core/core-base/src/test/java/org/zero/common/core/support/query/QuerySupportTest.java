@@ -3,11 +3,11 @@ package org.zero.common.core.support.query;
 import org.junit.jupiter.api.Test;
 import org.zero.common.core.support.query.render.SqlFragment;
 import org.zero.common.core.support.query.render.SqlQueryRenderer;
-import org.zero.common.data.model.query.ConditionGroupQO;
-import org.zero.common.data.model.query.ConditionQO;
+import org.zero.common.data.model.query.FilterConditionQO;
+import org.zero.common.data.model.query.FilterGroupQO;
+import org.zero.common.data.model.query.ListQO;
 import org.zero.common.data.model.query.MetricQO;
 import org.zero.common.data.model.query.PageQO;
-import org.zero.common.data.model.query.QueryQO;
 import org.zero.common.data.model.query.ReportQO;
 import org.zero.common.data.model.query.SortQO;
 
@@ -89,8 +89,8 @@ class QuerySupportTest {
 	}
 
 	@Test
-	void shouldUseDefaultPageForPlainQueryQO() {
-		QueryQO qo = new QueryQO();
+	void shouldUseDefaultPageForPlainListQO() {
+		ListQO qo = new ListQO();
 		qo.setFields(Collections.singletonList("id"));
 
 		QuerySpec querySpec = queryCompiler.compile(qo);
@@ -101,12 +101,12 @@ class QuerySupportTest {
 
 	@Test
 	void shouldRenderSearchSql() {
-		LegacyQueryQO qo = new LegacyQueryQO();
+		LegacyListQO qo = new LegacyListQO();
 		qo.setFields(Arrays.asList("id", "name"));
 		qo.setSorts(Collections.singletonList(new SortQO("createdAt", SortQO.Direction.DESC)));
-		qo.setWhere(new ConditionGroupQO(ConditionGroupQO.Logic.AND, Arrays.asList(
-			new ConditionQO("name", "contains", Collections.<Object>singletonList("tom")),
-			new ConditionQO("status", "in", Arrays.<Object>asList("ENABLED", "LOCKED"))
+		qo.setWhere(new FilterGroupQO(FilterGroupQO.Logic.AND, Arrays.asList(
+				new FilterConditionQO("name", "contains", Collections.<Object>singletonList("tom")),
+				new FilterConditionQO("status", "in", Arrays.<Object>asList("ENABLED", "LOCKED"))
 		)));
 		qo.setNumber(1L);
 		qo.setSize(20L);
@@ -126,8 +126,8 @@ class QuerySupportTest {
 		LegacyReportQO qo = new LegacyReportQO();
 		qo.setDimensions(Collections.singletonList("status"));
 		qo.setMetrics(Collections.singletonList(new MetricQO("id", "count", "userCount")));
-		qo.setWhere(new ConditionQO("status", "in", Collections.<Object>singletonList("ENABLED")));
-		qo.setHaving(new ConditionQO("userCount", "gt", Collections.<Object>singletonList(10)));
+		qo.setWhere(new FilterConditionQO("status", "in", Collections.<Object>singletonList("ENABLED")));
+		qo.setHaving(new FilterConditionQO("userCount", "gt", Collections.<Object>singletonList(10)));
 		qo.setSorts(Collections.singletonList(new SortQO("userCount", SortQO.Direction.DESC)));
 		qo.setNumber(2L);
 		qo.setSize(10L);
@@ -186,7 +186,7 @@ class QuerySupportTest {
 		}
 	}
 
-	static class LegacyQueryQO extends QueryQO implements PageParameterProvider {
+	static class LegacyListQO extends ListQO implements PageParameterProvider {
 		private long number = PageQO.DEFAULT_NUMBER;
 		private long size = PageQO.DEFAULT_SIZE;
 

@@ -4,12 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * 通用列表查询参数。
+ * 过滤条件组合节点。
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2026/4/2
@@ -17,21 +16,24 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class QueryQO implements Serializable {
+public class FilterGroupQO implements FilterQO {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * 查询条件。
+	 * 逻辑运算。
 	 */
-	private PredicateQO where;
+	private Logic logic = Logic.AND;
 
 	/**
-	 * 排序列表。
+	 * 子过滤节点。
 	 */
-	private List<SortQO> sorts = Collections.emptyList();
+	private List<FilterQO> children = Collections.emptyList();
 
 	/**
-	 * 选择字段列表。
+	 * 逻辑运算符：AND / OR。
 	 */
-	private List<String> fields = Collections.emptyList();
+	public enum Logic {
+		AND,
+		OR
+	}
 }

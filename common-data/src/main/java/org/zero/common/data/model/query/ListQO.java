@@ -4,11 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * 单个条件节点。
+ * 通用列表查询参数。
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2026/4/2
@@ -16,21 +17,21 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ConditionQO implements PredicateQO {
+public class ListQO implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * 前端字段 key。
+	 * 查询条件。
 	 */
-	private String field;
+	private FilterQO where;
 
 	/**
-	 * 操作符 code，例如 eq / in / contains。
+	 * 排序列表。
 	 */
-	private String operator = "eq";
+	private List<SortQO> sorts = Collections.emptyList();
 
 	/**
-	 * 条件值列表。
+	 * 选择字段列表。
 	 */
-	private List<Object> values = Collections.emptyList();
+	private List<String> fields = Collections.emptyList();
 }

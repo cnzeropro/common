@@ -18,8 +18,8 @@ import org.zero.common.core.extension.spring.web.method.support.JsonObjectParam;
 import org.zero.common.core.support.bean.dynamic.DynamicBean;
 import org.zero.common.core.support.bean.dynamic.DynamicBeanArgumentResolver;
 import org.zero.common.core.support.bean.dynamic.DynamicBeanParam;
+import org.zero.common.data.model.query.ListQO;
 import org.zero.common.data.model.query.PageQO;
-import org.zero.common.data.model.query.QueryQO;
 import org.zero.common.data.model.query.ReportQO;
 import org.zero.common.data.model.view.Result;
 
@@ -42,7 +42,7 @@ public class QueryController {
 	}
 
 	@PostMapping("search")
-	public Result<QueryQO> search(@RequestBody QueryQO param) {
+	public Result<ListQO> search(@RequestBody ListQO param) {
 		return Result.ok(param);
 	}
 

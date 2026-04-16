@@ -9,7 +9,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.zero.common.core.exception.ThrowableMessageSupplier;
-import org.zero.common.core.exception.handler.ThrowableResponseType;
+import org.zero.common.core.exception.handler.ThrowableHandler.ResponseType;
 import org.zero.common.core.util.jackson.databind.JacksonUtils;
 
 import java.io.PrintWriter;
@@ -97,7 +97,7 @@ class CustomBlockExceptionHandlerTest {
 		JacksonUtils.setObjectMapper(OBJECT_MAPPER);
 		CustomBlockExceptionHandler handler = new CustomBlockExceptionHandler(
 			THROWABLE_MESSAGE_SUPPLIER,
-			ThrowableResponseType.RESULT
+				ResponseType.RESULT
 		);
 		ResponseRecorder response = new ResponseRecorder();
 

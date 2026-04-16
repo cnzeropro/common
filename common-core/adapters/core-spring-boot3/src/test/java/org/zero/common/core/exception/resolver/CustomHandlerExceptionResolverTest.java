@@ -7,7 +7,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.servlet.ModelAndView;
 import org.zero.common.core.exception.ThrowableMessageSupplier;
 import org.zero.common.core.exception.handler.ThrowableHandler;
-import org.zero.common.core.exception.handler.ThrowableResponseType;
+import org.zero.common.core.exception.handler.ThrowableHandler.ResponseType;
 import org.zero.common.data.model.view.Result;
 
 import java.lang.reflect.Proxy;
@@ -78,7 +78,7 @@ class CustomHandlerExceptionResolverTest {
 		AttributeRequest request = new AttributeRequest();
 		ResponseStatusRecorder response = new ResponseStatusRecorder();
 		TestCustomHandlerExceptionResolver resolver = new TestCustomHandlerExceptionResolver(
-				new ThrowableHandler(THROWABLE_MESSAGE_SUPPLIER, ThrowableResponseType.RESULT)
+				new ThrowableHandler(THROWABLE_MESSAGE_SUPPLIER, ResponseType.RESULT)
 		);
 
 		ModelAndView modelAndView = resolver.invoke(request.createProxy(), response.createProxy(), new IllegalArgumentException("boom"));

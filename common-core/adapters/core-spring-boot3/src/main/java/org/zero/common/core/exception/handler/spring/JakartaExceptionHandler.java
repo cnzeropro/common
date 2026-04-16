@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.zero.common.core.exception.ThrowableMessageSupplier;
 import org.zero.common.core.exception.handler.ThrowableHandler;
-import org.zero.common.core.exception.handler.ThrowableResponseType;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -30,7 +29,7 @@ public class JakartaExceptionHandler extends ThrowableHandler {
 		super(throwableMessageProvider);
 	}
 
-	public JakartaExceptionHandler(ThrowableMessageSupplier throwableMessageProvider, ThrowableResponseType responseType) {
+	public JakartaExceptionHandler(ThrowableMessageSupplier throwableMessageProvider, ResponseType responseType) {
 		super(throwableMessageProvider, responseType);
 	}
 

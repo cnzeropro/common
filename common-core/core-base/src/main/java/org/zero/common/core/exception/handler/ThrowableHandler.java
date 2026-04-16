@@ -171,4 +171,15 @@ public class ThrowableHandler {
     public Result<Void> handle(HttpStatus httpStatus, Throwable throwable, CharSequence defaultMessage, Collection<Object> args) {
         return this.handle(httpStatus, throwable, defaultMessage, args.toArray());
     }
+
+	/**
+	 * 异常响应类型。
+	 *
+	 * @author Zero (cnzeropro@163.com)
+	 * @since 2026/4/15
+	 */
+	public enum ThrowableResponseType {
+		PROBLEM_DETAIL,
+		RESULT
+	}
 }

@@ -33,12 +33,12 @@ public class ReportQO implements Serializable {
 	/**
 	 * 查询条件。
 	 */
-	private PredicateQO where;
+	private FilterQO where;
 
 	/**
 	 * 聚合条件。
 	 */
-	private PredicateQO having;
+	private FilterQO having;
 
 	/**
 	 * 排序列表。

@@ -33,8 +33,8 @@ class ReportQOTest {
 	void allArgsConstructorShouldKeepProvidedQueryParts() {
 		List<String> dimensions = Arrays.asList("dept", "owner");
 		List<MetricQO> metrics = Arrays.asList(new MetricQO("amount", "sum", "totalAmount"));
-		PredicateQO where = new ConditionQO("status", "eq", Arrays.<Object>asList("PAID"));
-		PredicateQO having = new ConditionQO("totalAmount", "gt", Arrays.<Object>asList(100));
+		FilterQO where = new FilterConditionQO("status", "eq", Arrays.<Object>asList("PAID"));
+		FilterQO having = new FilterConditionQO("totalAmount", "gt", Arrays.<Object>asList(100));
 		List<SortQO> sorts = Arrays.asList(new SortQO("totalAmount", SortQO.Direction.DESC));
 		ReportQO reportQO = new ReportQO(dimensions, metrics, where, having, sorts);
 

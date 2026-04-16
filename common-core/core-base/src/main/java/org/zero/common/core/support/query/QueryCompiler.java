@@ -2,12 +2,12 @@ package org.zero.common.core.support.query;
 
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.zero.common.data.model.query.ConditionGroupQO;
-import org.zero.common.data.model.query.ConditionQO;
+import org.zero.common.data.model.query.FilterConditionQO;
+import org.zero.common.data.model.query.FilterGroupQO;
+import org.zero.common.data.model.query.FilterQO;
+import org.zero.common.data.model.query.ListQO;
 import org.zero.common.data.model.query.MetricQO;
 import org.zero.common.data.model.query.PageQO;
-import org.zero.common.data.model.query.PredicateQO;
-import org.zero.common.data.model.query.QueryQO;
 import org.zero.common.data.model.query.ReportQO;
 import org.zero.common.data.model.query.SortQO;
 
@@ -24,19 +24,19 @@ import java.util.stream.Collectors;
  * @since 2026/4/2
  */
 public class QueryCompiler {
-	public QuerySpec compile(QueryQO queryQO) {
-		if (queryQO == null) {
-			throw new IllegalArgumentException("QueryQO must not be null");
+	public QuerySpec compile(ListQO listQO) {
+		if (listQO == null) {
+			throw new IllegalArgumentException("ListQO must not be null");
 		}
 		return QuerySpec.of(
 			QueryMode.SEARCH,
-			compilePredicate(queryQO.getWhere()),
+				compilePredicate(listQO.getWhere()),
 			null,
-			compileSorts(queryQO.getSorts()),
-			normalizeTextList(queryQO.getFields()),
+				compileSorts(listQO.getSorts()),
+				normalizeTextList(listQO.getFields()),
 			Collections.emptyList(),
 			Collections.emptyList(),
-			resolvePageSpec(queryQO)
+				resolvePageSpec(listQO)
 		);
 	}
 
@@ -115,30 +115,30 @@ public class QueryCompiler {
 		return metricSpecs;
 	}
 
-	private PredicateNode compilePredicate(PredicateQO predicateQO) {
-		if (predicateQO == null) {
+	private PredicateNode compilePredicate(FilterQO filterQO) {
+		if (filterQO == null) {
 			return null;
 		}
-		if (predicateQO instanceof ConditionQO) {
-			ConditionQO conditionQO = (ConditionQO) predicateQO;
-			List<Object> values = conditionQO.getValues() == null ? Collections.emptyList() : new ArrayList<>(conditionQO.getValues());
+		if (filterQO instanceof FilterConditionQO) {
+			FilterConditionQO filterConditionQO = (FilterConditionQO) filterQO;
+			List<Object> values = filterConditionQO.getValues() == null ? Collections.emptyList() : new ArrayList<>(filterConditionQO.getValues());
 			return AtomicPredicate.of(
-				requireText(conditionQO.getField(), "Condition field must not be blank"),
-				normalizeCode(conditionQO.getOperator(), "Condition operator must not be blank"),
+					requireText(filterConditionQO.getField(), "Condition field must not be blank"),
+					normalizeCode(filterConditionQO.getOperator(), "Condition operator must not be blank"),
 				values
 			);
 		}
-		if (predicateQO instanceof ConditionGroupQO) {
-			ConditionGroupQO groupQO = (ConditionGroupQO) predicateQO;
+		if (filterQO instanceof FilterGroupQO) {
+			FilterGroupQO filterGroupQO = (FilterGroupQO) filterQO;
 			List<PredicateNode> children = new ArrayList<>();
-			if (!CollectionUtils.isEmpty(groupQO.getChildren())) {
-				for (PredicateQO child : groupQO.getChildren()) {
+			if (!CollectionUtils.isEmpty(filterGroupQO.getChildren())) {
+				for (FilterQO child : filterGroupQO.getChildren()) {
 					children.add(compilePredicate(child));
 				}
 			}
-			return PredicateGroup.of(fromGroupLogic(groupQO.getLogic()), children);
+			return PredicateGroup.of(fromGroupLogic(filterGroupQO.getLogic()), children);
 		}
-		throw new IllegalArgumentException(String.format("Unsupported predicate type: %s", predicateQO.getClass().getName()));
+		throw new IllegalArgumentException(String.format("Unsupported predicate type: %s", filterQO.getClass().getName()));
 	}
 
 	private PageSpec resolvePageSpec(Object queryObject) {
@@ -164,7 +164,7 @@ public class QueryCompiler {
 		return requireText(value, message).toLowerCase(Locale.ENGLISH);
 	}
 
-	private Logic fromGroupLogic(ConditionGroupQO.Logic logic) {
+	private Logic fromGroupLogic(FilterGroupQO.Logic logic) {
 		return logic == null ? Logic.AND : Logic.valueOf(logic.name());
 	}
 }

@@ -14,27 +14,27 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Zero (cnzeropro@163.com)
  * @since 2026/4/3
  */
-class ConditionQOTest {
+class FilterConditionQOTest {
 
 	@Test
 	void noArgsConstructorShouldUseDefaultOperatorAndValues() {
-		ConditionQO conditionQO = new ConditionQO();
+		FilterConditionQO filterConditionQO = new FilterConditionQO();
 
 		assertAll(
-			() -> assertEquals("eq", conditionQO.getOperator()),
-			() -> assertTrue(conditionQO.getValues().isEmpty())
+				() -> assertEquals("eq", filterConditionQO.getOperator()),
+				() -> assertTrue(filterConditionQO.getValues().isEmpty())
 		);
 	}
 
 	@Test
 	void allArgsConstructorShouldKeepProvidedValues() {
 		List<Object> values = Arrays.<Object>asList("alice", 18);
-		ConditionQO conditionQO = new ConditionQO("name", "in", values);
+		FilterConditionQO filterConditionQO = new FilterConditionQO("name", "in", values);
 
 		assertAll(
-			() -> assertEquals("name", conditionQO.getField()),
-			() -> assertEquals("in", conditionQO.getOperator()),
-			() -> assertSame(values, conditionQO.getValues())
+				() -> assertEquals("name", filterConditionQO.getField()),
+				() -> assertEquals("in", filterConditionQO.getOperator()),
+				() -> assertSame(values, filterConditionQO.getValues())
 		);
 	}
 }

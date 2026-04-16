@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.zero.common.core.exception.ThrowableMessageSupplier;
-import org.zero.common.core.exception.handler.ThrowableResponseType;
+import org.zero.common.core.exception.handler.ThrowableHandler.ResponseType;
 import org.zero.common.data.model.view.Result;
 
 import java.lang.reflect.Proxy;
@@ -91,7 +91,7 @@ class JakartaExceptionHandlerTest {
 
 	@Test
 	void shouldReturnResultWhenResponseTypeIsResult() {
-		JakartaExceptionHandler handler = new JakartaExceptionHandler(THROWABLE_MESSAGE_SUPPLIER, ThrowableResponseType.RESULT);
+		JakartaExceptionHandler handler = new JakartaExceptionHandler(THROWABLE_MESSAGE_SUPPLIER, ResponseType.RESULT);
 
 		Object result = handler.constraintViolationException(createConstraintViolationException());
 

@@ -16,15 +16,15 @@ import java.util.Objects;
  */
 public class ThrowableHandler {
 	protected final ThrowableMessageSupplier throwableMessageProvider;
-	protected final ThrowableResponseType responseType;
+	protected final ResponseType responseType;
 
 	public ThrowableHandler(ThrowableMessageSupplier throwableMessageProvider) {
-		this(throwableMessageProvider, ThrowableResponseType.PROBLEM_DETAIL);
+		this(throwableMessageProvider, ResponseType.PROBLEM_DETAIL);
 	}
 
-	public ThrowableHandler(ThrowableMessageSupplier throwableMessageProvider, ThrowableResponseType responseType) {
+	public ThrowableHandler(ThrowableMessageSupplier throwableMessageProvider, ResponseType responseType) {
 		this.throwableMessageProvider = Objects.requireNonNull(throwableMessageProvider, "throwableMessageProvider must not be null");
-		this.responseType = Objects.requireNonNullElse(responseType, ThrowableResponseType.PROBLEM_DETAIL);
+		this.responseType = Objects.requireNonNullElse(responseType, ResponseType.PROBLEM_DETAIL);
 	}
 
 	protected static HttpStatus resolveHttpStatus(int code) {
@@ -94,11 +94,22 @@ public class ThrowableHandler {
 	}
 
 	protected Object createResponse(int code, CharSequence message) {
-		if (this.responseType == ThrowableResponseType.RESULT) {
+		if (this.responseType == ResponseType.RESULT) {
 			return Result.error(code, message);
 		}
 		ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(resolveHttpStatus(code), toMessage(message));
 		problemDetail.setProperty("code", code);
 		return problemDetail;
+	}
+
+	/**
+	 * 异常响应类型。
+	 *
+	 * @author Zero (cnzeropro@163.com)
+	 * @since 2026/4/15
+	 */
+	public enum ResponseType {
+		PROBLEM_DETAIL,
+		RESULT
 	}
 }

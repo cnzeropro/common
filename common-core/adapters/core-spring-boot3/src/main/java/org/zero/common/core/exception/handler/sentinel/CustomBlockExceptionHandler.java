@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.zero.common.core.exception.ThrowableMessageSupplier;
 import org.zero.common.core.exception.handler.ThrowableHandler;
-import org.zero.common.core.exception.handler.ThrowableResponseType;
 import org.zero.common.core.util.jackson.databind.JacksonUtils;
 import org.zero.common.core.util.jakarta.servlet.ResponseUtil;
 
@@ -25,7 +24,7 @@ public class CustomBlockExceptionHandler extends ThrowableHandler implements Blo
 		super(throwableMessageProvider);
 	}
 
-	public CustomBlockExceptionHandler(ThrowableMessageSupplier throwableMessageProvider, ThrowableResponseType responseType) {
+	public CustomBlockExceptionHandler(ThrowableMessageSupplier throwableMessageProvider, ResponseType responseType) {
 		super(throwableMessageProvider, responseType);
 	}
 
