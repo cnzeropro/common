@@ -53,4 +53,13 @@ class ByteBufferInputStreamTest {
 
 		assertThrows(IOException.class, inputStream::read);
 	}
+
+	@Test
+	void shouldThrowIOExceptionWhenResetWithoutMark() {
+		ByteBufferInputStream inputStream = new ByteBufferInputStream(ByteBuffer.wrap("ab".getBytes(StandardCharsets.UTF_8)));
+
+		IOException exception = assertThrows(IOException.class, inputStream::reset);
+
+		assertEquals("Mark not set", exception.getMessage());
+	}
 }

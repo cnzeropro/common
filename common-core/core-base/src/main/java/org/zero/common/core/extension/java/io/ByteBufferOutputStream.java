@@ -8,6 +8,7 @@ import org.zero.common.core.util.java.lang.ArrayUtil;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 
 /**
@@ -21,15 +22,15 @@ public class ByteBufferOutputStream extends OutputStream {
 	protected final BufferSizeStrategy bufferSizeStrategy;
 
 	public ByteBufferOutputStream(int initBufferSize) {
-		this(initBufferSize, DefaultBufferSizeStrategy.DEFAULT);
+		this(createByteBuffer(initBufferSize), DefaultBufferSizeStrategy.DEFAULT);
 	}
 
 	public ByteBufferOutputStream(int initBufferSize, int maxBufferSize) {
-		this(initBufferSize, new DefaultBufferSizeStrategy(maxBufferSize));
+		this(createByteBuffer(initBufferSize, maxBufferSize), new DefaultBufferSizeStrategy(maxBufferSize));
 	}
 
 	public ByteBufferOutputStream(int initBufferSize, BufferSizeStrategy bufferSizeStrategy) {
-		this(ByteBuffer.allocate(initBufferSize), bufferSizeStrategy);
+		this(createByteBuffer(initBufferSize), bufferSizeStrategy);
 	}
 
 	public ByteBufferOutputStream(ByteBuffer byteBuffer) {
@@ -37,6 +38,8 @@ public class ByteBufferOutputStream extends OutputStream {
 	}
 
 	public ByteBufferOutputStream(ByteBuffer byteBuffer, BufferSizeStrategy bufferSizeStrategy) {
+		Objects.requireNonNull(byteBuffer, "ByteBuffer cannot be null");
+		Objects.requireNonNull(bufferSizeStrategy, "BufferSizeStrategy cannot be null");
 		if (byteBuffer.isReadOnly()) {
 			throw new IllegalArgumentException("ByteBuffer is read-only");
 		}
@@ -54,17 +57,11 @@ public class ByteBufferOutputStream extends OutputStream {
 		byteBuffer.put((byte) b);
 	}
 
-	@Override
-	public synchronized void write(byte[] bytes, int offset, int length) throws IOException {
-		checkClosed();
-		if (bytes == null) {
-			throw new NullPointerException("Byte array cannot be null");
+	protected static ByteBuffer createByteBuffer(int initBufferSize) {
+		if (initBufferSize < 0) {
+			throw new IllegalArgumentException("Initial buffer size must be non-negative");
 		}
-		if (offset < 0 || length < 0 || offset + length > bytes.length) {
-			throw new IndexOutOfBoundsException("Invalid offset or length");
-		}
-		ensureCapacity(length);
-		byteBuffer.put(bytes, offset, length);
+		return ByteBuffer.allocate(initBufferSize);
 	}
 
 	@Override
@@ -173,6 +170,36 @@ public class ByteBufferOutputStream extends OutputStream {
 		 * @return 新的缓冲区大小
 		 */
 		int nextSize(int oldSize, int requiredSize);
+	}
+
+	protected static ByteBuffer createByteBuffer(int initBufferSize, int maxBufferSize) {
+		if (maxBufferSize <= 0) {
+			throw new IllegalArgumentException("Max buffer size must be positive");
+		}
+		if (initBufferSize < 0) {
+			throw new IllegalArgumentException("Initial buffer size must be non-negative");
+		}
+		if (initBufferSize > maxBufferSize) {
+			throw new IllegalArgumentException(String.format(
+					"Initial buffer size must not exceed max buffer size: initBufferSize=%d, maxBufferSize=%d",
+					initBufferSize,
+					maxBufferSize
+			));
+		}
+		return ByteBuffer.allocate(initBufferSize);
+	}
+
+	@Override
+	public synchronized void write(byte[] bytes, int offset, int length) throws IOException {
+		checkClosed();
+		if (bytes == null) {
+			throw new NullPointerException("Byte array cannot be null");
+		}
+		if (offset < 0 || length < 0 || length > bytes.length - offset) {
+			throw new IndexOutOfBoundsException("Invalid offset or length");
+		}
+		ensureCapacity(length);
+		byteBuffer.put(bytes, offset, length);
 	}
 
 	@RequiredArgsConstructor

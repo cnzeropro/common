@@ -6,6 +6,7 @@ import lombok.SneakyThrows;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.InvalidMarkException;
 
 /**
  *
@@ -99,7 +100,11 @@ public class ByteBufferInputStream extends InputStream {
 	@Override
 	public synchronized void reset() throws IOException {
 		checkClosed();
-		byteBuffer.reset();
+		try {
+			byteBuffer.reset();
+		} catch (InvalidMarkException exception) {
+			throw new IOException("Mark not set", exception);
+		}
 	}
 
 	@Override
