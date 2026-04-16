@@ -1,4 +1,4 @@
-package org.zero.common.core.aop.spring.fixture.mapper;
+package org.zero.common.core.aop.spring.pointcut.fixture.mapper;
 
 /**
  * @author Zero (cnzeropro@163.com)

@@ -3,6 +3,12 @@ package org.zero.common.core.extension.java.io;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Zero (cnzeropro@163.com)
@@ -10,10 +16,33 @@ import java.io.IOException;
  */
 class ByteBufferOutputStreamTest {
 	@Test
-	void test() throws IOException {
-		ByteBufferOutputStream outputStream = new ByteBufferOutputStream(1,130);
-		outputStream.write("Hello, World!".getBytes());
-		byte[] byteArray = outputStream.toByteArray();
-		System.out.println(new String(byteArray));
+	void shouldExpandAndPreserveData() throws IOException {
+		ByteBufferOutputStream outputStream = new ByteBufferOutputStream(1, 130);
+		byte[] expected = "Hello, World!".getBytes(StandardCharsets.UTF_8);
+
+		outputStream.write(expected);
+
+		assertArrayEquals(expected, outputStream.toByteArray());
+		assertEquals(expected.length, outputStream.size());
+	}
+
+	@Test
+	void shouldFailWhenMaxBufferSizeCannotFitRequestedWrite() {
+		ByteBufferOutputStream outputStream = new ByteBufferOutputStream(4, 4);
+
+		IllegalStateException exception = assertThrows(IllegalStateException.class, () -> outputStream.write(new byte[5]));
+
+		assertTrue(exception.getMessage().contains("oldCapacity=4"));
+		assertTrue(exception.getMessage().contains("required=5"));
+	}
+
+	@Test
+	void shouldFailFastWhenStrategyDoesNotGrowCapacity() throws IOException {
+		ByteBufferOutputStream outputStream = new ByteBufferOutputStream(1, (oldSize, requiredSize) -> oldSize);
+		outputStream.write(1);
+
+		IllegalStateException exception = assertThrows(IllegalStateException.class, () -> outputStream.write(2));
+
+		assertTrue(exception.getMessage().contains("nextCapacity=1"));
 	}
 }

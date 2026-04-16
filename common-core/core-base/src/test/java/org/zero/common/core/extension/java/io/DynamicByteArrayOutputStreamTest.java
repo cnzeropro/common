@@ -1,10 +1,12 @@
 package org.zero.common.core.extension.java.io;
 
 import org.junit.jupiter.api.Test;
-import org.zero.common.core.util.java.util.RandomUtil;
 
 import java.io.IOException;
-import java.util.Random;
+import java.nio.charset.StandardCharsets;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Zero (cnzeropro@163.com)
@@ -12,21 +14,35 @@ import java.util.Random;
  */
 public class DynamicByteArrayOutputStreamTest {
 	@Test
-	 void test() throws IOException {
-		// ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		DynamicByteArrayOutputStream outputStream = new DynamicByteArrayOutputStream();
-		Random random = RandomUtil.getRandom();
-		for (int i = 0; i < 1000; i++) {
-			byte[] bytes = new byte[10000];
-			random.nextBytes(bytes);
-			outputStream.write(bytes);
+	void shouldStopAtLogicalEofWhenReadingSingleBytes() throws IOException {
+		DynamicByteArrayOutputStream outputStream = new DynamicByteArrayOutputStream(8, new DynamicByteArrayOutputStream.FixedBufferSizeStrategy(8));
+		byte[] expected = "hello".getBytes(StandardCharsets.UTF_8);
+		outputStream.write(expected);
+		DynamicByteArrayInputStream inputStream = new DynamicByteArrayInputStream(outputStream);
+
+		for (byte value : expected) {
+			assertEquals(value & 0xFF, inputStream.read());
 		}
-		System.out.println(outputStream.size());
-		ChunkedByteBuffer chunkedByteBuffer = outputStream.toChunkedByteBuffer(777);
-		DynamicByteArrayInputStream inputStream = new DynamicByteArrayInputStream(chunkedByteBuffer);
-		System.out.println(inputStream.remaining());
-		byte[] bytes = new byte[10000];
-		inputStream.read(bytes);
-		System.out.println(inputStream.remaining());
+
+		assertEquals(-1, inputStream.read());
+		assertEquals(0, inputStream.remaining().intValue());
+	}
+
+	@Test
+	void shouldRespectLogicalSizeAcrossMixedReads() throws IOException {
+		DynamicByteArrayOutputStream outputStream = new DynamicByteArrayOutputStream(4, new DynamicByteArrayOutputStream.FixedBufferSizeStrategy(4));
+		outputStream.write("abcdef".getBytes(StandardCharsets.UTF_8));
+		DynamicByteArrayInputStream inputStream = new DynamicByteArrayInputStream(outputStream);
+		byte[] first = new byte[3];
+		byte[] second = new byte[4];
+
+		assertEquals(3, inputStream.read(first));
+		assertEquals('d', inputStream.read());
+		assertEquals(2, inputStream.read(second));
+		assertEquals(-1, inputStream.read());
+
+		assertArrayEquals("abc".getBytes(StandardCharsets.UTF_8), first);
+		assertArrayEquals(new byte[]{'e', 'f', 0, 0}, second);
+		assertEquals(0, inputStream.remaining().intValue());
 	}
 }

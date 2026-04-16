@@ -1,4 +1,4 @@
-package org.zero.common.core.aop.spring.fixture.advice;
+package org.zero.common.core.aop.spring.pointcut.fixture.advice;
 
 import org.springframework.web.bind.annotation.ControllerAdvice;
 

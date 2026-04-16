@@ -1,7 +1,6 @@
-package org.zero.common.core.extension.java.collection;
+package org.zero.common.core.extension.java.util;
 
 import org.junit.jupiter.api.Test;
-import org.zero.common.core.extension.java.util.LRUMap;
 
 import java.util.Map;
 

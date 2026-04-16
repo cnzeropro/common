@@ -5,14 +5,14 @@ import org.aspectj.weaver.tools.PointcutExpression;
 import org.aspectj.weaver.tools.PointcutParameter;
 import org.aspectj.weaver.tools.PointcutParser;
 import org.junit.jupiter.api.Test;
-import org.zero.common.core.aop.spring.fixture.advice.SampleControllerAdvice;
-import org.zero.common.core.aop.spring.fixture.advice.SampleRestControllerAdvice;
-import org.zero.common.core.aop.spring.fixture.controller.SampleController;
-import org.zero.common.core.aop.spring.fixture.controller.SampleRestController;
-import org.zero.common.core.aop.spring.fixture.dao.SampleDao;
-import org.zero.common.core.aop.spring.fixture.mapper.SampleMapper;
-import org.zero.common.core.aop.spring.fixture.repository.SampleRepository;
-import org.zero.common.core.aop.spring.fixture.service.SampleService;
+import org.zero.common.core.aop.spring.pointcut.fixture.advice.SampleControllerAdvice;
+import org.zero.common.core.aop.spring.pointcut.fixture.advice.SampleRestControllerAdvice;
+import org.zero.common.core.aop.spring.pointcut.fixture.controller.SampleController;
+import org.zero.common.core.aop.spring.pointcut.fixture.controller.SampleRestController;
+import org.zero.common.core.aop.spring.pointcut.fixture.dao.SampleDao;
+import org.zero.common.core.aop.spring.pointcut.fixture.mapper.SampleMapper;
+import org.zero.common.core.aop.spring.pointcut.fixture.repository.SampleRepository;
+import org.zero.common.core.aop.spring.pointcut.fixture.service.SampleService;
 
 import java.lang.reflect.Method;
 

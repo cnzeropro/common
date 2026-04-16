@@ -135,7 +135,7 @@ public class DynamicByteArrayInputStream extends InputStream {
 
 		readLock.lock();
 		try {
-			if (totalSize.compareTo(currentPosition) < 0) {
+			if (totalSize.compareTo(currentPosition) <= 0) {
 				return -1;
 			}
 			if (this.isCurrentBufferExhausted() && !this.moveToNextBuffer()) {

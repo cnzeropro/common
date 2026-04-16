@@ -1,6 +1,7 @@
 package org.zero.common.core.extension.java.io;
 
 import lombok.SneakyThrows;
+import org.zero.common.data.constant.StringPool;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
@@ -13,16 +14,24 @@ import java.util.Locale;
 import java.util.Objects;
 
 /**
- * 可以写入字节、字符、字符串、字符序列等等的输出流。
- * 通过融合各类方法，解决了传统 OutputStream（字节输出流）只能写字节相关信息以及传统 Writer（字符输出流）只能写字符相关信息的问题。
+ * 同时支持字节写入与文本写入的内存输出流。
  * <p>
- * 但该类也导致了其他一些问题，比如：字符默认使用 UTF_8 编码（也可指定），如果写入的字节不是通过指定编码而来的话，可能会出现乱码。
+ * 该类继承自 {@link ByteArrayOutputStream}，保留原生的字节写入能力，并补充了针对 {@code char}、
+ * {@link String}、{@link CharSequence} 以及类似 {@link java.io.PrintWriter} 的
+ * {@code print}/{@code println}/{@code printf} 接口，便于在同一缓冲区内连续写入文本内容。
  * <p>
- * 多个类拷贝融合而来，包括 {@link java.io.PrintWriter}、{@link javax.servlet.ServletOutputStream}、{@link java.io.OutputStreamWriter} 等等。
+ * 注意事项：
+ * <ul>
+ *     <li>文本内容会按构造时指定的 {@link Charset} 编码，默认使用 {@link StandardCharsets#UTF_8}。</li>
+ *     <li>{@link #toString()} 会按当前默认字符集解码整个缓冲区；如果缓冲区内混入了其他编码写入的原始字节，结果可能出现乱码。</li>
+ *     <li>文本相关 API 收到 {@code null} 时，会写入 {@code nullDefault}；{@link #println()} 固定写入 {@code \r\n}。</li>
+ * </ul>
  * <p>
- * 可以的话还是应该继承自 {@link cn.hutool.core.io.FastByteArrayOutputStream} 或者 {@link org.springframework.util.FastByteArrayOutputStream} 等实现，此处为了不依赖其他 lib，所以选择继承了 {@link ByteArrayOutputStream}。
+ * 该实现参考了 {@link java.io.PrintWriter}、{@link javax.servlet.ServletOutputStream} 与
+ * {@link java.io.OutputStreamWriter} 的部分接口风格。为了避免额外引入其他依赖，这里直接继承
+ * {@link ByteArrayOutputStream}。
  *
- * @author zero
+ * @author Zero (cnzeropro@163.com)
  * @since 2022/11/28
  */
 public class ByteArrayOutputStreamWriter extends ByteArrayOutputStream implements Appendable {
@@ -30,11 +39,11 @@ public class ByteArrayOutputStreamWriter extends ByteArrayOutputStream implement
 	protected final String nullDefault;
 
 	public ByteArrayOutputStreamWriter() {
-		this(StandardCharsets.UTF_8, "null");
+		this(StandardCharsets.UTF_8, StringPool.NULL);
 	}
 
 	public ByteArrayOutputStreamWriter(Charset charset) {
-		this(charset, "null");
+		this(charset, StringPool.NULL);
 	}
 
 	public ByteArrayOutputStreamWriter(String nullDefault) {
@@ -50,6 +59,13 @@ public class ByteArrayOutputStreamWriter extends ByteArrayOutputStream implement
 		this.write(chars, 0, chars.length);
 	}
 
+	/**
+	 * 按默认字符集将指定字符数组片段编码后写入当前缓冲区。
+	 *
+	 * @param chars 字符数组
+	 * @param off   起始下标
+	 * @param len   写入长度
+	 */
 	@SneakyThrows
 	public void write(char[] chars, int off, int len) {
 		CharsetEncoder charsetEncoder = charset.newEncoder();
@@ -60,28 +76,34 @@ public class ByteArrayOutputStreamWriter extends ByteArrayOutputStream implement
 		this.write(bytes);
 	}
 
+	/**
+	 * 写入整个字符串；当参数为 {@code null} 时写入 {@code nullDefault}。
+	 *
+	 * @param str 字符串
+	 */
 	public void write(String str) {
-		this.write(str, 0, str.length());
+		String value = Objects.isNull(str) ? nullDefault : str;
+		this.write(value, 0, value.length());
 	}
 
+	/**
+	 * 写入字符串片段；当参数为 {@code null} 时，会以 {@code nullDefault} 作为源字符串执行同样的切片逻辑。
+	 *
+	 * @param str 字符串
+	 * @param off 起始下标
+	 * @param len 写入长度
+	 */
 	public void write(String str, int off, int len) {
-		char[] chars;
-		if (Objects.isNull(str)) {
-			chars = nullDefault.toCharArray();
-		} else {
-			chars = new char[len];
-			str.getChars(off, (off + len), chars, 0);
-		}
+		String value = Objects.isNull(str) ? nullDefault : str;
+		char[] chars = new char[len];
+		value.getChars(off, off + len, chars, 0);
 		this.write(chars);
 	}
 
 	@Override
 	public ByteArrayOutputStreamWriter append(CharSequence csq) {
-		if (Objects.isNull(csq)) {
-			this.write(nullDefault);
-		} else {
-			this.write(csq.toString());
-		}
+		String value = Objects.isNull(csq) ? nullDefault : csq.toString();
+		this.write(value);
 		return this;
 	}
 
@@ -94,7 +116,7 @@ public class ByteArrayOutputStreamWriter extends ByteArrayOutputStream implement
 
 	@Override
 	public ByteArrayOutputStreamWriter append(char c) {
-		this.write(c);
+		this.write(String.valueOf(c));
 		return this;
 	}
 
@@ -103,7 +125,7 @@ public class ByteArrayOutputStreamWriter extends ByteArrayOutputStream implement
 	}
 
 	public void print(char c) {
-		this.write(c);
+		this.write(String.valueOf(c));
 	}
 
 	public void print(int i) {
@@ -134,6 +156,9 @@ public class ByteArrayOutputStreamWriter extends ByteArrayOutputStream implement
 		this.write(Objects.toString(obj, nullDefault));
 	}
 
+	/**
+	 * 固定写入 CRLF 换行符。
+	 */
 	public void println() {
 		this.print("\r\n");
 	}
@@ -197,6 +222,12 @@ public class ByteArrayOutputStreamWriter extends ByteArrayOutputStream implement
 		return toString(charset);
 	}
 
+	/**
+	 * 使用指定字符集解码当前缓冲区中的全部字节。
+	 *
+	 * @param charset 用于解码的字符集
+	 * @return 解码后的字符串
+	 */
 	public synchronized String toString(Charset charset) {
 		return new String(buf, 0, count, charset);
 	}

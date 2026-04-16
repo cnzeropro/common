@@ -79,8 +79,19 @@ public class ByteBufferOutputStream extends OutputStream {
 	 * 确保有足够的容量写入数据
 	 */
 	protected void ensureCapacity(int required) {
+		long minCapacity = (long) byteBuffer.position() + required;
 		while (byteBuffer.remaining() < required) {
-			int newCapacity = bufferSizeStrategy.nextSize(byteBuffer.capacity(), required);
+			int oldCapacity = byteBuffer.capacity();
+			int newCapacity = bufferSizeStrategy.nextSize(oldCapacity, required);
+			if (newCapacity <= oldCapacity || newCapacity < minCapacity) {
+				throw new IllegalStateException(String.format(
+						"Unable to expand ByteBuffer: oldCapacity=%d, required=%d, minCapacity=%d, nextCapacity=%d",
+						oldCapacity,
+						required,
+						minCapacity,
+						newCapacity
+				));
+			}
 			ByteBuffer newBuffer = ByteBuffer.allocate(newCapacity);
 			byteBuffer.flip();
 			newBuffer.put(byteBuffer);

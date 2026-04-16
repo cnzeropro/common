@@ -1,4 +1,4 @@
-package org.zero.common.core.aop.spring.fixture.service;
+package org.zero.common.core.aop.spring.pointcut.fixture.service;
 
 import org.springframework.stereotype.Service;
 

@@ -2,11 +2,16 @@ package org.zero.common.core.extension.java.io;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Zero (cnzeropro@163.com)
@@ -14,30 +19,52 @@ import java.util.Arrays;
  */
 class ChunkedByteBufferTest {
 	@Test
-	void test() {
-		// 注意：同等数据总量下，maxBlockSize 越小，性能越低
+	void shouldSupportInsertDeleteReplaceAndGet() {
 		ChunkedByteBuffer buffer = new ChunkedByteBuffer(2);
-		buffer.put("hello".getBytes());
-		buffer.put("world".getBytes());
-		buffer.put("!".getBytes());
-		buffer.insert(BigInteger.valueOf(5), " ".getBytes());
-		buffer.put(new byte[100000]);
-		buffer.delete(1000, 1000);
-		byte[] bytes = new byte[1000];
-		Arrays.fill(bytes, (byte) 11);
-		buffer.replace(100, bytes);
-		ChunkedByteBuffer copied = buffer.copy(888);
-		System.out.println(buffer.size());
-		System.out.println(new String(buffer.get(12)));
-		System.out.println(copied.contentEquals(buffer));
+
+		buffer.put("helloworld!".getBytes(StandardCharsets.UTF_8));
+		buffer.insert(BigInteger.valueOf(5), " ".getBytes(StandardCharsets.UTF_8));
+		buffer.replace(BigInteger.valueOf(6), "W".getBytes(StandardCharsets.UTF_8));
+		buffer.delete(BigInteger.valueOf(11), BigInteger.ONE);
+
+		assertEquals(BigInteger.valueOf(11), buffer.size());
+		assertEquals("hello World", new String(buffer.get(11), StandardCharsets.UTF_8));
+		assertEquals("World", new String(buffer.get(BigInteger.valueOf(6), 5), StandardCharsets.UTF_8));
+		assertTrue(buffer.blockSize() > 1);
 	}
 
 	@Test
-	void test1() throws IOException {
-		ChunkedByteBuffer buffer = new ChunkedByteBuffer();
-		buffer.readFrom(Files.newInputStream(Paths.get("C:\\Users\\Rongan\\Downloads\\zh-cn_windows_11_business_editions_version_25h2_x64_dvd_22759158.iso")));
-		System.out.println(buffer.size());
-		// buffer.delete(1000, 1);
-		buffer.writeTo(Files.newOutputStream(Paths.get("C:\\Users\\Rongan\\Desktop\\zh-cn_windows_11_business_editions_version_25h2_x64_dvd_22759158.iso")));
+	void shouldCopyWithoutSharingContent() {
+		ChunkedByteBuffer buffer = new ChunkedByteBuffer(2);
+		buffer.put("abcdef".getBytes(StandardCharsets.UTF_8));
+
+		ChunkedByteBuffer copied = buffer.copy(3);
+
+		assertTrue(copied.contentEquals(buffer));
+
+		copied.insert(BigInteger.ZERO, "z".getBytes(StandardCharsets.UTF_8));
+
+		assertFalse(copied.contentEquals(buffer));
+		assertEquals("abcdef", new String(buffer.get(6), StandardCharsets.UTF_8));
+		assertEquals("zabcdef", new String(copied.get(7), StandardCharsets.UTF_8));
+	}
+
+	@Test
+	void shouldReadFromAndWriteToStreams() throws IOException {
+		byte[] source = "0123456789".getBytes(StandardCharsets.UTF_8);
+		ChunkedByteBuffer buffer = new ChunkedByteBuffer(4);
+
+		BigInteger bytesRead = buffer.readFrom(
+				new ByteArrayInputStream(source),
+				BigInteger.valueOf(2),
+				BigInteger.valueOf(5),
+				true
+		);
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		buffer.writeTo(outputStream);
+
+		assertEquals(BigInteger.valueOf(5), bytesRead);
+		assertArrayEquals("23456".getBytes(StandardCharsets.UTF_8), buffer.get(5));
+		assertArrayEquals("23456".getBytes(StandardCharsets.UTF_8), outputStream.toByteArray());
 	}
 }

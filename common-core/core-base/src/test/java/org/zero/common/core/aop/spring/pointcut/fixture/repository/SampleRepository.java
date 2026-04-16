@@ -1,4 +1,4 @@
-package org.zero.common.core.aop.spring.fixture.repository;
+package org.zero.common.core.aop.spring.pointcut.fixture.repository;
 
 import org.springframework.stereotype.Repository;
 

@@ -1,4 +1,4 @@
-package org.zero.common.core.aop.spring.fixture.controller;
+package org.zero.common.core.aop.spring.pointcut.fixture.controller;
 
 import org.springframework.stereotype.Controller;
 

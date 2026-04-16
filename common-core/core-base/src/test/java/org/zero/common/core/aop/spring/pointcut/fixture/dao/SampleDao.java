@@ -1,4 +1,4 @@
-package org.zero.common.core.aop.spring.fixture.dao;
+package org.zero.common.core.aop.spring.pointcut.fixture.dao;
 
 /**
  * @author Zero (cnzeropro@163.com)
