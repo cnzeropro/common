@@ -22,7 +22,7 @@ import org.zero.common.data.model.query.ReportQO;
  * @author Zero (cnzeropro@163.com)
  * @since 2026/4/2
  */
-public final class QueryQOJacksonConfigurer {
+public class QueryQOJacksonConfigurer {
 	private QueryQOJacksonConfigurer() {
 	}
 

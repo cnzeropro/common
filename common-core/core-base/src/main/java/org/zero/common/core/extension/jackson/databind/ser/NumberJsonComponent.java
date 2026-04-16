@@ -16,102 +16,123 @@ import java.util.Objects;
  */
 @JsonComponent
 public class NumberJsonComponent {
-    public static class LongSerializer extends StdSerializer<Long> {
-        public static final long JS_MAX_SAFE_INTEGER = (1L << 53L) - 1L;
-        public static final long JS_MIN_SAFE_INTEGER = -JS_MAX_SAFE_INTEGER;
+	private static boolean isSafeInteger(long value) {
+		return value >= LongSerializer.JS_MIN_SAFE_INTEGER && value <= LongSerializer.JS_MAX_SAFE_INTEGER;
+	}
 
-        public LongSerializer() {
-            super(Long.class);
-        }
+	private static boolean isSafeInteger(BigInteger value) {
+		return value.compareTo(BigIntegerSerializer.JS_MIN_SAFE_INTEGER) >= 0
+				&& value.compareTo(BigIntegerSerializer.JS_MAX_SAFE_INTEGER) <= 0;
+	}
 
-        @Override
-        public void serialize(Long value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-            if (Objects.isNull(value)) {
-                gen.writeNull();
-                return;
-            }
-            if (value > JS_MAX_SAFE_INTEGER || value < JS_MIN_SAFE_INTEGER) {
-                gen.writeString(value.toString());
-            } else {
-                gen.writeNumber(value);
-            }
-        }
-    }
+	private static boolean isSafeInteger(BigDecimal value) {
+		BigDecimal normalized = value.stripTrailingZeros();
+		return normalized.scale() <= 0
+				&& normalized.compareTo(BigDecimalSerializer.JS_MIN_SAFE_INTEGER) >= 0
+				&& normalized.compareTo(BigDecimalSerializer.JS_MAX_SAFE_INTEGER) <= 0;
+	}
 
-    public static class BigIntegerSerializer extends StdSerializer<BigInteger> {
-        public static final BigInteger JS_MAX_SAFE_INTEGER = BigInteger.valueOf(LongSerializer.JS_MAX_SAFE_INTEGER);
-        public static final BigInteger JS_MIN_SAFE_INTEGER = BigInteger.valueOf(LongSerializer.JS_MIN_SAFE_INTEGER);
+	public static class LongSerializer extends StdSerializer<Long> {
+		public static final long JS_MAX_SAFE_INTEGER = (1L << 53L) - 1L;
+		public static final long JS_MIN_SAFE_INTEGER = -JS_MAX_SAFE_INTEGER;
 
-        public BigIntegerSerializer() {
-            super(BigInteger.class);
-        }
+		public LongSerializer() {
+			super(Long.class);
+		}
 
-        @Override
-        public void serialize(BigInteger value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-            if (Objects.isNull(value)) {
-                gen.writeNull();
-                return;
-            }
-            if (value.compareTo(JS_MAX_SAFE_INTEGER) > 0 || value.compareTo(JS_MIN_SAFE_INTEGER) < 0) {
-                gen.writeString(value.toString());
-            } else {
-                gen.writeNumber(value);
-            }
-        }
-    }
+		@Override
+		public void serialize(Long value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+			if (Objects.isNull(value)) {
+				gen.writeNull();
+				return;
+			}
+			if (isSafeInteger(value)) {
+				gen.writeNumber(value);
+			} else {
+				gen.writeString(value.toString());
+			}
+		}
+	}
 
-    public static class BigDecimalSerializer extends StdSerializer<BigDecimal> {
-        public static final BigDecimal JS_MAX_SAFE_INTEGER = BigDecimal.valueOf(LongSerializer.JS_MAX_SAFE_INTEGER);
-        public static final BigDecimal JS_MIN_SAFE_INTEGER = BigDecimal.valueOf(LongSerializer.JS_MIN_SAFE_INTEGER);
+	public static class BigIntegerSerializer extends StdSerializer<BigInteger> {
+		public static final BigInteger JS_MAX_SAFE_INTEGER = BigInteger.valueOf(LongSerializer.JS_MAX_SAFE_INTEGER);
+		public static final BigInteger JS_MIN_SAFE_INTEGER = BigInteger.valueOf(LongSerializer.JS_MIN_SAFE_INTEGER);
 
-        public BigDecimalSerializer() {
-            super(BigDecimal.class);
-        }
+		public BigIntegerSerializer() {
+			super(BigInteger.class);
+		}
 
-        @Override
-        public void serialize(BigDecimal value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-            if (Objects.isNull(value)) {
-                gen.writeNull();
-                return;
-            }
-            if (value.compareTo(JS_MAX_SAFE_INTEGER) > 0 || value.compareTo(JS_MIN_SAFE_INTEGER) < 0) {
-                // 不要使用 toString()，否则存在返回科学计数法的情况
-                gen.writeString(value.toPlainString());
-            } else {
-                gen.writeNumber(value);
-            }
-        }
-    }
+		@Override
+		public void serialize(BigInteger value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+			if (Objects.isNull(value)) {
+				gen.writeNull();
+				return;
+			}
+			if (isSafeInteger(value)) {
+				gen.writeNumber(value);
+			} else {
+				gen.writeString(value.toString());
+			}
+		}
+	}
 
-    public static class FloatSerializer extends StdSerializer<Float> {
-        public FloatSerializer() {
-            super(Float.class);
-        }
+	public static class BigDecimalSerializer extends StdSerializer<BigDecimal> {
+		public static final BigDecimal JS_MAX_SAFE_INTEGER = BigDecimal.valueOf(LongSerializer.JS_MAX_SAFE_INTEGER);
+		public static final BigDecimal JS_MIN_SAFE_INTEGER = BigDecimal.valueOf(LongSerializer.JS_MIN_SAFE_INTEGER);
 
-        @Override
-        public void serialize(Float value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-            if (Objects.isNull(value)) {
-                gen.writeNull();
-                return;
-            }
-            // 确保不会输出科学计数法的同时尽量保证精度
-            gen.writeRawValue(BigDecimal.valueOf(value).toPlainString());
-        }
-    }
+		public BigDecimalSerializer() {
+			super(BigDecimal.class);
+		}
 
-    public static class DoubleSerializer extends StdSerializer<Double> {
-        public DoubleSerializer() {
-            super(Double.class);
-        }
+		@Override
+		public void serialize(BigDecimal value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+			if (Objects.isNull(value)) {
+				gen.writeNull();
+				return;
+			}
+			if (isSafeInteger(value)) {
+				gen.writeNumber(value);
+			} else {
+				gen.writeString(value.toPlainString());
+			}
+		}
+	}
 
-        @Override
-        public void serialize(Double value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-            if (Objects.isNull(value)) {
-                gen.writeNull();
-                return;
-            }
-            // 确保不会输出科学计数法的同时尽量保证精度
-            gen.writeRawValue(BigDecimal.valueOf(value).toPlainString());
-        }
-    }
+	public static class FloatSerializer extends StdSerializer<Float> {
+		public FloatSerializer() {
+			super(Float.class);
+		}
+
+		@Override
+		public void serialize(Float value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+			if (Objects.isNull(value)) {
+				gen.writeNull();
+				return;
+			}
+			if (!Float.isFinite(value)) {
+				gen.writeString(String.valueOf(value));
+				return;
+			}
+			gen.writeRawValue(new BigDecimal(Float.toString(value)).toPlainString());
+		}
+	}
+
+	public static class DoubleSerializer extends StdSerializer<Double> {
+		public DoubleSerializer() {
+			super(Double.class);
+		}
+
+		@Override
+		public void serialize(Double value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+			if (Objects.isNull(value)) {
+				gen.writeNull();
+				return;
+			}
+			if (!Double.isFinite(value)) {
+				gen.writeString(String.valueOf(value));
+				return;
+			}
+			gen.writeRawValue(BigDecimal.valueOf(value).toPlainString());
+		}
+	}
 }
