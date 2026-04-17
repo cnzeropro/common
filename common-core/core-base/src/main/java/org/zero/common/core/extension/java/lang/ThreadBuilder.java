@@ -30,7 +30,8 @@ public class ThreadBuilder implements Builder<Thread, ThreadBuilder> {
 
 	@Override
 	public Thread build() {
-		Thread thread = new Thread(group, task, Objects.toString(taskName, generateName()), stackSize);
+		String name = Objects.nonNull(taskName) ? taskName.toString() : generateName();
+		Thread thread = new Thread(group, task, name, stackSize);
 		if (Objects.nonNull(daemon)) {
 			thread.setDaemon(daemon);
 		}
