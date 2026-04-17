@@ -1,7 +1,6 @@
 package org.zero.common.core.extension.java.io;
 
 import lombok.Getter;
-import lombok.SneakyThrows;
 import org.zero.common.core.util.java.lang.ArrayUtil;
 import org.zero.common.core.util.java.lang.NumberUtil;
 import org.zero.common.core.util.java.util.CollectionUtil;
@@ -133,7 +132,7 @@ public class DynamicByteArrayInputStream extends InputStream {
 	public int read() throws IOException {
 		this.checkClosed();
 
-		readLock.lock();
+		writeLock.lock();
 		try {
 			if (totalSize.compareTo(currentPosition) <= 0) {
 				return -1;
@@ -146,7 +145,7 @@ public class DynamicByteArrayInputStream extends InputStream {
 			currentPosition = currentPosition.add(BigInteger.ONE);
 			return result;
 		} finally {
-			readLock.unlock();
+			writeLock.unlock();
 		}
 	}
 
@@ -157,16 +156,16 @@ public class DynamicByteArrayInputStream extends InputStream {
 		if (Objects.isNull(b)) {
 			throw new NullPointerException();
 		}
-		if (off < 0 || len < 0 || len + off > b.length) {
+		if (off < 0 || len < 0 || len > b.length - off) {
 			throw new IndexOutOfBoundsException();
 		}
 		if (len == 0) {
 			return 0;
 		}
 
-		readLock.lock();
+		writeLock.lock();
 		try {
-			BigInteger remaining = this.remaining();
+			BigInteger remaining = totalSize.subtract(currentPosition);
 			if (remaining.compareTo(BigInteger.ZERO) <= 0) {
 				return -1;
 			}
@@ -193,14 +192,19 @@ public class DynamicByteArrayInputStream extends InputStream {
 			currentPosition = currentPosition.add(BigInteger.valueOf(bytesRead));
 			return bytesRead;
 		} finally {
-			readLock.unlock();
+			writeLock.unlock();
 		}
 	}
 
 	@Override
 	public int available() throws IOException {
-		BigInteger remaining = this.remaining();
-		return NumberUtil.toInt(remaining);
+		this.checkClosed();
+		readLock.lock();
+		try {
+			return NumberUtil.toInt(totalSize.subtract(currentPosition));
+		} finally {
+			readLock.unlock();
+		}
 	}
 
 	@Override
@@ -211,9 +215,9 @@ public class DynamicByteArrayInputStream extends InputStream {
 			return 0;
 		}
 
-		readLock.lock();
+		writeLock.lock();
 		try {
-			BigInteger remaining = this.remaining();
+			BigInteger remaining = totalSize.subtract(currentPosition);
 			if (remaining.compareTo(BigInteger.ZERO) <= 0) {
 				return 0;
 			}
@@ -238,7 +242,7 @@ public class DynamicByteArrayInputStream extends InputStream {
 			currentPosition = currentPosition.add(BigInteger.valueOf(skipped));
 			return skipped;
 		} finally {
-			readLock.unlock();
+			writeLock.unlock();
 		}
 	}
 
@@ -248,17 +252,20 @@ public class DynamicByteArrayInputStream extends InputStream {
 	}
 
 	@Override
-	@SneakyThrows
 	public void mark(int readlimit) {
-		this.checkClosed();
-
-		readLock.lock();
+		if (isClosed()) {
+			return;
+		}
+		writeLock.lock();
 		try {
+			if (isClosed()) {
+				return;
+			}
 			markPosition = currentPosition;
 			markBufferIndex = currentBufferIndex;
 			markBufferOffset = currentBufferOffset;
 		} finally {
-			readLock.unlock();
+			writeLock.unlock();
 		}
 	}
 
@@ -270,13 +277,13 @@ public class DynamicByteArrayInputStream extends InputStream {
 			throw new IOException("Mark not set");
 		}
 
-		readLock.lock();
+		writeLock.lock();
 		try {
 			currentPosition = markPosition;
 			currentBufferIndex = markBufferIndex;
 			currentBufferOffset = markBufferOffset;
 		} finally {
-			readLock.unlock();
+			writeLock.unlock();
 		}
 	}
 
@@ -285,9 +292,7 @@ public class DynamicByteArrayInputStream extends InputStream {
 		closed = true;
 	}
 
-	@SneakyThrows
 	public BigInteger remaining() {
-		this.checkClosed();
 		readLock.lock();
 		try {
 			return totalSize.subtract(currentPosition);
@@ -300,21 +305,36 @@ public class DynamicByteArrayInputStream extends InputStream {
 	 * 获取当前读取位置
 	 */
 	public BigInteger getPosition() {
-		return currentPosition;
+		readLock.lock();
+		try {
+			return currentPosition;
+		} finally {
+			readLock.unlock();
+		}
 	}
 
 	/**
 	 * 获取总数据大小
 	 */
 	public BigInteger getSize() {
-		return totalSize;
+		readLock.lock();
+		try {
+			return totalSize;
+		} finally {
+			readLock.unlock();
+		}
 	}
 
 	/**
 	 * 获取缓冲区数量
 	 */
 	public int getBufferCount() {
-		return buffers.size();
+		readLock.lock();
+		try {
+			return buffers.size();
+		} finally {
+			readLock.unlock();
+		}
 	}
 
 	/**

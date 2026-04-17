@@ -50,6 +50,7 @@ public class DynamicByteArrayOutputStream extends OutputStream {
 	 * 缓冲区大小策略
 	 */
 	protected final BufferSizeStrategy bufferSizeStrategy;
+	protected final int initialBufferSize;
 
 	/**
 	 * 是否关闭
@@ -67,8 +68,9 @@ public class DynamicByteArrayOutputStream extends OutputStream {
 
 	public DynamicByteArrayOutputStream(int initialBufferSize, BufferSizeStrategy strategy) {
 		// 预先分配第一个缓冲区
-		this.allocateNewBuffer(initialBufferSize);
-		this.bufferSizeStrategy = strategy;
+		this.initialBufferSize = validateInitialBufferSize(initialBufferSize);
+		this.bufferSizeStrategy = Objects.requireNonNull(strategy, "Buffer size strategy cannot be null");
+		this.allocateNewBuffer(this.initialBufferSize);
 	}
 
 	@Override
@@ -88,13 +90,25 @@ public class DynamicByteArrayOutputStream extends OutputStream {
 		}
 	}
 
+	protected static int validateInitialBufferSize(int initialBufferSize) {
+		if (initialBufferSize <= 0) {
+			throw new IllegalArgumentException("Initial buffer size must be positive");
+		}
+		return initialBufferSize;
+	}
+
+	@Override
+	public void close() {
+		closed = true;
+	}
+
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
 		checkClosed();
 		if (Objects.isNull(b)) {
 			throw new NullPointerException();
 		}
-		if (off < 0 || len < 0 || len + off > b.length) {
+		if (off < 0 || len < 0 || len > b.length - off) {
 			throw new IndexOutOfBoundsException();
 		}
 		if (len == 0) {
@@ -124,35 +138,15 @@ public class DynamicByteArrayOutputStream extends OutputStream {
 		}
 	}
 
-	@Override
-	public void close() {
-		closed = true;
-	}
-
 	/**
 	 * 获取已写入的总字节数
 	 */
 	public BigInteger size() {
-		return totalBytesWritten;
-	}
-
-	/**
-	 * 重置流
-	 * <p>
-	 * 清空所有数据
-	 */
-	@SneakyThrows
-	public void reset() {
-		checkClosed();
-		writeLock.lock();
+		readLock.lock();
 		try {
-			buffers.clear();
-			totalBytesWritten = BigInteger.ZERO;
-			currentBufferIndex = -1;
-			currentBufferPosition = -1;
-			this.allocateNewBuffer(DEFAULT_BUFFER_SIZE);
+			return totalBytesWritten;
 		} finally {
-			writeLock.unlock();
+			readLock.unlock();
 		}
 	}
 
@@ -240,6 +234,26 @@ public class DynamicByteArrayOutputStream extends OutputStream {
 	}
 
 	/**
+	 * 重置流
+	 * <p>
+	 * 清空所有数据
+	 */
+	@SneakyThrows
+	public void reset() {
+		checkClosed();
+		writeLock.lock();
+		try {
+			buffers.clear();
+			totalBytesWritten = BigInteger.ZERO;
+			currentBufferIndex = -1;
+			currentBufferPosition = -1;
+			this.allocateNewBuffer(initialBufferSize);
+		} finally {
+			writeLock.unlock();
+		}
+	}
+
+	/**
 	 * 分配下一个缓冲区
 	 */
 	protected void allocateNextBuffer() {
@@ -249,6 +263,9 @@ public class DynamicByteArrayOutputStream extends OutputStream {
 			currentBuffer.length,
 			totalBytesWritten
 		);
+		if (newBufferSize <= 0) {
+			throw new IllegalStateException("Buffer size strategy must return a positive buffer size");
+		}
 		this.allocateNewBuffer(newBufferSize);
 	}
 
@@ -256,6 +273,9 @@ public class DynamicByteArrayOutputStream extends OutputStream {
 	 * 分配新的缓冲区
 	 */
 	protected void allocateNewBuffer(int size) {
+		if (size <= 0) {
+			throw new IllegalArgumentException("Buffer size must be positive");
+		}
 		byte[] newBuffer = new byte[size];
 		buffers.add(newBuffer);
 		currentBufferIndex++;
