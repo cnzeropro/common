@@ -13,6 +13,7 @@ import java.time.Duration;
  */
 @Slf4j
 public class RedissonStreamConsumer extends LoopRunnable {
+	protected final MessageProcessor processor;
 	public static final Duration DEFAULT_SLEEP_TIME = Duration.ofSeconds(30);
 	protected final Duration sleepTime;
 
@@ -22,7 +23,15 @@ public class RedissonStreamConsumer extends LoopRunnable {
 
 	public RedissonStreamConsumer(MessageProcessor processor, Duration sleepTime) {
 		super(processor::process);
+		this.processor = processor;
 		this.sleepTime = sleepTime;
+	}
+
+	@Override
+	protected void afterRunSuccess() throws InterruptedException {
+		if (processor instanceof PollingMessageProcessor) {
+			this.sleep();
+		}
 	}
 
 	@Override
@@ -30,7 +39,7 @@ public class RedissonStreamConsumer extends LoopRunnable {
 		if (throwable instanceof RedisTimeoutException) {
 			log.warn("redis timeout", throwable);
 			try {
-				ThreadUtil.sleep(sleepTime);
+				this.sleep();
 			} catch (InterruptedException e) {
 				this.handleInterrupt(e);
 			}
@@ -39,4 +48,7 @@ public class RedissonStreamConsumer extends LoopRunnable {
 		super.handleThrowable(throwable);
 	}
 
+	protected void sleep() throws InterruptedException {
+		ThreadUtil.sleep(sleepTime);
+	}
 }

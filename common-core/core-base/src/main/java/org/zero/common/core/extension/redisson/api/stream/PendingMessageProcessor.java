@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @RequiredArgsConstructor
-public abstract class PendingMessageProcessor<K, V> implements MessageProcessor {
+public abstract class PendingMessageProcessor<K, V> implements PollingMessageProcessor {
 	public static final int DEFAULT_COUNT = 10;
 	public static final long DEFAULT_TIMEOUT_NUMBER = 15;
 	public static final TimeUnit DEFAULT_TIMEOUT_UNIT = TimeUnit.MINUTES;
