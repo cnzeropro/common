@@ -1,7 +1,5 @@
 package org.zero.common.core.extension.java.lang.reflect;
 
-import lombok.Getter;
-
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -15,108 +13,127 @@ import java.util.StringJoiner;
  * @author Zero (cnzeropro@163.com)
  * @since 2025/2/27
  */
-@Getter
 public class ParameterizedTypeImpl implements ParameterizedType {
-    private final Type rawType;
-    private final Type[] actualTypeArguments;
-    private final Type ownerType;
+	private final Type rawType;
+	private final Type[] actualTypeArguments;
+	private final Type ownerType;
 
-    protected ParameterizedTypeImpl(Type rawType,
-                                    Type[] actualTypeArguments,
-                                    Type ownerType) {
-        this.actualTypeArguments = actualTypeArguments;
-        this.rawType = rawType;
-        if (ownerType == null && rawType instanceof Class) {
-            Class<?> rawClass = (Class<?>) rawType;
-            ownerType = rawClass.getEnclosingClass();
-            validateConstructorArguments(rawClass);
-        } else {
-            throw new IllegalArgumentException(String.format("Owner type must be either null or a class object: %s", ownerType));
-        }
-        this.ownerType = ownerType;
-    }
+	protected ParameterizedTypeImpl(Type rawType,
+	                                Type[] actualTypeArguments,
+	                                Type ownerType) {
+		this.rawType = rawType;
+		this.actualTypeArguments = actualTypeArguments == null ? null : actualTypeArguments.clone();
+		if (rawType instanceof Class) {
+			Class<?> rawClass = (Class<?>) rawType;
+			ownerType = ownerType != null ? ownerType : rawClass.getEnclosingClass();
+			validateConstructorArguments(rawClass);
+		}
+		this.ownerType = ownerType;
+	}
 
-    public static ParameterizedTypeImpl make(Type rawType, Type... actualTypeArguments) {
-        return new ParameterizedTypeImpl(rawType, actualTypeArguments, null);
-    }
+	public static ParameterizedTypeImpl make(Type rawType, Type... actualTypeArguments) {
+		return new ParameterizedTypeImpl(rawType, actualTypeArguments, null);
+	}
 
-    public static ParameterizedTypeImpl make(Type rawType, Type[] actualTypeArguments, Type ownerType) {
-        return new ParameterizedTypeImpl(rawType, actualTypeArguments, ownerType);
-    }
+	public static ParameterizedTypeImpl make(Type rawType, Type[] actualTypeArguments, Type ownerType) {
+		return new ParameterizedTypeImpl(rawType, actualTypeArguments, ownerType);
+	}
 
-    protected void validateConstructorArguments(Class<?> rawClass) {
-        TypeVariable<?>[] formals = rawClass.getTypeParameters();
-        // check correct arity of actual type args
-        if (formals.length != actualTypeArguments.length) {
-            throw new IllegalArgumentException(String.format("Mismatch of count of " +
-                            "formal and actual type " +
-                            "arguments in constructor " +
-                            "of %s: %d formal argument(s) " +
-                            "%d actual argument(s)",
-                    rawClass.getName(),
-                    formals.length,
-                    actualTypeArguments.length));
-        }
-    }
+	@Override
+	public Type[] getActualTypeArguments() {
+		return actualTypeArguments == null ? null : actualTypeArguments.clone();
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (o instanceof ParameterizedType) {
-            // Check that information is equivalent
-            ParameterizedType that = (ParameterizedType) o;
+	@Override
+	public Type getRawType() {
+		return rawType;
+	}
 
-            if (this == that) {
-                return true;
-            }
+	@Override
+	public Type getOwnerType() {
+		return ownerType;
+	}
 
-            Type thatOwner = that.getOwnerType();
-            Type thatRawType = that.getRawType();
+	protected void validateConstructorArguments(Class<?> rawClass) {
+		TypeVariable<?>[] formals = rawClass.getTypeParameters();
+		// check correct arity of actual type args
+		if (formals.length != actualTypeArguments.length) {
+			throw new IllegalArgumentException(String.format("Mismatch of count of " +
+							"formal and actual type " +
+							"arguments in constructor " +
+							"of %s: %d formal argument(s) " +
+							"%d actual argument(s)",
+					rawClass.getName(),
+					formals.length,
+					actualTypeArguments.length));
+		}
+	}
 
-            return Objects.equals(ownerType, thatOwner) &&
-                    Objects.equals(rawType, thatRawType) &&
-                    Arrays.equals(actualTypeArguments, // avoid clone
-                            that.getActualTypeArguments());
-        } else {
-            return false;
-        }
-    }
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof ParameterizedType) {
+			// Check that information is equivalent
+			ParameterizedType that = (ParameterizedType) o;
 
-    @Override
-    public int hashCode() {
-        return Arrays.hashCode(actualTypeArguments) ^
-                Objects.hashCode(ownerType) ^
-                Objects.hashCode(rawType);
-    }
+			if (this == that) {
+				return true;
+			}
 
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
+			Type thatOwner = that.getOwnerType();
+			Type thatRawType = that.getRawType();
 
-        if (ownerType != null) {
-            sb.append(ownerType.getTypeName());
+			return Objects.equals(ownerType, thatOwner) &&
+					Objects.equals(rawType, thatRawType) &&
+					Arrays.equals(actualTypeArguments, // avoid clone
+							that.getActualTypeArguments());
+		} else {
+			return false;
+		}
+	}
 
-            sb.append("$");
+	@Override
+	public int hashCode() {
+		return Arrays.hashCode(actualTypeArguments) ^
+				Objects.hashCode(ownerType) ^
+				Objects.hashCode(rawType);
+	}
 
-            if (ownerType instanceof ParameterizedTypeImpl) {
-                // Find simple name of nested type by removing the
-                // shared prefix with owner.
-                sb.append(rawType.getTypeName().replace(((ParameterizedTypeImpl) ownerType).rawType.getTypeName() + "$",
-                        ""));
-            } else {
-                sb.append(rawType.getTypeName());
-            }
-        } else {
-            sb.append(rawType.getTypeName());
-        }
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
 
-        if (actualTypeArguments != null) {
-            StringJoiner sj = new StringJoiner(", ", "<", ">");
-            sj.setEmptyValue("");
-            for (Type t : actualTypeArguments) {
-                sj.add(t.getTypeName());
-            }
-            sb.append(sj);
-        }
+		if (ownerType != null) {
+			if (ownerType instanceof Class) {
+				sb.append(((Class<?>) ownerType).getName());
+			} else {
+				sb.append(ownerType);
+			}
 
-        return sb.toString();
-    }
+			sb.append("$");
+
+			if (ownerType instanceof ParameterizedTypeImpl &&
+					((ParameterizedTypeImpl) ownerType).rawType instanceof Class &&
+					rawType instanceof Class) {
+				// Find simple name of nested type by removing the shared prefix with owner.
+				sb.append(((Class<?>) rawType).getName()
+						.replace(((Class<?>) ((ParameterizedTypeImpl) ownerType).rawType).getName() + "$", ""));
+			} else if (rawType instanceof Class) {
+				sb.append(((Class<?>) rawType).getSimpleName());
+			} else {
+				sb.append(rawType.getTypeName());
+			}
+		} else {
+			sb.append(rawType.getTypeName());
+		}
+
+		if (actualTypeArguments != null) {
+			StringJoiner sj = new StringJoiner(", ", "<", ">");
+			sj.setEmptyValue("");
+			for (Type t : actualTypeArguments) {
+				sj.add(t.getTypeName());
+			}
+			sb.append(sj);
+		}
+
+		return sb.toString();
+	}
 }
