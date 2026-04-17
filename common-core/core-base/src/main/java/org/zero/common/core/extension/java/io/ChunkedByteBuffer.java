@@ -1,6 +1,5 @@
 package org.zero.common.core.extension.java.io;
 
-import lombok.RequiredArgsConstructor;
 import org.zero.common.core.util.java.io.IoUtil;
 import org.zero.common.core.util.java.lang.ArrayUtil;
 import org.zero.common.core.util.java.lang.NumberUtil;
@@ -10,26 +9,26 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
 /**
- * 分块字节缓冲区
+ * 分块字节缓冲区。
  * <p>
- * 性能较差，如果存放数据小于 2GiB 时，建议使用 {@link java.nio.ByteBuffer}
+ * 如果存放数据小于 2GiB，建议优先使用 {@link java.nio.ByteBuffer}。
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2025/10/22
  */
-@RequiredArgsConstructor
 public class ChunkedByteBuffer implements Serializable {
 	/**
-	 * 数据块
+	 * 数据块。
 	 */
 	protected final List<byte[]> blocks = new LinkedList<>();
 	/**
-	 * 每块的最大容量
+	 * 每块最大容量。
 	 */
 	protected final int maxBlockCapacity;
 
@@ -37,10 +36,12 @@ public class ChunkedByteBuffer implements Serializable {
 		this(ArrayUtil.SAFE_MAX_ARRAY_SIZE);
 	}
 
+	public ChunkedByteBuffer(int maxBlockCapacity) {
+		this.maxBlockCapacity = validateMaxBlockCapacity(maxBlockCapacity);
+	}
+
 	/**
-	 * 添加数据
-	 * <p>
-	 * 注意：此方法效率低下，如果存在添加大量数据的需求，请使用 {@link #put(byte[])}
+	 * 添加单个字节。
 	 *
 	 * @param b 数据
 	 */
@@ -54,14 +55,12 @@ public class ChunkedByteBuffer implements Serializable {
 		int lastBlockIndex = blocks.size() - 1;
 		byte[] lastBlock = blocks.get(lastBlockIndex);
 		int lastBlockLength = lastBlock.length;
-		// 块已满，分配新块
 		if (lastBlockLength >= maxBlockCapacity) {
 			byte[] block = new byte[1];
 			block[0] = b;
 			blocks.add(block);
 			return;
 		}
-		// 块未满，扩展块
 		byte[] block = new byte[lastBlockLength + 1];
 		System.arraycopy(lastBlock, 0, block, 0, lastBlockLength);
 		block[lastBlockLength] = b;
@@ -69,44 +68,51 @@ public class ChunkedByteBuffer implements Serializable {
 	}
 
 	/**
-	 * 添加数据
+	 * 添加数据。
 	 *
 	 * @param bytes 数据
 	 */
 	public void put(byte[] bytes) {
+		Objects.requireNonNull(bytes, "Byte array cannot be null");
 		this.put(bytes, 0, bytes.length);
 	}
 
 	/**
-	 * 添加数据
+	 * 添加数据。
 	 *
-	 * @param bytes  数据
+	 * @param bytes 数据
 	 * @param offset 数据偏移量
 	 */
 	public void put(byte[] bytes, int offset) {
+		Objects.requireNonNull(bytes, "Byte array cannot be null");
 		this.put(bytes, offset, bytes.length - offset);
 	}
 
 	/**
-	 * 添加数据
+	 * 添加数据。
 	 *
-	 * @param bytes  数据
+	 * @param bytes 数据
 	 * @param offset 数据偏移量
 	 * @param length 数据长度
 	 */
 	public synchronized void put(byte[] bytes, int offset, int length) {
-		if (offset < 0 || length < 0 || offset + length > bytes.length) {
+		if (Objects.isNull(bytes)) {
+			throw new NullPointerException("Byte array cannot be null");
+		}
+		if (offset < 0 || length < 0 || length > bytes.length - offset) {
 			throw new IndexOutOfBoundsException();
 		}
+		if (length == 0) {
+			return;
+		}
+
 		if (blocks.isEmpty()) {
-			// 一个数据块可以容纳，直接创建并写入
 			if (length <= maxBlockCapacity) {
 				byte[] block = new byte[length];
 				System.arraycopy(bytes, offset, block, 0, length);
 				blocks.add(block);
 				return;
 			}
-			// 一个数据块无法容纳，持续创建新块分片存储，直到没有剩余
 			while (length > 0) {
 				int blockLength = Math.min(maxBlockCapacity, length);
 				byte[] block = new byte[blockLength];
@@ -117,11 +123,11 @@ public class ChunkedByteBuffer implements Serializable {
 			}
 			return;
 		}
+
 		int lastBlockIndex = blocks.size() - 1;
 		byte[] lastBlock = blocks.get(lastBlockIndex);
 		int lastBlockLength = lastBlock.length;
 		int lastBlockRemaining = maxBlockCapacity - lastBlockLength;
-		// 当前位置块可以容纳，扩容块并存储
 		if (length <= lastBlockRemaining) {
 			byte[] block = new byte[lastBlockLength + length];
 			System.arraycopy(lastBlock, 0, block, 0, lastBlockLength);
@@ -129,7 +135,6 @@ public class ChunkedByteBuffer implements Serializable {
 			blocks.set(lastBlockIndex, block);
 			return;
 		}
-		// 当前位置块无法容纳，将容量扩展到最大并写入一部分
 		if (lastBlockRemaining > 0) {
 			byte[] block = new byte[maxBlockCapacity];
 			System.arraycopy(lastBlock, 0, block, 0, lastBlockLength);
@@ -138,7 +143,6 @@ public class ChunkedByteBuffer implements Serializable {
 			offset += lastBlockRemaining;
 			length -= lastBlockRemaining;
 		}
-		// 然后持续创建新的块，写入数据，直到没有剩余
 		while (length > 0) {
 			int blockLength = Math.min(maxBlockCapacity, length);
 			byte[] block = new byte[blockLength];
@@ -150,19 +154,31 @@ public class ChunkedByteBuffer implements Serializable {
 	}
 
 	/**
-	 * 添加数据
+	 * 添加另一个缓冲区内容。
 	 *
 	 * @param buffer 数据
 	 */
-	public synchronized void put(ChunkedByteBuffer buffer) {
+	public void put(ChunkedByteBuffer buffer) {
 		if (Objects.isNull(buffer)) {
 			return;
 		}
-		buffer.blocks.forEach(this::put);
+		if (buffer == this) {
+			synchronized (this) {
+				this.appendBlocks(this.snapshotBlocks());
+			}
+			return;
+		}
+		List<byte[]> snapshot = buffer.snapshotBlocks();
+		if (snapshot.isEmpty()) {
+			return;
+		}
+		synchronized (this) {
+			this.appendBlocks(snapshot);
+		}
 	}
 
 	/**
-	 * 获取数据
+	 * 获取数据。
 	 *
 	 * @param bytes 数据容器
 	 * @return 写入的字节数
@@ -172,10 +188,10 @@ public class ChunkedByteBuffer implements Serializable {
 	}
 
 	/**
-	 * 获取数据
+	 * 获取数据。
 	 *
 	 * @param offset 偏移量
-	 * @param bytes  数据容器
+	 * @param bytes 数据容器
 	 * @return 写入的字节数
 	 */
 	public int get(long offset, byte[] bytes) {
@@ -183,10 +199,10 @@ public class ChunkedByteBuffer implements Serializable {
 	}
 
 	/**
-	 * 获取数据
+	 * 获取数据。
 	 *
 	 * @param offset 偏移量
-	 * @param bytes  数据容器
+	 * @param bytes 数据容器
 	 * @return 写入的字节数
 	 */
 	public synchronized int get(BigInteger offset, byte[] bytes) {
@@ -199,11 +215,14 @@ public class ChunkedByteBuffer implements Serializable {
 		if (blocks.isEmpty() || bytes.length == 0) {
 			return 0;
 		}
+		if (offset.compareTo(this.size()) >= 0) {
+			return 0;
+		}
 		return this.get(offset, bytes, 0, bytes.length);
 	}
 
 	/**
-	 * 获取数据
+	 * 获取数据。
 	 *
 	 * @param length 长度
 	 * @return 数据
@@ -213,7 +232,7 @@ public class ChunkedByteBuffer implements Serializable {
 	}
 
 	/**
-	 * 获取数据
+	 * 获取数据。
 	 *
 	 * @param offset 偏移量
 	 * @param length 长度
@@ -224,7 +243,7 @@ public class ChunkedByteBuffer implements Serializable {
 	}
 
 	/**
-	 * 获取数据
+	 * 获取数据。
 	 *
 	 * @param offset 偏移量
 	 * @param length 长度
@@ -244,7 +263,6 @@ public class ChunkedByteBuffer implements Serializable {
 		if (offset.compareTo(size) >= 0) {
 			return new byte[0];
 		}
-		// 调整长度，确保不会超过缓冲区末尾
 		BigInteger remaining = size.subtract(offset);
 		if (BigInteger.valueOf(length).compareTo(remaining) > 0) {
 			length = remaining.intValue();
@@ -255,23 +273,17 @@ public class ChunkedByteBuffer implements Serializable {
 	}
 
 	protected int get(BigInteger offset, byte[] dest, int destOffset, int length) {
-		// 定位位置
-		BigInteger currentOffset = BigInteger.ZERO;
-		int currentBlockIndex = 0;
-		int currentBlockOffset = 0;
-		for (int i = 0; i < blocks.size(); i++) {
-			byte[] block = blocks.get(i);
-			BigInteger nextOffset = currentOffset.add(BigInteger.valueOf(block.length));
-			if (offset.compareTo(currentOffset) >= 0 && offset.compareTo(nextOffset) < 0) {
-				currentBlockIndex = i;
-				currentBlockOffset = offset.subtract(currentOffset).intValue();
-				break;
-			}
-			currentOffset = nextOffset;
+		if (length <= 0) {
+			return 0;
 		}
-		// 读取数据
+		ReadPosition readPosition = this.findReadPosition(offset);
+		if (Objects.isNull(readPosition)) {
+			return 0;
+		}
 		int bytesRead = 0;
 		int resultCurrentOffset = destOffset;
+		int currentBlockIndex = readPosition.blockIndex;
+		int currentBlockOffset = readPosition.blockOffset;
 		while (bytesRead < length && currentBlockIndex < blocks.size()) {
 			byte[] currentBlock = blocks.get(currentBlockIndex);
 			int availableInBlock = currentBlock.length - currentBlockOffset;
@@ -286,7 +298,7 @@ public class ChunkedByteBuffer implements Serializable {
 	}
 
 	/**
-	 * 获取数据
+	 * 获取数据。
 	 *
 	 * @param offset 偏移量
 	 * @return 数据
@@ -295,9 +307,8 @@ public class ChunkedByteBuffer implements Serializable {
 		return this.get(BigInteger.valueOf(offset));
 	}
 
-
 	/**
-	 * 获取数据
+	 * 获取数据。
 	 *
 	 * @param offset 偏移量
 	 * @return 数据
@@ -308,13 +319,13 @@ public class ChunkedByteBuffer implements Serializable {
 		}
 		BigInteger size = this.size();
 		if (size.compareTo(offset) <= 0) {
-			return new ChunkedByteBuffer();
+			return new ChunkedByteBuffer(maxBlockCapacity);
 		}
 		return this.get(offset, size.subtract(offset));
 	}
 
 	/**
-	 * 获取数据
+	 * 获取数据。
 	 *
 	 * @param offset 偏移量
 	 * @param length 长度
@@ -325,7 +336,7 @@ public class ChunkedByteBuffer implements Serializable {
 	}
 
 	/**
-	 * 获取数据
+	 * 获取数据。
 	 *
 	 * @param offset 偏移量
 	 * @param length 长度
@@ -347,26 +358,18 @@ public class ChunkedByteBuffer implements Serializable {
 			return result;
 		}
 
-		// 调整长度，确保不会超过缓冲区末尾
 		BigInteger remaining = size.subtract(offset);
 		if (length.compareTo(remaining) > 0) {
 			length = remaining;
 		}
-		// 定位位置
-		BigInteger currentOffset = BigInteger.ZERO;
-		int currentBlockIndex = 0;
-		int currentBlockOffset = 0;
-		for (int i = 0; i < blocks.size(); i++) {
-			byte[] block = blocks.get(i);
-			BigInteger nextOffset = currentOffset.add(BigInteger.valueOf(block.length));
-			if (offset.compareTo(currentOffset) >= 0 && offset.compareTo(nextOffset) < 0) {
-				currentBlockIndex = i;
-				currentBlockOffset = offset.subtract(currentOffset).intValue();
-				break;
-			}
-			currentOffset = nextOffset;
+
+		ReadPosition readPosition = this.findReadPosition(offset);
+		if (Objects.isNull(readPosition)) {
+			return result;
 		}
-		// 读取数据
+
+		int currentBlockIndex = readPosition.blockIndex;
+		int currentBlockOffset = readPosition.blockOffset;
 		while (length.compareTo(BigInteger.ZERO) > 0 && currentBlockIndex < blocks.size()) {
 			byte[] currentBlock = blocks.get(currentBlockIndex);
 			int availableInBlock = currentBlock.length - currentBlockOffset;
@@ -383,46 +386,44 @@ public class ChunkedByteBuffer implements Serializable {
 	}
 
 	/**
-	 * 在指定位置插入数据
+	 * 在指定位置插入数据。
 	 *
 	 * @param offset 偏移量
-	 * @param bytes  插入数据
+	 * @param bytes 插入数据
 	 */
 	public synchronized void insert(long offset, byte[] bytes) {
 		this.insert(BigInteger.valueOf(offset), bytes);
 	}
 
 	/**
-	 * 在指定位置插入数据
+	 * 在指定位置插入数据。
 	 *
 	 * @param offset 偏移量
-	 * @param bytes  插入数据
+	 * @param bytes 插入数据
 	 */
 	public synchronized void insert(BigInteger offset, byte[] bytes) {
-		if (offset.compareTo(BigInteger.ZERO) < 0) {
+		if (Objects.isNull(offset) || offset.compareTo(BigInteger.ZERO) < 0) {
 			throw new IllegalArgumentException("Offset must be non-negative");
 		}
 		if (Objects.isNull(bytes) || bytes.length == 0) {
 			return;
 		}
 		BigInteger size = this.size();
-		// 如果偏移量超过当前大小，直接追加
 		if (offset.compareTo(size) >= 0) {
 			this.put(bytes);
 			return;
 		}
 
-		// 分割缓冲区，插入数据，然后重新合并
 		ChunkedByteBuffer firstPart = this.get(BigInteger.ZERO, offset);
 		ChunkedByteBuffer secondPart = this.get(offset, size.subtract(offset));
 		this.clear();
-		this.put(firstPart);
+		this.appendBlocks(firstPart.blocks);
 		this.put(bytes);
-		this.put(secondPart);
+		this.appendBlocks(secondPart.blocks);
 	}
 
 	/**
-	 * 在指定位置插入数据
+	 * 在指定位置插入数据。
 	 *
 	 * @param offset 偏移量
 	 * @param buffer 插入数据
@@ -432,36 +433,39 @@ public class ChunkedByteBuffer implements Serializable {
 	}
 
 	/**
-	 * 在指定位置插入数据
+	 * 在指定位置插入数据。
 	 *
 	 * @param offset 偏移量
 	 * @param buffer 插入数据
 	 */
-	public synchronized void insert(BigInteger offset, ChunkedByteBuffer buffer) {
-		if (offset.compareTo(BigInteger.ZERO) < 0) {
+	public void insert(BigInteger offset, ChunkedByteBuffer buffer) {
+		if (Objects.isNull(offset) || offset.compareTo(BigInteger.ZERO) < 0) {
 			throw new IllegalArgumentException("Offset must be non-negative");
 		}
-		if (Objects.isNull(buffer) || buffer.isEmpty()) {
+		if (Objects.isNull(buffer)) {
 			return;
 		}
-		BigInteger size = this.size();
-		// 如果偏移量超过当前大小，直接追加
-		if (offset.compareTo(size) >= 0) {
-			this.put(buffer);
+		if (buffer == this) {
+			synchronized (this) {
+				List<byte[]> snapshot = this.snapshotBlocks();
+				if (snapshot.isEmpty()) {
+					return;
+				}
+				this.insertSnapshot(offset, snapshot);
+			}
 			return;
 		}
-
-		// 分割缓冲区，插入数据，然后重新合并
-		ChunkedByteBuffer firstPart = this.get(BigInteger.ZERO, offset);
-		ChunkedByteBuffer secondPart = this.get(offset, size.subtract(offset));
-		this.clear();
-		this.put(firstPart);
-		this.put(buffer);
-		this.put(secondPart);
+		List<byte[]> snapshot = buffer.snapshotBlocks();
+		if (snapshot.isEmpty()) {
+			return;
+		}
+		synchronized (this) {
+			this.insertSnapshot(offset, snapshot);
+		}
 	}
 
 	/**
-	 * 删除指定范围的数据
+	 * 删除指定范围的数据。
 	 *
 	 * @param offset 偏移量
 	 * @param length 长度
@@ -471,7 +475,7 @@ public class ChunkedByteBuffer implements Serializable {
 	}
 
 	/**
-	 * 删除指定范围的数据
+	 * 删除指定范围的数据。
 	 *
 	 * @param offset 偏移量
 	 * @param length 长度
@@ -481,7 +485,7 @@ public class ChunkedByteBuffer implements Serializable {
 	}
 
 	/**
-	 * 删除指定范围的数据
+	 * 删除指定范围的数据。
 	 *
 	 * @param offset 偏移量
 	 * @param length 长度
@@ -491,16 +495,16 @@ public class ChunkedByteBuffer implements Serializable {
 	}
 
 	/**
-	 * 删除指定范围的数据
+	 * 删除指定范围的数据。
 	 *
 	 * @param offset 偏移量
 	 * @param length 长度
 	 */
 	public synchronized void delete(BigInteger offset, BigInteger length) {
-		if (offset.compareTo(BigInteger.ZERO) < 0) {
+		if (Objects.isNull(offset) || offset.compareTo(BigInteger.ZERO) < 0) {
 			throw new IllegalArgumentException("Offset must be non-negative");
 		}
-		if (length.compareTo(BigInteger.ZERO) < 0) {
+		if (Objects.isNull(length) || length.compareTo(BigInteger.ZERO) < 0) {
 			throw new IllegalArgumentException("Length must be non-negative");
 		}
 		BigInteger size = this.size();
@@ -508,25 +512,23 @@ public class ChunkedByteBuffer implements Serializable {
 			return;
 		}
 
-		// 调整长度，确保不会超过缓冲区末尾
 		BigInteger remaining = size.subtract(offset);
 		if (length.compareTo(remaining) > 0) {
 			length = remaining;
 		}
 
-		// 保留删除范围之前和之后的数据
 		ChunkedByteBuffer firstPart = this.get(BigInteger.ZERO, offset);
 		BigInteger secondPartOffset = offset.add(length);
 		ChunkedByteBuffer secondPart = this.get(secondPartOffset, size.subtract(secondPartOffset));
 		this.clear();
-		this.put(firstPart);
-		this.put(secondPart);
+		this.appendBlocks(firstPart.blocks);
+		this.appendBlocks(secondPart.blocks);
 	}
 
 	/**
-	 * 替换指定范围的数据
+	 * 替换指定范围的数据。
 	 *
-	 * @param offset  偏移量
+	 * @param offset 偏移量
 	 * @param newData 新数据
 	 */
 	public void replace(long offset, byte[] newData) {
@@ -534,13 +536,13 @@ public class ChunkedByteBuffer implements Serializable {
 	}
 
 	/**
-	 * 替换指定范围的数据
+	 * 替换指定范围的数据。
 	 *
 	 * @param offset 偏移量
-	 * @param bytes  新数据
+	 * @param bytes 新数据
 	 */
 	public synchronized void replace(BigInteger offset, byte[] bytes) {
-		if (offset.compareTo(BigInteger.ZERO) < 0) {
+		if (Objects.isNull(offset) || offset.compareTo(BigInteger.ZERO) < 0) {
 			throw new IllegalArgumentException("Offset must be non-negative");
 		}
 		if (ArrayUtil.isEmpty(bytes)) {
@@ -551,34 +553,49 @@ public class ChunkedByteBuffer implements Serializable {
 	}
 
 	/**
-	 * 替换指定范围的数据
+	 * 替换指定范围的数据。
 	 *
 	 * @param offset 偏移量
 	 * @param buffer 新数据
 	 */
-	public synchronized void replace(long offset, ChunkedByteBuffer buffer) {
+	public void replace(long offset, ChunkedByteBuffer buffer) {
 		this.replace(BigInteger.valueOf(offset), buffer);
 	}
 
 	/**
-	 * 替换指定范围的数据
+	 * 替换指定范围的数据。
 	 *
 	 * @param offset 偏移量
 	 * @param buffer 新数据
 	 */
-	public synchronized void replace(BigInteger offset, ChunkedByteBuffer buffer) {
-		if (offset.compareTo(BigInteger.ZERO) < 0) {
+	public void replace(BigInteger offset, ChunkedByteBuffer buffer) {
+		if (Objects.isNull(offset) || offset.compareTo(BigInteger.ZERO) < 0) {
 			throw new IllegalArgumentException("Offset must be non-negative");
 		}
 		if (Objects.isNull(buffer)) {
 			return;
 		}
-		this.delete(offset, buffer.size());
-		this.insert(offset, buffer);
+		if (buffer == this) {
+			synchronized (this) {
+				List<byte[]> snapshot = this.snapshotBlocks();
+				if (snapshot.isEmpty()) {
+					return;
+				}
+				this.replaceSnapshot(offset, snapshot);
+			}
+			return;
+		}
+		List<byte[]> snapshot = buffer.snapshotBlocks();
+		if (snapshot.isEmpty()) {
+			return;
+		}
+		synchronized (this) {
+			this.replaceSnapshot(offset, snapshot);
+		}
 	}
 
 	/**
-	 * 将数据写入输出流
+	 * 将数据写入输出流。
 	 *
 	 * @param out 输出流
 	 */
@@ -589,165 +606,258 @@ public class ChunkedByteBuffer implements Serializable {
 	}
 
 	/**
-	 * 从输入流中读取数据
+	 * 从输入流读取数据。
 	 *
 	 * @param in 输入流
+	 * @return 读取字节数
 	 */
 	public BigInteger readFrom(InputStream in) throws IOException {
 		return this.readFrom(in, true);
 	}
 
-
 	/**
-	 * 从输入流中读取数据
+	 * 从输入流读取数据。
 	 *
-	 * @param in       输入流
+	 * @param in 输入流
 	 * @param closedIn 是否关闭输入流
+	 * @return 读取字节数
 	 */
 	public BigInteger readFrom(InputStream in, boolean closedIn) throws IOException {
 		return this.readFrom(in, BigInteger.ZERO, BigInteger.ONE.negate(), closedIn);
 	}
 
 	/**
-	 * 从输入流中读取数据
+	 * 从输入流读取数据。
 	 *
-	 * @param in        输入流
+	 * @param in 输入流
 	 * @param skipBytes 跳过字节数
-	 * @param maxBytes  最大字节数
-	 * @param closedIn  是否关闭输入流
+	 * @param maxBytes 最大字节数，负数表示不限
+	 * @param closedIn 是否关闭输入流
+	 * @return 读取字节数
 	 */
 	public synchronized BigInteger readFrom(InputStream in, BigInteger skipBytes, BigInteger maxBytes, boolean closedIn) throws IOException {
+		Objects.requireNonNull(in, "InputStream cannot be null");
+		if (Objects.nonNull(skipBytes) && skipBytes.compareTo(BigInteger.ZERO) < 0) {
+			throw new IllegalArgumentException("Skip bytes must be non-negative");
+		}
+
 		int bytesRead;
 		byte[] bytes = new byte[maxBlockCapacity];
-		// 跳过字节，不使用 skip 相关方法来跳过（虽然 skip 实现也是用的 read，但子类实现或许不太一样），在大数据流或者其他网络流时可能遇到问题
-		if (Objects.nonNull(skipBytes) && skipBytes.compareTo(BigInteger.ZERO) > 0) {
-			BigInteger totalSkipped = BigInteger.ZERO;
-			while (totalSkipped.compareTo(skipBytes) < 0 &&
-				(bytesRead = in.read(bytes, 0, Math.min(bytes.length, NumberUtil.toInt(skipBytes.subtract(totalSkipped))))) != -1) {
-				totalSkipped = totalSkipped.add(BigInteger.valueOf(bytesRead));
+		try {
+			if (Objects.nonNull(skipBytes) && skipBytes.compareTo(BigInteger.ZERO) > 0) {
+				BigInteger totalSkipped = BigInteger.ZERO;
+				while (totalSkipped.compareTo(skipBytes) < 0 &&
+					(bytesRead = in.read(bytes, 0, Math.min(bytes.length, NumberUtil.toInt(skipBytes.subtract(totalSkipped))))) != -1) {
+					totalSkipped = totalSkipped.add(BigInteger.valueOf(bytesRead));
+				}
+			}
+
+			boolean ignoreMaxBytes = Objects.isNull(maxBytes) || maxBytes.compareTo(BigInteger.ZERO) < 0;
+			BigInteger totalRead = BigInteger.ZERO;
+			while ((ignoreMaxBytes || totalRead.compareTo(maxBytes) < 0) &&
+				(bytesRead = in.read(bytes, 0, ignoreMaxBytes ? bytes.length : Math.min(bytes.length, NumberUtil.toInt(maxBytes.subtract(totalRead))))) != -1) {
+				this.put(bytes, 0, bytesRead);
+				totalRead = totalRead.add(BigInteger.valueOf(bytesRead));
+			}
+			return totalRead;
+		} finally {
+			if (closedIn) {
+				IoUtil.close(in);
 			}
 		}
-		// 读取数据
-		boolean ignoreMaxBytes = Objects.isNull(maxBytes) || maxBytes.compareTo(BigInteger.ZERO) < 0;
-		BigInteger totalRead = BigInteger.ZERO;
-		while ((ignoreMaxBytes || totalRead.compareTo(maxBytes) < 0) &&
-			(bytesRead = in.read(bytes, 0, ignoreMaxBytes ? bytes.length : Math.min(bytes.length, NumberUtil.toInt(maxBytes.subtract(totalRead))))) != -1) {
-			this.put(bytes, 0, bytesRead);
-			totalRead = totalRead.add(BigInteger.valueOf(bytesRead));
-		}
-		// 关闭输入流
-		if (closedIn) {
-			IoUtil.close(in);
-		}
-		return totalRead;
 	}
 
 	/**
-	 * 比较两个缓冲区的内容是否相同
+	 * 比较两个缓冲区内容是否相同。
 	 *
 	 * @param other 另一个缓冲区
+	 * @return 是否相同
 	 */
-	public synchronized boolean contentEquals(ChunkedByteBuffer other) {
+	public boolean contentEquals(ChunkedByteBuffer other) {
 		if (Objects.isNull(other)) {
 			return false;
 		}
 		if (this == other) {
 			return true;
 		}
-		BigInteger thisSize = this.size();
-		BigInteger otherSize = other.size();
-		if (thisSize.compareTo(otherSize) != 0) {
+		List<byte[]> thisSnapshot = this.snapshotBlocks();
+		List<byte[]> otherSnapshot = other.snapshotBlocks();
+		if (calculateSize(thisSnapshot).compareTo(calculateSize(otherSnapshot)) != 0) {
 			return false;
 		}
-
-		// 逐块比较
-		BigInteger currentOffset = BigInteger.ZERO;
-		int thisBlockIndex = 0, otherBlockIndex = 0;
-		int thisBlockOffset = 0, otherBlockOffset = 0;
-		while (currentOffset.compareTo(thisSize) < 0) {
-			byte[] thisBlock = blocks.get(thisBlockIndex);
-			byte[] otherBlock = other.blocks.get(otherBlockIndex);
-
-			int thisAvailable = thisBlock.length - thisBlockOffset;
-			int otherAvailable = otherBlock.length - otherBlockOffset;
-			int compareLength = Math.min(thisAvailable, otherAvailable);
-
-			for (int i = 0; i < compareLength; i++) {
-				if (thisBlock[thisBlockOffset + i] != otherBlock[otherBlockOffset + i]) {
-					return false;
-				}
-			}
-
-			thisBlockOffset += compareLength;
-			otherBlockOffset += compareLength;
-
-			if (thisBlockOffset >= thisBlock.length) {
-				thisBlockIndex++;
-				thisBlockOffset = 0;
-			}
-			if (otherBlockOffset >= otherBlock.length) {
-				otherBlockIndex++;
-				otherBlockOffset = 0;
-			}
-
-			currentOffset = currentOffset.add(BigInteger.valueOf(compareLength));
-		}
-		return true;
+		return contentEquals(thisSnapshot, otherSnapshot);
 	}
 
 	/**
-	 * 创建缓冲区副本
+	 * 创建缓冲区副本。
+	 *
+	 * @return 副本
 	 */
 	public synchronized ChunkedByteBuffer copy() {
 		return this.copy(maxBlockCapacity);
 	}
 
 	/**
-	 * 创建缓冲区副本
+	 * 创建缓冲区副本。
 	 *
 	 * @param maxBlockCapacity 每块最大容量
+	 * @return 副本
 	 */
 	public synchronized ChunkedByteBuffer copy(int maxBlockCapacity) {
 		ChunkedByteBuffer copiedBuffer = new ChunkedByteBuffer(maxBlockCapacity);
-		for (byte[] block : blocks) {
-			copiedBuffer.put(block.clone());
-		}
+		copiedBuffer.appendBlocks(this.snapshotBlocks());
 		return copiedBuffer;
 	}
 
 	/**
-	 * 判断缓冲区是否为空
+	 * 判断缓冲区是否为空。
 	 *
-	 * @return 缓冲区是否为空
+	 * @return 是否为空
 	 */
 	public synchronized boolean isEmpty() {
 		return blocks.isEmpty() || this.size().compareTo(BigInteger.ZERO) == 0;
 	}
 
 	/**
-	 * 清空数据
+	 * 清空数据。
 	 */
 	public synchronized void clear() {
 		blocks.clear();
 	}
 
 	/**
-	 * 获取块数量
+	 * 获取块数量。
+	 *
+	 * @return 块数量
 	 */
 	public synchronized int blockSize() {
 		return blocks.size();
 	}
 
 	/**
-	 * 获取数据大小（字节数）
+	 * 获取数据大小。
 	 *
-	 * @return 数据大小（字节数）
+	 * @return 数据大小
 	 */
 	public synchronized BigInteger size() {
-		BigInteger size = BigInteger.ZERO;
+		return calculateSize(blocks);
+	}
+
+	protected synchronized List<byte[]> snapshotBlocks() {
+		List<byte[]> snapshot = new ArrayList<>(blocks.size());
 		for (byte[] block : blocks) {
+			if (Objects.isNull(block) || block.length == 0) {
+				continue;
+			}
+			snapshot.add(block.clone());
+		}
+		return snapshot;
+	}
+
+	protected void appendBlocks(List<byte[]> sourceBlocks) {
+		for (byte[] block : sourceBlocks) {
+			if (Objects.isNull(block) || block.length == 0) {
+				continue;
+			}
+			this.put(block, 0, block.length);
+		}
+	}
+
+	protected void insertSnapshot(BigInteger offset, List<byte[]> snapshot) {
+		BigInteger size = this.size();
+		if (offset.compareTo(size) >= 0) {
+			this.appendBlocks(snapshot);
+			return;
+		}
+		ChunkedByteBuffer firstPart = this.get(BigInteger.ZERO, offset);
+		ChunkedByteBuffer secondPart = this.get(offset, size.subtract(offset));
+		this.clear();
+		this.appendBlocks(firstPart.blocks);
+		this.appendBlocks(snapshot);
+		this.appendBlocks(secondPart.blocks);
+	}
+
+	protected void replaceSnapshot(BigInteger offset, List<byte[]> snapshot) {
+		this.delete(offset, calculateSize(snapshot));
+		this.insertSnapshot(offset, snapshot);
+	}
+
+	protected ReadPosition findReadPosition(BigInteger offset) {
+		BigInteger currentOffset = BigInteger.ZERO;
+		for (int i = 0; i < blocks.size(); i++) {
+			byte[] block = blocks.get(i);
+			if (Objects.isNull(block) || block.length == 0) {
+				continue;
+			}
+			BigInteger nextOffset = currentOffset.add(BigInteger.valueOf(block.length));
+			if (offset.compareTo(currentOffset) >= 0 && offset.compareTo(nextOffset) < 0) {
+				return new ReadPosition(i, offset.subtract(currentOffset).intValue());
+			}
+			currentOffset = nextOffset;
+		}
+		return null;
+	}
+
+	protected boolean contentEquals(List<byte[]> thisBlocks, List<byte[]> otherBlocks) {
+		int thisBlockIndex = 0;
+		int otherBlockIndex = 0;
+		int thisBlockOffset = 0;
+		int otherBlockOffset = 0;
+		while (true) {
+			while (thisBlockIndex < thisBlocks.size() && thisBlockOffset >= thisBlocks.get(thisBlockIndex).length) {
+				thisBlockIndex++;
+				thisBlockOffset = 0;
+			}
+			while (otherBlockIndex < otherBlocks.size() && otherBlockOffset >= otherBlocks.get(otherBlockIndex).length) {
+				otherBlockIndex++;
+				otherBlockOffset = 0;
+			}
+			boolean thisEnd = thisBlockIndex >= thisBlocks.size();
+			boolean otherEnd = otherBlockIndex >= otherBlocks.size();
+			if (thisEnd || otherEnd) {
+				return thisEnd == otherEnd;
+			}
+
+			byte[] thisBlock = thisBlocks.get(thisBlockIndex);
+			byte[] otherBlock = otherBlocks.get(otherBlockIndex);
+			int thisAvailable = thisBlock.length - thisBlockOffset;
+			int otherAvailable = otherBlock.length - otherBlockOffset;
+			int compareLength = Math.min(thisAvailable, otherAvailable);
+			for (int i = 0; i < compareLength; i++) {
+				if (thisBlock[thisBlockOffset + i] != otherBlock[otherBlockOffset + i]) {
+					return false;
+				}
+			}
+			thisBlockOffset += compareLength;
+			otherBlockOffset += compareLength;
+		}
+	}
+
+	protected static int validateMaxBlockCapacity(int maxBlockCapacity) {
+		if (maxBlockCapacity <= 0) {
+			throw new IllegalArgumentException("Max block capacity must be positive");
+		}
+		return maxBlockCapacity;
+	}
+
+	protected static BigInteger calculateSize(List<byte[]> sourceBlocks) {
+		BigInteger size = BigInteger.ZERO;
+		for (byte[] block : sourceBlocks) {
+			if (Objects.isNull(block)) {
+				continue;
+			}
 			size = size.add(BigInteger.valueOf(block.length));
 		}
 		return size;
+	}
+
+	protected static final class ReadPosition {
+		protected final int blockIndex;
+		protected final int blockOffset;
+
+		protected ReadPosition(int blockIndex, int blockOffset) {
+			this.blockIndex = blockIndex;
+			this.blockOffset = blockOffset;
+		}
 	}
 }
