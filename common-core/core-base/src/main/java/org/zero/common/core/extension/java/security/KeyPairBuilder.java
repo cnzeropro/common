@@ -181,12 +181,6 @@ public class KeyPairBuilder implements Builder<KeyPair, KeyPairBuilder> {
 		return new KeyPairBuilder(algorithm);
 	}
 
-	protected void validateBuildParameters() {
-		if (keySize > 0 && Objects.nonNull(algorithmParameterSpec)) {
-			throw new IllegalStateException("keySize and algorithmParameterSpec cannot be configured at the same time");
-		}
-	}
-
 	/**
 	 * 构建密钥对。
 	 * <p>
@@ -203,7 +197,9 @@ public class KeyPairBuilder implements Builder<KeyPair, KeyPairBuilder> {
 	@Override
 	public KeyPair build() {
 		Objects.requireNonNull(algorithm, "algorithm cannot be null");
-		validateBuildParameters();
+		if (keySize > 0 && Objects.nonNull(algorithmParameterSpec)) {
+			throw new IllegalStateException("keySize and algorithmParameterSpec cannot be configured at the same time");
+		}
 		String afterWithAlgorithm = KeyUtil.getAlgorithmAfterWith(algorithm);
 		KeyPairGenerator keyPairGenerator = Objects.isNull(provider)
 				? KeyPairGenerator.getInstance(afterWithAlgorithm)
