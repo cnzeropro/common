@@ -1,8 +1,13 @@
 package org.zero.common.core.extension.javax.crypto;
 
 import org.junit.jupiter.api.Test;
+import sun.security.internal.spec.TlsRsaPremasterSecretParameterSpec;
 
 import javax.crypto.SecretKey;
+import java.security.spec.AlgorithmParameterSpec;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Zero (cnzeropro@163.com)
@@ -10,10 +15,26 @@ import javax.crypto.SecretKey;
  */
 class SecretKeyBuilderTest {
 	@Test
-	void test() {
-		SecretKey secretKey = SecretKeyBuilder.builder("DES")
-			.keySize(64)
+	void shouldGenerateSecretKeyWithSingleAlgorithmParameterSpec() {
+		AlgorithmParameterSpec algorithmParameterSpec = new TlsRsaPremasterSecretParameterSpec(3, 3);
+		SecretKey secretKey = SecretKeyBuilder.builder("SunTlsRsaPremasterSecret")
+				.algorithmParameterSpec(algorithmParameterSpec)
 			.build();
-		System.out.println(secretKey);
+
+		assertEquals("TlsRsaPremasterSecret", secretKey.getAlgorithm());
+		assertEquals(48, secretKey.getEncoded().length);
+	}
+
+	@Test
+	void shouldRejectConfiguringKeySizeAndAlgorithmParameterSpecAtTheSameTime() {
+		IllegalStateException exception = assertThrows(
+				IllegalStateException.class,
+				() -> SecretKeyBuilder.builder("SunTlsRsaPremasterSecret")
+						.keySize(128)
+						.algorithmParameterSpec(new TlsRsaPremasterSecretParameterSpec(3, 3))
+						.build()
+		);
+
+		assertEquals("keySize and algorithmParameterSpec cannot be configured at the same time", exception.getMessage());
 	}
 }
