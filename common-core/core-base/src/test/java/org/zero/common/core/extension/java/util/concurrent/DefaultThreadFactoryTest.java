@@ -5,10 +5,13 @@ import org.junit.jupiter.api.Test;
 import java.util.concurrent.ThreadFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
+ * DefaultThreadFactory 测试。
+ *
  * @author Zero (cnzeropro@163.com)
  * @since 2026/4/17
  */
@@ -34,5 +37,29 @@ class DefaultThreadFactoryTest {
 		assertSame(handler, thread.getUncaughtExceptionHandler());
 		assertTrue(thread.getName().startsWith("demo[pool"));
 		assertTrue(thread.getName().endsWith("-thread1]"));
+	}
+
+	@Test
+	void shouldIncrementPoolNumberForFactoriesWithSameBaseName() {
+		String baseName = "same-base-name";
+		ThreadFactory firstFactory = DefaultThreadFactory.builder(baseName).build();
+		ThreadFactory secondFactory = DefaultThreadFactory.builder(baseName).build();
+
+		Thread firstThread = firstFactory.newThread(() -> {
+		});
+		Thread secondThread = secondFactory.newThread(() -> {
+		});
+
+		long firstPoolNumber = this.poolNumberOf(firstThread);
+		long secondPoolNumber = this.poolNumberOf(secondThread);
+		assertEquals(firstPoolNumber + 1L, secondPoolNumber);
+		assertNotEquals(firstThread.getName(), secondThread.getName());
+	}
+
+	private long poolNumberOf(Thread thread) {
+		String threadName = thread.getName();
+		int poolStart = threadName.indexOf("[pool") + "[pool".length();
+		int poolEnd = threadName.indexOf("-thread");
+		return Long.parseLong(threadName.substring(poolStart, poolEnd));
 	}
 }
