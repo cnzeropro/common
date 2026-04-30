@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.annotation.EnumValue;
 import com.baomidou.mybatisplus.annotation.IEnum;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import org.zero.common.core.extension.java.util.ReferenceLimitedMap;
+import org.zero.common.core.extension.java.util.ReferenceBoundedMap;
 import org.zero.common.core.support.cache.Cache;
 import org.zero.common.core.support.cache.MapCache;
 import org.zero.common.core.util.java.lang.ref.ReferenceType;
@@ -25,7 +25,7 @@ public class MpEnumUtil {
     /**
      * 方法缓存
      */
-    private static final Cache<Class<? extends Enum<?>>, Method> METHOD_CACHE = MapCache.of(() -> ReferenceLimitedMap.<Class<? extends Enum<?>>, Method>builder()
+	private static final Cache<Class<? extends Enum<?>>, Method> METHOD_CACHE = MapCache.of(() -> ReferenceBoundedMap.<Class<? extends Enum<?>>, Method>builder()
             .maxCapacity(10000)
             .accessOrder(true)
             .referenceType(ReferenceType.WEAK)

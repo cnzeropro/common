@@ -7,7 +7,7 @@ import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.core.util.StringUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.zero.common.core.extension.java.util.ReferenceLimitedMap;
+import org.zero.common.core.extension.java.util.ReferenceBoundedMap;
 import org.zero.common.core.support.cache.Cache;
 import org.zero.common.core.support.cache.MapCache;
 import org.zero.common.core.util.java.lang.ref.ReferenceType;
@@ -40,7 +40,7 @@ public class QueryWrapperUtil {
     /**
      * 方法缓存
      */
-    protected static final Cache<Class<?>, Map<String, Collection<Method>>> METHOD_CACHE = MapCache.of(() -> ReferenceLimitedMap.<Class<?>, Map<String, Collection<Method>>>builder()
+	protected static final Cache<Class<?>, Map<String, Collection<Method>>> METHOD_CACHE = MapCache.of(() -> ReferenceBoundedMap.<Class<?>, Map<String, Collection<Method>>>builder()
             .maxCapacity(10000)
             .accessOrder(true)
             .referenceType(ReferenceType.WEAK)

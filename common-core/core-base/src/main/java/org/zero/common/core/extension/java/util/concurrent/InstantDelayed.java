@@ -20,10 +20,7 @@ public interface InstantDelayed extends Delayed {
 
 	default boolean isExpired() {
 		Instant expireTime = this.getExpireTime();
-		if (Objects.isNull(expireTime)) {
-			return false;
-		}
-		return Instant.now().isAfter(expireTime);
+		return Objects.nonNull(expireTime) && !Instant.now().isBefore(expireTime);
 	}
 
 	/**
@@ -48,7 +45,7 @@ public interface InstantDelayed extends Delayed {
 			return 0;
 		}
 		if (o instanceof InstantDelayed) {
-			return Comparator.nullsFirst(Instant::compareTo).compare(this.getExpireTime(), ((InstantDelayed) o).getExpireTime());
+			return Comparator.nullsLast(Instant::compareTo).compare(this.getExpireTime(), ((InstantDelayed) o).getExpireTime());
 		}
 		return Long.compare(this.getDelay(TimeUnit.NANOSECONDS), o.getDelay(TimeUnit.NANOSECONDS));
 	}
