@@ -4,7 +4,7 @@ import feign.Param;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.zero.common.core.extension.java.lang.reflect.TypeReference;
-import org.zero.common.core.extension.java.util.Container;
+import org.zero.common.core.extension.java.util.Option;
 import org.zero.common.core.util.java.lang.ArrayUtil;
 import org.zero.common.core.util.java.lang.ClassUtil;
 import org.zero.common.core.util.java.lang.ObjectUtil;
@@ -246,21 +246,21 @@ public class BeanMap<V> {
 	}
 
 	protected String getPropertyName(BeanProperty beanProperty) {
-		Container<Field> fieldOpt = Container.of(beanProperty.getField());
+		Option<Field> fieldOpt = Option.of(beanProperty.getField());
 		return fieldOpt.map(field -> AnnotationUtils.getAnnotation(field, Param.class))
-			.or(() -> Container.of(beanProperty.getGetterMethod())
+				.or(() -> Option.of(beanProperty.getGetterMethod())
 				.map(method -> AnnotationUtils.getAnnotation(method, Param.class)))
 			.map(Param::value)
 			.or(() -> fieldOpt.map(Field::getName))
-			.get();
+				.getOrNull();
 	}
 
 	protected Object getPropertyValue(BeanProperty beanProperty) {
 		Object bean = beanProperty.getBean();
-		return Container.of(beanProperty.getGetterMethod())
+		return Option.of(beanProperty.getGetterMethod())
 			.map(method -> MethodUtil.invoke(method, bean))
-			.or(() -> Container.of(beanProperty.getField())
+				.or(() -> Option.of(beanProperty.getField())
 				.map(field -> FieldUtil.getValue(field, bean)))
-			.get();
+				.getOrNull();
 	}
 }
