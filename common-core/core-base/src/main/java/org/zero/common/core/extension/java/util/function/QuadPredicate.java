@@ -3,71 +3,60 @@ package org.zero.common.core.extension.java.util.function;
 import java.util.Objects;
 
 /**
+ * 接收四个参数并返回布尔结果的断言接口。
+ * <p>
+ * 语义与 {@link java.util.function.BiPredicate} 一致，仅将入参数量扩展为四个。
+ *
  * @author Zero (cnzeropro@163.com)
  * @see java.util.function.BiPredicate
  * @since 2025/4/27
  */
 @FunctionalInterface
 public interface QuadPredicate<A, B, C, D> {
-    /**
-     * Evaluates this predicate on the given arguments.
+	/**
+	 * 对给定的四个参数执行断言判断。
      *
-     * @param a the first input argument
-     * @param b the second input argument
-     * @param c the third input argument
-     * @param d the fourth input argument
-     * @return {@code true} if the input arguments match the predicate,
-     * otherwise {@code false}
+	 * @param a 第一个输入参数
+	 * @param b 第二个输入参数
+	 * @param c 第三个输入参数
+	 * @param d 第四个输入参数
+	 * @return 如果输入参数匹配断言则返回 {@code true}，否则返回 {@code false}
      */
     boolean test(A a, B b, C c, D d);
 
     /**
-     * Returns a composed predicate that represents a short-circuiting logical
-     * AND of this predicate and another.  When evaluating the composed
-     * predicate, if this predicate is {@code false}, then the {@code other}
-     * predicate is not evaluated.
+	 * 返回短路逻辑 AND 组合断言。
      *
-     * <p>Any exceptions thrown during evaluation of either predicate are relayed
-     * to the caller; if evaluation of this predicate throws an exception, the
-     * {@code other} predicate will not be evaluated.
+	 * <p>如果当前断言返回 {@code false}，{@code other} 不会执行。
+	 * 任一断言抛出的异常都会继续传递给调用方。
      *
-     * @param other a predicate that will be logically-ANDed with this
-     *              predicate
-     * @return a composed predicate that represents the short-circuiting logical
-     * AND of this predicate and the {@code other} predicate
-     * @throws NullPointerException if other is null
+	 * @param other 与当前断言进行逻辑 AND 组合的断言
+	 * @return 表示短路逻辑 AND 的组合断言
+	 * @throws NullPointerException 当 {@code other} 为 {@code null} 时抛出
      */
     default QuadPredicate<A, B, C, D> and(QuadPredicate<? super A, ? super B, ? super C, ? super D> other) {
         Objects.requireNonNull(other);
         return (A a, B b, C c, D d) -> test(a, b, c, d) && other.test(a, b, c, d);
     }
 
-    /**
-     * Returns a predicate that represents the logical negation of this
-     * predicate.
+	/**
+	 * 返回当前断言的逻辑非断言。
      *
-     * @return a predicate that represents the logical negation of this
-     * predicate
+	 * @return 表示当前断言逻辑非的断言
      */
     default QuadPredicate<A, B, C, D> negate() {
         return (A a, B b, C c, D d) -> !test(a, b, c, d);
     }
 
     /**
-     * Returns a composed predicate that represents a short-circuiting logical
-     * OR of this predicate and another.  When evaluating the composed
-     * predicate, if this predicate is {@code true}, then the {@code other}
-     * predicate is not evaluated.
+	 * 返回短路逻辑 OR 组合断言。
      *
-     * <p>Any exceptions thrown during evaluation of either predicate are relayed
-     * to the caller; if evaluation of this predicate throws an exception, the
-     * {@code other} predicate will not be evaluated.
+	 * <p>如果当前断言返回 {@code true}，{@code other} 不会执行。
+	 * 任一断言抛出的异常都会继续传递给调用方。
      *
-     * @param other a predicate that will be logically-ORed with this
-     *              predicate
-     * @return a composed predicate that represents the short-circuiting logical
-     * OR of this predicate and the {@code other} predicate
-     * @throws NullPointerException if other is null
+	 * @param other 与当前断言进行逻辑 OR 组合的断言
+	 * @return 表示短路逻辑 OR 的组合断言
+	 * @throws NullPointerException 当 {@code other} 为 {@code null} 时抛出
      */
     default QuadPredicate<A, B, C, D> or(QuadPredicate<? super A, ? super B, ? super C, ? super D> other) {
         Objects.requireNonNull(other);
