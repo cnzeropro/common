@@ -12,7 +12,8 @@ import static org.zero.common.core.extension.java.DataSize.DECIMAL_RADIX;
 /**
  * 数据单位
  * <p>
- * 支持二进制单位（1024 为基数）和十进制单位（1000 为基数）
+ * 支持 IEC 二进制单位（1024 为基数）和 SI 十进制单位（1000 为基数）。
+ * 每个枚举值保存相对于 Byte 的换算倍率，供 {@link DataSize} 做解析、换算和可读化输出。
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2025/12/24
@@ -154,28 +155,51 @@ public enum DataUnit {
 	QUETTABYTE(DECIMAL_RADIX.pow(10), "QB"),
 	;
 
+	/**
+	 * 当前单位对应的字节数倍率。
+	 */
 	private final BigInteger size;
+	/**
+	 * 单位后缀，用于文本解析和格式化输出。
+	 */
 	private final String suffix;
 
 	/**
 	 * 通过后缀获取对应的数据单位
 	 * <p>
-	 * 不明确是二进制还是十进制的话默认使用二进制单位，如 M 不明写成 MiB 或 MB，默认使用 MiB
+	 * 完整后缀优先精确匹配，如 MB 匹配十进制单位，MiB 匹配二进制单位。
+	 * 未明确写成二进制或十进制的缩写默认使用二进制单位，如 M 默认匹配 MiB。
 	 *
 	 * @param suffix 单位后缀
 	 * @return 匹配到的单位
 	 * @throws IllegalArgumentException 后缀无法识别报错
 	 */
 	public static DataUnit fromSuffix(String suffix) {
+		String suffixToUse = StringUtil.trim(suffix);
+		if (StringUtil.isBlank(suffixToUse)) {
+			throw new IllegalArgumentException("Data unit suffix must not be blank");
+		}
 		for (DataUnit unit : values()) {
-			// 支持类似于 3MB、3M、3m 等写法
-			if (StringUtil.startWith(unit.suffix, suffix, true)) {
+			if (StringUtil.equals(unit.suffix, suffixToUse, true)) {
+				return unit;
+			}
+		}
+		for (DataUnit unit : values()) {
+			// 支持类似于 3M、3m 等缩写写法，完整后缀已在上方优先处理
+			if (StringUtil.startWith(unit.suffix, suffixToUse, true)) {
 				return unit;
 			}
 		}
 		throw new IllegalArgumentException("Unknown data unit suffix '" + suffix + "'");
 	}
 
+	/**
+	 * 通过枚举名称获取对应的数据单位。
+	 *
+	 * @param name 枚举名称，不区分大小写
+	 * @return 匹配到的单位
+	 * @throws IllegalArgumentException 名称无法识别时报错
+	 */
 	public static DataUnit fromName(String name) {
 		for (DataUnit unit : values()) {
 			if (StringUtil.equals(unit.name(), name, true)) {

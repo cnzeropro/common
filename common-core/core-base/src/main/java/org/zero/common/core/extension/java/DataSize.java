@@ -37,28 +37,60 @@ import static org.zero.common.core.extension.java.DataUnit.ZETTABYTE;
 /**
  * 数据大小
  * <p>
- * 支持二进制单位（1024 为基数）和十进制单位（1000 为基数）
+ * 以字节数作为内部存储单位，支持 IEC 二进制单位（1024 为基数）和 SI 十进制单位（1000 为基数）。
+ * <p>
+ * 文本解析允许小数单位，但换算结果必须是完整字节；负数会被保留，常用于表达差值或配额变化。
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2025/12/24
  */
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class DataSize implements Comparable<DataSize>, Serializable {
+	/**
+	 * 二进制单位基数。
+	 */
 	public static final long BINARY_BASE = 1024L;
 	public static final BigInteger BINARY_RADIX = BigInteger.valueOf(BINARY_BASE);
+	/**
+	 * 十进制单位基数。
+	 */
 	public static final long DECIMAL_BASE = 1000L;
 	public static final BigInteger DECIMAL_RADIX = BigInteger.valueOf(DECIMAL_BASE);
 
+	/**
+	 * 数据大小解析表达式：数字部分支持正负号和小数，单位后缀最多 3 位字母。
+	 */
 	public static final Pattern PATTERN = Pattern.compile("^([+-]?\\d+(\\.\\d+)?)\\s*([a-zA-Z]{0,3})$");
 
+	/**
+	 * 零字节常量。
+	 */
 	public static final DataSize ZERO = ofBytes(0L);
 
+	/**
+	 * 实际字节数。
+	 */
 	protected final BigInteger bytes;
 
+	/**
+	 * 解析数据大小文本，未提供单位时默认按 Byte 处理。
+	 *
+	 * @param text 数据大小文本，如 {@code 1.5MiB}、{@code 10MB}、{@code 512}
+	 * @return 数据大小
+	 * @throws IllegalArgumentException 文本为空、格式不匹配、单位未知或无法换算为完整字节时报错
+	 */
 	public static DataSize parse(CharSequence text) {
 		return parse(text, null);
 	}
 
+	/**
+	 * 解析数据大小文本，并在文本未带单位时使用指定默认单位。
+	 *
+	 * @param text        数据大小文本
+	 * @param defaultUnit 默认单位，为 {@code null} 时使用 Byte
+	 * @return 数据大小
+	 * @throws IllegalArgumentException 文本为空、格式不匹配、单位未知或无法换算为完整字节时报错
+	 */
 	public static DataSize parse(CharSequence text, DataUnit defaultUnit) {
 		if (CharSequenceUtil.isBlank(text)) {
 			throw new IllegalArgumentException("Text must not be blank");
@@ -73,10 +105,22 @@ public class DataSize implements Comparable<DataSize>, Serializable {
 		return of(new BigDecimal(matcher.group(1)), unit);
 	}
 
+	/**
+	 * 创建指定字节数的数据大小。
+	 *
+	 * @param bytes 字节数
+	 * @return 数据大小
+	 */
 	public static DataSize ofBytes(long bytes) {
 		return ofBytes(BigInteger.valueOf(bytes));
 	}
 
+	/**
+	 * 创建指定字节数的数据大小。
+	 *
+	 * @param bytes 字节数
+	 * @return 数据大小
+	 */
 	public static DataSize ofBytes(BigInteger bytes) {
 		return new DataSize(bytes);
 	}
@@ -109,22 +153,63 @@ public class DataSize implements Comparable<DataSize>, Serializable {
 		return of(new BigDecimal(Double.toString(amount)), unit);
 	}
 
+	/**
+	 * 按指定单位创建数据大小。
+	 * <p>
+	 * 换算结果必须是完整字节，例如 {@code 1.5KiB} 可以换算为 1536B，{@code 1.9B} 会报错。
+	 *
+	 * @param amount 数值
+	 * @param unit   单位
+	 * @return 数据大小
+	 * @throws IllegalArgumentException 换算结果不是完整字节时报错
+	 */
 	public static DataSize of(BigDecimal amount, DataUnit unit) {
-		return ofBytes(amount.multiply(new BigDecimal(unit.getSize().toString())).toBigInteger());
+		try {
+			// 换算结果必须落在完整字节上，避免 1.9B 这类输入被静默截断
+			return ofBytes(amount.multiply(new BigDecimal(unit.getSize())).toBigIntegerExact());
+		} catch (ArithmeticException exception) {
+			throw new IllegalArgumentException("Data size must be an exact number of bytes", exception);
+		}
 	}
 
+	/**
+	 * 获取字节数。
+	 *
+	 * @return 字节数
+	 */
 	public BigInteger toBytes() {
 		return this.bytes;
 	}
 
+	/**
+	 * 转换为指定单位，结果只保留整数部分。
+	 *
+	 * @param unit 目标单位
+	 * @return 目标单位下的整数值
+	 */
 	public BigInteger to(DataUnit unit) {
 		return this.bytes.divide(unit.getSize());
 	}
 
+	/**
+	 * 转换为指定单位。
+	 *
+	 * @param unit  目标单位
+	 * @param scale 小数位数
+	 * @return 目标单位下的十进制值
+	 */
 	public BigDecimal to(DataUnit unit, int scale) {
 		return this.to(unit, scale, RoundingMode.HALF_UP);
 	}
 
+	/**
+	 * 转换为指定单位。
+	 *
+	 * @param unit         目标单位
+	 * @param scale        小数位数
+	 * @param roundingMode 舍入模式
+	 * @return 目标单位下的十进制值
+	 */
 	public BigDecimal to(DataUnit unit, int scale, RoundingMode roundingMode) {
 		return new BigDecimal(this.bytes).divide(new BigDecimal(unit.getSize()), scale, roundingMode);
 	}
@@ -139,18 +224,44 @@ public class DataSize implements Comparable<DataSize>, Serializable {
 		return String.format("%dB", this.bytes);
 	}
 
+	/**
+	 * 输出默认可读字符串，默认使用二进制单位并保留 2 位小数。
+	 *
+	 * @return 可读字符串
+	 */
 	public String toReadableString() {
 		return this.toReadableString(true);
 	}
 
+	/**
+	 * 输出可读字符串。
+	 *
+	 * @param useBinaryUnits 是否使用二进制单位；{@code false} 时使用十进制单位
+	 * @return 可读字符串
+	 */
 	public String toReadableString(boolean useBinaryUnits) {
 		return this.toReadableString(useBinaryUnits, 2);
 	}
 
+	/**
+	 * 输出可读字符串。
+	 *
+	 * @param useBinaryUnits 是否使用二进制单位；{@code false} 时使用十进制单位
+	 * @param scale          小数位数
+	 * @return 可读字符串
+	 */
 	public String toReadableString(boolean useBinaryUnits, int scale) {
 		return this.toReadableString(useBinaryUnits, scale, RoundingMode.HALF_UP);
 	}
 
+	/**
+	 * 输出可读字符串。
+	 *
+	 * @param useBinaryUnits 是否使用二进制单位；{@code false} 时使用十进制单位
+	 * @param scale          小数位数
+	 * @param roundingMode   舍入模式
+	 * @return 可读字符串
+	 */
 	public String toReadableString(boolean useBinaryUnits, int scale, RoundingMode roundingMode) {
 		if (useBinaryUnits) {
 			return this.toBinaryReadableString(scale, roundingMode);
@@ -158,69 +269,89 @@ public class DataSize implements Comparable<DataSize>, Serializable {
 		return this.toDecimalReadableString(scale, roundingMode);
 	}
 
+	/**
+	 * 使用 IEC 二进制单位输出可读字符串。
+	 * <p>
+	 * 单位选择按字节数绝对值判断，最终数值仍保留原始正负号。
+	 *
+	 * @param scale        小数位数
+	 * @param roundingMode 舍入模式
+	 * @return 可读字符串
+	 */
 	public String toBinaryReadableString(int scale, RoundingMode roundingMode) {
-		if (bytes.compareTo(KIBIBYTE.getSize()) < 0) {
+		BigInteger absoluteBytes = this.bytes.abs();
+		if (absoluteBytes.compareTo(KIBIBYTE.getSize()) < 0) {
 			return String.format("%dB", this.bytes);
 		}
-		if (bytes.compareTo(MEBIBYTE.getSize()) < 0) {
+		if (absoluteBytes.compareTo(MEBIBYTE.getSize()) < 0) {
 			return this.to(KIBIBYTE, scale, roundingMode).stripTrailingZeros().toPlainString() + KIBIBYTE.getSuffix();
 		}
-		if (bytes.compareTo(GIBIBYTE.getSize()) < 0) {
+		if (absoluteBytes.compareTo(GIBIBYTE.getSize()) < 0) {
 			return this.to(MEBIBYTE, scale, roundingMode).stripTrailingZeros().toPlainString() + MEBIBYTE.getSuffix();
 		}
-		if (bytes.compareTo(TEBIBYTE.getSize()) < 0) {
+		if (absoluteBytes.compareTo(TEBIBYTE.getSize()) < 0) {
 			return this.to(GIBIBYTE, scale, roundingMode).stripTrailingZeros().toPlainString() + GIBIBYTE.getSuffix();
 		}
-		if (bytes.compareTo(PEBIBYTE.getSize()) < 0) {
+		if (absoluteBytes.compareTo(PEBIBYTE.getSize()) < 0) {
 			return this.to(TEBIBYTE, scale, roundingMode).stripTrailingZeros().toPlainString() + TEBIBYTE.getSuffix();
 		}
-		if (bytes.compareTo(EXBIBYTE.getSize()) < 0) {
+		if (absoluteBytes.compareTo(EXBIBYTE.getSize()) < 0) {
 			return this.to(PEBIBYTE, scale, roundingMode).stripTrailingZeros().toPlainString() + PEBIBYTE.getSuffix();
 		}
-		if (bytes.compareTo(ZEBIBYTE.getSize()) < 0) {
+		if (absoluteBytes.compareTo(ZEBIBYTE.getSize()) < 0) {
 			return this.to(EXBIBYTE, scale, roundingMode).stripTrailingZeros().toPlainString() + EXBIBYTE.getSuffix();
 		}
-		if (bytes.compareTo(YOBIBYTE.getSize()) < 0) {
+		if (absoluteBytes.compareTo(YOBIBYTE.getSize()) < 0) {
 			return this.to(ZEBIBYTE, scale, roundingMode).stripTrailingZeros().toPlainString() + ZEBIBYTE.getSuffix();
 		}
-		if (bytes.compareTo(ROBIBYTE.getSize()) < 0) {
+		if (absoluteBytes.compareTo(ROBIBYTE.getSize()) < 0) {
 			return this.to(YOBIBYTE, scale, roundingMode).stripTrailingZeros().toPlainString() + YOBIBYTE.getSuffix();
 		}
-		if (bytes.compareTo(QUEBIBYTE.getSize()) < 0) {
+		if (absoluteBytes.compareTo(QUEBIBYTE.getSize()) < 0) {
 			return this.to(ROBIBYTE, scale, roundingMode).stripTrailingZeros().toPlainString() + ROBIBYTE.getSuffix();
 		}
 		return this.to(QUEBIBYTE, scale, roundingMode).stripTrailingZeros().toPlainString() + QUEBIBYTE.getSuffix();
 	}
 
+	/**
+	 * 使用 SI 十进制单位输出可读字符串。
+	 * <p>
+	 * 单位选择按字节数绝对值判断，最终数值仍保留原始正负号。
+	 *
+	 * @param scale        小数位数
+	 * @param roundingMode 舍入模式
+	 * @return 可读字符串
+	 */
 	public String toDecimalReadableString(int scale, RoundingMode roundingMode) {
-		if (bytes.compareTo(KILOBYTE.getSize()) < 0) {
+		BigInteger absoluteBytes = this.bytes.abs();
+		if (absoluteBytes.compareTo(KILOBYTE.getSize()) < 0) {
 			return String.format("%dB", this.bytes);
 		}
-		if (bytes.compareTo(MEGABYTE.getSize()) < 0) {
+		if (absoluteBytes.compareTo(MEGABYTE.getSize()) < 0) {
 			return this.to(KILOBYTE, scale, roundingMode).stripTrailingZeros().toPlainString() + KILOBYTE.getSuffix();
 		}
-		if (bytes.compareTo(GIGABYTE.getSize()) < 0) {
+		if (absoluteBytes.compareTo(GIGABYTE.getSize()) < 0) {
 			return this.to(MEGABYTE, scale, roundingMode).stripTrailingZeros().toPlainString() + MEGABYTE.getSuffix();
 		}
-		if (bytes.compareTo(TERABYTE.getSize()) < 0) {
+		if (absoluteBytes.compareTo(TERABYTE.getSize()) < 0) {
 			return this.to(GIGABYTE, scale, roundingMode).stripTrailingZeros().toPlainString() + GIGABYTE.getSuffix();
 		}
-		if (bytes.compareTo(PETABYTE.getSize()) < 0) {
+		if (absoluteBytes.compareTo(PETABYTE.getSize()) < 0) {
 			return this.to(TERABYTE, scale, roundingMode).stripTrailingZeros().toPlainString() + TERABYTE.getSuffix();
 		}
-		if (bytes.compareTo(EXABYTE.getSize()) < 0) {
+		if (absoluteBytes.compareTo(EXABYTE.getSize()) < 0) {
 			return this.to(PETABYTE, scale, roundingMode).stripTrailingZeros().toPlainString() + PETABYTE.getSuffix();
 		}
-		if (bytes.compareTo(ZETTABYTE.getSize()) < 0) {
+		if (absoluteBytes.compareTo(ZETTABYTE.getSize()) < 0) {
 			return this.to(EXABYTE, scale, roundingMode).stripTrailingZeros().toPlainString() + EXABYTE.getSuffix();
 		}
-		if (bytes.compareTo(YOTTABYTE.getSize()) < 0) {
+		if (absoluteBytes.compareTo(YOTTABYTE.getSize()) < 0) {
 			return this.to(ZETTABYTE, scale, roundingMode).stripTrailingZeros().toPlainString() + ZETTABYTE.getSuffix();
 		}
-		if (bytes.compareTo(RONNABYTE.getSize()) < 0) {
+		if (absoluteBytes.compareTo(RONNABYTE.getSize()) < 0) {
 			return this.to(YOTTABYTE, scale, roundingMode).stripTrailingZeros().toPlainString() + YOTTABYTE.getSuffix();
 		}
-		if (bytes.compareTo(QUETTABYTE.getSize()) < 0) {
+		if (absoluteBytes.compareTo(QUETTABYTE.getSize()) < 0) {
 			return this.to(RONNABYTE, scale, roundingMode).stripTrailingZeros().toPlainString() + RONNABYTE.getSuffix();
 		}
 		return this.to(QUETTABYTE, scale, roundingMode).stripTrailingZeros().toPlainString() + QUETTABYTE.getSuffix();
