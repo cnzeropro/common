@@ -8,6 +8,7 @@ import org.zero.common.core.util.java.util.stream.StreamUtil;
 import org.zero.common.data.constant.StringPool;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -470,6 +471,66 @@ public class ArrayUtil {
 			pos += a.length;
 		}
 		return result;
+	}
+
+	/**
+	 * 判断数组是否包含指定元素。
+	 *
+	 * @param array 数组
+	 * @param value 指定元素
+	 * @param <T>   数组元素类型
+	 * @return 包含返回 true，否则返回 false
+	 */
+	public static <T> boolean contains(T[] array, T value) {
+		if (isEmpty(array)) {
+			return false;
+		}
+		for (T item : array) {
+			if (Objects.equals(item, value)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * 计算两个数组的交集。
+	 *
+	 * <p>结果按第一个数组的顺序返回，并自动去重。</p>
+	 *
+	 * @param array 第一个数组
+	 * @param other 第二个数组
+	 * @param <T>   数组元素类型
+	 * @return 交集数组
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T[] intersection(T[] array, T[] other) {
+		Objects.requireNonNull(array, "array cannot be null");
+		return intersection(array, other, (Class<T>) array.getClass().getComponentType());
+	}
+
+	/**
+	 * 计算两个数组的交集。
+	 *
+	 * <p>结果按第一个数组的顺序返回，并自动去重。</p>
+	 *
+	 * @param array         第一个数组
+	 * @param other         第二个数组
+	 * @param componentType 数组元素类型
+	 * @param <T>           数组元素类型
+	 * @return 交集数组
+	 */
+	public static <T> T[] intersection(T[] array, T[] other, Class<T> componentType) {
+		if (isEmpty(array) || isEmpty(other)) {
+			return create(componentType, 0);
+		}
+		List<T> result = new ArrayList<>();
+		for (T item : array) {
+			if (contains(other, item) && !result.contains(item)) {
+				result.add(item);
+			}
+		}
+		return of(result, componentType);
 	}
 
 	public static <T> byte[] map(T[] array, ToByteFunction<T> function) {
