@@ -45,7 +45,7 @@ import java.util.logging.Level;
 /**
  * 线程安全的引用类型有界 Map。
  * <p>
- * 该实现扩展了标准 {@link Map} 语义，额外支持强引用、软引用、弱引用、虚引用、TTL、最大容量淘汰和
+ * 该实现扩展了标准 {@link Map} 语义，额外支持强引用、软引用、弱引用、虚引用、存活时间、最大容量淘汰和
  * {@link PurgeListener} 清理回调。公开读写操作会先执行惰性清理，使已过期或已被 GC 回收的 entry
  * 在调用者视角中尽量表现为不存在。
  * <p>
@@ -58,7 +58,7 @@ import java.util.logging.Level;
  * 不受支持。该类内部使用读写锁保证线程安全，但不实现 {@link java.util.concurrent.ConcurrentMap}，
  * 也不承诺高并发写入性能。
  * <p>
- * 清理监听器在同步显式操作中于状态提交后执行并保留异常外抛；后台过期/引用回收清理会记录并吞掉
+ * 清理监听器在同步显式操作中于状态提交后执行并保留异常外抛；后台过期/引用回收清理会记录并抑制
  * 监听器异常，避免清理任务被业务回调打断。
  *
  * @param <K> 键类型
@@ -93,7 +93,7 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 	/**
 	 * 是否使用有序 Map。
 	 */
-	protected final boolean order;
+	protected final boolean ordered;
 	/**
 	 * 底层存储。
 	 * <p>
@@ -109,7 +109,7 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 	/**
 	 * 延迟队列。
 	 * <p>
-	 * 仅保存配置了 TTL 的 pair。
+	 * 仅保存配置了存活时间的 pair。
 	 */
 	protected final DelayQueue<Pair<K, V>> delayQueue;
 	/**
@@ -121,7 +121,7 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 	/**
 	 * 清理任务线程池。
 	 * <p>
-	 * 非惰性清理模式会向该执行器提交引用回收和 TTL 过期两个长期任务。
+	 * 非惰性清理模式会向该执行器提交引用回收和存活时间过期两个长期任务。
 	 */
 	protected final Executor cleanupExecutor;
 	/**
@@ -129,11 +129,11 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 	 */
 	protected final ReferenceType referenceType;
 	/**
-	 * 默认缓存 TTL。
+	 * 默认缓存存活时间。
 	 * <p>
 	 * {@code null} 表示默认不过期，单次写入方法可覆盖该值。
 	 */
-	protected final Duration ttl;
+	protected final Duration timeToLive;
 	/**
 	 * 默认缓存失效监听器。
 	 */
@@ -158,29 +158,29 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 	/**
 	 * 当前引用回收清理线程。
 	 */
-	protected volatile Thread reclaimedCleanupThread;
+	protected volatile Thread referenceCleanupThread;
 	/**
-	 * 当前 TTL 过期清理线程。
+	 * 当前存活时间过期清理线程。
 	 */
-	protected volatile Thread expiryCleanupThread;
+	protected volatile Thread expirationCleanupThread;
 
 	/**
 	 * 创建引用类型有界 Map。
 	 */
-	protected ReferenceBoundedMap(int maxCapacity, boolean order,
+	protected ReferenceBoundedMap(int maxCapacity, boolean ordered,
 	                              Map<K, Pair<K, V>> storage,
 	                              ReferenceQueue<V> referenceQueue, DelayQueue<Pair<K, V>> delayQueue,
 	                              boolean lazyCleanup, Executor cleanupExecutor,
-	                              ReferenceType referenceType, Duration ttl, PurgeListener<K, V> listener) {
+	                              ReferenceType referenceType, Duration timeToLive, PurgeListener<K, V> listener) {
 		this.maxCapacity = maxCapacity;
-		this.order = order;
+		this.ordered = ordered;
 		this.storage = storage;
 		this.referenceQueue = referenceQueue;
 		this.delayQueue = delayQueue;
 		this.lazyCleanup = lazyCleanup;
 		this.cleanupExecutor = cleanupExecutor;
 		this.referenceType = referenceType;
-		this.ttl = ttl;
+		this.timeToLive = timeToLive;
 		this.listener = listener;
 		this.submitCleanupTask();
 	}
@@ -216,7 +216,7 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 	/**
 	 * 创建默认清理执行器。
 	 * <p>
-	 * 每个非惰性实例会提交引用回收和 TTL 过期两个长期任务；这里使用可扩展线程池，避免多个实例共享默认
+	 * 每个非惰性实例会提交引用回收和存活时间过期两个长期任务；这里使用可扩展线程池，避免多个实例共享默认
 	 * 执行器时互相占满固定工作线程。
 	 */
 	protected static Executor createDefaultCleanupExecutor() {
@@ -257,76 +257,77 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 	}
 
 	/**
-	 * 使用默认引用类型、TTL 和监听器写入 value。
+	 * 使用默认引用类型、存活时间和监听器写入 value。
 	 */
 	@Override
 	public V put(K key, V value) {
-		return this.put(key, value, referenceType, ttl, listener);
+		return this.put(key, value, referenceType, timeToLive, listener);
 	}
 
 	/**
 	 * 使用指定引用类型写入 value。
 	 */
 	public V put(K key, V value, ReferenceType referenceType) {
-		return this.put(key, value, referenceType, ttl, listener);
+		return this.put(key, value, referenceType, timeToLive, listener);
 	}
 
 	/**
-	 * 使用指定 TTL 写入 value。
+	 * 使用指定存活时间写入 value。
 	 */
-	public V put(K key, V value, Duration ttl) {
-		return this.put(key, value, referenceType, ttl, listener);
+	public V put(K key, V value, Duration timeToLive) {
+		return this.put(key, value, referenceType, timeToLive, listener);
 	}
 
 	/**
 	 * 使用指定监听器写入 value。
 	 */
 	public V put(K key, V value, PurgeListener<K, V> listener) {
-		return this.put(key, value, referenceType, ttl, listener);
+		return this.put(key, value, referenceType, timeToLive, listener);
 	}
 
 	/**
-	 * 使用指定引用类型和 TTL 写入 value。
+	 * 使用指定引用类型和存活时间写入 value。
 	 */
-	public V put(K key, V value, ReferenceType referenceType, Duration ttl) {
-		return this.put(key, value, referenceType, ttl, listener);
+	public V put(K key, V value, ReferenceType referenceType, Duration timeToLive) {
+		return this.put(key, value, referenceType, timeToLive, listener);
 	}
 
 	/**
 	 * 使用指定引用类型和监听器写入 value。
 	 */
 	public V put(K key, V value, ReferenceType referenceType, PurgeListener<K, V> listener) {
-		return this.put(key, value, referenceType, ttl, listener);
+		return this.put(key, value, referenceType, timeToLive, listener);
 	}
 
 	/**
-	 * 使用指定 TTL 和监听器写入 value。
+	 * 使用指定存活时间和监听器写入 value。
 	 */
-	public V put(K key, V value, Duration ttl, PurgeListener<K, V> listener) {
-		return this.put(key, value, referenceType, ttl, listener);
+	public V put(K key, V value, Duration timeToLive, PurgeListener<K, V> listener) {
+		return this.put(key, value, referenceType, timeToLive, listener);
 	}
 
 	/**
-	 * 写入 value，并指定本次 entry 的引用类型、TTL 和监听器。
+	 * 写入 value，并指定本次 entry 的引用类型、存活时间和监听器。
 	 * <p>
 	 * 写入前会先清理无效 entry；写入后如超过最大容量，会按底层 Map 顺序淘汰 entry。
+	 * 如果覆盖了当前有效 entry，旧 entry 会按 {@link PurgeReason#REPLACED} 通知。
 	 */
-	public V put(K key, V value, ReferenceType referenceType, Duration ttl, PurgeListener<K, V> listener) {
+	public V put(K key, V value, ReferenceType referenceType, Duration timeToLive, PurgeListener<K, V> listener) {
 		this.cleanupInvalidEntries();
-		Pair<K, V> newPair = this.createPair(key, value, referenceType, ttl, listener);
+		Pair<K, V> newPair = this.createPair(key, value, referenceType, timeToLive, listener);
 		Pair<K, V> oldPair;
 		Collection<Pair<K, V>> evictedPairs;
 		writeLock.lock();
 		try {
 			oldPair = storage.put(key, newPair);
-			this.addDelayQueueLocked(newPair);
-			this.removeDelayQueueLocked(oldPair);
-			evictedPairs = this.cleanupExcessLocked();
+			this.addToDelayQueueLocked(newPair);
+			this.removeFromDelayQueueLocked(oldPair);
+			evictedPairs = this.evictExcessEntriesLocked();
 		} finally {
 			writeLock.unlock();
 		}
-		this.notifyListener(oldPair, PurgeReason.EXPLICIT, false);
-		this.notifyPairs(evictedPairs, PurgeReason.EVICTION, false);
+		this.notifyReplacement(oldPair, false);
+		this.notifyPurgeListeners(evictedPairs, PurgeReason.EVICTION, false);
 		return Objects.nonNull(oldPair) ? oldPair.getValue() : null;
 	}
 
@@ -335,49 +336,49 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 	 */
 	@Override
 	public V putIfAbsent(K key, V value) {
-		return this.putIfAbsent(key, value, referenceType, ttl, listener);
+		return this.putIfAbsent(key, value, referenceType, timeToLive, listener);
 	}
 
 	/**
 	 * key 未映射到 pair 时，使用指定引用类型写入 value。
 	 */
 	public V putIfAbsent(K key, V value, ReferenceType referenceType) {
-		return this.putIfAbsent(key, value, referenceType, ttl, listener);
+		return this.putIfAbsent(key, value, referenceType, timeToLive, listener);
 	}
 
 	/**
-	 * key 未映射到 pair 时，使用指定 TTL 写入 value。
+	 * key 未映射到 pair 时，使用指定存活时间写入 value。
 	 */
-	public V putIfAbsent(K key, V value, Duration ttl) {
-		return this.putIfAbsent(key, value, referenceType, ttl, listener);
+	public V putIfAbsent(K key, V value, Duration timeToLive) {
+		return this.putIfAbsent(key, value, referenceType, timeToLive, listener);
 	}
 
 	/**
 	 * key 未映射到 pair 时，使用指定监听器写入 value。
 	 */
 	public V putIfAbsent(K key, V value, PurgeListener<K, V> listener) {
-		return this.putIfAbsent(key, value, referenceType, ttl, listener);
+		return this.putIfAbsent(key, value, referenceType, timeToLive, listener);
 	}
 
 	/**
-	 * key 未映射到 pair 时，使用指定引用类型和 TTL 写入 value。
+	 * key 未映射到 pair 时，使用指定引用类型和存活时间写入 value。
 	 */
-	public V putIfAbsent(K key, V value, ReferenceType referenceType, Duration ttl) {
-		return this.putIfAbsent(key, value, referenceType, ttl, listener);
+	public V putIfAbsent(K key, V value, ReferenceType referenceType, Duration timeToLive) {
+		return this.putIfAbsent(key, value, referenceType, timeToLive, listener);
 	}
 
 	/**
 	 * key 未映射到 pair 时，使用指定引用类型和监听器写入 value。
 	 */
 	public V putIfAbsent(K key, V value, ReferenceType referenceType, PurgeListener<K, V> listener) {
-		return this.putIfAbsent(key, value, referenceType, ttl, listener);
+		return this.putIfAbsent(key, value, referenceType, timeToLive, listener);
 	}
 
 	/**
-	 * key 未映射到 pair 时，使用指定 TTL 和监听器写入 value。
+	 * key 未映射到 pair 时，使用指定存活时间和监听器写入 value。
 	 */
-	public V putIfAbsent(K key, V value, Duration ttl, PurgeListener<K, V> listener) {
-		return this.putIfAbsent(key, value, referenceType, ttl, listener);
+	public V putIfAbsent(K key, V value, Duration timeToLive, PurgeListener<K, V> listener) {
+		return this.putIfAbsent(key, value, referenceType, timeToLive, listener);
 	}
 
 	/**
@@ -386,7 +387,7 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 	 * 与 JDK 默认 {@code Map.putIfAbsent} 的 value-null 语义不同，此处以 pair presence 判断是否存在映射；
 	 * 已存在但 value 为 {@code null} 的 entry 不会被覆盖。
 	 */
-	public V putIfAbsent(K key, V value, ReferenceType referenceType, Duration ttl, PurgeListener<K, V> listener) {
+	public V putIfAbsent(K key, V value, ReferenceType referenceType, Duration timeToLive, PurgeListener<K, V> listener) {
 		this.cleanupInvalidEntries();
 		Pair<K, V> oldPair;
 		Collection<Pair<K, V>> evictedPairs = new ArrayList<>();
@@ -396,19 +397,19 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 			if (Objects.nonNull(oldPair)) {
 				return oldPair.getValue();
 			}
-			Pair<K, V> newPair = this.createPair(key, value, referenceType, ttl, listener);
+			Pair<K, V> newPair = this.createPair(key, value, referenceType, timeToLive, listener);
 			storage.put(key, newPair);
-			this.addDelayQueueLocked(newPair);
-			evictedPairs = this.cleanupExcessLocked();
+			this.addToDelayQueueLocked(newPair);
+			evictedPairs = this.evictExcessEntriesLocked();
 		} finally {
 			writeLock.unlock();
 		}
-		this.notifyPairs(evictedPairs, PurgeReason.EVICTION, false);
+		this.notifyPurgeListeners(evictedPairs, PurgeReason.EVICTION, false);
 		return null;
 	}
 
 	/**
-	 * 替换已存在 pair 的 value，并保留原引用类型、TTL 和监听器。
+	 * 替换已存在 pair 的 value，并保留原引用类型、存活时间和监听器。
 	 */
 	@Override
 	public V replace(K key, V value) {
@@ -417,11 +418,11 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 	}
 
 	/**
-	 * 替换已存在 pair 的 value，并应用新的引用类型、TTL 和监听器。
+	 * 替换已存在 pair 的 value，并应用新的引用类型、存活时间和监听器。
 	 */
-	public V replace(K key, V value, ReferenceType referenceType, Duration ttl, PurgeListener<K, V> listener) {
+	public V replace(K key, V value, ReferenceType referenceType, Duration timeToLive, PurgeListener<K, V> listener) {
 		this.cleanupInvalidEntries();
-		return this.replaceExisting(key, value, referenceType, ttl, listener, false);
+		return this.replaceExisting(key, value, referenceType, timeToLive, listener, false);
 	}
 
 	/**
@@ -438,8 +439,8 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 			}
 			Pair<K, V> newPair = this.recreatePair(pair, newValue);
 			storage.put(key, newPair);
-			this.removeDelayQueueLocked(pair);
-			this.addDelayQueueLocked(newPair);
+			this.removeFromDelayQueueLocked(pair);
+			this.addToDelayQueueLocked(newPair);
 			return true;
 		} finally {
 			writeLock.unlock();
@@ -460,8 +461,8 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 				V newValue = function.apply(entry.getKey(), pair.getValue());
 				Pair<K, V> newPair = this.recreatePair(pair, newValue);
 				entry.setValue(newPair);
-				this.removeDelayQueueLocked(pair);
-				this.addDelayQueueLocked(newPair);
+				this.removeFromDelayQueueLocked(pair);
+				this.addToDelayQueueLocked(newPair);
 			}
 		} finally {
 			writeLock.unlock();
@@ -470,59 +471,59 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 
 	@Override
 	public void putAll(Map<? extends K, ? extends V> map) {
-		this.putAll(map, referenceType, ttl, listener);
+		this.putAll(map, referenceType, timeToLive, listener);
 	}
 
 	/**
 	 * 使用指定引用类型批量写入。
 	 */
 	public void putAll(Map<? extends K, ? extends V> map, ReferenceType referenceType) {
-		this.putAll(map, referenceType, ttl, listener);
+		this.putAll(map, referenceType, timeToLive, listener);
 	}
 
 	/**
-	 * 使用指定 TTL 批量写入。
+	 * 使用指定存活时间批量写入。
 	 */
-	public void putAll(Map<? extends K, ? extends V> map, Duration ttl) {
-		this.putAll(map, referenceType, ttl, listener);
+	public void putAll(Map<? extends K, ? extends V> map, Duration timeToLive) {
+		this.putAll(map, referenceType, timeToLive, listener);
 	}
 
 	/**
 	 * 使用指定监听器批量写入。
 	 */
 	public void putAll(Map<? extends K, ? extends V> map, PurgeListener<K, V> listener) {
-		this.putAll(map, referenceType, ttl, listener);
+		this.putAll(map, referenceType, timeToLive, listener);
 	}
 
 	/**
-	 * 使用指定引用类型和 TTL 批量写入。
+	 * 使用指定引用类型和存活时间批量写入。
 	 */
-	public void putAll(Map<? extends K, ? extends V> map, ReferenceType referenceType, Duration ttl) {
-		this.putAll(map, referenceType, ttl, listener);
+	public void putAll(Map<? extends K, ? extends V> map, ReferenceType referenceType, Duration timeToLive) {
+		this.putAll(map, referenceType, timeToLive, listener);
 	}
 
 	/**
 	 * 使用指定引用类型和监听器批量写入。
 	 */
 	public void putAll(Map<? extends K, ? extends V> map, ReferenceType referenceType, PurgeListener<K, V> listener) {
-		this.putAll(map, referenceType, ttl, listener);
+		this.putAll(map, referenceType, timeToLive, listener);
 	}
 
 	/**
-	 * 使用指定 TTL 和监听器批量写入。
+	 * 使用指定存活时间和监听器批量写入。
 	 */
-	public void putAll(Map<? extends K, ? extends V> map, Duration ttl, PurgeListener<K, V> listener) {
-		this.putAll(map, referenceType, ttl, listener);
+	public void putAll(Map<? extends K, ? extends V> map, Duration timeToLive, PurgeListener<K, V> listener) {
+		this.putAll(map, referenceType, timeToLive, listener);
 	}
 
 	/**
-	 * 使用指定引用类型、TTL 和监听器批量写入。
+	 * 使用指定引用类型、存活时间和监听器批量写入。
 	 * <p>
 	 * 该方法逐项调用 {@link #put(Object, Object, ReferenceType, Duration, PurgeListener)}，因此每个 entry
 	 * 会独立触发替换通知和容量淘汰。
 	 */
-	public void putAll(Map<? extends K, ? extends V> map, ReferenceType referenceType, Duration ttl, PurgeListener<K, V> listener) {
-		map.forEach((key, value) -> this.put(key, value, referenceType, ttl, listener));
+	public void putAll(Map<? extends K, ? extends V> map, ReferenceType referenceType, Duration timeToLive, PurgeListener<K, V> listener) {
+		map.forEach((key, value) -> this.put(key, value, referenceType, timeToLive, listener));
 	}
 
 	/**
@@ -560,7 +561,7 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 	/**
 	 * 清空所有映射。
 	 * <p>
-	 * 已过期 entry 按 {@link PurgeReason#EXPIRY} 通知，仍有效 entry 按 {@link PurgeReason#EXPLICIT} 通知。
+	 * 已过期 entry 按 {@link PurgeReason#EXPIRED} 通知，仍有效 entry 按 {@link PurgeReason#CLEARED} 通知。
 	 */
 	@Override
 	public void clear() {
@@ -575,7 +576,7 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 		}
 		pairs.forEach(pair -> this.notifyListener(
 				pair,
-				pair.isExpired() ? PurgeReason.EXPIRY : PurgeReason.EXPLICIT,
+				pair.isExpired() ? PurgeReason.EXPIRED : PurgeReason.CLEARED,
 				false
 		));
 	}
@@ -697,17 +698,17 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 			} else {
 				V newValue = mappingFunction.apply(key);
 				if (Objects.nonNull(newValue)) {
-					Pair<K, V> newPair = this.createPair(key, newValue, referenceType, ttl, listener);
+					Pair<K, V> newPair = this.createPair(key, newValue, referenceType, timeToLive, listener);
 					storage.put(key, newPair);
-					this.addDelayQueueLocked(newPair);
-					evictedPairs = this.cleanupExcessLocked();
+					this.addToDelayQueueLocked(newPair);
+					evictedPairs = this.evictExcessEntriesLocked();
 					result = newValue;
 				}
 			}
 		} finally {
 			writeLock.unlock();
 		}
-		this.notifyPairs(evictedPairs, PurgeReason.EVICTION, false);
+		this.notifyPurgeListeners(evictedPairs, PurgeReason.EVICTION, false);
 		return result;
 	}
 
@@ -732,8 +733,8 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 				} else {
 					Pair<K, V> newPair = this.recreatePair(pair, newValue);
 					storage.put(key, newPair);
-					this.removeDelayQueueLocked(pair);
-					this.addDelayQueueLocked(newPair);
+					this.removeFromDelayQueueLocked(pair);
+					this.addToDelayQueueLocked(newPair);
 					result = newValue;
 				}
 			}
@@ -766,21 +767,21 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 			} else if (Objects.nonNull(pair)) {
 				Pair<K, V> newPair = this.recreatePair(pair, newValue);
 				storage.put(key, newPair);
-				this.removeDelayQueueLocked(pair);
-				this.addDelayQueueLocked(newPair);
+				this.removeFromDelayQueueLocked(pair);
+				this.addToDelayQueueLocked(newPair);
 				result = newValue;
 			} else {
-				Pair<K, V> newPair = this.createPair(key, newValue, referenceType, ttl, listener);
+				Pair<K, V> newPair = this.createPair(key, newValue, referenceType, timeToLive, listener);
 				storage.put(key, newPair);
-				this.addDelayQueueLocked(newPair);
-				evictedPairs = this.cleanupExcessLocked();
+				this.addToDelayQueueLocked(newPair);
+				evictedPairs = this.evictExcessEntriesLocked();
 				result = newValue;
 			}
 		} finally {
 			writeLock.unlock();
 		}
 		this.notifyListener(removedPair, PurgeReason.EXPLICIT, false);
-		this.notifyPairs(evictedPairs, PurgeReason.EVICTION, false);
+		this.notifyPurgeListeners(evictedPairs, PurgeReason.EVICTION, false);
 		return result;
 	}
 
@@ -808,50 +809,60 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 			} else if (Objects.nonNull(pair)) {
 				Pair<K, V> newPair = this.recreatePair(pair, newValue);
 				storage.put(key, newPair);
-				this.removeDelayQueueLocked(pair);
-				this.addDelayQueueLocked(newPair);
+				this.removeFromDelayQueueLocked(pair);
+				this.addToDelayQueueLocked(newPair);
 				result = newValue;
 			} else {
-				Pair<K, V> newPair = this.createPair(key, newValue, referenceType, ttl, listener);
+				Pair<K, V> newPair = this.createPair(key, newValue, referenceType, timeToLive, listener);
 				storage.put(key, newPair);
-				this.addDelayQueueLocked(newPair);
-				evictedPairs = this.cleanupExcessLocked();
+				this.addToDelayQueueLocked(newPair);
+				evictedPairs = this.evictExcessEntriesLocked();
 				result = newValue;
 			}
 		} finally {
 			writeLock.unlock();
 		}
 		this.notifyListener(removedPair, PurgeReason.EXPLICIT, false);
-		this.notifyPairs(evictedPairs, PurgeReason.EVICTION, false);
+		this.notifyPurgeListeners(evictedPairs, PurgeReason.EVICTION, false);
 		return result;
 	}
 
 	protected void submitCleanupTask() {
 		if (!lazyCleanup) {
-			cleanupExecutor.execute(() -> this.runCleanupLoop(true));
-			cleanupExecutor.execute(() -> this.runCleanupLoop(false));
+			cleanupExecutor.execute(this::runReferenceCleanupLoop);
+			cleanupExecutor.execute(this::runExpirationCleanupLoop);
 		}
 	}
 
 	/**
-	 * 运行指定类型的后台清理循环。
-	 *
-	 * @param reclamation {@code true} 表示引用回收清理，{@code false} 表示 TTL 过期清理
+	 * 运行引用队列后台清理循环。
 	 */
-	protected void runCleanupLoop(boolean reclamation) {
+	protected void runReferenceCleanupLoop() {
 		Thread currentThread = Thread.currentThread();
-		this.registerCleanupThread(reclamation, currentThread);
+		this.registerReferenceCleanupThread(currentThread);
 		try {
 			new LoopRunnable(() -> {
 				this.throwIfDestroyed();
-				if (reclamation) {
-					this.cleanupReclaimedEntries(true);
-				} else {
-					this.cleanupExpiredEntries(true);
-				}
+				this.cleanupCollectedEntries(true);
 			}).run();
 		} finally {
-			this.clearCleanupThread(reclamation, currentThread);
+			this.clearReferenceCleanupThread(currentThread);
+		}
+	}
+
+	/**
+	 * 运行存活时间过期后台清理循环。
+	 */
+	protected void runExpirationCleanupLoop() {
+		Thread currentThread = Thread.currentThread();
+		this.registerExpirationCleanupThread(currentThread);
+		try {
+			new LoopRunnable(() -> {
+				this.throwIfDestroyed();
+				this.cleanupExpiredEntries(true);
+			}).run();
+		} finally {
+			this.clearExpirationCleanupThread(currentThread);
 		}
 	}
 
@@ -865,34 +876,42 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 	}
 
 	/**
-	 * 记录后台清理线程，便于 {@link #destroy()} 精准中断。
+	 * 记录引用队列后台清理线程，便于 {@link #destroy()} 精准中断。
 	 */
-	protected void registerCleanupThread(boolean reclamation, Thread thread) {
-		if (reclamation) {
-			reclaimedCleanupThread = thread;
-		} else {
-			expiryCleanupThread = thread;
+	protected void registerReferenceCleanupThread(Thread thread) {
+		referenceCleanupThread = thread;
+	}
+
+	/**
+	 * 记录存活时间过期后台清理线程，便于 {@link #destroy()} 精准中断。
+	 */
+	protected void registerExpirationCleanupThread(Thread thread) {
+		expirationCleanupThread = thread;
+	}
+
+	/**
+	 * 清除引用队列后台清理线程引用。
+	 */
+	protected void clearReferenceCleanupThread(Thread thread) {
+		if (referenceCleanupThread == thread) {
+			referenceCleanupThread = null;
 		}
 	}
 
 	/**
-	 * 清除后台清理线程引用。
+	 * 清除存活时间过期后台清理线程引用。
 	 */
-	protected void clearCleanupThread(boolean reclamation, Thread thread) {
-		if (reclamation) {
-			if (reclaimedCleanupThread == thread) {
-				reclaimedCleanupThread = null;
-			}
-		} else if (expiryCleanupThread == thread) {
-			expiryCleanupThread = null;
+	protected void clearExpirationCleanupThread(Thread thread) {
+		if (expirationCleanupThread == thread) {
+			expirationCleanupThread = null;
 		}
 	}
 
 	/**
 	 * 创建 {@link Pair} 对象
 	 */
-	protected Pair<K, V> createPair(K key, V value, ReferenceType referenceType, Duration ttl, PurgeListener<K, V> listener) {
-		Instant expireTime = Objects.nonNull(ttl) ? Instant.now().plus(ttl) : null;
+	protected Pair<K, V> createPair(K key, V value, ReferenceType referenceType, Duration timeToLive, PurgeListener<K, V> listener) {
+		Instant expireTime = Objects.nonNull(timeToLive) ? Instant.now().plus(timeToLive) : null;
 		return this.createPair(key, value, referenceType, expireTime, listener);
 	}
 
@@ -946,20 +965,20 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 	 * 清理无效键值对
 	 */
 	protected void cleanupInvalidEntries() {
-		this.cleanupReclaimedEntries(false);
+		this.cleanupCollectedEntries(false);
 		this.cleanupExpiredEntries(false);
 	}
 
 	/**
-	 * 清理 GC 回收过的键值对
+	 * 清理由 GC 收集的键值对。
 	 *
-	 * @param wait 是否阻塞等待引用队列；后台清理传 {@code true}，惰性清理传 {@code false}
+	 * @param blocking 是否阻塞等待引用队列；后台清理传 {@code true}，惰性清理传 {@code false}
 	 */
-	protected void cleanupReclaimedEntries(boolean wait) {
+	protected void cleanupCollectedEntries(boolean blocking) {
 		while (true) {
 			Reference<?> reference;
 			try {
-				reference = wait ? referenceQueue.remove() : referenceQueue.poll();
+				reference = blocking ? referenceQueue.remove() : referenceQueue.poll();
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 				return;
@@ -977,21 +996,21 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 				} finally {
 					writeLock.unlock();
 				}
-				this.notifyListener(removedPair, PurgeReason.RECLAMATION, wait);
+				this.notifyListener(removedPair, PurgeReason.COLLECTED, blocking);
 			}
 		}
 	}
 
 	/**
-	 * 清理过期的键值对
+	 * 清理过期的键值对。
 	 *
-	 * @param wait 是否阻塞等待延迟队列；后台清理传 {@code true}，惰性清理传 {@code false}
+	 * @param blocking 是否阻塞等待延迟队列；后台清理传 {@code true}，惰性清理传 {@code false}
 	 */
-	protected void cleanupExpiredEntries(boolean wait) {
+	protected void cleanupExpiredEntries(boolean blocking) {
 		while (true) {
 			Pair<K, V> pair;
 			try {
-				pair = wait ? delayQueue.take() : delayQueue.poll();
+				pair = blocking ? delayQueue.take() : delayQueue.poll();
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 				return;
@@ -1006,15 +1025,15 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 			} finally {
 				writeLock.unlock();
 			}
-			this.notifyListener(removedPair, PurgeReason.EXPIRY, wait);
+			this.notifyListener(removedPair, PurgeReason.EXPIRED, blocking);
 		}
 	}
 
 	/**
-	 * 清理超出最大容量的键值对
+	 * 淘汰超出最大容量的键值对。
 	 */
-	protected Collection<Pair<K, V>> cleanupExcessLocked() {
-		Collection<Pair<K, V>> removedPairs = new ArrayList<>();
+	protected Collection<Pair<K, V>> evictExcessEntriesLocked() {
+		Collection<Pair<K, V>> evictedPairs = new ArrayList<>();
 		while (storage.size() > maxCapacity) {
 			Iterator<Map.Entry<K, Pair<K, V>>> iterator = storage.entrySet().iterator();
 			if (!iterator.hasNext()) {
@@ -1023,10 +1042,10 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 			Map.Entry<K, Pair<K, V>> entry = iterator.next();
 			Pair<K, V> pair = entry.getValue();
 			iterator.remove();
-			this.removeDelayQueueLocked(pair);
-			removedPairs.add(pair);
+			this.removeFromDelayQueueLocked(pair);
+			evictedPairs.add(pair);
 		}
-		return removedPairs;
+		return evictedPairs;
 	}
 
 	/**
@@ -1034,7 +1053,7 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 	 *
 	 * @param preserveMetadata 是否保留旧 pair 的引用类型、过期时间和监听器
 	 */
-	protected V replaceExisting(K key, V value, ReferenceType referenceType, Duration ttl, PurgeListener<K, V> listener, boolean preserveMetadata) {
+	protected V replaceExisting(K key, V value, ReferenceType referenceType, Duration timeToLive, PurgeListener<K, V> listener, boolean preserveMetadata) {
 		Pair<K, V> oldPair = null;
 		writeLock.lock();
 		try {
@@ -1044,10 +1063,10 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 			}
 			Pair<K, V> newPair = preserveMetadata
 					? this.recreatePair(oldPair, value)
-					: this.createPair(key, value, referenceType, ttl, listener);
+					: this.createPair(key, value, referenceType, timeToLive, listener);
 			storage.put(key, newPair);
-			this.removeDelayQueueLocked(oldPair);
-			this.addDelayQueueLocked(newPair);
+			this.removeFromDelayQueueLocked(oldPair);
+			this.addToDelayQueueLocked(newPair);
 			return oldPair.getValue();
 		} finally {
 			writeLock.unlock();
@@ -1100,7 +1119,7 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 	/**
 	 * 将带过期时间的 pair 加入延迟队列。
 	 */
-	protected void addDelayQueueLocked(Pair<K, V> pair) {
+	protected void addToDelayQueueLocked(Pair<K, V> pair) {
 		if (Objects.nonNull(pair) && Objects.nonNull(pair.getExpireTime())) {
 			delayQueue.add(pair);
 		}
@@ -1109,7 +1128,7 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 	/**
 	 * 从延迟队列移除带过期时间的 pair。
 	 */
-	protected void removeDelayQueueLocked(Pair<K, V> pair) {
+	protected void removeFromDelayQueueLocked(Pair<K, V> pair) {
 		if (Objects.nonNull(pair) && Objects.nonNull(pair.getExpireTime())) {
 			delayQueue.remove(pair);
 		}
@@ -1131,7 +1150,7 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 		}
 		storage.remove(pair.getKey());
 		if (removeDelayQueue) {
-			this.removeDelayQueueLocked(pair);
+			this.removeFromDelayQueueLocked(pair);
 		}
 		return pair;
 	}
@@ -1139,15 +1158,15 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 	/**
 	 * 显式按 key 删除映射。
 	 * <p>
-	 * 如果删除点发现 entry 已经过期，则返回 {@code null} 并按 {@link PurgeReason#EXPIRY} 通知，
+	 * 如果删除点发现 entry 已经过期，则返回 {@code null} 并按 {@link PurgeReason#EXPIRED} 通知，
 	 * 使 {@link #remove(Object)} 与 {@link #get(Object)} 对过期 entry 的逻辑视图保持一致。
 	 */
-	protected Pair<K, V> removeByKey(Object key, PurgeReason reason, boolean swallowListenerException) {
+	protected Pair<K, V> removeByKey(Object key, PurgeReason reason, boolean suppressListenerException) {
 		Pair<K, V> removedPair;
 		writeLock.lock();
 		try {
 			removedPair = storage.remove(key);
-			this.removeDelayQueueLocked(removedPair);
+			this.removeFromDelayQueueLocked(removedPair);
 		} finally {
 			writeLock.unlock();
 		}
@@ -1155,17 +1174,17 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 			return null;
 		}
 		if (removedPair.isExpired()) {
-			this.notifyListener(removedPair, PurgeReason.EXPIRY, swallowListenerException);
+			this.notifyListener(removedPair, PurgeReason.EXPIRED, suppressListenerException);
 			return null;
 		}
-		this.notifyListener(removedPair, reason, swallowListenerException);
+		this.notifyListener(removedPair, reason, suppressListenerException);
 		return removedPair;
 	}
 
 	/**
 	 * 按 pair 身份删除当前映射并通知监听器。
 	 */
-	protected Pair<K, V> removeCurrentPair(Pair<K, V> pair, PurgeReason reason, boolean removeDelayQueue, boolean swallowListenerException) {
+	protected Pair<K, V> removeCurrentPair(Pair<K, V> pair, PurgeReason reason, boolean removeDelayQueue, boolean suppressListenerException) {
 		Pair<K, V> removedPair;
 		writeLock.lock();
 		try {
@@ -1173,23 +1192,35 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 		} finally {
 			writeLock.unlock();
 		}
-		this.notifyListener(removedPair, reason, swallowListenerException);
+		this.notifyListener(removedPair, reason, suppressListenerException);
 		return removedPair;
 	}
 
 	/**
 	 * 批量通知清理监听器。
 	 */
-	protected void notifyPairs(Collection<Pair<K, V>> pairs, PurgeReason reason, boolean swallowListenerException) {
-		pairs.forEach(pair -> this.notifyListener(pair, reason, swallowListenerException));
+	protected void notifyPurgeListeners(Collection<Pair<K, V>> pairs, PurgeReason reason, boolean suppressListenerException) {
+		pairs.forEach(pair -> this.notifyListener(pair, reason, suppressListenerException));
+	}
+
+	/**
+	 * 通知被替换的旧 entry。
+	 * <p>
+	 * 如果旧 entry 在被替换时已经过期，则它从调用者视角属于过期清理而非替换。
+	 */
+	protected void notifyReplacement(Pair<K, V> oldPair, boolean suppressListenerException) {
+		if (Objects.isNull(oldPair)) {
+			return;
+		}
+		this.notifyListener(oldPair, oldPair.isExpired() ? PurgeReason.EXPIRED : PurgeReason.REPLACED, suppressListenerException);
 	}
 
 	/**
 	 * 通知监听器
 	 *
-	 * @param swallowListenerException 是否吞掉监听器异常；后台异步清理为 {@code true}
+	 * @param suppressListenerException 是否抑制监听器异常；后台异步清理为 {@code true}
 	 */
-	protected void notifyListener(Pair<K, V> pair, PurgeReason reason, boolean swallowListenerException) {
+	protected void notifyListener(Pair<K, V> pair, PurgeReason reason, boolean suppressListenerException) {
 		if (Objects.isNull(pair)) {
 			return;
 		}
@@ -1200,7 +1231,7 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 		try {
 			listener.onPurge(pair.getKey(), pair.getValue(), reason);
 		} catch (RuntimeException e) {
-			if (!swallowListenerException) {
+			if (!suppressListenerException) {
 				throw e;
 			}
 			log.log(Level.WARNING, "Purge listener threw exception during async cleanup.", e);
@@ -1209,13 +1240,13 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 
 	protected void destroy() throws Exception {
 		destroyed = true;
-		Thread reclaimedThread = reclaimedCleanupThread;
-		Thread expiredThread = expiryCleanupThread;
-		if (Objects.nonNull(reclaimedThread)) {
-			reclaimedThread.interrupt();
+		Thread referenceThread = referenceCleanupThread;
+		Thread expirationThread = expirationCleanupThread;
+		if (Objects.nonNull(referenceThread)) {
+			referenceThread.interrupt();
 		}
-		if (Objects.nonNull(expiredThread) && expiredThread != reclaimedThread) {
-			expiredThread.interrupt();
+		if (Objects.nonNull(expirationThread) && expirationThread != referenceThread) {
+			expirationThread.interrupt();
 		}
 		writeLock.lock();
 		try {
@@ -1367,12 +1398,12 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 		/**
 		 * 是否有序。默认：true
 		 */
-		protected boolean order = true;
+		protected boolean ordered = true;
 		/**
 		 * 是否使用访问顺序。默认：false
 		 * <p>
 		 * true：访问顺序；false：插入顺序 <br>
-		 * 注意：仅当 {@code order = true} 时有效，且该值为 true 时将影响性能。
+		 * 注意：仅当 {@code ordered = true} 时有效，且该值为 true 时将影响性能。
 		 */
 		protected boolean accessOrder = false;
 		/**
@@ -1415,11 +1446,11 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 		@Accessors(fluent = true, chain = true)
 		protected ReferenceType referenceType = ReferenceType.STRONG;
 		/**
-		 * 默认缓存 TTL。
+		 * 默认缓存存活时间。
 		 */
 		@Setter
 		@Accessors(fluent = true, chain = true)
-		protected Duration ttl;
+		protected Duration timeToLive;
 		/**
 		 * 默认缓存失效监听器。
 		 */
@@ -1430,16 +1461,16 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 		/**
 		 * 开启有序存储。
 		 */
-		public Builder<K, V> order() {
-			return this.order(true);
+		public Builder<K, V> ordered() {
+			return this.ordered(true);
 		}
 
 		/**
 		 * 设置是否使用有序存储。
 		 */
-		public Builder<K, V> order(boolean order) {
-			this.order = order;
-			return this.initMap();
+		public Builder<K, V> ordered(boolean ordered) {
+			this.ordered = ordered;
+			return this.initStorage();
 		}
 
 		/**
@@ -1453,9 +1484,9 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 		 * 设置是否使用访问顺序。
 		 */
 		public Builder<K, V> accessOrder(boolean accessOrder) {
-			this.order = true;
+			this.ordered = true;
 			this.accessOrder = accessOrder;
-			return this.initMap();
+			return this.initStorage();
 		}
 
 		/**
@@ -1463,7 +1494,7 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 		 */
 		public Builder<K, V> initialCapacity(int initialCapacity) {
 			this.initialCapacity = initialCapacity;
-			return this.initMap();
+			return this.initStorage();
 		}
 
 		/**
@@ -1471,7 +1502,7 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 		 */
 		public Builder<K, V> loadFactor(float loadFactor) {
 			this.loadFactor = loadFactor;
-			return this.initMap();
+			return this.initStorage();
 		}
 
 		/**
@@ -1492,8 +1523,8 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 		/**
 		 * 根据当前容量和顺序配置重建默认底层 Map。
 		 */
-		protected Builder<K, V> initMap() {
-			this.storage = order ? new LinkedHashMap<>(initialCapacity, loadFactor, accessOrder) : new HashMap<>(initialCapacity, loadFactor);
+		protected Builder<K, V> initStorage() {
+			this.storage = ordered ? new LinkedHashMap<>(initialCapacity, loadFactor, accessOrder) : new HashMap<>(initialCapacity, loadFactor);
 			return this;
 		}
 
@@ -1502,7 +1533,7 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 		 */
 		@Override
 		public ReferenceBoundedMap<K, V> build() {
-			return new ReferenceBoundedMap<>(maxCapacity, order, storage, referenceQueue, delayQueue, lazyCleanup, cleanupExecutor, referenceType, ttl, listener);
+			return new ReferenceBoundedMap<>(maxCapacity, ordered, storage, referenceQueue, delayQueue, lazyCleanup, cleanupExecutor, referenceType, timeToLive, listener);
 		}
 	}
 
@@ -1531,7 +1562,7 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 				Pair<K, V> pair = snapshot.get(cursor++);
 				if (ReferenceBoundedMap.this.isCurrentPair(pair)) {
 					if (pair.isExpired()) {
-						ReferenceBoundedMap.this.removeCurrentPair(pair, PurgeReason.EXPIRY, true, false);
+						ReferenceBoundedMap.this.removeCurrentPair(pair, PurgeReason.EXPIRED, true, false);
 						continue;
 					}
 					nextPair = pair;
@@ -1659,12 +1690,12 @@ public class ReferenceBoundedMap<K, V> extends AbstractMap<K, V> {
 				}
 				Pair<K, V> newPair = ReferenceBoundedMap.this.recreatePair(current, value);
 				storage.put(key, newPair);
-				ReferenceBoundedMap.this.removeDelayQueueLocked(current);
-				ReferenceBoundedMap.this.addDelayQueueLocked(newPair);
+				ReferenceBoundedMap.this.removeFromDelayQueueLocked(current);
+				ReferenceBoundedMap.this.addToDelayQueueLocked(newPair);
 				return current.getValue();
 			} finally {
 				writeLock.unlock();
-				ReferenceBoundedMap.this.notifyListener(expiredPair, PurgeReason.EXPIRY, false);
+				ReferenceBoundedMap.this.notifyListener(expiredPair, PurgeReason.EXPIRED, false);
 			}
 		}
 

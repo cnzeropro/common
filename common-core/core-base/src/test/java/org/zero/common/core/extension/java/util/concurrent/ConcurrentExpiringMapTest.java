@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.zero.common.core.extension.java.util.PurgeListener;
 import org.zero.common.core.extension.java.util.PurgeReason;
 
+import java.lang.reflect.Modifier;
 import java.time.Duration;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -88,11 +89,11 @@ class ConcurrentExpiringMapTest {
 			return "new";
 		}, Duration.ofMillis(40), listener(newEvents)));
 		assertEquals("new", map.get("key"));
-		assertEvents(oldEvents, event("key", "old", PurgeReason.EXPIRY));
+		assertEvents(oldEvents, event("key", "old", PurgeReason.EXPIRED));
 
 		sleep(Duration.ofMillis(80));
 		assertNull(map.get("key"));
-		assertEvents(newEvents, event("key", "new", PurgeReason.EXPIRY));
+		assertEvents(newEvents, event("key", "new", PurgeReason.EXPIRED));
 	}
 
 	@Test
@@ -107,8 +108,17 @@ class ConcurrentExpiringMapTest {
 
 		sleep(Duration.ofMillis(120));
 		assertNull(map.get("key"));
-		assertEvents(originalEvents, event("key", "AB", PurgeReason.EXPIRY));
+		assertEvents(originalEvents, event("key", "AB", PurgeReason.EXPIRED));
 		assertTrue(replacementEvents.isEmpty());
+	}
+
+	@Test
+	void pairValueIsVolatileAndSetValueReturnsPreviousValue() throws NoSuchFieldException {
+		ConcurrentExpiringMap.Pair<String, String> pair = new ConcurrentExpiringMap.Pair<>("key", "old", null, null);
+
+		assertTrue(Modifier.isVolatile(ConcurrentExpiringMap.Pair.class.getDeclaredField("value").getModifiers()));
+		assertEquals("old", pair.setValue("new"));
+		assertEquals("new", pair.getValue());
 	}
 
 	@Test
@@ -163,7 +173,7 @@ class ConcurrentExpiringMapTest {
 		assertFalse(map.containsValue("3"));
 		assertEquals("{a=2}", map.toString());
 		assertEvents(events,
-				event("a", "1", PurgeReason.EXPLICIT),
+				event("a", "1", PurgeReason.REPLACED),
 				event("b", "2", PurgeReason.EXPLICIT),
 				event("c", "3", PurgeReason.EXPLICIT)
 		);
@@ -196,7 +206,7 @@ class ConcurrentExpiringMapTest {
 	}
 
 	@Test
-	void explicitRemovalAndClearNotifyListenerWithoutTtl() {
+	void explicitRemovalAndClearNotifyListenerWithoutTimeToLive() {
 		List<PurgeEvent> events = new CopyOnWriteArrayList<>();
 		ConcurrentExpiringMap<String, String> map = this.newLazyMap();
 
@@ -208,13 +218,13 @@ class ConcurrentExpiringMapTest {
 
 		assertEvents(events,
 				event("remove", "A", PurgeReason.EXPLICIT),
-				event("clear-1", "B", PurgeReason.EXPLICIT),
-				event("clear-2", "C", PurgeReason.EXPLICIT)
+				event("clear-1", "B", PurgeReason.CLEARED),
+				event("clear-2", "C", PurgeReason.CLEARED)
 		);
 	}
 
 	@Test
-	void clearReportsExpiryAndExplicitForMixedEntries() {
+	void clearReportsExpiredAndClearedForMixedEntries() {
 		List<PurgeEvent> events = new CopyOnWriteArrayList<>();
 		ConcurrentExpiringMap<String, String> map = this.newLazyMap();
 
@@ -225,8 +235,8 @@ class ConcurrentExpiringMapTest {
 
 		assertTrue(map.isEmpty());
 		assertEvents(events,
-				event("live", "A", PurgeReason.EXPLICIT),
-				event("expired", "B", PurgeReason.EXPIRY)
+				event("live", "A", PurgeReason.CLEARED),
+				event("expired", "B", PurgeReason.EXPIRED)
 		);
 	}
 
@@ -295,7 +305,7 @@ class ConcurrentExpiringMapTest {
 		assertEquals(expected, map);
 		assertEquals(expected.hashCode(), map.hashCode());
 		assertEquals("{live=1}", map.toString());
-		assertEvents(events, event("expired", "gone", PurgeReason.EXPIRY));
+		assertEvents(events, event("expired", "gone", PurgeReason.EXPIRED));
 	}
 
 	@Test
@@ -333,7 +343,7 @@ class ConcurrentExpiringMapTest {
 			map.writeLock.unlock();
 		}
 
-		map.cleanupExpired(false);
+		map.cleanupExpiredEntries(false);
 		assertEquals("new", map.get("key"));
 	}
 

@@ -33,11 +33,11 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.logging.Level;
 
-import static org.zero.common.core.util.java.util.MapUtil.DEFAULT_INITIAL_CAPACITY;
-import static org.zero.common.core.util.java.util.MapUtil.DEFAULT_LOAD_FACTOR;
+import static org.zero.common.core.util.java.util.MapUtil.INITIAL_CAPACITY;
+import static org.zero.common.core.util.java.util.MapUtil.LOAD_FACTOR;
 
 /**
- * 线程安全的 TTL Map。
+ * 线程安全的存活时间 Map。
  * <p>
  * 该实现以 {@link ConcurrentMap} 契约为基准：公开写路径不允许 {@code null} key/value，
  * 已过期 entry 在所有公开读写路径中都按“逻辑不存在”处理。读操作通过读锁保护，复合写操作通过
@@ -48,7 +48,7 @@ import static org.zero.common.core.util.java.util.MapUtil.DEFAULT_LOAD_FACTOR;
  * {@link java.util.ConcurrentModificationException}，也不会暴露内部存储使用的 {@link Pair} 实例。
  * {@code entrySet().add(...)} 不受支持。
  * <p>
- * 清理监听器在同步显式操作中于状态提交后执行并保留异常外抛；后台过期清理会记录并吞掉监听器异常，
+ * 清理监听器在同步显式操作中于状态提交后执行并保留异常外抛；后台过期清理会记录并抑制监听器异常，
  * 避免清理线程被业务回调打断。
  *
  * @param <K> 键类型
@@ -68,15 +68,15 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 	/**
 	 * 延迟队列。
 	 * <p>
-	 * 仅保存配置了 TTL 的 pair；同 key 被替换时旧 pair 必须同步从该队列移除。
+	 * 仅保存配置了存活时间的 pair；同 key 被替换时旧 pair 必须同步从该队列移除。
 	 */
 	protected final DelayQueue<Pair<K, V>> delayQueue;
 	/**
-	 * 默认缓存 TTL。
+	 * 默认缓存存活时间。
 	 * <p>
-	 * {@code null} 表示默认不过期，单次写入方法可传入自定义 TTL 覆盖该值。
+	 * {@code null} 表示默认不过期，单次写入方法可传入自定义存活时间覆盖该值。
 	 */
-	protected final Duration ttl;
+	protected final Duration timeToLive;
 	/**
 	 * 默认缓存失效监听器。
 	 * <p>
@@ -103,18 +103,18 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 	protected final ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
 
 	/**
-	 * 创建 TTL Map。
+	 * 创建存活时间 Map。
 	 *
 	 * @param storage              底层存储
 	 * @param delayQueue           过期延迟队列
-	 * @param ttl                  默认 TTL，{@code null} 表示默认不过期
+	 * @param timeToLive          默认存活时间，{@code null} 表示默认不过期
 	 * @param listener             默认清理监听器
 	 * @param cleanupThreadBuilder 后台清理线程构建器；{@code null} 表示惰性清理
 	 */
-	protected ConcurrentExpiringMap(Map<K, Pair<K, V>> storage, DelayQueue<Pair<K, V>> delayQueue, Duration ttl, PurgeListener<K, V> listener, ThreadBuilder cleanupThreadBuilder) {
+	protected ConcurrentExpiringMap(Map<K, Pair<K, V>> storage, DelayQueue<Pair<K, V>> delayQueue, Duration timeToLive, PurgeListener<K, V> listener, ThreadBuilder cleanupThreadBuilder) {
 		this.storage = storage;
 		this.delayQueue = delayQueue;
-		this.ttl = ttl;
+		this.timeToLive = timeToLive;
 		this.listener = listener;
 		this.cleanupThread = this.buildCleanupThread(cleanupThreadBuilder);
 	}
@@ -150,56 +150,56 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 			return defaultValue;
 		}
 		if (pair.isExpired()) {
-			this.removeCurrentPair(pair, PurgeReason.EXPIRY, true, false);
+			this.removeCurrentPair(pair, PurgeReason.EXPIRED, true, false);
 			return defaultValue;
 		}
 		return pair.getValue();
 	}
 
 	/**
-	 * 使用默认 TTL 和默认监听器写入 value。
+	 * 使用默认存活时间和默认监听器写入 value。
 	 */
 	@Override
 	public V put(K key, V value) {
-		return this.put(key, value, ttl, listener);
+		return this.put(key, value, timeToLive, listener);
 	}
 
 	/**
-	 * 使用指定 TTL 和默认监听器写入 value。
+	 * 使用指定存活时间和默认监听器写入 value。
 	 *
-	 * @param ttl 本次写入的 TTL，{@code null} 表示不过期
+	 * @param timeToLive 本次写入的存活时间，{@code null} 表示不过期
 	 */
-	public V put(K key, V value, Duration ttl) {
-		return this.put(key, value, ttl, listener);
+	public V put(K key, V value, Duration timeToLive) {
+		return this.put(key, value, timeToLive, listener);
 	}
 
 	/**
-	 * 使用默认 TTL 和指定监听器写入 value。
+	 * 使用默认存活时间和指定监听器写入 value。
 	 *
 	 * @param listener 本次写入的清理监听器
 	 */
 	public V put(K key, V value, PurgeListener<K, V> listener) {
-		return this.put(key, value, ttl, listener);
+		return this.put(key, value, timeToLive, listener);
 	}
 
 	/**
-	 * 写入 value，并为本次 entry 指定 TTL 与清理监听器。
+	 * 写入 value，并为本次 entry 指定存活时间与清理监听器。
 	 * <p>
-	 * 如果旧 entry 已过期，返回值按 {@code absent} 处理为 {@code null}，但仍会按 {@link PurgeReason#EXPIRY}
-	 * 通知旧 entry。
+	 * 如果旧 entry 仍有效，会按 {@link PurgeReason#REPLACED} 通知旧 value；如果旧 entry 已过期，返回值按
+	 * {@code absent} 处理为 {@code null}，但仍会按 {@link PurgeReason#EXPIRED} 通知旧 entry。
 	 *
 	 * @throws NullPointerException key 或 value 为 {@code null}
 	 */
-	public V put(K key, V value, Duration ttl, PurgeListener<K, V> listener) {
+	public V put(K key, V value, Duration timeToLive, PurgeListener<K, V> listener) {
 		this.requireNonNullKey(key);
 		this.requireNonNullValue(value);
-		Pair<K, V> newPair = this.createPair(key, value, ttl, listener);
+		Pair<K, V> newPair = this.createPair(key, value, timeToLive, listener);
 		Pair<K, V> oldPair;
 		writeLock.lock();
 		try {
 			oldPair = storage.put(key, newPair);
-			this.addDelayQueueLocked(newPair);
-			this.removeDelayQueueLocked(oldPair);
+			this.addToDelayQueueLocked(newPair);
+			this.removeFromDelayQueueLocked(oldPair);
 		} finally {
 			writeLock.unlock();
 		}
@@ -210,42 +210,42 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 	/**
 	 * 创建内部存储节点。
 	 *
-	 * @param ttl TTL，{@code null} 表示不过期
+	 * @param timeToLive 存活时间，{@code null} 表示不过期
 	 */
-	protected Pair<K, V> createPair(K key, V value, Duration ttl, PurgeListener<K, V> listener) {
-		Instant expireTime = Objects.isNull(ttl) ? null : Instant.now().plus(ttl);
+	protected Pair<K, V> createPair(K key, V value, Duration timeToLive, PurgeListener<K, V> listener) {
+		Instant expireTime = Objects.isNull(timeToLive) ? null : Instant.now().plus(timeToLive);
 		return new Pair<>(key, value, expireTime, listener);
 	}
 
 	/**
-	 * 使用默认 TTL 和默认监听器批量写入。
+	 * 使用默认存活时间和默认监听器批量写入。
 	 */
 	@Override
 	public void putAll(Map<? extends K, ? extends V> map) {
-		this.putAll(map, ttl, listener);
+		this.putAll(map, timeToLive, listener);
 	}
 
 	/**
-	 * 使用指定 TTL 和默认监听器批量写入。
+	 * 使用指定存活时间和默认监听器批量写入。
 	 */
-	public void putAll(Map<? extends K, ? extends V> map, Duration ttl) {
-		this.putAll(map, ttl, listener);
+	public void putAll(Map<? extends K, ? extends V> map, Duration timeToLive) {
+		this.putAll(map, timeToLive, listener);
 	}
 
 	/**
-	 * 使用默认 TTL 和指定监听器批量写入。
+	 * 使用默认存活时间和指定监听器批量写入。
 	 */
 	public void putAll(Map<? extends K, ? extends V> map, PurgeListener<K, V> listener) {
-		this.putAll(map, ttl, listener);
+		this.putAll(map, timeToLive, listener);
 	}
 
 	/**
-	 * 使用指定 TTL 和监听器批量写入。
+	 * 使用指定存活时间和监听器批量写入。
 	 * <p>
 	 * 该方法逐项调用 {@link #put(Object, Object, Duration, PurgeListener)}，因此每个 entry 会独立触发替换通知。
 	 */
-	public void putAll(Map<? extends K, ? extends V> map, Duration ttl, PurgeListener<K, V> listener) {
-		map.forEach((key, value) -> this.put(key, value, ttl, listener));
+	public void putAll(Map<? extends K, ? extends V> map, Duration timeToLive, PurgeListener<K, V> listener) {
+		map.forEach((key, value) -> this.put(key, value, timeToLive, listener));
 	}
 
 	/**
@@ -253,52 +253,52 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 	 */
 	@Override
 	public V putIfAbsent(K key, V value) {
-		return this.putIfAbsent(key, value, ttl, listener);
+		return this.putIfAbsent(key, value, timeToLive, listener);
 	}
 
 	/**
-	 * key 当前不存在或仅存在过期 entry 时，使用指定 TTL 写入 value。
+	 * key 当前不存在或仅存在过期 entry 时，使用指定存活时间写入 value。
 	 */
-	public V putIfAbsent(K key, V value, Duration ttl) {
-		return this.putIfAbsent(key, value, ttl, listener);
+	public V putIfAbsent(K key, V value, Duration timeToLive) {
+		return this.putIfAbsent(key, value, timeToLive, listener);
 	}
 
 	/**
 	 * key 当前不存在或仅存在过期 entry 时，使用指定监听器写入 value。
 	 */
 	public V putIfAbsent(K key, V value, PurgeListener<K, V> listener) {
-		return this.putIfAbsent(key, value, ttl, listener);
+		return this.putIfAbsent(key, value, timeToLive, listener);
 	}
 
 	/**
 	 * key 当前不存在或仅存在过期 entry 时写入 value。
 	 * <p>
-	 * 如果旧 entry 已过期，它会被替换并按 {@link PurgeReason#EXPIRY} 通知，返回值仍为 {@code null}。
+	 * 如果旧 entry 已过期，它会被替换并按 {@link PurgeReason#EXPIRED} 通知，返回值仍为 {@code null}。
 	 *
 	 * @throws NullPointerException key 或 value 为 {@code null}
 	 */
-	public V putIfAbsent(K key, V value, Duration ttl, PurgeListener<K, V> listener) {
+	public V putIfAbsent(K key, V value, Duration timeToLive, PurgeListener<K, V> listener) {
 		this.requireNonNullKey(key);
 		this.requireNonNullValue(value);
 		Pair<K, V> oldPair;
 		Pair<K, V> newPair = null;
-		boolean replacedExpired = false;
+		boolean replacedExpiredEntry = false;
 		writeLock.lock();
 		try {
 			oldPair = storage.get(key);
 			if (Objects.nonNull(oldPair) && !oldPair.isExpired()) {
 				return oldPair.getValue();
 			}
-			newPair = this.createPair(key, value, ttl, listener);
+			newPair = this.createPair(key, value, timeToLive, listener);
 			storage.put(key, newPair);
-			this.addDelayQueueLocked(newPair);
-			this.removeDelayQueueLocked(oldPair);
-			replacedExpired = Objects.nonNull(oldPair);
+			this.addToDelayQueueLocked(newPair);
+			this.removeFromDelayQueueLocked(oldPair);
+			replacedExpiredEntry = Objects.nonNull(oldPair);
 		} finally {
 			writeLock.unlock();
 		}
-		if (replacedExpired) {
-			this.notifyListener(oldPair, PurgeReason.EXPIRY, false);
+		if (replacedExpiredEntry) {
+			this.notifyListener(oldPair, PurgeReason.EXPIRED, false);
 		}
 		return null;
 	}
@@ -306,7 +306,7 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 	/**
 	 * 删除 key 对应的当前 entry。
 	 * <p>
-	 * 如果删除时发现 entry 已经过期，则返回 {@code null} 并按 {@link PurgeReason#EXPIRY} 通知。
+	 * 如果删除时发现 entry 已经过期，则返回 {@code null} 并按 {@link PurgeReason#EXPIRED} 通知。
 	 */
 	@Override
 	public V remove(Object key) {
@@ -315,14 +315,14 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 		writeLock.lock();
 		try {
 			removedPair = storage.remove(key);
-			this.removeDelayQueueLocked(removedPair);
+			this.removeFromDelayQueueLocked(removedPair);
 		} finally {
 			writeLock.unlock();
 		}
 		if (Objects.isNull(removedPair)) {
 			return null;
 		}
-		this.notifyListener(removedPair, removedPair.isExpired() ? PurgeReason.EXPIRY : PurgeReason.EXPLICIT, false);
+		this.notifyListener(removedPair, removedPair.isExpired() ? PurgeReason.EXPIRED : PurgeReason.EXPLICIT, false);
 		return removedPair.isExpired() ? null : removedPair.getValue();
 	}
 
@@ -345,7 +345,7 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 			}
 			if (pair.isExpired()) {
 				removedPair = this.removeCurrentPairLocked(pair, true);
-				reason = PurgeReason.EXPIRY;
+				reason = PurgeReason.EXPIRED;
 			} else if (Objects.equals(pair.getValue(), value)) {
 				removedPair = this.removeCurrentPairLocked(pair, true);
 			} else {
@@ -361,7 +361,7 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 	/**
 	 * 清空所有 entry。
 	 * <p>
-	 * 已经过期的 entry 按 {@link PurgeReason#EXPIRY} 通知，仍有效的 entry 按 {@link PurgeReason#EXPLICIT} 通知。
+	 * 已经过期的 entry 按 {@link PurgeReason#EXPIRED} 通知，仍有效的 entry 按 {@link PurgeReason#CLEARED} 通知。
 	 */
 	@Override
 	public void clear() {
@@ -374,11 +374,11 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 		} finally {
 			writeLock.unlock();
 		}
-		pairs.forEach(pair -> this.notifyListener(pair, pair.isExpired() ? PurgeReason.EXPIRY : PurgeReason.EXPLICIT, false));
+		pairs.forEach(pair -> this.notifyListener(pair, pair.isExpired() ? PurgeReason.EXPIRED : PurgeReason.CLEARED, false));
 	}
 
 	/**
-	 * 替换仍有效的 entry value，并保留原 TTL 与监听器。
+	 * 替换仍有效的 entry value，并保留原存活时间与监听器。
 	 * <p>
 	 * key 不存在或 entry 已过期时返回 {@code null}。
 	 */
@@ -400,14 +400,14 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 			return pair.setValue(value);
 		} finally {
 			writeLock.unlock();
-			this.notifyListener(expiredPair, PurgeReason.EXPIRY, false);
+			this.notifyListener(expiredPair, PurgeReason.EXPIRED, false);
 		}
 	}
 
 	/**
 	 * 仅当 key 当前映射到 oldValue 时替换为 newValue。
 	 * <p>
-	 * 替换成功时保留原 TTL 与监听器；已过期 entry 会被清理并返回 {@code false}。
+	 * 替换成功时保留原存活时间与监听器；已过期 entry 会被清理并返回 {@code false}。
 	 */
 	@Override
 	public boolean replace(K key, V oldValue, V newValue) {
@@ -432,7 +432,7 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 			return true;
 		} finally {
 			writeLock.unlock();
-			this.notifyListener(expiredPair, PurgeReason.EXPIRY, false);
+			this.notifyListener(expiredPair, PurgeReason.EXPIRED, false);
 		}
 	}
 
@@ -460,7 +460,7 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 		} finally {
 			writeLock.unlock();
 		}
-		expiredPairs.forEach(pair -> this.notifyListener(pair, PurgeReason.EXPIRY, false));
+		expiredPairs.forEach(pair -> this.notifyListener(pair, PurgeReason.EXPIRED, false));
 	}
 
 	/**
@@ -468,21 +468,21 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 	 */
 	@Override
 	public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
-		return this.computeIfAbsent(key, mappingFunction, ttl, listener);
+		return this.computeIfAbsent(key, mappingFunction, timeToLive, listener);
 	}
 
 	/**
-	 * key 不存在或仅存在过期 entry 时，根据 mappingFunction 计算并使用指定 TTL 写入新 value。
+	 * key 不存在或仅存在过期 entry 时，根据 mappingFunction 计算并使用指定存活时间写入新 value。
 	 */
-	public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction, Duration ttl) {
-		return this.computeIfAbsent(key, mappingFunction, ttl, listener);
+	public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction, Duration timeToLive) {
+		return this.computeIfAbsent(key, mappingFunction, timeToLive, listener);
 	}
 
 	/**
 	 * key 不存在或仅存在过期 entry 时，根据 mappingFunction 计算并使用指定监听器写入新 value。
 	 */
 	public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction, PurgeListener<K, V> listener) {
-		return this.computeIfAbsent(key, mappingFunction, ttl, listener);
+		return this.computeIfAbsent(key, mappingFunction, timeToLive, listener);
 	}
 
 	/**
@@ -490,7 +490,7 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 	 * <p>
 	 * mappingFunction 返回 {@code null} 时不建立映射；如果旧 entry 已过期，会先按过期原因清理旧 entry。
 	 */
-	public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction, Duration ttl, PurgeListener<K, V> listener) {
+	public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction, Duration timeToLive, PurgeListener<K, V> listener) {
 		this.requireNonNullKey(key);
 		Objects.requireNonNull(mappingFunction, "mappingFunction");
 		Pair<K, V> expiredPair = null;
@@ -505,14 +505,14 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 				expiredPair = this.removeCurrentPairLocked(pair, true);
 				return null;
 			}
-			Pair<K, V> newPair = this.createPair(key, newValue, ttl, listener);
+			Pair<K, V> newPair = this.createPair(key, newValue, timeToLive, listener);
 			expiredPair = Objects.nonNull(pair) ? this.removeCurrentPairLocked(pair, true) : null;
 			storage.put(key, newPair);
-			this.addDelayQueueLocked(newPair);
+			this.addToDelayQueueLocked(newPair);
 			return newValue;
 		} finally {
 			writeLock.unlock();
-			this.notifyListener(expiredPair, PurgeReason.EXPIRY, false);
+			this.notifyListener(expiredPair, PurgeReason.EXPIRED, false);
 		}
 	}
 
@@ -535,7 +535,7 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 			}
 			if (pair.isExpired()) {
 				removedPair = this.removeCurrentPairLocked(pair, true);
-				reason = PurgeReason.EXPIRY;
+				reason = PurgeReason.EXPIRED;
 				return null;
 			}
 			V newValue = remappingFunction.apply(key, pair.getValue());
@@ -556,30 +556,30 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 	 */
 	@Override
 	public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
-		return this.compute(key, remappingFunction, ttl, listener);
+		return this.compute(key, remappingFunction, timeToLive, listener);
 	}
 
 	/**
-	 * 按 compute 语义重新计算映射，并在新建 entry 时使用指定 TTL。
+	 * 按 compute 语义重新计算映射，并在新建 entry 时使用指定存活时间。
 	 */
-	public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction, Duration ttl) {
-		return this.compute(key, remappingFunction, ttl, listener);
+	public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction, Duration timeToLive) {
+		return this.compute(key, remappingFunction, timeToLive, listener);
 	}
 
 	/**
 	 * 按 compute 语义重新计算映射，并在新建 entry 时使用指定监听器。
 	 */
 	public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction, PurgeListener<K, V> listener) {
-		return this.compute(key, remappingFunction, ttl, listener);
+		return this.compute(key, remappingFunction, timeToLive, listener);
 	}
 
 	/**
 	 * 按 compute 语义重新计算映射。
 	 * <p>
 	 * 已过期 entry 传给 remappingFunction 的旧值为 {@code null}；如果计算结果非空，会新建 pair 并应用传入
-	 * TTL/listener，而不是原地复活旧 pair。
+	 * 存活时间和监听器，而不是原地复活旧 pair。
 	 */
-	public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction, Duration ttl, PurgeListener<K, V> listener) {
+	public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction, Duration timeToLive, PurgeListener<K, V> listener) {
 		this.requireNonNullKey(key);
 		Objects.requireNonNull(remappingFunction, "remappingFunction");
 		Pair<K, V> removedPair = null;
@@ -592,18 +592,18 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 			V newValue = remappingFunction.apply(key, oldValue);
 			if (Objects.isNull(newValue)) {
 				removedPair = this.removeCurrentPairLocked(pair, true);
-				reason = live ? PurgeReason.EXPLICIT : PurgeReason.EXPIRY;
+				reason = live ? PurgeReason.EXPLICIT : PurgeReason.EXPIRED;
 				return null;
 			}
 			if (live) {
 				pair.setValue(newValue);
 				return newValue;
 			}
-			Pair<K, V> newPair = this.createPair(key, newValue, ttl, listener);
+			Pair<K, V> newPair = this.createPair(key, newValue, timeToLive, listener);
 			removedPair = this.removeCurrentPairLocked(pair, true);
 			storage.put(key, newPair);
-			this.addDelayQueueLocked(newPair);
-			reason = PurgeReason.EXPIRY;
+			this.addToDelayQueueLocked(newPair);
+			reason = PurgeReason.EXPIRED;
 			return newValue;
 		} finally {
 			writeLock.unlock();
@@ -616,29 +616,29 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 	 */
 	@Override
 	public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
-		return this.merge(key, value, remappingFunction, ttl, listener);
+		return this.merge(key, value, remappingFunction, timeToLive, listener);
 	}
 
 	/**
-	 * 按 merge 语义合并映射，并在新建 entry 时使用指定 TTL。
+	 * 按 merge 语义合并映射，并在新建 entry 时使用指定存活时间。
 	 */
-	public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction, Duration ttl) {
-		return this.merge(key, value, remappingFunction, ttl, listener);
+	public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction, Duration timeToLive) {
+		return this.merge(key, value, remappingFunction, timeToLive, listener);
 	}
 
 	/**
 	 * 按 merge 语义合并映射，并在新建 entry 时使用指定监听器。
 	 */
 	public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction, PurgeListener<K, V> listener) {
-		return this.merge(key, value, remappingFunction, ttl, listener);
+		return this.merge(key, value, remappingFunction, timeToLive, listener);
 	}
 
 	/**
 	 * 按 merge 语义合并映射。
 	 * <p>
-	 * key 不存在或仅存在过期 entry 时直接写入 value，并使用传入 TTL/listener 创建新 pair。
+	 * key 不存在或仅存在过期 entry 时直接写入 value，并使用传入的存活时间和监听器创建新 pair。
 	 */
-	public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction, Duration ttl, PurgeListener<K, V> listener) {
+	public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction, Duration timeToLive, PurgeListener<K, V> listener) {
 		this.requireNonNullKey(key);
 		this.requireNonNullValue(value);
 		Objects.requireNonNull(remappingFunction, "remappingFunction");
@@ -649,11 +649,11 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 			Pair<K, V> pair = storage.get(key);
 			boolean live = Objects.nonNull(pair) && !pair.isExpired();
 			if (!live) {
-				Pair<K, V> newPair = this.createPair(key, value, ttl, listener);
+				Pair<K, V> newPair = this.createPair(key, value, timeToLive, listener);
 				removedPair = this.removeCurrentPairLocked(pair, true);
 				storage.put(key, newPair);
-				this.addDelayQueueLocked(newPair);
-				reason = PurgeReason.EXPIRY;
+				this.addToDelayQueueLocked(newPair);
+				reason = PurgeReason.EXPIRED;
 				return value;
 			}
 			V newValue = remappingFunction.apply(pair.getValue(), value);
@@ -676,7 +676,7 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 	 */
 	@Override
 	public int size() {
-		this.cleanupExpired(false);
+		this.cleanupExpiredEntries(false);
 		readLock.lock();
 		try {
 			return storage.size();
@@ -690,7 +690,7 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 	 */
 	@Override
 	public boolean isEmpty() {
-		this.cleanupExpired(false);
+		this.cleanupExpiredEntries(false);
 		readLock.lock();
 		try {
 			return storage.isEmpty();
@@ -709,7 +709,7 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 			return false;
 		}
 		if (pair.isExpired()) {
-			this.removeCurrentPair(pair, PurgeReason.EXPIRY, true, false);
+			this.removeCurrentPair(pair, PurgeReason.EXPIRED, true, false);
 			return false;
 		}
 		return true;
@@ -797,7 +797,7 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 	 */
 	@Override
 	public String toString() {
-		this.cleanupExpired(false);
+		this.cleanupExpiredEntries(false);
 		Map<K, V> snapshot = new LinkedHashMap<>();
 		readLock.lock();
 		try {
@@ -810,7 +810,7 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 
 	protected Thread buildCleanupThread(ThreadBuilder threadBuilder) {
 		if (Objects.nonNull(threadBuilder)) {
-			return threadBuilder.task(new LoopRunnable(() -> this.cleanupExpired(true))).start().build();
+			return threadBuilder.task(new LoopRunnable(() -> this.cleanupExpiredEntries(true))).start().build();
 		}
 		return null;
 	}
@@ -833,7 +833,7 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 	 * 快照用于弱一致视图遍历；返回后仍需在使用点进行 pair 身份校验。
 	 */
 	protected ArrayList<Pair<K, V>> snapshotPairs() {
-		this.cleanupExpired(false);
+		this.cleanupExpiredEntries(false);
 		ArrayList<Pair<K, V>> pairs = new ArrayList<>();
 		readLock.lock();
 		try {
@@ -862,7 +862,7 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 	/**
 	 * 将带过期时间的 pair 加入延迟队列。
 	 */
-	protected void addDelayQueueLocked(Pair<K, V> pair) {
+	protected void addToDelayQueueLocked(Pair<K, V> pair) {
 		if (Objects.nonNull(pair) && Objects.nonNull(pair.getExpireTime())) {
 			delayQueue.add(pair);
 		}
@@ -871,7 +871,7 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 	/**
 	 * 从延迟队列移除带过期时间的 pair。
 	 */
-	protected void removeDelayQueueLocked(Pair<K, V> pair) {
+	protected void removeFromDelayQueueLocked(Pair<K, V> pair) {
 		if (Objects.nonNull(pair) && Objects.nonNull(pair.getExpireTime())) {
 			delayQueue.remove(pair);
 		}
@@ -893,7 +893,7 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 		}
 		storage.remove(pair.getKey());
 		if (removeDelayQueue) {
-			this.removeDelayQueueLocked(pair);
+			this.removeFromDelayQueueLocked(pair);
 		}
 		return pair;
 	}
@@ -901,7 +901,7 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 	/**
 	 * 按 pair 身份删除当前映射并通知监听器。
 	 */
-	protected Pair<K, V> removeCurrentPair(Pair<K, V> pair, PurgeReason reason, boolean removeDelayQueue, boolean swallowListenerException) {
+	protected Pair<K, V> removeCurrentPair(Pair<K, V> pair, PurgeReason reason, boolean removeDelayQueue, boolean suppressListenerException) {
 		Pair<K, V> removedPair;
 		writeLock.lock();
 		try {
@@ -909,32 +909,32 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 		} finally {
 			writeLock.unlock();
 		}
-		this.notifyListener(removedPair, reason, swallowListenerException);
+		this.notifyListener(removedPair, reason, suppressListenerException);
 		return removedPair;
 	}
 
 	/**
 	 * 通知被替换的旧 entry。
 	 * <p>
-	 * 如果旧 entry 在被替换时已经过期，则它从调用者视角属于过期清理而非显式删除。
+	 * 如果旧 entry 在被替换时已经过期，则它从调用者视角属于过期清理而非替换。
 	 */
-	protected void notifyReplacement(Pair<K, V> oldPair, boolean swallowListenerException) {
+	protected void notifyReplacement(Pair<K, V> oldPair, boolean suppressListenerException) {
 		if (Objects.isNull(oldPair)) {
 			return;
 		}
-		this.notifyListener(oldPair, oldPair.isExpired() ? PurgeReason.EXPIRY : PurgeReason.EXPLICIT, swallowListenerException);
+		this.notifyListener(oldPair, oldPair.isExpired() ? PurgeReason.EXPIRED : PurgeReason.REPLACED, suppressListenerException);
 	}
 
 	/**
 	 * 清理过期 entry。
 	 *
-	 * @param wait 是否阻塞等待下一个过期 entry；后台清理线程传 {@code true}，惰性清理传 {@code false}
+	 * @param blocking 是否阻塞等待下一个过期 entry；后台清理线程传 {@code true}，惰性清理传 {@code false}
 	 */
-	protected void cleanupExpired(boolean wait) {
+	protected void cleanupExpiredEntries(boolean blocking) {
 		while (true) {
 			Pair<K, V> pair;
 			try {
-				pair = wait ? delayQueue.take() : delayQueue.poll();
+				pair = blocking ? delayQueue.take() : delayQueue.poll();
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 				return;
@@ -942,16 +942,16 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 			if (Objects.isNull(pair)) {
 				return;
 			}
-			this.removeCurrentPair(pair, PurgeReason.EXPIRY, false, wait);
+			this.removeCurrentPair(pair, PurgeReason.EXPIRED, false, blocking);
 		}
 	}
 
 	/**
 	 * 通知清理监听器。
 	 *
-	 * @param swallowListenerException 是否吞掉监听器异常；后台异步清理为 {@code true}
+	 * @param suppressListenerException 是否抑制监听器异常；后台异步清理为 {@code true}
 	 */
-	protected void notifyListener(Pair<K, V> pair, PurgeReason reason, boolean swallowListenerException) {
+	protected void notifyListener(Pair<K, V> pair, PurgeReason reason, boolean suppressListenerException) {
 		if (Objects.isNull(pair)) {
 			return;
 		}
@@ -962,7 +962,7 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 		try {
 			listener.onPurge(pair.getKey(), pair.getValue(), reason);
 		} catch (RuntimeException e) {
-			if (!swallowListenerException) {
+			if (!suppressListenerException) {
 				throw e;
 			}
 			log.log(Level.WARNING, "Purge listener threw exception during async cleanup.", e);
@@ -1010,6 +1010,13 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 	 */
 	@Getter
 	protected static class Pair<K, V> extends AbstractMap.SimpleEntry<K, V> implements InstantDelayed {
+		/**
+		 * 当前 value。
+		 * <p>
+		 * {@link ConcurrentExpiringMap} 的 live entry 会在写锁内原地更新 value，读路径可能通过快照在锁外读取。
+		 * 使用 {@code volatile} 保证这些弱一致读取能看到已发布的新值。
+		 */
+		protected volatile V value;
 		protected final Instant expireTime;
 		protected final PurgeListener<K, V> listener;
 
@@ -1018,8 +1025,27 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 		 */
 		public Pair(K key, V value, Instant expireTime, PurgeListener<K, V> listener) {
 			super(key, value);
+			this.value = value;
 			this.expireTime = expireTime;
 			this.listener = listener;
+		}
+
+		/**
+		 * 返回当前 value。
+		 */
+		@Override
+		public V getValue() {
+			return value;
+		}
+
+		/**
+		 * 更新当前 value，并返回更新前的值。
+		 */
+		@Override
+		public V setValue(V value) {
+			V oldValue = this.value;
+			this.value = value;
+			return oldValue;
 		}
 
 		/**
@@ -1051,15 +1077,15 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 		 * <p>
 		 * 默认使用 {@link HashMap}，如需稳定遍历顺序可传入 {@link LinkedHashMap}。
 		 */
-		protected Map<K, Pair<K, V>> storage = new HashMap<>(DEFAULT_INITIAL_CAPACITY, DEFAULT_LOAD_FACTOR);
+		protected Map<K, Pair<K, V>> storage = new HashMap<>(INITIAL_CAPACITY, LOAD_FACTOR);
 		/**
 		 * 延迟队列。
 		 */
 		protected DelayQueue<Pair<K, V>> delayQueue = new DelayQueue<>();
 		/**
-		 * 默认缓存 TTL。
+		 * 默认缓存存活时间。
 		 */
-		protected Duration ttl;
+		protected Duration timeToLive;
 		/**
 		 * 默认缓存失效监听器。
 		 */
@@ -1135,7 +1161,7 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 		@Override
 		public ConcurrentExpiringMap<K, V> build() {
 			ThreadBuilder cleanupThreadBuilder = this.createCleanupThreadBuilder();
-			return new ConcurrentExpiringMap<>(storage, delayQueue, ttl, listener, cleanupThreadBuilder);
+			return new ConcurrentExpiringMap<>(storage, delayQueue, timeToLive, listener, cleanupThreadBuilder);
 		}
 	}
 
@@ -1168,7 +1194,7 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 					return true;
 				}
 				if (pair.isExpired()) {
-					ConcurrentExpiringMap.this.removeCurrentPair(pair, PurgeReason.EXPIRY, true, false);
+					ConcurrentExpiringMap.this.removeCurrentPair(pair, PurgeReason.EXPIRED, true, false);
 				}
 			}
 			return false;
@@ -1293,7 +1319,7 @@ public class ConcurrentExpiringMap<K, V> implements ConcurrentMap<K, V> {
 				return current.setValue(value);
 			} finally {
 				writeLock.unlock();
-				ConcurrentExpiringMap.this.notifyListener(expiredPair, PurgeReason.EXPIRY, false);
+				ConcurrentExpiringMap.this.notifyListener(expiredPair, PurgeReason.EXPIRED, false);
 			}
 		}
 

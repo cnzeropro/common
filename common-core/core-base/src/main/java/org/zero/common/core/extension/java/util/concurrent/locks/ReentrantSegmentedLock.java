@@ -28,7 +28,7 @@ public class ReentrantSegmentedLock implements SegmentedLock {
 	 * 使用默认段数创建分段锁。
 	 */
 	public ReentrantSegmentedLock() {
-		this(MapUtil.DEFAULT_INITIAL_CAPACITY);
+		this(MapUtil.INITIAL_CAPACITY);
 	}
 
 	/**

@@ -44,6 +44,6 @@ public class ThreadBuilder implements Builder<Thread, ThreadBuilder> {
 	}
 
 	protected static String generateName() {
-		return "Thread" + THREAD_NUMBER.getAndIncrement();
+		return "Thread-" + THREAD_NUMBER.getAndIncrement();
 	}
 }

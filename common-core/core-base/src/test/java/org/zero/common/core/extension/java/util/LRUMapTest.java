@@ -7,6 +7,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -17,7 +18,7 @@ class LRUMapTest {
 
 	@Test
 	void shouldEvictLeastRecentlyUsedEntry() {
-		Map<String, String> map = LRUMap.create(true, 3);
+		Map<String, String> map = new LRUMap<>(3);
 		map.put("1", "1");
 		map.put("2", "2");
 		map.put("3", "3");
@@ -31,5 +32,18 @@ class LRUMapTest {
 		assertFalse(map.containsKey("2"));
 		assertEquals("3", map.get("3"));
 		assertEquals("4", map.get("4"));
+	}
+
+	@Test
+	void shouldRejectNonPositiveMaxCapacity() {
+		assertThrows(IllegalArgumentException.class, () -> new LRUMap<>(0));
+		assertThrows(IllegalArgumentException.class, () -> new LRUMap<>(-1));
+	}
+
+	@Test
+	void shouldExposeMaxCapacity() {
+		LRUMap<String, String> map = new LRUMap<>(2);
+
+		assertEquals(2, map.maxCapacity());
 	}
 }

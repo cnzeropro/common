@@ -23,7 +23,7 @@ public class MapUtil {
 	/**
 	 * The default initial capacity - MUST be a power of two.
 	 */
-	public static final int DEFAULT_INITIAL_CAPACITY = 1 << 4; // aka 16
+	public static final int INITIAL_CAPACITY = 1 << 4; // aka 16
 
 	/**
 	 * The maximum capacity, used if a higher value is implicitly specified
@@ -35,12 +35,12 @@ public class MapUtil {
 	/**
 	 * The load factor used when none specified in constructor.
 	 */
-	public static final float DEFAULT_LOAD_FACTOR = 0.75f;
+	public static final float LOAD_FACTOR = 0.75f;
 
 	/**
 	 * 默认容量
 	 */
-	public static final int DEFAULT_CAPACITY = (int) (DEFAULT_INITIAL_CAPACITY * DEFAULT_LOAD_FACTOR); // 12
+	public static final int DEFAULT_CAPACITY = (int) (INITIAL_CAPACITY * LOAD_FACTOR); // 12
 
 	/**
 	 * The bin count threshold for using a tree rather than list for a
@@ -87,7 +87,7 @@ public class MapUtil {
 	}
 
 	public static int calculateCapacity(int numMappings) {
-		return (int) Math.ceil(numMappings / DEFAULT_LOAD_FACTOR);
+		return (int) Math.ceil(numMappings / LOAD_FACTOR);
 	}
 
 	/**

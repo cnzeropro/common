@@ -83,7 +83,7 @@ class ReferenceBoundedMapTest {
 
 	@Test
 	void putIfAbsentReplaceAndGetOrDefaultRespectPresenceInsteadOfNullValue() {
-		List<PurgeEvent> expiryEvents = new CopyOnWriteArrayList<>();
+		List<PurgeEvent> expiredEvents = new CopyOnWriteArrayList<>();
 		ReferenceBoundedMap<String, String> map = this.newLazyMap();
 
 		map.put("existing", "value-1");
@@ -101,12 +101,12 @@ class ReferenceBoundedMapTest {
 		assertEquals("value-3", map.get("existing"));
 		assertTrue(map.replace("existing", "value-3", "value-4"));
 		assertEquals("value-4", map.get("existing"));
-		assertEquals("value-4", map.replace("existing", "value-5", ReferenceType.STRONG, Duration.ofMillis(40), listener(expiryEvents)));
+		assertEquals("value-4", map.replace("existing", "value-5", ReferenceType.STRONG, Duration.ofMillis(40), listener(expiredEvents)));
 		assertEquals("value-5", map.get("existing"));
 
 		sleep(Duration.ofMillis(80));
 		assertNull(map.get("existing"));
-		assertEvents(expiryEvents, event("existing", "value-5", PurgeReason.EXPIRY));
+		assertEvents(expiredEvents, event("existing", "value-5", PurgeReason.EXPIRED));
 	}
 
 	@Test
@@ -144,7 +144,7 @@ class ReferenceBoundedMapTest {
 		assertFalse(map.containsKey("nullable"));
 		assertEquals("{a=A2}", map.toString());
 		assertEvents(events,
-				event("a", "A", PurgeReason.EXPLICIT),
+				event("a", "A", PurgeReason.REPLACED),
 				event("b", "B", PurgeReason.EXPLICIT),
 				event("nullable", null, PurgeReason.EXPLICIT)
 		);
@@ -275,7 +275,7 @@ class ReferenceBoundedMapTest {
 	}
 
 	@Test
-	void staleExpiryAndReclamationCleanupDoNotRemoveNewMapping() {
+	void staleExpiredAndCollectedCleanupDoNotRemoveNewMapping() {
 		ReferenceBoundedMap<String, String> map = this.newLazyMap();
 
 		ReferenceBoundedMap.Pair<String, String> expiredOldPair = map.createPair("expiry", "old", ReferenceType.STRONG, Instant.now().minusMillis(1), null);
@@ -301,12 +301,12 @@ class ReferenceBoundedMapTest {
 			map.writeLock.unlock();
 		}
 		assertTrue(((Reference<?>) reclaimedOldPair).enqueue());
-		map.cleanupReclaimedEntries(false);
+		map.cleanupCollectedEntries(false);
 		assertEquals("new", map.get("reclaim"));
 	}
 
 	@Test
-	void referenceQueueCleanupNotifiesReclamationAndRemovesPair() {
+	void referenceQueueCleanupNotifiesCollectedAndRemovesPair() {
 		List<PurgeEvent> events = new CopyOnWriteArrayList<>();
 		ReferenceBoundedMap<String, String> map = this.newLazyMap();
 		ReferenceBoundedMap.Pair<String, String> pair = map.createPair(
@@ -325,9 +325,9 @@ class ReferenceBoundedMapTest {
 		}
 
 		assertTrue(((Reference<?>) pair).enqueue());
-		map.cleanupReclaimedEntries(false);
+		map.cleanupCollectedEntries(false);
 		assertFalse(map.containsKey("weak"));
-		assertEvents(events, event("weak", null, PurgeReason.RECLAMATION));
+		assertEvents(events, event("weak", null, PurgeReason.COLLECTED));
 	}
 
 	@Test
@@ -354,13 +354,13 @@ class ReferenceBoundedMapTest {
 		assertEvents(events,
 				event("first", "1", PurgeReason.EXPLICIT),
 				event("second", "updated", PurgeReason.EXPLICIT),
-				event("clear-1", "A", PurgeReason.EXPLICIT),
-				event("clear-2", "B", PurgeReason.EXPLICIT)
+				event("clear-1", "A", PurgeReason.CLEARED),
+				event("clear-2", "B", PurgeReason.CLEARED)
 		);
 	}
 
 	@Test
-	void clearNotifiesExpiredEntriesAsExpiry() {
+	void clearNotifiesExpiredEntriesAsExpired() {
 		List<PurgeEvent> events = new CopyOnWriteArrayList<>();
 		ReferenceBoundedMap<String, String> map = this.newLazyMap();
 
@@ -369,11 +369,11 @@ class ReferenceBoundedMapTest {
 		map.clear();
 
 		assertTrue(map.isEmpty());
-		assertEvents(events, event("expired", "value", PurgeReason.EXPIRY));
+		assertEvents(events, event("expired", "value", PurgeReason.EXPIRED));
 	}
 
 	@Test
-	void clearReportsExpiryAndExplicitForMixedEntries() {
+	void clearReportsExpiredAndClearedForMixedEntries() {
 		List<PurgeEvent> events = new CopyOnWriteArrayList<>();
 		ReferenceBoundedMap<String, String> map = this.newLazyMap();
 
@@ -384,8 +384,8 @@ class ReferenceBoundedMapTest {
 
 		assertTrue(map.isEmpty());
 		assertEvents(events,
-				event("live", "A", PurgeReason.EXPLICIT),
-				event("expired", "B", PurgeReason.EXPIRY)
+				event("live", "A", PurgeReason.CLEARED),
+				event("expired", "B", PurgeReason.EXPIRED)
 		);
 	}
 
@@ -424,7 +424,7 @@ class ReferenceBoundedMapTest {
 		sleep(Duration.ofMillis(80));
 		assertNull(removeMap.remove("expired"));
 		assertFalse(removeMap.containsKey("expired"));
-		assertEvents(events, event("expired", "value", PurgeReason.EXPIRY));
+		assertEvents(events, event("expired", "value", PurgeReason.EXPIRED));
 
 		ReferenceBoundedMap<String, String> iteratorMap = this.newLazyMap();
 		iteratorMap.put("key", "value", Duration.ofMillis(40), listener(events));
