@@ -4,9 +4,10 @@ plugins {
 
 /*
  * 依赖布局。
- * 作用：Jakarta 适配层在根平台之上叠加 Jakarta BOM，再统一替换 `javax` API。
+ * 作用：Jakarta 适配层叠加 Jakarta BOM，并为复用的电话校验规则补齐 Hutool BOM。
  */
 dependencies {
+    implementation(platform(libs.cn.hutool.hutool.bom))
     implementation(platform(libs.jakarta.platform.jakarta.jakartaee.bom))
     compileOnly(project(':core-base'))
     compileOnly(project(':common-data'))
@@ -15,7 +16,11 @@ dependencies {
     implementation('jakarta.websocket:jakarta.websocket-api')
     implementation('jakarta.annotation:jakarta.annotation-api')
     implementation('jakarta.mail:jakarta.mail-api')
+    implementation('cn.hutool:hutool-core')
     implementation('org.slf4j:slf4j-api')
+    testImplementation(project(':core-base')) {
+        transitive = false
+    }
 
     /*
      * Lombok 编译支持。

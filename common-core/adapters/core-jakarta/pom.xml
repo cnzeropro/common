@@ -55,6 +55,11 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
+			<groupId>cn.hutool</groupId>
+			<artifactId>hutool-core</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
 			<groupId>jakarta.mail</groupId>
 			<artifactId>jakarta.mail-api</artifactId>
 			<optional>true</optional>
@@ -154,4 +159,3 @@
 		</plugins>
 	</build>
 </project>
-
