@@ -1,7 +1,8 @@
-package org.zero.common.core.extension.jakarta.validation.validator;
+package org.zero.common.core.extension.jakarta.validation.constraints;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
+import org.zero.common.core.extension.jakarta.validation.internal.constraintvalidators.PhoneValidator;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -34,12 +35,12 @@ public @interface Phone {
 	/**
 	 * 国际化消息模板。
 	 * <p>
-	 * 默认值使用 Bean Validation 消息占位符，消息键为 {@code jakarta.validation.validator.Phone.message}。
+	 * 默认值使用 Bean Validation 消息占位符，消息键为 {@code jakarta.validation.constraints.Phone.message}。
 	 * 本模块在 classpath 根路径提供 {@code ValidationMessages*.properties}，可被 Bean Validation 默认消息插值器读取。
 	 *
 	 * @return 消息模板
 	 */
-	String message() default "{jakarta.validation.validator.Phone.message}";
+	String message() default "{jakarta.validation.constraints.Phone.message}";
 
 	/**
 	 * 约束分组。

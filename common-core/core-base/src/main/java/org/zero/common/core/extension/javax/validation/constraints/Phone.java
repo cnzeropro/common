@@ -1,4 +1,6 @@
-package org.zero.common.core.extension.javax.validation.validator;
+package org.zero.common.core.extension.javax.validation.constraints;
+
+import org.zero.common.core.extension.javax.validation.internal.constraintvalidators.PhoneValidator;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -9,10 +11,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 校验座机号码格式。
+ * 校验电话号码格式。
  * <p>
- * 当前支持中国大陆普通座机号码，以及 400/800 服务号码。约束只校验非空白值的格式：{@code null}、空字符串及
- * 纯空白字符串视为未提供值并通过；必填语义请组合 {@code @NotBlank}。
+ * 电话号码是手机号与座机号码的并集。约束只校验非空白值的格式：{@code null}、空字符串及纯空白字符串
+ * 视为未提供值并通过；必填语义请组合 {@code @NotBlank}。
  *
  * @author Zero (cnzeropro@163.com)
  * @since 2026/05/18
@@ -27,18 +29,18 @@ import java.lang.annotation.Target;
 })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Constraint(validatedBy = LandlineValidator.class)
-public @interface Landline {
+@Constraint(validatedBy = PhoneValidator.class)
+public @interface Phone {
 
 	/**
 	 * 国际化消息模板。
 	 * <p>
-	 * 默认值使用 Bean Validation 消息占位符，消息键为 {@code javax.validation.validator.Landline.message}。
+	 * 默认值使用 Bean Validation 消息占位符，消息键为 {@code javax.validation.constraints.Phone.message}。
 	 * 本模块在 classpath 根路径提供 {@code ValidationMessages*.properties}，可被 Bean Validation 默认消息插值器读取。
 	 *
 	 * @return 消息模板
 	 */
-	String message() default "{javax.validation.validator.Landline.message}";
+	String message() default "{javax.validation.constraints.Phone.message}";
 
 	/**
 	 * 约束分组。

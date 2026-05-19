@@ -1,9 +1,11 @@
-package org.zero.common.core.extension.jakarta.validation.validator;
+package org.zero.common.core.extension.javax.validation.internal.constraintvalidators;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.PhoneUtil;
-import jakarta.validation.ConstraintValidator;
-import jakarta.validation.ConstraintValidatorContext;
+import org.zero.common.core.extension.javax.validation.constraints.Phone;
+
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
 
 /**
  * 电话号码约束校验器。
