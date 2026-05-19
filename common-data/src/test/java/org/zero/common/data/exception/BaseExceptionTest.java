@@ -232,17 +232,4 @@ class BaseExceptionTest {
 		assertEquals("tuple business error", exception.getLocalizedMessage());
 	}
 
-	@Test
-	void standardExceptionSubclassesShouldRemainCompatible() {
-		IllegalStateException cause = new IllegalStateException("boom");
-		CommonException commonException = new CommonException("plain");
-		UtilException utilException = new UtilException(cause);
-
-		assertEquals("plain", commonException.getMessage());
-		assertEquals("error", commonException.getLocalizedMessage());
-
-		assertEquals("boom", utilException.getMessage());
-		assertSame(cause, utilException.getCause());
-		assertEquals("error", utilException.getLocalizedMessage());
-	}
 }

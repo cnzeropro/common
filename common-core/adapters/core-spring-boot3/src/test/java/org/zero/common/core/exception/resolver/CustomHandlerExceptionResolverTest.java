@@ -3,25 +3,20 @@ package org.zero.common.core.exception.resolver;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.ProblemDetail;
 import org.springframework.web.servlet.ModelAndView;
 import org.zero.common.core.exception.ThrowableMessageSupplier;
 import org.zero.common.core.exception.handler.ThrowableHandler;
-import org.zero.common.core.exception.handler.ThrowableHandler.ResponseType;
-import org.zero.common.data.model.view.Result;
 
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 /**
- * {@link CustomHandlerExceptionResolver} 测试。
- *
  * @author Zero (cnzeropro@163.com)
- * @since 2026/4/15
+ * @since 2026/04/15
  */
 class CustomHandlerExceptionResolverTest {
 	private static final ThrowableMessageSupplier THROWABLE_MESSAGE_SUPPLIER = new ThrowableMessageSupplier() {
@@ -59,33 +54,36 @@ class CustomHandlerExceptionResolverTest {
 	}
 
 	@Test
-	void shouldStoreProblemDetailInRequestAttributeByDefault() {
+	void shouldStoreHandlerResultInRequestAttribute() {
+		Object handlerResult = new Object();
 		AttributeRequest request = new AttributeRequest();
 		ResponseStatusRecorder response = new ResponseStatusRecorder();
-		TestCustomHandlerExceptionResolver resolver = new TestCustomHandlerExceptionResolver(
-				new ThrowableHandler(THROWABLE_MESSAGE_SUPPLIER)
-		);
+		TestCustomHandlerExceptionResolver resolver =
+				new TestCustomHandlerExceptionResolver(new StubThrowableHandler(handlerResult));
 
-		ModelAndView modelAndView = resolver.invoke(request.createProxy(), response.createProxy(), new IllegalArgumentException("boom"));
+		ModelAndView modelAndView = resolver.invoke(
+				request.createProxy(),
+				response.createProxy(),
+				new IllegalArgumentException("boom")
+		);
 
 		assertEquals("error", modelAndView.getViewName());
 		assertEquals(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, response.status);
-		assertInstanceOf(ProblemDetail.class, request.attributes.get("jakarta.servlet.error.result"));
+		assertSame(handlerResult, request.attributes.get("jakarta.servlet.error.result"));
 	}
 
-	@Test
-	void shouldStoreResultInRequestAttributeWhenResponseTypeIsResult() {
-		AttributeRequest request = new AttributeRequest();
-		ResponseStatusRecorder response = new ResponseStatusRecorder();
-		TestCustomHandlerExceptionResolver resolver = new TestCustomHandlerExceptionResolver(
-				new ThrowableHandler(THROWABLE_MESSAGE_SUPPLIER, ResponseType.RESULT)
-		);
+	private static final class StubThrowableHandler extends ThrowableHandler {
+		private final Object result;
 
-		ModelAndView modelAndView = resolver.invoke(request.createProxy(), response.createProxy(), new IllegalArgumentException("boom"));
+		private StubThrowableHandler(Object result) {
+			super(THROWABLE_MESSAGE_SUPPLIER);
+			this.result = result;
+		}
 
-		assertEquals("error", modelAndView.getViewName());
-		assertEquals(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, response.status);
-		assertInstanceOf(Result.class, request.attributes.get("jakarta.servlet.error.result"));
+		@Override
+		public Object handle(Throwable throwable, Object... args) {
+			return result;
+		}
 	}
 
 	private static final class TestCustomHandlerExceptionResolver extends CustomHandlerExceptionResolver {

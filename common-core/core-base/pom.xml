@@ -703,7 +703,7 @@
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<configuration>
 					<includes>
-						<include>**/*MultiReleaseTest.class</include>
+						<include>**/*Test.class</include>
 					</includes>
 					<failIfNoTests>false</failIfNoTests>
 					<failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>

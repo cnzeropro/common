@@ -148,6 +148,10 @@ node scripts/metadata/verify.js gradle --verbose
 ## 测试策略
 
 - 框架：JUnit 5，匹配：`*Test`、`*Tests`、`*Spec`
+- 测试类命名遵循“一类一测”：被测类 `Xxx` 的测试类命名为 `XxxTest`，不要额外添加 `Javax`、`Jakarta`、`Functional`、`Compiled` 等前置或后置语义
+- 测试类必须放在与被测类对应的测试源码根和同名包下，例如 `src/main/java/org/example/Foo.java` 对应 `src/test/java/org/example/FooTest.java`，multi-release source set 也按各自源码根对应
+- 一个被测类只对应一个测试类；一个测试类也只验证一个被测类，不要在同一个测试类中混放多个生产类的测试
+- 多个测试共享的数据、对象构造或断言辅助逻辑应抽到测试夹具或 helper 类，且不要以 `Test`、`Tests`、`Spec` 结尾，避免被测试框架当作测试类
 - 已知陷阱：`SocketPingClientTest`（等待 `Scanner(System.in)`）、`JmhTests`（Benchmark）、`ChunkedByteBufferTest`、
   `ExcelUtilTest`、`ExportControllerTest`（依赖绝对路径或输出目录）
 

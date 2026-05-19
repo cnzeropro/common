@@ -25,43 +25,12 @@ class HttpStatusTest {
 	}
 
 	@Test
-	void constantsShouldRetainHistoricalAliasValues() {
-		assertEquals(org.zero.common.data.constant.HttpStatus.EARLY_HINTS, org.zero.common.data.constant.HttpStatus.CHECKPOINT);
-		assertEquals(org.zero.common.data.constant.HttpStatus.CONTENT_TOO_LARGE, org.zero.common.data.constant.HttpStatus.PAYLOAD_TOO_LARGE);
-		assertEquals(org.zero.common.data.constant.HttpStatus.CONTENT_TOO_LARGE, org.zero.common.data.constant.HttpStatus.REQUEST_ENTITY_TOO_LARGE);
-		assertEquals(org.zero.common.data.constant.HttpStatus.RANGE_NOT_SATISFIABLE, org.zero.common.data.constant.HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
-		assertEquals(org.zero.common.data.constant.HttpStatus.MISDIRECTED_REQUEST, org.zero.common.data.constant.HttpStatus.DESTINATION_LOCKED);
-		assertEquals(org.zero.common.data.constant.HttpStatus.UNPROCESSABLE_CONTENT, org.zero.common.data.constant.HttpStatus.UNPROCESSABLE_ENTITY);
-	}
-
-	@Test
 	void obsoleteAndUnusedStatusesShouldRemainResolvable() {
 		assertSame(HttpStatus.UNUSED_306, HttpStatus.resolve(306));
 		assertEquals("(Unused)", HttpStatus.UNUSED_306.reasonPhrase());
 		assertSame(HttpStatus.NOT_EXTENDED, HttpStatus.resolve(510));
 		assertEquals("Not Extended (OBSOLETED)", HttpStatus.NOT_EXTENDED.reasonPhrase());
 		assertSame(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED, HttpStatus.resolve(511));
-	}
-
-	@Test
-	void deprecatedConstantsShouldKeepDeprecatedAnnotations() throws NoSuchFieldException {
-		assertDeprecated(org.zero.common.data.constant.HttpStatus.class, "PROCESSING");
-		assertDeprecated(org.zero.common.data.constant.HttpStatus.class, "CHECKPOINT");
-		assertDeprecated(org.zero.common.data.constant.HttpStatus.class, "MOVED_TEMPORARILY");
-		assertDeprecated(org.zero.common.data.constant.HttpStatus.class, "USE_PROXY");
-		assertDeprecated(org.zero.common.data.constant.HttpStatus.class, "UNUSED_306");
-		assertDeprecated(org.zero.common.data.constant.HttpStatus.class, "PAYLOAD_TOO_LARGE");
-		assertDeprecated(org.zero.common.data.constant.HttpStatus.class, "REQUEST_ENTITY_TOO_LARGE");
-		assertDeprecated(org.zero.common.data.constant.HttpStatus.class, "REQUEST_URI_TOO_LONG");
-		assertDeprecated(org.zero.common.data.constant.HttpStatus.class, "REQUESTED_RANGE_NOT_SATISFIABLE");
-		assertDeprecated(org.zero.common.data.constant.HttpStatus.class, "UNUSED_418");
-		assertDeprecated(org.zero.common.data.constant.HttpStatus.class, "I_AM_A_TEAPOT");
-		assertDeprecated(org.zero.common.data.constant.HttpStatus.class, "INSUFFICIENT_SPACE_ON_RESOURCE");
-		assertDeprecated(org.zero.common.data.constant.HttpStatus.class, "METHOD_FAILURE");
-		assertDeprecated(org.zero.common.data.constant.HttpStatus.class, "DESTINATION_LOCKED");
-		assertDeprecated(org.zero.common.data.constant.HttpStatus.class, "UNPROCESSABLE_ENTITY");
-		assertDeprecated(org.zero.common.data.constant.HttpStatus.class, "BANDWIDTH_LIMIT_EXCEEDED");
-		assertDeprecated(org.zero.common.data.constant.HttpStatus.class, "NOT_EXTENDED");
 	}
 
 	@Test

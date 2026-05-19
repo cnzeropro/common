@@ -161,7 +161,7 @@ public final class MultiReleaseJava8ConventionPlugin extends AbstractJvmConventi
                         .plus(project.files(jarTask.flatMap(Jar::getArchiveFile)))
                 );
                 task.getJavaLauncher().set(toolchains.launcherFor(spec -> spec.getLanguageVersion().set(JavaLanguageVersion.of(toolchainVersion))));
-                task.include("**/*MultiReleaseTest.class");
+                task.include("**/*Test.class");
                 task.useJUnitPlatform();
             });
             project.getTasks().named("check").configure(task -> task.dependsOn(testTask));

@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
@@ -12,18 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @since 2025/12/25
  */
 class DataSizeTest {
-
-	@Test
-	void parseShouldPreferExactSuffixBeforeAbbreviation() {
-		assertEquals(DataUnit.BYTE, DataUnit.fromSuffix("B"));
-		assertEquals(DataUnit.MEBIBYTE, DataUnit.fromSuffix("M"));
-		assertEquals(DataUnit.MEBIBYTE, DataUnit.fromSuffix("m"));
-		assertEquals(DataUnit.MEBIBYTE, DataUnit.fromSuffix("MiB"));
-		assertEquals(DataUnit.MEGABYTE, DataUnit.fromSuffix("MB"));
-		assertEquals(DataUnit.QUEBIBYTE, DataUnit.fromSuffix("Q"));
-		assertEquals(DataUnit.QUETTABYTE, DataUnit.fromSuffix("QB"));
-	}
-
 	@Test
 	void parseShouldConvertFractionalUnitsWhenBytesAreExact() {
 		assertEquals(BigInteger.valueOf(1536L), DataSize.parse("1.5KiB").toBytes());
@@ -35,7 +22,6 @@ class DataSizeTest {
 		assertThrows(IllegalArgumentException.class, () -> DataSize.parse("1.9B"));
 		assertThrows(IllegalArgumentException.class, () -> DataSize.parse("1.1KiB"));
 		assertThrows(IllegalArgumentException.class, () -> DataSize.parse("5.18546Q"));
-		assertThrows(IllegalArgumentException.class, () -> DataUnit.fromSuffix(""));
 	}
 
 	@Test

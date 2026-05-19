@@ -1,12 +1,15 @@
 package org.zero.common.core.extension.java.security;
 
+import io.jsonwebtoken.security.KeyPairBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.security.KeyPair;
 import java.security.interfaces.ECKey;
+import java.security.interfaces.RSAKey;
 import java.security.spec.ECGenParameterSpec;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
@@ -14,6 +17,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @since 2026/4/17
  */
 class KeyPairBuilderTest {
+	@Test
+	void shouldGenerateRsaKeyPairWithConfiguredKeySize() {
+		KeyPair keyPair = KeyPairBuilder.builder("RSA")
+				.keySize(2048)
+				.build();
+
+		assertNotNull(keyPair.getPublic());
+		assertNotNull(keyPair.getPrivate());
+		assertEquals(2048, ((RSAKey) keyPair.getPrivate()).getModulus().bitLength());
+	}
+
 	@Test
 	void shouldGenerateEcKeyPairWithConfiguredKeySize() {
 		KeyPair keyPair = KeyPairBuilder.builder("EC")

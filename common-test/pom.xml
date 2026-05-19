@@ -339,7 +339,7 @@
 						<artifactId>maven-surefire-plugin</artifactId>
 						<configuration>
 							<includes>
-								<include>**/*LtwTest.class</include>
+								<include>**/LtwLoggableServiceTest.class</include>
 							</includes>
 							<argLine>-javaagent:${project.build.directory}/aspectj-agent/aspectjweaver.jar</argLine>
 						</configuration>
@@ -438,7 +438,7 @@
 						<artifactId>maven-surefire-plugin</artifactId>
 						<configuration>
 							<includes>
-								<include>**/*CtwTest.class</include>
+								<include>**/CtwLoggableServiceTest.class</include>
 							</includes>
 						</configuration>
 					</plugin>

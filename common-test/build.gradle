@@ -214,7 +214,7 @@ tasks.register('ltwTest', Test) { task ->
     task.classpath = ltwTestSourceSet.runtimeClasspath
     task.jvmArgs("-javaagent:${configurations.aspectjWeaverAgent.singleFile.absolutePath}")
     task.javaLauncher.set(toolchains.launcherFor(spec -> spec.getLanguageVersion().set(JavaLanguageVersion.of(8))))
-    task.include('**/*LtwTest.class')
+    task.include('**/LtwLoggableServiceTest.class')
     task.useJUnitPlatform()
 }
 
@@ -226,7 +226,7 @@ tasks.register('ctwTest', Test) { task ->
     task.classpath = files(ctwWovenOutputDirectory, ctwTestSourceSet.output.resourcesDir)
         .plus(ctwTestSourceSet.runtimeClasspath.minus(ctwTestSourceSet.output))
     task.javaLauncher.set(toolchains.launcherFor(spec -> spec.getLanguageVersion().set(JavaLanguageVersion.of(8))))
-    task.include('**/*CtwTest.class')
+    task.include('**/CtwLoggableServiceTest.class')
     task.useJUnitPlatform()
 }
 
