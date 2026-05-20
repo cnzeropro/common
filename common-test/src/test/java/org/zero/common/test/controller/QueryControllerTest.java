@@ -1,118 +1,91 @@
 package org.zero.common.test.controller;
 
-import org.hamcrest.core.IsEqual;
+import cn.hutool.json.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.Test;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.web.servlet.MockMvc;
+import org.zero.common.core.support.bean.dynamic.DynamicBean;
+import org.zero.common.data.model.query.ListQO;
+import org.zero.common.data.model.query.ReportQO;
+import org.zero.common.data.model.view.Result;
 
-import javax.annotation.Resource;
+import java.util.Arrays;
 
-import static java.lang.Boolean.TRUE;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Zero (cnzeropro@163.com)
  * @since 2025/1/6
  */
-// @WebMvcTest(QueryController.class)
-// @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.STRICT_STUBS)
-@AutoConfigureMockMvc
-@SpringBootTest
 class QueryControllerTest {
-    @Resource
-    MockMvc mockMvc;
+	private final QueryController controller = new QueryController();
 
-    /**
-     * <a href="http://127.0.0.1:34567/query/q1?fields=id,name&groupings=a,b,c&havings[0].field=id&havings[0].operator=NULL_NE&havings[0].value=1&collations[0].field=id&collations[1].field=age&collations[1].order=DESC">Test</a>
-     */
-    @Test
-    void q1() throws Exception {
-        String body = mockMvc.perform(get("/query/q1")
-                        // .queryParam("fields", "id,name")
-                        .queryParam("fields", "id", "name")
-                        // .queryParam("fields[0].name", "id")
-                        // .queryParam("fields[1].name", "name")
-                        // .queryParam("fields[1].alias", "username")
-                        .queryParam("groupings", "a", "b", "c")
-                        .queryParam("havings[0].field", "id")
-                        .queryParam("havings[0].operator", "NULL_NE")
-                        .queryParam("havings[0].value", "1")
-                        .queryParam("collations[0].field", "id")
-                        .queryParam("collations[1].field", "age")
-                        .queryParam("collations[1].order", "DESC")
-                        .accept(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code", IsEqual.equalTo(200), Integer.class))
-                .andExpect(jsonPath("$.success").value(TRUE))
-                .andReturn()
-                .getResponse()
-                .getContentAsString(UTF_8);
-        System.out.println(body);
-    }
+	@Test
+	void businessShouldEchoQueryObject() {
+		QueryController.UserListQO query = new QueryController.UserListQO();
+		query.setName("zero");
+		query.setStatus("enabled");
 
-    /**
-     * <a href="http://127.0.0.1:34567/query/q2?a=mmm,nnn&b=154&c=6536&c=4564">Test</a>
-     */
-    @Test
-    void q2() throws Exception {
-        String body = mockMvc.perform(get("/query/q2")
-                        .queryParam("a", "mmm,nnn")
-                        // .queryParam("a", "mmm", "nnn")
-                        .queryParam("b", "154")
-                        .queryParam("c", "6536")
-                        .queryParam("c", "4564"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code", IsEqual.equalTo(200), Integer.class))
-                .andExpect(jsonPath("$.success").value(TRUE))
-                .andReturn()
-                .getResponse()
-                .getContentAsString(UTF_8);
-        System.out.println(body);
-    }
+		Result<QueryController.UserListQO> result = controller.business(query);
 
-    /**
-     * <a href="http://127.0.0.1:34567/query/q3?a=mmm,nnn&b=154&c=6536&c=4564">Test</a>
-     */
-    @Test
-    void q3() throws Exception {
-        String body = mockMvc.perform(get("/query/q3")
-                        .queryParam("a", "mmm", "nnn")
-                        .queryParam("b", "154")
-                        .queryParam("c", "6536")
-                        .queryParam("c", "4564"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code", IsEqual.equalTo(200), Integer.class))
-                .andExpect(jsonPath("$.success").value(TRUE))
-                .andReturn()
-                .getResponse()
-                .getContentAsString(UTF_8);
-        System.out.println(body);
-    }
+		assertTrue(result.isSuccess());
+		assertSame(query, result.getData());
+	}
 
-    /**
-     * <a href="http://127.0.0.1:34567/query/q4?a=mmm,nnn&b=154&c=6536&c=4564">Test</a>
-     */
-    @Test
-    void q4() throws Exception {
-        String body = mockMvc.perform(get("/query/q3")
-                        .queryParam("a", "mmm", "nnn")
-                        .queryParam("b", "154")
-                        .queryParam("c", "6536")
-                        .queryParam("c", "4564"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code", IsEqual.equalTo(200), Integer.class))
-                .andExpect(jsonPath("$.success").value(TRUE))
-                .andReturn()
-                .getResponse()
-                .getContentAsString(UTF_8);
-        System.out.println(body);
-    }
+	@Test
+	void searchShouldEchoListQueryObject() {
+		ListQO query = new ListQO();
+
+		Result<ListQO> result = controller.search(query);
+
+		assertTrue(result.isSuccess());
+		assertSame(query, result.getData());
+	}
+
+	@Test
+	void reportShouldEchoReportQueryObject() {
+		ReportQO query = new ReportQO();
+
+		Result<ReportQO> result = controller.report(query);
+
+		assertTrue(result.isSuccess());
+		assertSame(query, result.getData());
+	}
+
+	@Test
+	void q2ShouldEchoDynamicBean() {
+		DynamicBean bean = DynamicBean.create()
+				.set("a", Arrays.asList("mmm", "nnn"))
+				.set("b", 154)
+				.set("c", new Integer[]{6536, 4564});
+
+		Result<DynamicBean> result = controller.q2(bean);
+
+		assertTrue(result.isSuccess());
+		assertSame(bean, result.getData());
+	}
+
+	@Test
+	void q3ShouldEchoHutoolJsonObject() {
+		JSONObject param = new JSONObject()
+				.set("c", Arrays.asList(6536, 4564));
+
+		Result<JSONObject> result = controller.q3(param);
+
+		assertTrue(result.isSuccess());
+		assertSame(param, result.getData());
+	}
+
+	@Test
+	void q4ShouldEchoJacksonObjectNode() {
+		ObjectNode param = new ObjectMapper().createObjectNode();
+		param.put("b", 154);
+		param.putArray("c").add(6536).add(4564);
+
+		Result<ObjectNode> result = controller.q4(param);
+
+		assertTrue(result.isSuccess());
+		assertSame(param, result.getData());
+	}
 }

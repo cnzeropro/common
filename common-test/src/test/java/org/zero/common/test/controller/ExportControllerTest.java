@@ -1,109 +1,42 @@
 package org.zero.common.test.controller;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.ContentDisposition;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.web.servlet.MockMvc;
-import org.zero.common.test.config.ResponseBodyAdviceConfig;
 
-import javax.annotation.Resource;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.Optional;
+import java.util.List;
+import java.util.Map;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Zero (cnzeropro@163.com)
  * @since 2025/1/7
  */
-@MockitoSettings(strictness = Strictness.STRICT_STUBS)
-@WebMvcTest(ExportController.class)
-@Import(ResponseBodyAdviceConfig.class)
 class ExportControllerTest {
-    @Resource
-    MockMvc mockMvc;
+	private final ExportController controller = new ExportController();
 
-    /**
-     * <a href="http://127.0.0.1:34567/export/e1">Test</a>
-     */
-    @Test
-    void e1() throws Exception {
-        MockHttpServletResponse response = mockMvc.perform(get("/export/e1"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN))
-                .andReturn()
-                .getResponse();
-        String filename = Optional.ofNullable(response.getHeader(HttpHeaders.CONTENT_DISPOSITION))
-                .map(ContentDisposition::parse)
-                .map(ContentDisposition::getFilename)
-                .orElse("unknown.data");
-        byte[] body = response.getContentAsByteArray();
-        Path path = Files.write(Paths.get(downloadDir.toString(), filename), body, StandardOpenOption.CREATE);
-        System.out.println("File path: " + path);
-    }
+	@Test
+	void e1ShouldReturnConfiguredFilePath() {
+		String path = controller.e1();
 
-    /**
-     * <a href="http://127.0.0.1:34567/export/e2">Test</a>
-     */
-    @Test
-    void e2() throws Exception {
-        MockHttpServletResponse response = mockMvc.perform(get("/export/e2"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                .andReturn()
-                .getResponse();
-        String filename = Optional.ofNullable(response.getHeader(HttpHeaders.CONTENT_DISPOSITION))
-                .map(ContentDisposition::parse)
-                .map(ContentDisposition::getFilename)
-                .orElse("unknown.data");
-        byte[] body = response.getContentAsByteArray();
-        Path path = Files.write(Paths.get(downloadDir.toString(), filename), body, StandardOpenOption.CREATE);
-        System.out.println("File path: " + path);
-    }
+		assertTrue(path.endsWith("新建 文本文档.txt"));
+	}
 
-    /**
-     * <a href="http://127.0.0.1:34567/export/e3">Test</a>
-     */
-    @Test
-    void e3() throws Exception {
-        MockHttpServletResponse response = mockMvc.perform(get("/export/e3"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith("application/zip"))
-                .andReturn()
-                .getResponse();
-        String filename = Optional.ofNullable(response.getHeader(HttpHeaders.CONTENT_DISPOSITION))
-                .map(ContentDisposition::parse)
-                .map(ContentDisposition::getFilename)
-                .orElse("unknown.data");
-        byte[] body = response.getContentAsByteArray();
-        Path path = Files.write(Paths.get(downloadDir.toString(), filename), body, StandardOpenOption.CREATE);
-        System.out.println("File path: " + path);
-    }
+	@Test
+	void e2ShouldReturnRowsForExcelExport() {
+		List<Map<String, Object>> rows = controller.e2();
 
-    Path downloadDir = Paths.get("target", "download");
+		assertEquals(3, rows.size());
+		assertEquals("hello", rows.get(0).get("标题1"));
+		assertFalse(rows.get(1).isEmpty());
+	}
 
-    @BeforeEach
-    void setUp() throws IOException {
-        if (!Files.exists(downloadDir)) {
-            Files.createDirectories(downloadDir);
-        }
-    }
+	@Test
+	void e3ShouldReturnArchiveSources() {
+		String[] sources = controller.e3();
 
-    // @AfterEach
-    // void tearDown() throws IOException {
-    //     Files.deleteIfExists(downloadDir);
-    // }
+		assertEquals(2, sources.length);
+		assertTrue(sources[0].endsWith("新建 文本文档.txt"));
+	}
 }

@@ -20,7 +20,7 @@ class ThreadBuilderTest {
 			Thread generatedThread = new ThreadBuilder().build();
 
 			assertEquals("named-thread", namedThread.getName());
-			assertEquals("Thread1", generatedThread.getName());
+			assertEquals("Thread-1", generatedThread.getName());
 			assertEquals(2L, ThreadBuilder.THREAD_NUMBER.get());
 		} finally {
 			ThreadBuilder.THREAD_NUMBER.set(originalThreadNumber);

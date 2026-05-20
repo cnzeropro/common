@@ -4,60 +4,59 @@ import org.junit.jupiter.api.Test;
 import org.zero.common.core.extension.java.lang.reflect.TypeReference;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Zero (cnzeropro@163.com)
  * @since 2025/1/23
  */
 class ConverterCompositeTest {
-    ConverterComposite converterComposite = ConverterComposite.getInstance();
+	@Test
+	void addConverterShouldRegisterByDeclaredReturnType() {
+		ConverterComposite converterComposite = new ConverterComposite();
 
-    @Test
-    void addConverter() {
-        converterComposite.addConverter(new TypeReference<ArrayList<Integer>>() {
-                }.getType(),
-                new ToList<Integer>(ArrayList::new, Integer.class, converterComposite) {
-                });
-        converterComposite.addConverter(new TypeReference<Date[]>() {
-                }.getType(),
-                new ToArray<Date>(Date.class, converterComposite) {
-                });
-        converterComposite.converters.forEach((key, value) -> System.out.println(key + ":" + value));
-    }
+		converterComposite.addConverter(ToInt.INSTANCE);
 
-    @Test
-    void getConverters() {
-        Collection<ObjectConverter<?>> converters = converterComposite.getConverters(Number.class, false);
-        for (ObjectConverter<?> converter : converters) {
-            System.out.println(converter);
-        }
-    }
+		assertTrue(converterComposite.canConvert(Integer.class, true));
+	}
 
-    @Test
-    void convertCollection() {
-        addConverter();
-        Object array = new String[]{"6767", "5", "554"};
-        List<Integer> converted = converterComposite.convertExactAndQuietly(new TypeReference<ArrayList<Integer>>() {
-        }.getType(), array);
-        System.out.println(converted);
-    }
+	@Test
+	void convertShouldUseAssignableConverterWhenExactIsFalse() {
+		ConverterComposite converterComposite = new ConverterComposite();
+		converterComposite.addConverter(ToInt.INSTANCE);
 
-    @Test
-    void convert() {
-        Number converted = converterComposite.convert(Number.class, "1", false, false);
-        System.out.println(converted);
-    }
+		Number converted = converterComposite.convert(Number.class, "1", false, false);
 
-    @Test
-    void convertArray() {
-        Object array = new String[]{"32443", "545", "65564"};
-        // Object array = new int[]{43432, 44, 544};
-        Integer[] converted = converterComposite.convertExactAndQuietly(Integer[].class, array);
-        for (Integer integer : converted) {
-            System.out.println(integer);
-        }
-    }
+		assertEquals(1, converted);
+	}
+
+	@Test
+	void convertCollectionShouldUseRegisteredElementConverter() {
+		ConverterComposite converterComposite = new ConverterComposite();
+		converterComposite.addConverter(ToInt.INSTANCE);
+		converterComposite.addConverter(new TypeReference<ArrayList<Integer>>() {
+				}.getType(),
+				new ToList<Integer>(ArrayList::new, Integer.class, converterComposite) {
+				});
+
+		List<Integer> converted = converterComposite.convertExactAndQuietly(new TypeReference<ArrayList<Integer>>() {
+		}.getType(), new String[]{"6767", "5", "554"});
+
+		assertEquals(java.util.Arrays.asList(6767, 5, 554), converted);
+	}
+
+	@Test
+	void convertArrayShouldUseRegisteredElementConverter() {
+		ConverterComposite converterComposite = new ConverterComposite();
+		converterComposite.addConverter(ToInt.INSTANCE);
+		converterComposite.addConverter(Integer[].class, new ToArray<Integer>(Integer.class, converterComposite) {
+		});
+
+		Integer[] converted = converterComposite.convertExactAndQuietly(Integer[].class, new String[]{"32443", "545", "65564"});
+
+		assertArrayEquals(new Integer[]{32443, 545, 65564}, converted);
+	}
 }
