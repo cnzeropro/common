@@ -8,6 +8,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Zero (cnzeropro@163.com)
@@ -55,7 +56,10 @@ class ConverterCompositeTest {
 		converterComposite.addConverter(Integer[].class, new ToArray<Integer>(Integer.class, converterComposite) {
 		});
 
-		Integer[] converted = converterComposite.convertExactAndQuietly(Integer[].class, new String[]{"32443", "545", "65564"});
+		Integer[] converted = converterComposite.convertExactAndQuietly(
+				Integer[].class,
+				new String[]{"32443", "545", "65564"}
+		);
 
 		assertArrayEquals(new Integer[]{32443, 545, 65564}, converted);
 	}

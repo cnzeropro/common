@@ -1,6 +1,4 @@
 package org.zero.common.core.extension.java.security;
-
-import io.jsonwebtoken.security.KeyPairBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.security.KeyPair;
@@ -47,6 +45,9 @@ class KeyPairBuilderTest {
 						.build()
 		);
 
-		assertEquals("keySize and algorithmParameterSpec cannot be configured at the same time", exception.getMessage());
+		assertEquals(
+				"keySize and algorithmParameterSpec cannot be configured at the same time",
+				exception.getMessage()
+		);
 	}
 }

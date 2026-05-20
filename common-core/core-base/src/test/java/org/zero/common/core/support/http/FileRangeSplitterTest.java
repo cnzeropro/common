@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+
 /**
  * @author Zero (cnzeropro@163.com)
  * @since 2026/1/6
