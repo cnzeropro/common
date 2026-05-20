@@ -8,6 +8,10 @@ import org.zero.common.core.util.java.lang.ThreadUtil;
 import java.time.Duration;
 
 /**
+ * Redisson Stream 消费循环。
+ * <p>
+ * 阻塞型处理器依赖 Redisson 读操作等待数据；轮询型处理器每轮成功后按配置退避。
+ *
  * @author Zero (cnzeropro@163.com)
  * @since 2025/11/27
  */
@@ -37,7 +41,12 @@ public class RedissonStreamConsumer extends LoopRunnable {
 	@Override
 	protected void handleThrowable(Throwable throwable) {
 		if (throwable instanceof RedisTimeoutException) {
-			log.warn("redis timeout", throwable);
+			log.warn(
+					"redisson stream consumer timeout, processorClass: {}, sleepTime: {}",
+					processor.getClass().getName(),
+					sleepTime,
+					throwable
+			);
 			try {
 				this.sleep();
 			} catch (InterruptedException e) {
