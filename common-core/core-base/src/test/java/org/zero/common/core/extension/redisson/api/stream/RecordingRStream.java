@@ -29,6 +29,8 @@ final class RecordingRStream<K, V> implements InvocationHandler {
 	private final List<StreamMessageId> acknowledgedIds = new ArrayList<>();
 	private final List<StreamMessageId> fastClaimedIds = new ArrayList<>();
 	private final List<StreamMessageId> removedIds = new ArrayList<>();
+	private final List<StreamMessageId> listPendingStartIds = new ArrayList<>();
+	private final List<Boolean> listPendingStartIdExclusives = new ArrayList<>();
 
 	private Map<StreamMessageId, Map<K, V>> readGroupResult = Collections.emptyMap();
 	private PendingResult pendingInfo = new PendingResult(0, null, null, Collections.emptyMap());
@@ -112,6 +114,14 @@ final class RecordingRStream<K, V> implements InvocationHandler {
 
 	List<StreamMessageId> getRemovedIds() {
 		return removedIds;
+	}
+
+	List<StreamMessageId> getListPendingStartIds() {
+		return listPendingStartIds;
+	}
+
+	List<Boolean> getListPendingStartIdExclusives() {
+		return listPendingStartIdExclusives;
 	}
 
 	int getAckWithArgsCount() {
@@ -199,6 +209,7 @@ final class RecordingRStream<K, V> implements InvocationHandler {
 			return pendingInfo;
 		}
 		if ("listPending".equals(methodName)) {
+			this.recordListPendingArgs(args == null || args.length == 0 ? null : args[0]);
 			return pendingEntries;
 		}
 		if ("pendingRange".equals(methodName)) {
@@ -273,5 +284,19 @@ final class RecordingRStream<K, V> implements InvocationHandler {
 		StreamMessageId[] ids = (StreamMessageId[]) args[4];
 		fastClaimedIds.addAll(Arrays.asList(ids));
 		return fastClaimResult;
+	}
+
+	private void recordListPendingArgs(Object pendingRangeArgs) {
+		if (pendingRangeArgs == null) {
+			return;
+		}
+		try {
+			Method getStartId = pendingRangeArgs.getClass().getMethod("getStartId");
+			Method isStartIdExclusive = pendingRangeArgs.getClass().getMethod("isStartIdExclusive");
+			listPendingStartIds.add((StreamMessageId) getStartId.invoke(pendingRangeArgs));
+			listPendingStartIdExclusives.add((Boolean) isStartIdExclusive.invoke(pendingRangeArgs));
+		} catch (ReflectiveOperationException e) {
+			throw new IllegalStateException("Failed to record listPending arguments", e);
+		}
 	}
 }

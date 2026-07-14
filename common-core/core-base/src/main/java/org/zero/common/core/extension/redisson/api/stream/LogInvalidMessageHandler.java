@@ -15,6 +15,8 @@ import java.util.Objects;
  */
 @Slf4j
 public class LogInvalidMessageHandler<K, V> implements InvalidMessageHandler<K, V> {
+	protected static final String INVALID_MESSAGE_LOG_TEMPLATE = "invalid pending stream message, context: {}";
+
 	protected final Level level;
 
 	public LogInvalidMessageHandler(Level level) {
@@ -22,29 +24,29 @@ public class LogInvalidMessageHandler<K, V> implements InvalidMessageHandler<K, 
 	}
 
 	@Override
-	public MessageAction handle(PendingMessageEntry<K, V> pendingMessageEntry) {
-		this.logInvalidMessage(level, pendingMessageEntry);
+	public MessageAction handle(MessageContext<K, V> context) {
+		Objects.requireNonNull(context, "context must not be null");
+		this.logInvalidMessage(context);
 		return MessageAction.ACK;
 	}
 
-	protected void logInvalidMessage(Level level, PendingMessageEntry<K, V> pendingMessageEntry) {
-		switch (level) {
+	protected void logInvalidMessage(MessageContext<K, V> context) {
+		switch (this.level) {
 			case ERROR:
-				log.error("invalid pending stream message, entry: {}", pendingMessageEntry);
-				break;
+				log.error(INVALID_MESSAGE_LOG_TEMPLATE, context);
+				return;
 			case WARN:
-				log.warn("invalid pending stream message, entry: {}", pendingMessageEntry);
-				break;
+				log.warn(INVALID_MESSAGE_LOG_TEMPLATE, context);
+				return;
 			case INFO:
-				log.info("invalid pending stream message, entry: {}", pendingMessageEntry);
-				break;
+				log.info(INVALID_MESSAGE_LOG_TEMPLATE, context);
+				return;
 			case TRACE:
-				log.trace("invalid pending stream message, entry: {}", pendingMessageEntry);
-				break;
+				log.trace(INVALID_MESSAGE_LOG_TEMPLATE, context);
+				return;
 			case DEBUG:
 			default:
-				log.debug("invalid pending stream message, entry: {}", pendingMessageEntry);
-				break;
+				log.debug(INVALID_MESSAGE_LOG_TEMPLATE, context);
 		}
 	}
 }

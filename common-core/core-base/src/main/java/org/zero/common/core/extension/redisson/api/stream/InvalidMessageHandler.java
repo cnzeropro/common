@@ -10,7 +10,7 @@ package org.zero.common.core.extension.redisson.api.stream;
  * @since 2025/11/28
  */
 @FunctionalInterface
-public interface InvalidMessageHandler<K, V> {
+public interface InvalidMessageHandler<K, V> extends MessageHandler<K, V> {
 	/**
 	 * 最大空闲时间，单位为毫秒。
 	 * <p>
@@ -27,11 +27,4 @@ public interface InvalidMessageHandler<K, V> {
 		return 3;
 	}
 
-	/**
-	 * 处理无效 pending 消息，并返回 pending 列表后续动作。
-	 *
-	 * @param pendingMessageEntry pending 消息及其正文
-	 * @return 处理后的确认动作
-	 */
-	MessageAction handle(PendingMessageEntry<K, V> pendingMessageEntry);
 }

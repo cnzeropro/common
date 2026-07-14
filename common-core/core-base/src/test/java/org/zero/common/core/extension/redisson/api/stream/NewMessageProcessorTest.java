@@ -7,6 +7,7 @@ import org.redisson.api.stream.StreamReadGroupArgs;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
@@ -21,7 +22,7 @@ class NewMessageProcessorTest {
 	private static final String CONSUMER_NAME = "consumer";
 
 	@Test
-	void shouldAckWithCompatibleCommandAfterMessageProcessed() {
+	void shouldAckAfterMessageProcessed() {
 		RecordingRStream<String, String> stream = RecordingRStream.create();
 		StreamMessageId messageId = this.prepareReadMessage(stream, 1);
 		NewMessageProcessor<String, String> processor = new NewMessageProcessor<String, String>(
@@ -36,6 +37,35 @@ class NewMessageProcessorTest {
 		assertEquals(Collections.singletonList(messageId), stream.getAcknowledgedIds());
 		assertEquals(GROUP_NAME, stream.getLastAckGroupName());
 		assertEquals(0, stream.getAckWithArgsCount());
+	}
+
+	@Test
+	void shouldPassNewMessageContextToMessageHandler() {
+		RecordingRStream<String, String> stream = RecordingRStream.create();
+		StreamMessageId messageId = this.prepareReadMessage(stream, 11);
+		AtomicReference<MessageContext<String, String>> contextRef = new AtomicReference<>();
+		MessageHandler<String, String> handler = new MessageHandler<String, String>() {
+			@Override
+			public MessageAction handle(MessageContext<String, String> context) {
+				contextRef.set(context);
+				return MessageAction.ACK;
+			}
+		};
+		NewMessageProcessor<String, String> processor = new NewMessageProcessor<String, String>(
+				stream.proxy(),
+				GROUP_NAME,
+				CONSUMER_NAME,
+				handler
+		);
+
+		processor.process();
+
+		MessageContext<String, String> context = contextRef.get();
+		assertFalse(context.isPending());
+		assertEquals(messageId, context.getMessageId());
+		assertEquals(CONSUMER_NAME, context.getOwnerConsumerName());
+		assertEquals(0L, context.getIdleTime());
+		assertEquals(1L, context.getDeliveredCount());
 	}
 
 	@Test

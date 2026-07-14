@@ -26,49 +26,58 @@ import java.util.concurrent.TimeUnit;
  * @since 2025/11/27
  */
 @Slf4j
-public class PendingMessageProcessor<K, V> extends AbstractStreamMessageProcessor<K, V>
+public class PendingMessageProcessor<K, V> extends AbstractMessageProcessor<K, V>
 		implements PollingMessageProcessor {
 	public static final int DEFAULT_COUNT = 10;
 	public static final long DEFAULT_TIMEOUT_NUMBER = 15;
 	public static final TimeUnit DEFAULT_TIMEOUT_UNIT = TimeUnit.MINUTES;
+	protected static final StreamMessageId AUTO_CLAIM_INITIAL_ID = new StreamMessageId(0, 0);
 
-	protected final ValidMessageHandler<K, V> validMessageHandler;
+	protected final MessageHandler<K, V> messageHandler;
 	protected final InvalidMessageHandler<K, V> invalidMessageHandler;
 	protected final long idleTime;
 	protected final TimeUnit idleTimeUnit;
 	protected final int count;
+	protected StreamMessageId autoClaimStartId = AUTO_CLAIM_INITIAL_ID;
+	protected StreamMessageId pendingScanStartId = StreamMessageId.MIN;
 
 	public PendingMessageProcessor(
 			RStream<K, V> stream,
 			String groupName,
 			String consumerName,
-			ValidMessageHandler<K, V> validMessageHandler,
+			MessageHandler<K, V> messageHandler,
 			InvalidMessageHandler<K, V> invalidMessageHandler
 	) {
 		this(stream, groupName, consumerName,
-				validMessageHandler, invalidMessageHandler,
-			DEFAULT_TIMEOUT_NUMBER, DEFAULT_TIMEOUT_UNIT, DEFAULT_COUNT);
+				messageHandler, invalidMessageHandler,
+				DEFAULT_TIMEOUT_NUMBER, DEFAULT_TIMEOUT_UNIT, DEFAULT_COUNT);
 	}
 
 	public PendingMessageProcessor(
 			RStream<K, V> stream,
 			String groupName,
 			String consumerName,
-			ValidMessageHandler<K, V> validMessageHandler,
+			MessageHandler<K, V> messageHandler,
 			InvalidMessageHandler<K, V> invalidMessageHandler,
 			long idleTime,
 			TimeUnit idleTimeUnit,
 			int count
 	) {
 		super(stream, groupName, consumerName);
-		this.validMessageHandler = Objects.requireNonNull(
-				validMessageHandler,
-				"validMessageHandler must not be null"
+		this.messageHandler = Objects.requireNonNull(
+				messageHandler,
+				"messageHandler must not be null"
 		);
 		this.invalidMessageHandler = Objects.requireNonNull(
 				invalidMessageHandler,
 				"invalidMessageHandler must not be null"
 		);
+		if (idleTime < 0) {
+			throw new IllegalArgumentException("idleTime must not be negative");
+		}
+		if (count <= 0) {
+			throw new IllegalArgumentException("count must be greater than 0");
+		}
 		this.idleTime = idleTime;
 		this.idleTimeUnit = Objects.requireNonNull(idleTimeUnit, "idleTimeUnit must not be null");
 		this.count = count;
@@ -80,6 +89,8 @@ public class PendingMessageProcessor<K, V> extends AbstractStreamMessageProcesso
 		long total = pendingResult.getTotal();
 		if (total <= 0) {
 			log.debug("no pending stream messages, groupName: {}, consumerName: {}", groupName, consumerName);
+			this.autoClaimStartId = AUTO_CLAIM_INITIAL_ID;
+			this.pendingScanStartId = StreamMessageId.MIN;
 			return;
 		}
 		log.debug(
@@ -91,16 +102,77 @@ public class PendingMessageProcessor<K, V> extends AbstractStreamMessageProcesso
 				pendingResult.getHighestId()
 		);
 		this.claimIdleMessages();
-		// 认领后重新按当前消费者过滤 pending，确保只处理当前消费者已经拥有的消息。
-		StreamMessageId lowestId = pendingResult.getLowestId();
-		StreamMessageId highestId = pendingResult.getHighestId();
-		StreamPendingRangeArgs pendingRangeArgs = StreamPendingRangeArgs.groupName(groupName)
-			.startId(lowestId)
-			.endId(highestId)
-			.count(count)
-			.consumerName(consumerName)
-			.idleTime(Duration.of(idleTime, TimeUnitUtil.toChronoUnit(idleTimeUnit)));
-		List<PendingEntry> pendingEntries = stream.listPending(pendingRangeArgs);
+		List<PendingEntry> pendingEntries = this.listOwnedPendingEntries();
+		if (pendingEntries.isEmpty()) {
+			return;
+		}
+		Map<StreamMessageId, Map<K, V>> messageMap = this.readPendingMessages(pendingEntries);
+		this.processPendingEntries(pendingEntries, messageMap);
+		this.advancePendingScanStartId(pendingEntries);
+	}
+
+	protected void process(MessageContext<K, V> context) {
+		log.debug(
+				"pending stream message received, groupName: {}, consumerName: {}, entry: {}",
+				groupName,
+				consumerName,
+				context
+		);
+		StreamMessageId id = context.getMessageId();
+		if (context.getIdleTime() < invalidMessageHandler.getMaxIdleTime()
+				&& context.getDeliveredCount() < invalidMessageHandler.getMaxDeliveredCount()) {
+			MessageAction action = this.handleMessage(messageHandler, context);
+			this.handleValidMessageAction(id, action);
+			return;
+		}
+		log.warn(
+				"pending stream message exceeded invalid threshold, "
+						+ "groupName: {}, consumerName: {}, messageId: {}, idleTime: {}, deliveredCount: {}",
+				groupName,
+				consumerName,
+				id,
+				context.getIdleTime(),
+				context.getDeliveredCount()
+		);
+		MessageAction action = this.handleMessage(invalidMessageHandler, context);
+		this.handleInvalidMessageAction(id, action);
+	}
+
+	/**
+	 * 列出当前消费者已经拥有且达到空闲阈值的 pending 记录。
+	 * <p>
+	 * 认领完成后仍需按当前消费者重新扫描 pending 列表，避免处理仍属于其它消费者的消息。
+	 *
+	 * @return 当前消费者可处理的 pending 记录
+	 */
+	protected List<PendingEntry> listOwnedPendingEntries() {
+		StreamMessageId scanStartId = pendingScanStartId;
+		List<PendingEntry> pendingEntries = stream.listPending(this.createPendingRangeArgs());
+		if (pendingEntries == null || pendingEntries.isEmpty()) {
+			this.pendingScanStartId = StreamMessageId.MIN;
+			log.debug(
+					"no owned idle pending stream messages, groupName: {}, consumerName: {}, scanStartId: {}",
+					groupName,
+					consumerName,
+					scanStartId
+			);
+			return Collections.emptyList();
+		}
+		return pendingEntries;
+	}
+
+	/**
+	 * 根据 pending 记录 ID 范围读取消息正文。
+	 * <p>
+	 * Redisson 的 {@code listPending} 只返回 pending 元数据，真正的消息正文仍需通过 {@code pendingRange}
+	 * 单独读取。
+	 *
+	 * @param pendingEntries pending 元数据列表
+	 * @return 消息 ID 到消息正文的映射
+	 */
+	protected Map<StreamMessageId, Map<K, V>> readPendingMessages(List<PendingEntry> pendingEntries) {
+		StreamMessageId lowestId = pendingEntries.get(0).getId();
+		StreamMessageId highestId = pendingEntries.get(pendingEntries.size() - 1).getId();
 		Map<StreamMessageId, Map<K, V>> messageMap = stream.pendingRange(
 				groupName,
 				consumerName,
@@ -108,14 +180,34 @@ public class PendingMessageProcessor<K, V> extends AbstractStreamMessageProcesso
 				highestId,
 				idleTime,
 				idleTimeUnit,
-				count
+				pendingEntries.size()
 		);
+		return messageMap == null ? Collections.emptyMap() : messageMap;
+	}
+
+	/**
+	 * 逐条处理 pending 记录。
+	 * <p>
+	 * 单条消息处理失败时保留 pending 状态，并继续处理同批次中的其它消息。
+	 *
+	 * @param pendingEntries pending 元数据列表
+	 * @param messageMap 消息 ID 到消息正文的映射
+	 */
+	protected void processPendingEntries(
+			List<PendingEntry> pendingEntries,
+			Map<StreamMessageId, Map<K, V>> messageMap
+	) {
 		for (PendingEntry pendingEntry : pendingEntries) {
 			Map<K, V> message = messageMap.get(pendingEntry.getId());
 			if (Objects.nonNull(message)) {
-				PendingMessageEntry<K, V> pendingMessageEntry = new PendingMessageEntry<>(pendingEntry, message);
+				MessageContext<K, V> context = MessageContext.pendingMessage(
+						groupName,
+						consumerName,
+						pendingEntry,
+						message
+				);
 				try {
-					this.process(pendingMessageEntry);
+					this.process(context);
 				} catch (Exception e) {
 					log.warn(
 							"pending stream message processing failed, groupName: {}, consumerName: {}, messageId: {}",
@@ -136,44 +228,10 @@ public class PendingMessageProcessor<K, V> extends AbstractStreamMessageProcesso
 		}
 	}
 
-	protected void process(PendingMessageEntry<K, V> pendingMessageEntry) {
-		log.debug(
-				"pending stream message received, groupName: {}, consumerName: {}, entry: {}",
-				groupName,
-				consumerName,
-				pendingMessageEntry
-		);
-		StreamMessageId id = pendingMessageEntry.getId();
-		if (pendingMessageEntry.getIdleTime() >= invalidMessageHandler.getMaxIdleTime()
-				|| pendingMessageEntry.getLastTimeDelivered() >= invalidMessageHandler.getMaxDeliveredCount()) {
-			log.warn(
-					"pending stream message exceeded invalid threshold, "
-							+ "groupName: {}, consumerName: {}, messageId: {}, idleTime: {}, deliveredCount: {}",
-					groupName,
-					consumerName,
-					id,
-					pendingMessageEntry.getIdleTime(),
-					pendingMessageEntry.getLastTimeDelivered()
-			);
-			MessageAction action = Objects.requireNonNull(
-					invalidMessageHandler.handle(pendingMessageEntry),
-					"invalid message action must not be null"
-			);
-			this.handleInvalidMessageAction(id, action);
-		} else {
-			Map<K, V> message = pendingMessageEntry.getMessage();
-			MessageAction action = Objects.requireNonNull(
-					validMessageHandler.handle(message),
-					"valid message action must not be null"
-			);
-			this.handleValidMessageAction(id, action);
-		}
-	}
-
 	protected void handleValidMessageAction(StreamMessageId messageId, MessageAction action) {
 		switch (action) {
 			case ACK:
-				this.ack(messageId);
+				this.executeAction(messageId, action);
 				log.debug(
 						"pending stream message acknowledged, groupName: {}, consumerName: {}, messageId: {}",
 						groupName,
@@ -182,7 +240,7 @@ public class PendingMessageProcessor<K, V> extends AbstractStreamMessageProcesso
 				);
 				break;
 			case ACK_AND_DELETE:
-				long removedCount = this.ackAndDelete(messageId);
+				long removedCount = this.executeAction(messageId, action);
 				log.info(
 						"pending stream message acknowledged and deleted, "
 								+ "groupName: {}, consumerName: {}, messageId: {}, removedCount: {}",
@@ -208,7 +266,7 @@ public class PendingMessageProcessor<K, V> extends AbstractStreamMessageProcesso
 	protected void handleInvalidMessageAction(StreamMessageId messageId, MessageAction action) {
 		switch (action) {
 			case ACK:
-				this.ack(messageId);
+				this.executeAction(messageId, action);
 				log.info(
 						"invalid pending stream message acknowledged, groupName: {}, consumerName: {}, messageId: {}",
 						groupName,
@@ -217,7 +275,7 @@ public class PendingMessageProcessor<K, V> extends AbstractStreamMessageProcesso
 				);
 				break;
 			case ACK_AND_DELETE:
-				long removedCount = this.ackAndDelete(messageId);
+				long removedCount = this.executeAction(messageId, action);
 				log.info(
 						"invalid pending stream message acknowledged and deleted, "
 								+ "groupName: {}, consumerName: {}, messageId: {}, removedCount: {}",
@@ -246,12 +304,13 @@ public class PendingMessageProcessor<K, V> extends AbstractStreamMessageProcesso
 	 * 这里只转移所有权，不直接处理消息正文；后续 {@code listPending/pendingRange} 会按当前消费者读取并处理。
 	 */
 	protected void claimIdleMessages() {
+		StreamMessageId startId = autoClaimStartId;
 		AutoClaimResult<K, V> autoClaimResult = stream.autoClaim(
 				groupName,
 				consumerName,
 				idleTime,
 				idleTimeUnit,
-				this.autoClaimStartId(),
+				startId,
 				count
 		);
 		Map<StreamMessageId, Map<K, V>> messages = autoClaimResult.getMessages();
@@ -273,14 +332,51 @@ public class PendingMessageProcessor<K, V> extends AbstractStreamMessageProcesso
 					autoClaimResult.getNextId()
 			);
 		}
+		StreamMessageId nextId = autoClaimResult.getNextId();
+		this.autoClaimStartId = nextId == null || AUTO_CLAIM_INITIAL_ID.equals(nextId)
+				? AUTO_CLAIM_INITIAL_ID
+				: nextId;
 	}
 
 	/**
-	 * XAUTOCLAIM 起始 ID。
+	 * 创建 pending 列表扫描参数。
 	 * <p>
-	 * 使用 {@code 0-0} 从 pending 列表头部开始扫描，而不是 range 查询中的 {@code -} 语义。
+	 * {@code StreamMessageId.MIN} 用于从列表头开始扫描；后续批次使用 exclusive start id 避免重复读取上一批
+	 * 最后一条记录。
+	 *
+	 * @return pending 列表扫描参数
 	 */
-	protected StreamMessageId autoClaimStartId() {
-		return new StreamMessageId(0, 0);
+	protected StreamPendingRangeArgs createPendingRangeArgs() {
+		StreamMessageId startId = pendingScanStartId;
+		StreamPendingRangeArgs pendingRangeArgs;
+		if (StreamMessageId.MIN.equals(startId)) {
+			pendingRangeArgs = StreamPendingRangeArgs.groupName(groupName)
+					.startId(StreamMessageId.MIN)
+					.endId(StreamMessageId.MAX)
+					.count(count);
+		} else {
+			pendingRangeArgs = StreamPendingRangeArgs.groupName(groupName)
+					.startIdExclusive(startId)
+					.endId(StreamMessageId.MAX)
+					.count(count);
+		}
+		return pendingRangeArgs
+				.consumerName(consumerName)
+				.idleTime(Duration.of(idleTime, TimeUnitUtil.toChronoUnit(idleTimeUnit)));
+	}
+
+	/**
+	 * 根据本批扫描结果推进下一轮 pending 扫描起点。
+	 * <p>
+	 * 本批不足 {@link #count} 条时，说明当前扫描窗口已经到达尾部，下一轮从列表头重新开始。
+	 *
+	 * @param pendingEntries 本批 pending 元数据列表
+	 */
+	protected void advancePendingScanStartId(List<PendingEntry> pendingEntries) {
+		if (pendingEntries.size() < count) {
+			this.pendingScanStartId = StreamMessageId.MIN;
+			return;
+		}
+		this.pendingScanStartId = pendingEntries.get(pendingEntries.size() - 1).getId();
 	}
 }

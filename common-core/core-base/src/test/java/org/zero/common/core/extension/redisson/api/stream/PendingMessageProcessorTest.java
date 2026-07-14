@@ -10,8 +10,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -23,7 +25,7 @@ class PendingMessageProcessorTest {
 	private static final String CONSUMER_NAME = "consumer";
 
 	@Test
-	void shouldAckWithCompatibleCommandAfterPendingMessageProcessed() {
+	void shouldAckAfterPendingMessageProcessed() {
 		RecordingRStream<String, String> stream = RecordingRStream.create();
 		StreamMessageId messageId = new StreamMessageId(1, 0);
 		this.preparePendingMessage(stream, messageId, new PendingEntry(messageId, CONSUMER_NAME, 1, 1));
@@ -45,6 +47,37 @@ class PendingMessageProcessorTest {
 		assertEquals(Collections.singletonList(messageId), stream.getAcknowledgedIds());
 		assertEquals(GROUP_NAME, stream.getLastAckGroupName());
 		assertEquals(0, stream.getAckWithArgsCount());
+	}
+
+	@Test
+	void shouldPassPendingContextToMessageHandler() {
+		RecordingRStream<String, String> stream = RecordingRStream.create();
+		StreamMessageId messageId = new StreamMessageId(11, 0);
+		this.preparePendingMessage(stream, messageId, new PendingEntry(messageId, CONSUMER_NAME, 123, 2));
+		AtomicReference<MessageContext<String, String>> contextRef = new AtomicReference<>();
+		MessageHandler<String, String> handler = new MessageHandler<String, String>() {
+			@Override
+			public MessageAction handle(MessageContext<String, String> context) {
+				contextRef.set(context);
+				return MessageAction.ACK;
+			}
+		};
+		PendingMessageProcessor<String, String> processor = new PendingMessageProcessor<>(
+				stream.proxy(),
+				GROUP_NAME,
+				CONSUMER_NAME,
+				handler,
+				new NoopInvalidMessageHandler()
+		);
+
+		processor.process();
+
+		MessageContext<String, String> context = contextRef.get();
+		assertTrue(context.isPending());
+		assertEquals(messageId, context.getMessageId());
+		assertEquals(CONSUMER_NAME, context.getOwnerConsumerName());
+		assertEquals(123L, context.getIdleTime());
+		assertEquals(2L, context.getDeliveredCount());
 	}
 
 	@Test
@@ -103,7 +136,7 @@ class PendingMessageProcessorTest {
 			}
 
 			@Override
-			public MessageAction handle(PendingMessageEntry<String, String> pendingMessageEntry) {
+			public MessageAction handle(MessageContext<String, String> context) {
 				invalidCount.incrementAndGet();
 				return MessageAction.KEEP_PENDING;
 			}
@@ -140,7 +173,7 @@ class PendingMessageProcessorTest {
 			}
 
 			@Override
-			public MessageAction handle(PendingMessageEntry<String, String> pendingMessageEntry) {
+			public MessageAction handle(MessageContext<String, String> context) {
 				invalidCount.incrementAndGet();
 				return MessageAction.ACK_AND_DELETE;
 			}
@@ -189,6 +222,63 @@ class PendingMessageProcessorTest {
 		assertEquals(10, stream.getLastAutoClaimCount());
 	}
 
+	@Test
+	void shouldContinueAutoClaimFromReturnedNextId() {
+		RecordingRStream<String, String> stream = RecordingRStream.create();
+		StreamMessageId messageId = new StreamMessageId(7, 0);
+		StreamMessageId nextId = new StreamMessageId(8, 0);
+		stream.pendingInfo(new PendingResult(1, messageId, messageId, Collections.singletonMap("old-consumer", 1L)))
+				.autoClaimResult(new org.redisson.api.AutoClaimResult<>(
+						nextId,
+						Collections.emptyMap(),
+						Collections.emptyList()
+				));
+		PendingMessageProcessor<String, String> processor = new PendingMessageProcessor<>(
+				stream.proxy(),
+				GROUP_NAME,
+				CONSUMER_NAME,
+				message -> MessageAction.ACK,
+				new NoopInvalidMessageHandler()
+		);
+
+		processor.process();
+		stream.autoClaimResult(new org.redisson.api.AutoClaimResult<>(
+				new StreamMessageId(0, 0),
+				Collections.emptyMap(),
+				Collections.emptyList()
+		));
+		processor.process();
+
+		assertEquals(nextId, stream.getLastAutoClaimStartId());
+	}
+
+	@Test
+	void shouldContinuePendingScanAfterFullBatch() {
+		RecordingRStream<String, String> stream = RecordingRStream.create();
+		StreamMessageId firstId = new StreamMessageId(21, 0);
+		StreamMessageId secondId = new StreamMessageId(22, 0);
+		this.preparePendingMessage(stream, firstId, new PendingEntry(firstId, CONSUMER_NAME, 1, 1));
+		PendingMessageProcessor<String, String> processor = new PendingMessageProcessor<>(
+				stream.proxy(),
+				GROUP_NAME,
+				CONSUMER_NAME,
+				message -> MessageAction.KEEP_PENDING,
+				new NoopInvalidMessageHandler(),
+				PendingMessageProcessor.DEFAULT_TIMEOUT_NUMBER,
+				PendingMessageProcessor.DEFAULT_TIMEOUT_UNIT,
+				1
+		);
+
+		processor.process();
+		this.preparePendingMessage(stream, secondId, new PendingEntry(secondId, CONSUMER_NAME, 1, 1));
+		processor.process();
+
+		assertEquals(StreamMessageId.MIN, stream.getListPendingStartIds().get(0));
+		assertFalse(stream.getListPendingStartIdExclusives().get(0));
+		assertEquals(firstId, stream.getListPendingStartIds().get(1));
+		assertTrue(stream.getListPendingStartIdExclusives().get(1));
+	}
+
 	private void preparePendingMessage(
 			RecordingRStream<String, String> stream,
 			StreamMessageId messageId,
@@ -205,7 +295,7 @@ class PendingMessageProcessorTest {
 
 	private static class NoopInvalidMessageHandler implements InvalidMessageHandler<String, String> {
 		@Override
-		public MessageAction handle(PendingMessageEntry<String, String> pendingMessageEntry) {
+		public MessageAction handle(MessageContext<String, String> context) {
 			return MessageAction.ACK;
 		}
 	}

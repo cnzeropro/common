@@ -25,36 +25,36 @@ public class ClaimMessageHandler<K, V> implements InvalidMessageHandler<K, V> {
 	protected final String consumerName;
 
 	@Override
-	public MessageAction handle(PendingMessageEntry<K, V> pendingMessageEntry) {
-		this.claim(pendingMessageEntry);
+	public MessageAction handle(MessageContext<K, V> context) {
+		this.claim(context);
 		return MessageAction.KEEP_PENDING;
 	}
 
 	/**
 	 * 使用 XCLAIM JUSTID 转移消息所有权。
 	 */
-	protected List<StreamMessageId> claim(PendingMessageEntry<K, V> pendingMessageEntry) {
+	protected List<StreamMessageId> claim(MessageContext<K, V> context) {
 		List<StreamMessageId> messageIds = stream.fastClaim(
 				groupName,
 				consumerName,
-				pendingMessageEntry.getIdleTime(),
+				context.getIdleTime(),
 				TimeUnit.MILLISECONDS,
-				pendingMessageEntry.getId()
+				context.getMessageId()
 		);
 		if (messageIds.isEmpty()) {
 			log.warn(
 					"pending stream message claim returned empty result, "
 							+ "groupName: {}, sourceConsumerName: {}, targetConsumerName: {}, messageId: {}",
 					groupName,
-					pendingMessageEntry.getConsumerName(),
+					context.getOwnerConsumerName(),
 					consumerName,
-					pendingMessageEntry.getId()
+					context.getMessageId()
 			);
 		} else {
 			log.info(
 					"pending stream message claimed, groupName: {}, sourceConsumerName: {}, targetConsumerName: {}, messageIds: {}",
 					groupName,
-					pendingMessageEntry.getConsumerName(),
+					context.getOwnerConsumerName(),
 					consumerName,
 					messageIds
 			);

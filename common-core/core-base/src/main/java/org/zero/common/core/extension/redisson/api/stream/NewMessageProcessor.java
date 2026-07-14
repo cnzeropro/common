@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  * @since 2025/11/27
  */
 @Slf4j
-public class NewMessageProcessor<K, V> extends AbstractStreamMessageProcessor<K, V> {
+public class NewMessageProcessor<K, V> extends AbstractMessageProcessor<K, V> {
 	public static final int DEFAULT_COUNT = 10;
 	public static final long DEFAULT_TIMEOUT_NUMBER = 10;
 	public static final TimeUnit DEFAULT_TIMEOUT_UNIT = TimeUnit.MINUTES;
@@ -30,27 +30,27 @@ public class NewMessageProcessor<K, V> extends AbstractStreamMessageProcessor<K,
 			TimeUnitUtil.toChronoUnit(DEFAULT_TIMEOUT_UNIT)
 	);
 
-	protected final ValidMessageHandler<K, V> validMessageHandler;
+	protected final MessageHandler<K, V> messageHandler;
 	protected final StreamReadGroupArgs readGroupArgs;
 
 	public NewMessageProcessor(
 			RStream<K, V> stream,
 			String groupName,
 			String consumerName,
-			ValidMessageHandler<K, V> validMessageHandler
+			MessageHandler<K, V> messageHandler
 	) {
-		this(stream, groupName, consumerName, validMessageHandler, defaultReadGroupArgs());
+		this(stream, groupName, consumerName, messageHandler, defaultReadGroupArgs());
 	}
 
 	public NewMessageProcessor(
 			RStream<K, V> stream,
 			String groupName,
 			String consumerName,
-			ValidMessageHandler<K, V> validMessageHandler,
+			MessageHandler<K, V> messageHandler,
 			StreamReadGroupArgs readGroupArgs
 	) {
 		super(stream, groupName, consumerName);
-		this.validMessageHandler = Objects.requireNonNull(validMessageHandler, "validMessageHandler must not be null");
+		this.messageHandler = Objects.requireNonNull(messageHandler, "messageHandler must not be null");
 		this.readGroupArgs = Objects.requireNonNull(readGroupArgs, "readGroupArgs must not be null");
 	}
 
@@ -68,19 +68,16 @@ public class NewMessageProcessor<K, V> extends AbstractStreamMessageProcessor<K,
 	@Override
 	public void process() {
 		Map<StreamMessageId, Map<K, V>> messageMap = stream.readGroup(groupName, consumerName, readGroupArgs);
+		if (messageMap == null || messageMap.isEmpty()) {
+			log.debug("no new stream messages, groupName: {}, consumerName: {}", groupName, consumerName);
+			return;
+		}
 		messageMap.forEach((messageId, message) -> {
-			log.debug(
-					"stream message received, groupName: {}, consumerName: {}, messageId: {}, message: {}",
-					groupName,
-					consumerName,
-					messageId,
-					message
-			);
+			log.debug("stream message received, groupName: {}, consumerName: {}, messageId: {}, message: {}", groupName, consumerName, messageId, message);
 			try {
-				MessageAction action = Objects.requireNonNull(
-						validMessageHandler.handle(message),
-						"valid message action must not be null"
-				);
+				// 创建新投递消息上下文
+				MessageContext<K, V> context = MessageContext.newMessage(groupName, consumerName, messageId, message);
+				MessageAction action = this.handleMessage(messageHandler, context);
 				this.handleMessageAction(messageId, action);
 			} catch (Exception e) {
 				// 保留消息 pending 状态，避免单条消息异常导致消费线程退出。
@@ -98,7 +95,7 @@ public class NewMessageProcessor<K, V> extends AbstractStreamMessageProcessor<K,
 	protected void handleMessageAction(StreamMessageId messageId, MessageAction action) {
 		switch (action) {
 			case ACK:
-				this.ack(messageId);
+				this.executeAction(messageId, action);
 				log.debug(
 						"stream message acknowledged, groupName: {}, consumerName: {}, messageId: {}",
 						groupName,
@@ -107,10 +104,9 @@ public class NewMessageProcessor<K, V> extends AbstractStreamMessageProcessor<K,
 				);
 				break;
 			case ACK_AND_DELETE:
-				long removedCount = this.ackAndDelete(messageId);
+				long removedCount = this.executeAction(messageId, action);
 				log.info(
-						"stream message acknowledged and deleted, "
-								+ "groupName: {}, consumerName: {}, messageId: {}, removedCount: {}",
+						"stream message acknowledged and deleted, groupName: {}, consumerName: {}, messageId: {}, removedCount: {}",
 						groupName,
 						consumerName,
 						messageId,

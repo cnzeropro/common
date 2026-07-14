@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.redisson.api.PendingEntry;
 import org.redisson.api.StreamMessageId;
 
+import javax.mail.MessageContext;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
@@ -25,12 +26,14 @@ class ClaimMessageHandlerTest {
 				"group",
 				"target-consumer"
 		);
-		PendingMessageEntry<String, String> entry = new PendingMessageEntry<>(
+		MessageContext<String, String> context = MessageContext.pendingMessage(
+				"group",
+				"consumer",
 				new PendingEntry(messageId, "old-consumer", 123, 2),
 				Collections.emptyMap()
 		);
 
-		MessageAction action = handler.handle(entry);
+		MessageAction action = handler.handle(context);
 
 		assertEquals(MessageAction.KEEP_PENDING, action);
 		assertEquals(Collections.singletonList(messageId), stream.getFastClaimedIds());

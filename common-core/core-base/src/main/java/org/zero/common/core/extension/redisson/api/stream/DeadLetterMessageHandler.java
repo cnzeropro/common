@@ -8,7 +8,6 @@ import org.redisson.api.stream.StreamAddArgs;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 
 /**
  * 将无效 pending 消息转存到死信 Stream 后确认原消息。
@@ -16,8 +15,9 @@ import java.util.function.Function;
  * 写入死信 Stream 成功后返回 {@link MessageAction#ACK}，由 pending 处理器确认原消费者组消息；
  * 写入失败或消息映射失败时异常会继续向外抛出，原消息保持 pending，便于后续恢复或再次转存。
  * <p>
- * 死信消息的字段结构由 {@code messageMapper} 决定。泛型键值类型不固定时，建议业务侧自行约定元数据字段
- * 或使用独立的死信消息类型，避免强行在原消息结构中追加不兼容字段。
+ * 死信消息的字段结构由 {@link MessageMapper} 决定。映射策略可以把源消息上下文
+ * {@link MessageContext} 的键值类型映射为另一组死信 Stream 键值类型；同类型复制可使用
+ * {@link #copyMessage()}。
  * <p>
  * 如需在转存后同时删除原 Stream 消息，可将 {@code successAction} 配置为
  * {@link MessageAction#ACK_AND_DELETE}。
@@ -26,25 +26,21 @@ import java.util.function.Function;
  * @since 2026/5/20
  */
 @Slf4j
-public class DeadLetterMessageHandler<K, V> implements InvalidMessageHandler<K, V> {
-	protected final RStream<K, V> deadLetterStream;
-	protected final Function<PendingMessageEntry<K, V>, Map<K, V>> messageMapper;
+public class DeadLetterMessageHandler<SK, SV, DK, DV> implements InvalidMessageHandler<SK, SV> {
+	protected final RStream<DK, DV> deadLetterStream;
+	protected final MessageMapper<SK, SV, DK, DV> messageMapper;
 	protected final MessageAction successAction;
 
-	public DeadLetterMessageHandler(RStream<K, V> deadLetterStream) {
-		this(deadLetterStream, DeadLetterMessageHandler::copyMessage);
-	}
-
 	public DeadLetterMessageHandler(
-			RStream<K, V> deadLetterStream,
-			Function<PendingMessageEntry<K, V>, Map<K, V>> messageMapper
+			RStream<DK, DV> deadLetterStream,
+			MessageMapper<SK, SV, DK, DV> messageMapper
 	) {
 		this(deadLetterStream, messageMapper, MessageAction.ACK);
 	}
 
 	public DeadLetterMessageHandler(
-			RStream<K, V> deadLetterStream,
-			Function<PendingMessageEntry<K, V>, Map<K, V>> messageMapper,
+			RStream<DK, DV> deadLetterStream,
+			MessageMapper<SK, SV, DK, DV> messageMapper,
 			MessageAction successAction
 	) {
 		this.deadLetterStream = Objects.requireNonNull(deadLetterStream, "deadLetterStream must not be null");
@@ -52,34 +48,44 @@ public class DeadLetterMessageHandler<K, V> implements InvalidMessageHandler<K, 
 		this.successAction = this.requireSuccessAction(successAction);
 	}
 
-	protected static <K, V> Map<K, V> copyMessage(PendingMessageEntry<K, V> pendingMessageEntry) {
+	/**
+	 * 创建复制原消息正文的映射策略。
+	 *
+	 * @param <K> 消息字段类型，同时用于源消息上下文和死信消息正文
+	 * @param <V> 消息值类型，同时用于源消息上下文和死信消息正文
+	 * @return 死信消息映射策略
+	 */
+	public static <K, V> MessageMapper<K, V, K, V> copyMessage() {
+		return DeadLetterMessageHandler::copyMessageBody;
+	}
+
+	protected static <K, V> Map<K, V> copyMessageBody(MessageContext<K, V> context) {
+		Objects.requireNonNull(context, "context must not be null");
 		return new LinkedHashMap<>(Objects.requireNonNull(
-				pendingMessageEntry.getMessage(),
+				context.getMessage(),
 				"pending message must not be null"
 		));
 	}
 
 	@Override
-	public MessageAction handle(PendingMessageEntry<K, V> pendingMessageEntry) {
-		Objects.requireNonNull(pendingMessageEntry, "pendingMessageEntry must not be null");
-		Map<K, V> message = this.mapMessage(pendingMessageEntry);
+	public MessageAction handle(MessageContext<SK, SV> context) {
+		Objects.requireNonNull(context, "context must not be null");
+		Map<DK, DV> message = this.mapMessage(context);
 		StreamMessageId deadLetterMessageId = deadLetterStream.add(StreamAddArgs.entries(message));
-		log.info(
-				"dead letter stream message appended, "
+		log.info("dead letter stream message appended, "
 						+ "originalMessageId: {}, originalConsumerName: {}, idleTime: {}, deliveredCount: {}, "
 						+ "deadLetterMessageId: {}",
-				pendingMessageEntry.getId(),
-				pendingMessageEntry.getConsumerName(),
-				pendingMessageEntry.getIdleTime(),
-				pendingMessageEntry.getLastTimeDelivered(),
-				deadLetterMessageId
-		);
+				context.getMessageId(),
+				context.getOwnerConsumerName(),
+				context.getIdleTime(),
+				context.getDeliveredCount(),
+				deadLetterMessageId);
 		return successAction;
 	}
 
-	protected Map<K, V> mapMessage(PendingMessageEntry<K, V> pendingMessageEntry) {
-		Map<K, V> message = Objects.requireNonNull(
-				messageMapper.apply(pendingMessageEntry),
+	protected Map<DK, DV> mapMessage(MessageContext<SK, SV> context) {
+		Map<DK, DV> message = Objects.requireNonNull(
+				messageMapper.map(context),
 				"dead letter message must not be null"
 		);
 		if (message.isEmpty()) {
@@ -94,5 +100,26 @@ public class DeadLetterMessageHandler<K, V> implements InvalidMessageHandler<K, 
 			throw new IllegalArgumentException("successAction must acknowledge original message");
 		}
 		return action;
+	}
+
+	/**
+	 * 死信消息映射策略。
+	 * <p>
+	 * 实现类只负责生成要写入死信 Stream 的消息正文，不负责确认、删除或重试原消息。
+	 *
+	 * @param <SK> 源消息字段类型
+	 * @param <SV> 源消息值类型
+	 * @param <DK> 死信消息字段类型
+	 * @param <DV> 死信消息值类型
+	 */
+	@FunctionalInterface
+	public interface MessageMapper<SK, SV, DK, DV> {
+		/**
+		 * 将消息上下文映射为死信消息正文。
+		 *
+		 * @param context 消息上下文
+		 * @return 死信消息正文
+		 */
+		Map<DK, DV> map(MessageContext<SK, SV> context);
 	}
 }
