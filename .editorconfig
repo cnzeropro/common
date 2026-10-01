@@ -1,31 +1,60 @@
-# EditorConfig: https://editorconfig.org
+# EditorConfig 用于在不同 IDE / 编辑器之间保持一致的基础格式化规则。
 root = true
 
+# 全局默认值：统一字符集、换行、基础缩进与空白处理。
 [*]
 charset = utf-8
 end_of_line = lf
+indent_style = space
+indent_size = 4
+tab_width = 4
 insert_final_newline = true
 trim_trailing_whitespace = true
+max_line_length = 120
+
+# Java 生态源码与 XML 按仓库既有风格使用 Tab，保持与主线代码一致。
+[*.{aj,groovy,java,kt,kts,xml,xsd}]
+indent_style = tab
+indent_size = 4
+continuation_indent_size = 8
+
+# Gradle Groovy DSL 保持 4 空格，和当前构建脚本风格一致。
+[*.gradle]
 indent_style = space
 indent_size = 4
 
-[*.{java,py,sql,gradle}]
+# 如后续引入 Gradle Kotlin DSL，继续使用 4 空格缩进。
+[*.gradle.kts]
+indent_style = space
 indent_size = 4
 
-[*.{js,yml,toml,xml,properties,config}]
+# 结构化配置文件统一使用 2 空格缩进。
+[*.{json,jsonc,toml,yaml,yml}]
 indent_size = 2
+tab_width = 2
 
-[*.sh]
+# Properties 文件延续项目文档约定，使用 2 空格续行缩进。
+[*.properties]
 indent_size = 2
+tab_width = 2
+
+# POSIX Shell 脚本使用 2 空格缩进，并显式保持 LF。
+[*.{bash,sh}]
+indent_size = 2
+tab_width = 2
 end_of_line = lf
 
+# PowerShell 脚本保持 4 空格缩进，并与仓库脚本统一为 LF。
 [*.ps1]
 indent_size = 4
+tab_width = 4
 end_of_line = lf
 
-[*.{cmd,bat}]
+# Windows 命令脚本显式使用 CRLF，避免在 cmd.exe / bat 环境下出现兼容性问题。
+[*.{bat,cmd}]
 end_of_line = crlf
-indent_size = 4
 
-[*.md]
+# 文档允许保留行尾空格，并关闭列宽提示以兼容显式换行与长链接。
+[*.{adoc,md,markdown}]
 trim_trailing_whitespace = false
+max_line_length = off

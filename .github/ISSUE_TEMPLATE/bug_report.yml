@@ -9,8 +9,8 @@ body:
       value: |
         在提交缺陷前，请先阅读以下文档：
 
-        - [CONTRIBUTING.md](https://gitee.com/zerocn/common/blob/master/CONTRIBUTING.md)
-        - [SECURITY.md](https://gitee.com/zerocn/common/blob/master/SECURITY.md)
+        - [CONTRIBUTING.md](https://gitee.com/zerocn/common/blob/main/CONTRIBUTING.md)
+        - [SECURITY.md](https://gitee.com/zerocn/common/blob/main/SECURITY.md)
 
         如果问题属于安全漏洞，请不要继续提交公开 issue。
   - type: dropdown
