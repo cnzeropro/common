@@ -1,19 +1,33 @@
-# 文本文件自动识别并统一以 LF 存入仓库
+# 默认对文本文件做自动归一化，并统一以 LF 存储到仓库。
 * text=auto eol=lf
 
-# Java 源码启用 Git 内置 diff 驱动
+# Java / AspectJ 源码启用 Git 内置 Java diff 驱动，便于评审类型与方法级变更。
 *.java text diff=java
+*.aj text diff=java
 
-# 脚本 / wrapper / 钩子固定 LF
+# 脚本文件按运行环境固定换行，避免 wrapper 与平台脚本被错误改写。
 *.sh text eol=lf
 *.ps1 text eol=lf
-mvnw text eol=lf
 gradlew text eol=lf
-
-# Windows 批处理必须 CRLF（cmd.exe 兼容）
-*.cmd text eol=crlf
+mvnw text eol=lf
 *.bat text eol=crlf
+*.cmd text eol=crlf
 
-# 二进制文件不参与文本归一化与 diff
+# 常见二进制资源不参与文本归一化与 diff。
+*.7z binary
+*.ear binary
+*.gif binary
+*.gz binary
+*.ico binary
 *.jar binary
+*.jpeg binary
+*.jpg binary
+*.nar binary
+*.pdf binary
+*.png binary
+*.rar binary
+*.tar binary
+*.tar.gz binary
+*.war binary
 *.xdb binary
+*.zip binary
